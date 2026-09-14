@@ -1,0 +1,204 @@
+import React from 'react';
+import { useTracker } from '../context/TrackerContext';
+import { X, GraduationCap, Award, CheckCircle2 } from 'lucide-react';
+
+interface TitlesModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => {
+  const { stats, ppsHoras, setPpsHoras } = useTracker();
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div 
+        className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-slate-800 bg-[#0d1527] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold font-syne text-white tracking-wide">
+                Titulación Universitaria
+              </h2>
+              <p className="text-xs font-mono text-slate-400">
+                Plan 2023 · UTN Facultad Regional Rosario
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Contenido */}
+        <div className="p-6 space-y-6 max-h-[calc(85vh-120px)] overflow-y-auto">
+          
+          {/* Tarjeta ADUSI (Título Intermedio) */}
+          <div className="bg-[#070b13] border border-slate-800 rounded-xl p-5 relative overflow-hidden">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div>
+                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-pink-500/10 border border-pink-500/30 text-pink-300 font-bold">
+                  Título Intermedio
+                </span>
+                <h3 className="font-syne font-bold text-base text-white mt-1.5">
+                  Analista Desarrollador Universitario en Sistemas de Información (ADUSI)
+                </h3>
+              </div>
+              <div className="text-right">
+                <span className="font-mono text-lg font-bold text-cyan-400">
+                  {stats.adusiProgreso}%
+                </span>
+              </div>
+            </div>
+
+            {/* Barra de progreso ADUSI */}
+            <div className="h-2 rounded-full bg-slate-800 overflow-hidden mb-4">
+              <div 
+                className="h-full bg-gradient-to-r from-pink-500 to-cyan-400 transition-all duration-500"
+                style={{ width: `${stats.adusiProgreso}%` }}
+              />
+            </div>
+
+            {/* Requisitos ADUSI */}
+            <div className="space-y-2 font-mono text-xs">
+              <div className="flex items-center justify-between text-slate-300">
+                <span>Materias 1º, 2º y 3º Nivel (23 materias):</span>
+                {stats.adusiFaltantes.some(f => f.includes('Materias')) ? (
+                  <span className="text-slate-400">En progreso</span>
+                ) : (
+                  <span className="text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Completadas
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between text-slate-300">
+                <span>Seminario Integrador (ADUSI):</span>
+                {stats.adusiFaltantes.includes('Seminario Integrador') ? (
+                  <span className="text-slate-400">Pendiente</span>
+                ) : (
+                  <span className="text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Aprobado
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between text-slate-300">
+                <span>Cumplimiento de 4 hs de Electivas:</span>
+                {stats.horasElectivasAprobadas >= 4 ? (
+                  <span className="text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> {stats.horasElectivasAprobadas} / 4 hs
+                  </span>
+                ) : (
+                  <span className="text-amber-400">
+                    {stats.horasElectivasAprobadas} / 4 hs (faltan {4 - stats.horasElectivasAprobadas} hs)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {stats.adusiCumplido && (
+              <div className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>¡Felicitaciones! Cumplís con todos los requisitos para tramitar el título de ADUSI.</span>
+              </div>
+            )}
+          </div>
+
+          {/* Tarjeta Ingeniería (Título de Grado) */}
+          <div className="bg-[#070b13] border border-slate-800 rounded-xl p-5 relative overflow-hidden">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div>
+                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold">
+                  Título de Grado
+                </span>
+                <h3 className="font-syne font-bold text-base text-white mt-1.5">
+                  Ingeniero/a en Sistemas de Información
+                </h3>
+              </div>
+              <div className="text-right">
+                <span className="font-mono text-lg font-bold text-emerald-400">
+                  {stats.ingenieroProgreso}%
+                </span>
+              </div>
+            </div>
+
+            {/* Barra de progreso Ingeniería */}
+            <div className="h-2 rounded-full bg-slate-800 overflow-hidden mb-4">
+              <div 
+                className="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-emerald-400 transition-all duration-500"
+                style={{ width: `${stats.ingenieroProgreso}%` }}
+              />
+            </div>
+
+            {/* Requisitos Ingeniería */}
+            <div className="space-y-3 font-mono text-xs">
+              <div className="flex items-center justify-between text-slate-300">
+                <span>36 Materias Troncales:</span>
+                <span className={stats.aprobadasCount === stats.totalTroncales ? 'text-emerald-400' : 'text-slate-400'}>
+                  {stats.aprobadasCount} / {stats.totalTroncales} aprobadas
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-slate-300">
+                <span>Mínimo 20 hs de Electivas:</span>
+                <span className={stats.horasElectivasAprobadas >= 20 ? 'text-emerald-400' : 'text-amber-400'}>
+                  {stats.horasElectivasAprobadas} / 20 hs acumuladas
+                </span>
+              </div>
+
+              {/* Input interactivo de PPS (Prácticas Profesionales Supervisadas) */}
+              <div className="pt-2 border-t border-slate-800/80">
+                <div className="flex items-center justify-between mb-1.5 text-slate-300">
+                  <span>Prácticas Profesionales Supervisadas (PPS - 200 hs):</span>
+                  <span className={ppsHoras >= 200 ? 'text-emerald-400' : 'text-slate-400'}>
+                    {ppsHoras} / 200 hs
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    step="10"
+                    value={ppsHoras}
+                    onChange={e => setPpsHoras(parseInt(e.target.value))}
+                    className="w-full accent-cyan-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="200"
+                    value={ppsHoras}
+                    onChange={e => setPpsHoras(Math.min(200, Math.max(0, parseInt(e.target.value) || 0)))}
+                    className="w-16 bg-[#0b101c] border border-slate-800 rounded px-2 py-1 text-right text-xs text-cyan-300 font-mono focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {stats.ingenieroCumplido && (
+              <div className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-xs flex items-center gap-2">
+                <Award className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>¡Excelente! Has alcanzado todos los requisitos para recibirte de Ingeniero/a.</span>
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+};
