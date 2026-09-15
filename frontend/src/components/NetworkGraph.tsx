@@ -11,6 +11,11 @@ export const NetworkGraph: React.FC = () => {
   const nodesDatasetRef = useRef<DataSet<any> | null>(null);
   const edgesDatasetRef = useRef<DataSet<any> | null>(null);
 
+  // Refs estables para los handlers — evitan el problema de stale closure
+  // cuando el grafo se inicializa con [] y captura las funciones del primer render
+  const toggleMateriaEstadoRef = useRef<(id: number) => void>(() => {});
+  const setSelectedSubjectIdRef = useRef<(id: number | null) => void>(() => {});
+
   const {
     estados,
     edgeMode,
@@ -20,12 +25,24 @@ export const NetworkGraph: React.FC = () => {
     setSelectedSubjectId
   } = useTracker();
 
+  // Mantener los refs siempre actualizados ante cada render
+  useEffect(() => {
+    toggleMateriaEstadoRef.current = toggleMateriaEstado;
+  }, [toggleMateriaEstado]);
+
+  useEffect(() => {
+    setSelectedSubjectIdRef.current = setSelectedSubjectId;
+  }, [setSelectedSubjectId]);
+
+  // Materias a mostrar en el grafo: excluir el Seminario ADUSI (id 99)
+  const materiasGrafo = MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo);
+
   // Inicializar Network una sola vez
   useEffect(() => {
     if (!containerRef.current) return;
 
     // Crear nodos iniciales
-    const initialNodes = MATERIAS_TRONCALES.map(m => ({
+    const initialNodes = materiasGrafo.map(m => ({
       id: m.id,
       label: m.nombre,
       level: m.nivel,
@@ -41,7 +58,7 @@ export const NetworkGraph: React.FC = () => {
     // Crear aristas iniciales
     let edgeId = 1;
     const rawEdges: any[] = [];
-    MATERIAS_TRONCALES.forEach(m => {
+    materiasGrafo.forEach(m => {
       m.reqRegular.forEach(c => {
         rawEdges.push({
           id: edgeId++,
@@ -96,45 +113,41 @@ export const NetworkGraph: React.FC = () => {
         zoomView: true,
         dragView: true
       },
-      nodes: {
-        chosen: false
-      },
-      edges: {
-        chosen: false
-      }
+      nodes: { chosen: false },
+      edges: { chosen: false }
     };
 
     const net = new Network(containerRef.current, { nodes: nodesDataSet, edges: edgesDataSet }, options);
     networkRef.current = net;
 
-    // Click simple: alternar estado
+    // Click simple: alternar estado — usa ref para siempre tener la función actual
     net.on('click', params => {
       if (params.nodes.length > 0) {
         const clickedId = Number(params.nodes[0]);
-        toggleMateriaEstado(clickedId);
+        toggleMateriaEstadoRef.current(clickedId);
       }
     });
 
-    // Doble click o click secundario: abrir modal de detalles
+    // Doble click: abrir modal de detalles
     net.on('doubleClick', params => {
       if (params.nodes.length > 0) {
         const clickedId = Number(params.nodes[0]);
-        setSelectedSubjectId(clickedId);
+        setSelectedSubjectIdRef.current(clickedId);
       }
     });
 
+    // Click derecho: abrir modal de detalles
     net.on('oncontext', params => {
       params.event.preventDefault();
       const nodeId = net.getNodeAt(params.pointer.DOM);
       if (nodeId !== undefined) {
-        setSelectedSubjectId(Number(nodeId));
+        setSelectedSubjectIdRef.current(Number(nodeId));
       }
     });
 
-    // Redimensionar ante cambios de ventana
+    // Redimensionar ante cambios de ventana (sin recentrar)
     const handleResize = () => {
       net.redraw();
-      net.fit();
     };
     window.addEventListener('resize', handleResize);
 
@@ -142,6 +155,7 @@ export const NetworkGraph: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       net.destroy();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Actualizar nodos y aristas cuando cambian los estados o filtros
@@ -150,7 +164,7 @@ export const NetworkGraph: React.FC = () => {
 
     // Actualizar nodos
     const nodeUpdates: any[] = [];
-    MATERIAS_TRONCALES.forEach(m => {
+    materiasGrafo.forEach(m => {
       const est = estados[m.id] || 'pendiente';
       const cursable = esMateriaCursable(m);
       const rendible = esMateriaRendible(m);
@@ -224,7 +238,7 @@ export const NetworkGraph: React.FC = () => {
     });
 
     edgesDatasetRef.current.update(edgeUpdates);
-  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible]);
+  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, materiasGrafo]);
 
   // Controles de zoom y centrado
   const handleZoomIn = () => {

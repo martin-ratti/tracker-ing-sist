@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTracker } from '../context/TrackerContext';
 import { X, GraduationCap, Award, CheckCircle2 } from 'lucide-react';
 
@@ -10,10 +10,22 @@ interface TitlesModalProps {
 export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => {
   const { stats, ppsHoras, setPpsHoras } = useTracker();
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       <div 
         className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
@@ -146,7 +158,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
             {/* Requisitos Ingeniería */}
             <div className="space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between text-slate-300">
-                <span>36 Materias Troncales:</span>
+                <span>{stats.totalTroncales} Materias Troncales:</span>
                 <span className={stats.aprobadasCount === stats.totalTroncales ? 'text-emerald-400' : 'text-slate-400'}>
                   {stats.aprobadasCount} / {stats.totalTroncales} aprobadas
                 </span>

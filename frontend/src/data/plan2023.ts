@@ -29,7 +29,7 @@ export const MATERIAS_TRONCALES: Materia[] = [
   { id: 21, nombre: "Com. Datos", nombreCompleto: "Comunicación de Datos", nivel: 3, horas: 4, reqRegular: [], reqAprobada: [3, 7] },
   { id: 22, nombre: "Análisis Num.", nombreCompleto: "Análisis Numérico", nivel: 3, horas: 3, reqRegular: [9], reqAprobada: [1, 2] },
   { id: 23, nombre: "DSI", nombreCompleto: "Diseño de Sistemas de Información", nivel: 3, horas: 6, esIntegradora: true, reqRegular: [14, 16], reqAprobada: [4, 6, 8] },
-  { id: 99, nombre: "Seminario ADUSI", nombreCompleto: "Seminario Integrador (ADUSI)", nivel: 3, horas: 4, esAdusiSolo: true, reqRegular: [16], reqAprobada: [6, 8, 13, 14] },
+  { id: 99, nombre: "Seminario ADUSI", nombreCompleto: "Seminario Integrador (ADUSI)", nivel: 3, horas: 4, esAdusiSolo: true, reqRegular: [16], reqAprobada: [6, 8, 13, 14], reqRendirAprobada: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] },
 
   // 4TO NIVEL
   { id: 24, nombre: "Legislación", nombreCompleto: "Legislación", nivel: 4, horas: 2, reqRegular: [11], reqAprobada: [] },
@@ -79,7 +79,7 @@ export const MATERIAS_ELECTIVAS: Electiva[] = [
   { id: 212, nombre: "Infraestructura Tecnológica", nivel: 4, horas: 4, tipo: "Cuatrimestral", cuatrimestre: "2°C", reqRegular: [16], reqAprobada: [15] },
   { id: 213, nombre: "Soporte a la Gestión de Datos con Programación Visual", nivel: 4, horas: 4, tipo: "Anual", cuatrimestre: "Anual", reqRegular: [19], reqAprobada: [13, 14] },
   { id: 214, nombre: "Metodología de la Investigación", nivel: 4, horas: 4, tipo: "Cuatrimestral", cuatrimestre: "1°C", reqRegular: [17], reqAprobada: [17] },
-  { id: 215, nombre: "Metodologías Ágiles en el Desarrollo de Software", nivel: 4, horas: 3, tipo: "Cuatrimestral", cuatrimestre: "1°C / 2°C", reqRegular: [25], reqAprobada: [14, 16] },
+  { id: 215, nombre: "Metodologías Ágiles en el Desarrollo de Software", nivel: 4, horas: 3, tipo: "Cuatrimestral", cuatrimestre: "1°C / 2°C", reqRegular: [], reqAprobada: [14, 16] },
 
   // Nivel 5
   { id: 216, nombre: "Fabricación Aditiva", nivel: 5, horas: 3, tipo: "Anual", cuatrimestre: "Anual", reqRegular: [28, 29, 30], reqAprobada: [7, 15, 18] },

@@ -16,6 +16,7 @@ export const SubjectModal: React.FC = () => {
     estados,
     notas,
     toggleMateriaEstado,
+    setEstadoDirecto,
     setNotaMateria,
     showToast
   } = useTracker();
@@ -27,6 +28,15 @@ export const SubjectModal: React.FC = () => {
   const [comentarioVal, setComentarioVal] = useState<string>('');
 
   const materia = selectedSubjectId ? MATERIAS_MAP[selectedSubjectId] : null;
+
+  // Cerrar con Escape
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedSubjectId(null);
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [setSelectedSubjectId]);
 
   useEffect(() => {
     if (selectedSubjectId && notas[selectedSubjectId]) {
@@ -60,7 +70,7 @@ export const SubjectModal: React.FC = () => {
       folio: folioVal.trim() || undefined,
       comentario: comentarioVal.trim() || undefined
     });
-    showToast(` Notas guardadas para ${materia.nombre}`);
+    showToast(`✅ Notas guardadas para ${materia.nombre}`);
   };
 
   // Encontrar qué materias destraba esta materia
@@ -72,7 +82,10 @@ export const SubjectModal: React.FC = () => {
   });
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={() => setSelectedSubjectId(null)}
+    >
       <div 
         className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
@@ -166,8 +179,8 @@ export const SubjectModal: React.FC = () => {
                 onClick={() => {
                   if (currentEstado === 'regular') toggleMateriaEstado(materia.id);
                   else if (currentEstado === 'pendiente') {
-                    toggleMateriaEstado(materia.id);
-                    setTimeout(() => toggleMateriaEstado(materia.id), 50);
+                    setEstadoDirecto(materia.id, 'aprobada');
+                    showToast(`🟢 ${materia.nombre} marcada como APROBADA`);
                   }
                 }}
                 className={`py-2 px-3 rounded-lg border flex items-center justify-center gap-1.5 transition-all ${

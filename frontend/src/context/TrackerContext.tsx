@@ -37,6 +37,7 @@ interface TrackerContextType {
   toastMessage: string | null;
   showToast: (msg: string) => void;
   toggleMateriaEstado: (id: number) => void;
+  setEstadoDirecto: (id: number, estado: EstadoMateria) => void;
   toggleElectivaEstado: (id: number) => void;
   setNotaMateria: (id: number, nota: NotaMateria) => void;
   puedeRegularMateria: (m: Materia) => boolean;
@@ -47,6 +48,7 @@ interface TrackerContextType {
   esElectivaCursable: (e: Electiva) => boolean;
   stats: Stats;
   resetAll: () => void;
+  reloadProgress: () => void;
 }
 
 const TrackerContext = createContext<TrackerContextType | undefined>(undefined);
@@ -66,15 +68,21 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setToastMessage(msg);
   }, []);
 
-  // Cargar estado inicial
-  useEffect(() => {
-    fetchProgress().then((data: ProgresoUsuario) => {
-      if (data.estados) setEstados(data.estados);
-      if (data.estadosElectivas) setEstadosElectivas(data.estadosElectivas);
-      if (data.notas) setNotas(data.notas);
-      if (data.ppsHoras !== undefined) setPpsHorasState(data.ppsHoras);
-    });
+  // Cargar estado
+  const reloadProgress = useCallback(() => {
+    fetchProgress()
+      .then((data: ProgresoUsuario) => {
+        setEstados(data.estados || {});
+        setEstadosElectivas(data.estadosElectivas || {});
+        setNotas(data.notas || {});
+        setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
+      })
+      .catch(err => console.error('Error al cargar progreso:', err));
   }, []);
+
+  useEffect(() => {
+    reloadProgress();
+  }, [reloadProgress]);
 
   const getEstado = useCallback((id: number): EstadoMateria => {
     return estados[id] || 'pendiente';
@@ -168,12 +176,15 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
           newEstados[m.id] = 'pendiente';
           changed = true;
         } else if (est === 'aprobada' && m.reqRendirAprobada) {
+          let rendirOk = true;
           if (m.reqRendirAprobada === 'TODAS') {
-            const rendirOk = MATERIAS_TRONCALES.filter(x => x.id !== m.id).every(x => (newEstados[x.id] || 'pendiente') === 'aprobada');
-            if (!rendirOk) {
-              newEstados[m.id] = 'regular';
-              changed = true;
-            }
+            rendirOk = MATERIAS_TRONCALES.filter(x => x.id !== m.id).every(x => (newEstados[x.id] || 'pendiente') === 'aprobada');
+          } else {
+            rendirOk = m.reqRendirAprobada.every(c => (newEstados[c] || 'pendiente') === 'aprobada');
+          }
+          if (!rendirOk) {
+            newEstados[m.id] = 'regular';
+            changed = true;
           }
         }
       });
@@ -237,6 +248,12 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
           showToast('⚠️ Para rendir Proyecto Final debes tener TODAS las materias anteriores aprobadas');
           return;
         }
+        if (m.esAdusiSolo) {
+          showToast('⚠️ Para aprobar el Seminario ADUSI debes tener aprobado todo 1º, 2º y 3º año');
+          return;
+        }
+        showToast(`⚠️ No cumples con las correlativas necesarias para aprobar ${m.nombre}`);
+        return;
       }
       nextEstados[id] = 'aprobada';
       showToast(`🟢 ${m.nombre} marcada como APROBADA`);
@@ -252,6 +269,47 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setEstadosElectivas(nextElectivas);
     persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas });
   }, [estados, estadosElectivas, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, applyCascade]);
+
+  // Establecer un estado concreto sin pasar por el ciclo de toggle
+  const setEstadoDirecto = useCallback((id: number, estado: EstadoMateria) => {
+    const m = MATERIAS_MAP[id];
+    if (!m) return;
+
+    if (estado === 'regular' && !puedeRegularMateria(m)) {
+      showToast(`⚠️ No cumples las correlativas para regularizar ${m.nombre}`);
+      return;
+    }
+
+    if (estado === 'aprobada') {
+      if (!cumpleReqsCursada(m)) {
+        showToast(`⚠️ No cumples con los requisitos previos de ${m.nombre}`);
+        return;
+      }
+      if (!puedeAprobarMateria(m)) {
+        if (m.esAdusiSolo) {
+          showToast('⚠️ Para aprobar el Seminario ADUSI debes tener aprobado todo 1º, 2º y 3º año');
+        } else if (m.reqRendirAprobada === 'TODAS') {
+          showToast('⚠️ Para aprobar Proyecto Final debes tener aprobadas todas las materias anteriores');
+        } else {
+          showToast(`⚠️ No cumples con las correlativas de aprobación para ${m.nombre}`);
+        }
+        return;
+      }
+    }
+
+    let nextEstados = { ...estados, [id]: estado };
+    let nextElectivas = { ...estadosElectivas };
+
+    if (estado === 'pendiente') {
+      const cascaded = applyCascade(nextEstados, nextElectivas);
+      nextEstados = cascaded.newEstados;
+      nextElectivas = cascaded.newElectivas;
+    }
+
+    setEstados(nextEstados);
+    setEstadosElectivas(nextElectivas);
+    persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas, notas, ppsHoras });
+  }, [estados, estadosElectivas, notas, ppsHoras, applyCascade, puedeRegularMateria, puedeAprobarMateria, cumpleReqsCursada, showToast]);
 
   // Alternar estado de una electiva
   const toggleElectivaEstado = useCallback((id: number) => {
@@ -424,6 +482,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         toastMessage,
         showToast,
         toggleMateriaEstado,
+        setEstadoDirecto,
         toggleElectivaEstado,
         setNotaMateria,
         puedeRegularMateria,
@@ -433,7 +492,8 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         puedeRegularElectiva,
         esElectivaCursable,
         stats,
-        resetAll
+        resetAll,
+        reloadProgress
       }}
     >
       {children}

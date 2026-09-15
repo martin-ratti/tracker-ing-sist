@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { X, HelpCircle, AlertTriangle } from 'lucide-react';
 
 interface HelpModalProps {
@@ -6,11 +7,23 @@ interface HelpModalProps {
 }
 
 export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div 
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
         className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
@@ -90,6 +103,27 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </p>
           </div>
 
+          <div className="space-y-2 border-t border-slate-800/80 pt-4">
+            <h3 className="text-sm font-bold text-amber-300">
+              Panel de Electivas
+            </h3>
+            <p className="text-slate-400 leading-relaxed">
+              Abrí el panel de <strong className="text-amber-300">Electivas</strong> (ícono ✨ en el header) para gestionar las materias optativas. Podés filtrar por nivel (2° a 5° Año) y ver el progreso hacia las 4 hs requeridas para ADUSI y las 20 hs para Ingeniería.
+            </p>
+          </div>
+
+          <div className="space-y-2 border-t border-slate-800/80 pt-4">
+            <h3 className="text-sm font-bold text-indigo-300">
+              Filtros de Correlativas en el Grafo
+            </h3>
+            <p className="text-slate-400 leading-relaxed">
+              En la vista de Grafo de Red podés filtrar las conexiones visibles: <strong>Todas</strong> (muestra todo), <strong>Para Cursar</strong> (solo flechas de regularidad) o <strong>Para Rendir</strong> (solo flechas de aprobación).
+            </p>
+          </div>
+
+          <div className="text-[11px] text-slate-500 border-t border-slate-800/40 pt-3">
+            Presioná <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">Esc</kbd> o hacé click fuera para cerrar cualquier panel.
+          </div>
         </div>
       </div>
     </div>
