@@ -172,14 +172,14 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
             {/* Requisitos Ingeniería */}
             <div className="space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between text-slate-300">
-                <span>{stats.totalTroncales} Materias Troncales:</span>
+                <span>{stats.totalTroncales} Materias Troncales (90%):</span>
                 <span className={stats.aprobadasCount === stats.totalTroncales ? 'text-emerald-400' : 'text-slate-400'}>
                   {stats.aprobadasCount} / {stats.totalTroncales} aprobadas
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-slate-300">
-                <span>Mínimo 20 hs de Electivas:</span>
+                <span>Mínimo 20 hs de Electivas (5%):</span>
                 <span className={stats.horasElectivasAprobadas >= 20 ? 'text-emerald-400' : 'text-amber-400'}>
                   {stats.horasElectivasAprobadas} / 20 hs acumuladas
                 </span>
@@ -188,7 +188,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
               {/* Input interactivo de PPS (Prácticas Profesionales Supervisadas) */}
               <div className="pt-2 border-t border-slate-800/80">
                 <div className="flex items-center justify-between mb-1.5 text-slate-300">
-                  <span>Prácticas Profesionales Supervisadas (PPS - 200 hs):</span>
+                  <span>Prácticas Profesionales Supervisadas (PPS - 200 hs, 5%):</span>
                   <span className={ppsHoras >= 200 ? 'text-emerald-400' : 'text-slate-400'}>
                     {ppsHoras} / 200 hs
                   </span>

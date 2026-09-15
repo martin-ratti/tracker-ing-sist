@@ -62,9 +62,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
   };
 
   return (
-    <header className="bg-[#0b101c]/90 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-30 px-3 sm:px-6 py-3">
+    <header className="bg-[#0b101c]/95 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-30 px-4 sm:px-8 xl:px-12 py-3 w-full">
       {/* Barra superior con título y controles */}
-      <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
         
         {/* Identidad y Título */}
         <div className="flex items-center justify-between w-full md:w-auto gap-4">
@@ -220,44 +220,179 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           )}
         </div>
 
-        {/* Barra de Progreso y Acciones principales */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-          {/* Barra de avance */}
-          <div className="w-full sm:w-48 md:w-56 font-mono text-xs">
-            <div className="flex justify-between text-[11px] mb-1 text-slate-300">
-              <span>{stats.aprobadasCount} / {stats.totalTroncales} materias</span>
-              <span className="font-bold" style={{ color: 'var(--color-primary)' }}>
-                {stats.porcentajeCarrera}%
+        {/* Acciones de usuario y personalización (superior derecha) */}
+        <div className="hidden md:flex items-center gap-2">
+          {/* Perfil del Alumno */}
+          <button
+            onClick={() => setProfileModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-mono text-xs transition-colors"
+            title="Configurar nombre y legajo universitario del alumno"
+          >
+            <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="max-w-[120px] truncate">
+              {perfil.nombre || 'Perfil'}
+            </span>
+          </button>
+
+          <ThemeSelector />
+
+          {user ? (
+            <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800/80 rounded-lg py-1 px-2.5 font-mono text-xs">
+              <div className="flex items-center gap-1.5 text-slate-300 text-[11px]" title={`Sesión activa: ${user.email}`}>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_5px_#10b981]" />
+                <span className="max-w-[110px] truncate font-medium">{user.email.split('@')[0]}</span>
+              </div>
+              <button
+                onClick={logout}
+                className="ml-1 p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                title="Cerrar sesión"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={openAuthModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono text-xs transition-all shadow-sm"
+              style={{ 
+                backgroundColor: 'var(--color-primary-bg)', 
+                borderColor: 'var(--color-primary-border)', 
+                color: 'var(--color-primary)' 
+              }}
+              title="Sincronizar avance en la nube para verlo desde otra PC o celular"
+            >
+              <Cloud className="w-3.5 h-3.5" style={{ color: 'var(--color-primary)' }} />
+              <span>Nube</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Sub-barra: Selector de Vistas, Filtros de Correlativas, % de Avance y Botones de Acción */}
+      <div className="w-full mt-3 pt-2.5 border-t border-slate-800/40 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+        {/* Bloque Izquierdo: Vistas, Filtro de Correlativas y % de Carrera */}
+        <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
+          {/* Selector de vistas: Grafo vs Malla */}
+          <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-lg border border-slate-800">
+            <button
+              onClick={() => setViewMode('grafo')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+                viewMode === 'grafo' ? 'border font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200'
+              }`}
+              style={viewMode === 'grafo' ? {
+                backgroundColor: 'var(--color-primary-bg)',
+                borderColor: 'var(--color-primary-border)',
+                color: 'var(--color-primary)'
+              } : {}}
+            >
+              <Network className="w-3.5 h-3.5" />
+              <span>Grafo Red</span>
+            </button>
+            <button
+              onClick={() => setViewMode('malla')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+                viewMode === 'malla' ? 'border font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200'
+              }`}
+              style={viewMode === 'malla' ? {
+                backgroundColor: 'var(--color-primary-bg)',
+                borderColor: 'var(--color-primary-border)',
+                color: 'var(--color-primary)'
+              } : {}}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Malla Curricular</span>
+            </button>
+          </div>
+
+          {/* Filtros de correlativas (solo relevante en modo Grafo) */}
+          {viewMode === 'grafo' && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-500 text-[11px] hidden sm:inline">Correlativas:</span>
+              <div className="flex items-center bg-slate-900/80 p-1 rounded-lg border border-slate-800">
+                <button
+                  onClick={() => setEdgeMode('ambos')}
+                  className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
+                    edgeMode === 'ambos' ? 'bg-slate-800 font-bold' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                  style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
+                >
+                  Todas
+                </button>
+                <button
+                  onClick={() => setEdgeMode('regular')}
+                  className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
+                    edgeMode === 'regular' ? 'font-bold' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                  style={edgeMode === 'regular' ? {
+                    backgroundColor: 'var(--color-cursable-bg)',
+                    color: 'var(--color-cursable)'
+                  } : {}}
+                >
+                  Para Cursar
+                </button>
+                <button
+                  onClick={() => setEdgeMode('aprobada')}
+                  className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
+                    edgeMode === 'aprobada' ? 'font-bold' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                  style={edgeMode === 'aprobada' ? {
+                    backgroundColor: 'var(--color-regular-bg)',
+                    color: 'var(--color-regular)'
+                  } : {}}
+                >
+                  Para Rendir
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Porcentaje y barra de avance de la carrera larga y satisfactoria */}
+          <div className="flex items-center gap-3 px-3.5 py-1.5 bg-slate-900/80 rounded-xl border border-slate-800 shadow-inner">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-300 font-medium whitespace-nowrap">
+              <span className="text-slate-400">Avance:</span>
+              <span className="text-white font-bold">
+                {stats.aprobadasCount} / {stats.totalTroncales} materias
               </span>
             </div>
-            <div className="h-2 rounded-full bg-slate-800/90 overflow-hidden border border-slate-700/60 p-0.5">
+            <div className="w-36 sm:w-56 md:w-72 lg:w-[340px] xl:w-[460px] 2xl:w-[560px] h-2.5 sm:h-3 rounded-full bg-slate-950/90 overflow-hidden border border-slate-700/60 p-0.5 relative shadow-inner">
               <div 
-                className="h-full rounded-full transition-all duration-500 ease-out"
+                className="h-full rounded-full transition-all duration-700 ease-out relative"
                 style={{ 
                   width: `${stats.porcentajeCarrera}%`,
                   background: 'var(--gradient-primary)',
-                  boxShadow: '0 0 10px var(--color-primary-glow)'
+                  boxShadow: '0 0 12px var(--color-primary-glow)'
                 }}
-              />
+              >
+                <span className="absolute right-0 top-0 bottom-0 w-2 bg-white/40 rounded-full blur-[1px]" />
+              </div>
             </div>
+            <span 
+              className="font-bold text-xs sm:text-sm min-w-[46px] text-right font-syne"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              {stats.porcentajeCarrera}%
+            </span>
           </div>
+        </div>
 
-          {/* Botones de navegación y modales */}
-          <div className="hidden md:flex items-center gap-2">
+        {/* Bloque Derecho: Botones de navegación académica, Leyenda y Reset */}
+        <div className="flex items-center gap-2 flex-wrap ml-auto">
+          {/* Botones de navegación académica */}
+          <div className="hidden md:flex items-center gap-1.5">
             {/* Botón Calendario Oficial y Metas */}
             <button
               onClick={() => setCalendarOpen(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono text-xs transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all ${
                 stats.metasCount > 0
                   ? 'bg-cyan-500/20 border-cyan-400/60 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                  : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
+                  : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
               }`}
               title="Calendario Académico UTN 2026/2027 y Metas de Examen"
             >
               <CalendarDays className="w-3.5 h-3.5 text-cyan-400" />
               <span>Calendario</span>
               {stats.metasCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded bg-cyan-500/30 text-[10px] text-cyan-200 font-bold flex items-center gap-1">
+                <span className="px-1.5 py-0.2 rounded bg-cyan-500/30 text-[10px] text-cyan-200 font-bold flex items-center gap-0.5">
                   <Target className="w-2.5 h-2.5" />
                   {stats.metasCount}
                 </span>
@@ -267,43 +402,35 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Ficha Analítica / Reporte PDF */}
             <button
               onClick={() => setReportOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-xs transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-[11px] transition-colors"
               title="Descargar o imprimir ficha analítica oficial en PDF"
             >
               <FileText className="w-3.5 h-3.5 text-purple-400" />
               <span>Ficha PDF</span>
             </button>
 
-            {/* Perfil del Alumno */}
-            <button
-              onClick={() => setProfileModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-mono text-xs transition-colors"
-              title="Configurar nombre y legajo universitario del alumno"
-            >
-              <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="max-w-[110px] truncate">
-                {perfil.nombre || 'Perfil'}
-              </span>
-            </button>
-
+            {/* Botón Electivas */}
             <button
               onClick={() => setElectivasOpen(!electivasOpen)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono text-xs transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all ${
                 electivasOpen
                   ? 'bg-amber-500/20 border-amber-400/60 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
-                  : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
+                  : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
               }`}
+              title="Panel de Materias Electivas y cálculo de horas"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>Electivas</span>
-              <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-[10px] text-amber-300">
+              <span className="px-1 py-0.2 rounded bg-amber-500/20 text-[10px] text-amber-300 font-medium">
                 {stats.horasElectivasAprobadas}/20hs
               </span>
             </button>
 
+            {/* Botón Títulos */}
             <button
               onClick={onOpenTitles}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-xs transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-[11px] transition-colors"
+              title="Requisitos para Título Intermedio ADUSI e Ingeniería"
             >
               <GraduationCap className="w-3.5 h-3.5 text-indigo-400" />
               <span>Títulos</span>
@@ -311,183 +438,67 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]" title="ADUSI alcanzado" />
               )}
             </button>
-
-            <ThemeSelector />
-
-            {user ? (
-              <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800/80 rounded-lg py-1 px-2 font-mono text-xs">
-                <div className="flex items-center gap-1.5 text-slate-300 text-[11px]" title={`Sesión activa: ${user.email}`}>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_5px_#10b981]" />
-                  <span className="max-w-[110px] truncate font-medium">{user.email.split('@')[0]}</span>
-                </div>
-                <button
-                  onClick={logout}
-                  className="ml-1 p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors"
-                  title="Cerrar sesión"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={openAuthModal}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono text-xs transition-all shadow-sm"
-                style={{ 
-                  backgroundColor: 'var(--color-primary-bg)', 
-                  borderColor: 'var(--color-primary-border)', 
-                  color: 'var(--color-primary)' 
-                }}
-                title="Sincronizar avance en la nube para verlo desde otra PC o celular"
-              >
-                <Cloud className="w-3.5 h-3.5" style={{ color: 'var(--color-primary)' }} />
-                <span>Nube</span>
-              </button>
-            )}
           </div>
-        </div>
-      </div>
 
-      {/* Sub-barra: Selector de Vistas, Filtros de Árbol y Guía rápida */}
-      <div className="max-w-[1600px] mx-auto mt-3 pt-2.5 border-t border-slate-800/40 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-        {/* Selector de vistas: Grafo vs Malla */}
-        <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-lg border border-slate-800">
-          <button
-            onClick={() => setViewMode('grafo')}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-              viewMode === 'grafo' ? 'border font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200'
-            }`}
-            style={viewMode === 'grafo' ? {
-              backgroundColor: 'var(--color-primary-bg)',
-              borderColor: 'var(--color-primary-border)',
-              color: 'var(--color-primary)'
-            } : {}}
-          >
-            <Network className="w-3.5 h-3.5" />
-            <span>Grafo Red</span>
-          </button>
-          <button
-            onClick={() => setViewMode('malla')}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-              viewMode === 'malla' ? 'border font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200'
-            }`}
-            style={viewMode === 'malla' ? {
-              backgroundColor: 'var(--color-primary-bg)',
-              borderColor: 'var(--color-primary-border)',
-              color: 'var(--color-primary)'
-            } : {}}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span>Malla Curricular</span>
-          </button>
-        </div>
+          <div className="h-4 w-px bg-slate-800 hidden xl:block" />
 
-        {/* Filtros de correlativas (solo relevante en modo Grafo) */}
-        {viewMode === 'grafo' && (
-          <div className="flex items-center gap-1.5">
-            <span className="text-slate-500 text-[11px] hidden sm:inline">Correlativas:</span>
-            <div className="flex items-center bg-slate-900/80 p-1 rounded-lg border border-slate-800">
-              <button
-                onClick={() => setEdgeMode('ambos')}
-                className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                  edgeMode === 'ambos' ? 'bg-slate-800 font-bold' : 'text-slate-400 hover:text-slate-200'
-                }`}
-                style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
-              >
-                Todas
-              </button>
-              <button
-                onClick={() => setEdgeMode('regular')}
-                className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                  edgeMode === 'regular' ? 'font-bold' : 'text-slate-400 hover:text-slate-200'
-                }`}
-                style={edgeMode === 'regular' ? {
-                  backgroundColor: 'var(--color-cursable-bg)',
-                  color: 'var(--color-cursable)'
-                } : {}}
-              >
-                Para Cursar
-              </button>
-              <button
-                onClick={() => setEdgeMode('aprobada')}
-                className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                  edgeMode === 'aprobada' ? 'font-bold' : 'text-slate-400 hover:text-slate-200'
-                }`}
-                style={edgeMode === 'aprobada' ? {
-                  backgroundColor: 'var(--color-regular-bg)',
-                  color: 'var(--color-regular)'
-                } : {}}
-              >
-                Para Rendir
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Leyenda adaptada al tema activo y Reset */}
-        <div className="flex items-center gap-3 ml-auto">
           {/* Leyenda compacta */}
-          <div className="hidden lg:flex items-center gap-3 text-[11px] text-slate-400">
+          <div className="hidden lg:flex items-center gap-2.5 text-[11px] text-slate-400">
             <div className="flex items-center gap-1.5">
               <span 
-                className="w-2.5 h-2.5 rounded border"
-                style={{ 
-                  borderColor: 'var(--color-cursable-border)', 
-                  backgroundColor: 'var(--color-cursable)' 
-                }}
+                className="w-2 h-2 rounded-full" 
+                style={{ backgroundColor: 'var(--color-cursable)' }}
               />
               <span>Cursable</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span 
-                className="w-2.5 h-2.5 rounded border"
-                style={{ 
-                  borderColor: 'var(--color-regular-border)', 
-                  backgroundColor: 'var(--color-regular)' 
-                }}
+                className="w-2 h-2 rounded-full" 
+                style={{ backgroundColor: 'var(--color-regular)' }}
               />
               <span>Regular</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span 
-                className="w-2.5 h-2.5 rounded border"
-                style={{ 
-                  borderColor: 'var(--color-aprobada-border)', 
-                  backgroundColor: 'var(--color-aprobada)' 
-                }}
+                className="w-2 h-2 rounded-full" 
+                style={{ backgroundColor: 'var(--color-aprobada)' }}
               />
               <span>Aprobada</span>
             </div>
           </div>
 
-          <button
-            onClick={onOpenHelp}
-            className="text-slate-400 hover:text-white p-1 rounded transition-colors"
-            title="Ayuda y atajos"
-          >
-            <HelpCircle className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={handleReset}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] transition-all ${
-              confirmReset 
-                ? 'bg-rose-500/30 border border-rose-500 text-rose-300 animate-pulse font-bold' 
-                : 'text-slate-500 hover:text-rose-400'
-            }`}
-            title="Reiniciar todos los estados a pendiente"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>{confirmReset ? '¿Confirmar?' : 'Reiniciar'}</span>
-          </button>
-          {confirmReset && (
+          {/* Ayuda y Reset */}
+          <div className="flex items-center gap-1">
             <button
-              onClick={handleCancelReset}
-              className="p-1 rounded text-slate-500 hover:text-slate-200 transition-colors"
-              title="Cancelar reinicio"
+              onClick={onOpenHelp}
+              className="text-slate-400 hover:text-white p-1 rounded transition-colors"
+              title="Ayuda y atajos"
             >
-              <X className="w-3.5 h-3.5" />
+              <HelpCircle className="w-4 h-4" />
             </button>
-          )}
+
+            <button
+              onClick={handleReset}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] transition-all ${
+                confirmReset 
+                  ? 'bg-rose-500/30 border border-rose-500 text-rose-300 animate-pulse font-bold' 
+                  : 'text-slate-500 hover:text-rose-400'
+              }`}
+              title="Reiniciar todos los estados a pendiente"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>{confirmReset ? '¿Confirmar?' : 'Reiniciar'}</span>
+            </button>
+            {confirmReset && (
+              <button
+                onClick={handleCancelReset}
+                className="p-1 rounded text-slate-500 hover:text-slate-200 transition-colors"
+                title="Cancelar reinicio"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </header>

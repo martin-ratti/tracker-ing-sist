@@ -492,9 +492,11 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!ingElectivasOk) ingenieroFaltantes.push(`Electivas (${horasElectivasAprobadas}/20 hs)`);
     if (!ppsOk) ingenieroFaltantes.push(`PPS (${ppsHoras}/200 hs)`);
 
-    const ingPuntosTotales = totalTroncales + 20 + 200;
-    const ingPuntosActuales = aprobadas + Math.min(horasElectivasAprobadas, 20) + Math.min(ppsHoras, 200);
-    const ingenieroProgreso = Math.round((ingPuntosActuales / ingPuntosTotales) * 100);
+    // Ponderación de Ingeniería: 90% Materias Troncales (36 troncales), 5% Electivas (20 hs) y 5% PPS (200 hs)
+    const progresoTroncales = totalTroncales > 0 ? (aprobadas / totalTroncales) * 90 : 0;
+    const progresoElectivas = (Math.min(horasElectivasAprobadas, 20) / 20) * 5;
+    const progresoPPS = (Math.min(ppsHoras, 200) / 200) * 5;
+    const ingenieroProgreso = Math.min(100, Math.round(progresoTroncales + progresoElectivas + progresoPPS));
 
     const ingenieroCumplido = todasTroncalesOk && ingElectivasOk && ppsOk;
     const metasCount = Object.keys(metasExamen).length;
