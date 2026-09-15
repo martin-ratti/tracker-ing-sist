@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter tracker-backend dev & pnpm --filter frontend dev",
+    "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,yellow\" \"pnpm --filter tracker-backend dev\" \"pnpm --filter frontend dev\"",
     "dev:backend": "pnpm --filter tracker-backend dev",
     "dev:frontend": "pnpm --filter frontend dev",
     "build": "pnpm --filter tracker-backend build && pnpm --filter frontend build",
     "install:all": "pnpm --filter tracker-backend install && pnpm --filter frontend install"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
   }
 }

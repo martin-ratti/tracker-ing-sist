@@ -7,3 +7,5 @@ build/
 .env.local
 .vscode/
 .idea/
+backend/data/*.json
+backend/data/progress/
