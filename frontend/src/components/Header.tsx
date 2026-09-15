@@ -61,14 +61,24 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
         {/* Identidad y Título */}
         <div className="flex items-center justify-between w-full md:w-auto gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 text-white font-bold font-syne text-base tracking-wider">
+            <div 
+              className="w-9 h-9 rounded-lg flex items-center justify-center text-black font-extrabold font-syne text-base tracking-wider shadow-lg transition-all"
+              style={{ backgroundColor: 'var(--color-primary)', boxShadow: '0 0 15px var(--color-primary-glow)' }}
+            >
               ISI
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-syne font-extrabold text-base sm:text-lg text-white tracking-wider flex items-center gap-2">
                   UTN SISTEMAS
-                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
+                  <span 
+                    className="text-[10px] uppercase font-mono px-2 py-0.5 rounded border transition-colors"
+                    style={{ 
+                      backgroundColor: 'var(--color-primary-bg)', 
+                      borderColor: 'var(--color-primary-border)', 
+                      color: 'var(--color-primary)' 
+                    }}
+                  >
                     Plan 2023 · FRRo
                   </span>
                 </h1>
@@ -102,29 +112,71 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </div>
         </div>
 
-        {/* Estadísticas en vivo */}
+        {/* Estadísticas en vivo adaptadas al tema */}
         <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto py-1 w-full md:w-auto justify-center">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#071f14]/80 border border-emerald-500/30 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <div 
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all"
+            style={{ 
+              backgroundColor: 'var(--color-aprobada-bg)', 
+              borderColor: 'var(--color-aprobada-border)' 
+            }}
+          >
+            <span 
+              className="w-2 h-2 rounded-full" 
+              style={{ backgroundColor: 'var(--color-aprobada)' }}
+            />
             <div className="text-left font-mono">
-              <div className="text-emerald-400 font-bold text-xs sm:text-sm leading-none">{stats.aprobadasCount}</div>
-              <div className="text-[10px] text-emerald-300/60 uppercase leading-tight">Aprobadas</div>
+              <div 
+                className="font-bold text-xs sm:text-sm leading-none"
+                style={{ color: 'var(--color-aprobada)' }}
+              >
+                {stats.aprobadasCount}
+              </div>
+              <div className="text-[10px] text-slate-300/70 uppercase leading-tight">Aprobadas</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1a1400]/80 border border-amber-500/30 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+          <div 
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all"
+            style={{ 
+              backgroundColor: 'var(--color-regular-bg)', 
+              borderColor: 'var(--color-regular-border)' 
+            }}
+          >
+            <span 
+              className="w-2 h-2 rounded-full" 
+              style={{ backgroundColor: 'var(--color-regular)' }}
+            />
             <div className="text-left font-mono">
-              <div className="text-amber-400 font-bold text-xs sm:text-sm leading-none">{stats.regularesCount}</div>
-              <div className="text-[10px] text-amber-300/60 uppercase leading-tight">Regulares</div>
+              <div 
+                className="font-bold text-xs sm:text-sm leading-none"
+                style={{ color: 'var(--color-regular)' }}
+              >
+                {stats.regularesCount}
+              </div>
+              <div className="text-[10px] text-slate-300/70 uppercase leading-tight">Regulares</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#051520]/80 border border-cyan-500/30 shadow-sm">
-            <span className={`w-2 h-2 rounded-full bg-cyan-400 ${stats.cursablesCount > 0 ? 'animate-ping' : ''}`}></span>
+          <div 
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all"
+            style={{ 
+              backgroundColor: 'var(--color-cursable-bg)', 
+              borderColor: 'var(--color-cursable-border)' 
+            }}
+          >
+            <span 
+              className={`w-2 h-2 rounded-full ${stats.cursablesCount > 0 ? 'animate-ping' : ''}`}
+              style={{ backgroundColor: 'var(--color-cursable)' }}
+            />
             <div className="text-left font-mono">
-              <div className="text-cyan-400 font-bold text-xs sm:text-sm leading-none">{stats.cursablesCount}</div>
-              <div className="text-[10px] text-cyan-300/60 uppercase leading-tight">Cursables</div>
+              <div 
+                className="font-bold text-xs sm:text-sm leading-none"
+                style={{ color: 'var(--color-cursable)' }}
+              >
+                {stats.cursablesCount}
+              </div>
+              <div className="text-[10px] text-slate-300/70 uppercase leading-tight">Cursables</div>
             </div>
           </div>
 
@@ -152,12 +204,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           <div className="w-full sm:w-48 md:w-56 font-mono text-xs">
             <div className="flex justify-between text-[11px] mb-1 text-slate-300">
               <span>{stats.aprobadasCount} / {stats.totalTroncales} materias</span>
-              <span className="text-cyan-400 font-bold">{stats.porcentajeCarrera}%</span>
+              <span className="font-bold" style={{ color: 'var(--color-primary)' }}>
+                {stats.porcentajeCarrera}%
+              </span>
             </div>
             <div className="h-2 rounded-full bg-slate-800/90 overflow-hidden border border-slate-700/60 p-0.5">
               <div 
-                className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(34,211,238,0.5)]"
-                style={{ width: `${stats.porcentajeCarrera}%` }}
+                className="h-full rounded-full transition-all duration-500 ease-out"
+                style={{ 
+                  width: `${stats.porcentajeCarrera}%`,
+                  background: 'var(--gradient-primary)',
+                  boxShadow: '0 0 10px var(--color-primary-glow)'
+                }}
               />
             </div>
           </div>
@@ -209,10 +267,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             ) : (
               <button
                 onClick={openAuthModal}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/20 font-mono text-xs transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono text-xs transition-all shadow-sm"
+                style={{ 
+                  backgroundColor: 'var(--color-primary-bg)', 
+                  borderColor: 'var(--color-primary-border)', 
+                  color: 'var(--color-primary)' 
+                }}
                 title="Sincronizar avance en la nube para verlo desde otra PC o celular"
               >
-                <Cloud className="w-3.5 h-3.5 text-cyan-400" />
+                <Cloud className="w-3.5 h-3.5" style={{ color: 'var(--color-primary)' }} />
                 <span>Nube</span>
               </button>
             )}
@@ -227,10 +290,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           <button
             onClick={() => setViewMode('grafo')}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-              viewMode === 'grafo'
-                ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
+              viewMode === 'grafo' ? 'border font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
+            style={viewMode === 'grafo' ? {
+              backgroundColor: 'var(--color-primary-bg)',
+              borderColor: 'var(--color-primary-border)',
+              color: 'var(--color-primary)'
+            } : {}}
           >
             <Network className="w-3.5 h-3.5" />
             <span>Grafo Red</span>
@@ -238,10 +304,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           <button
             onClick={() => setViewMode('malla')}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-              viewMode === 'malla'
-                ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
+              viewMode === 'malla' ? 'border font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
+            style={viewMode === 'malla' ? {
+              backgroundColor: 'var(--color-primary-bg)',
+              borderColor: 'var(--color-primary-border)',
+              color: 'var(--color-primary)'
+            } : {}}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
             <span>Malla Curricular</span>
@@ -256,24 +325,33 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               <button
                 onClick={() => setEdgeMode('ambos')}
                 className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                  edgeMode === 'ambos' ? 'bg-slate-800 text-cyan-300 font-bold' : 'text-slate-400 hover:text-slate-200'
+                  edgeMode === 'ambos' ? 'bg-slate-800 font-bold' : 'text-slate-400 hover:text-slate-200'
                 }`}
+                style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
               >
                 Todas
               </button>
               <button
                 onClick={() => setEdgeMode('regular')}
                 className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                  edgeMode === 'regular' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-slate-400 hover:text-slate-200'
+                  edgeMode === 'regular' ? 'font-bold' : 'text-slate-400 hover:text-slate-200'
                 }`}
+                style={edgeMode === 'regular' ? {
+                  backgroundColor: 'var(--color-cursable-bg)',
+                  color: 'var(--color-cursable)'
+                } : {}}
               >
                 Para Cursar
               </button>
               <button
                 onClick={() => setEdgeMode('aprobada')}
                 className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                  edgeMode === 'aprobada' ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-slate-400 hover:text-slate-200'
+                  edgeMode === 'aprobada' ? 'font-bold' : 'text-slate-400 hover:text-slate-200'
                 }`}
+                style={edgeMode === 'aprobada' ? {
+                  backgroundColor: 'var(--color-regular-bg)',
+                  color: 'var(--color-regular)'
+                } : {}}
               >
                 Para Rendir
               </button>
@@ -281,27 +359,45 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </div>
         )}
 
-        {/* Leyenda y Reset */}
+        {/* Leyenda adaptada al tema activo y Reset */}
         <div className="flex items-center gap-3 ml-auto">
           {/* Leyenda compacta */}
           <div className="hidden lg:flex items-center gap-3 text-[11px] text-slate-400">
-            <div className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded border border-cyan-400 bg-cyan-400/20"></span>
+            <div className="flex items-center gap-1.5">
+              <span 
+                className="w-2.5 h-2.5 rounded border"
+                style={{ 
+                  borderColor: 'var(--color-cursable-border)', 
+                  backgroundColor: 'var(--color-cursable)' 
+                }}
+              />
               <span>Cursable</span>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded border border-amber-400 bg-amber-400/20"></span>
+            <div className="flex items-center gap-1.5">
+              <span 
+                className="w-2.5 h-2.5 rounded border"
+                style={{ 
+                  borderColor: 'var(--color-regular-border)', 
+                  backgroundColor: 'var(--color-regular)' 
+                }}
+              />
               <span>Regular</span>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded border border-emerald-400 bg-emerald-400/20"></span>
+            <div className="flex items-center gap-1.5">
+              <span 
+                className="w-2.5 h-2.5 rounded border"
+                style={{ 
+                  borderColor: 'var(--color-aprobada-border)', 
+                  backgroundColor: 'var(--color-aprobada)' 
+                }}
+              />
               <span>Aprobada</span>
             </div>
           </div>
 
           <button
             onClick={onOpenHelp}
-            className="text-slate-400 hover:text-cyan-300 p-1 rounded transition-colors"
+            className="text-slate-400 hover:text-white p-1 rounded transition-colors"
             title="Ayuda y atajos"
           >
             <HelpCircle className="w-4 h-4" />

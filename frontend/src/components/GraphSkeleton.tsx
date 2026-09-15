@@ -15,10 +15,20 @@ export const GraphSkeleton: React.FC = () => {
 
       <div className="relative z-10 flex flex-col items-center gap-4 p-8 rounded-2xl bg-[#0b101c]/80 border border-slate-800/80 backdrop-blur-md shadow-2xl text-center max-w-sm">
         <div className="relative">
-          <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+          <div 
+            className="p-4 rounded-2xl border"
+            style={{
+              backgroundColor: 'var(--color-primary-bg)',
+              borderColor: 'var(--color-primary-border)',
+              color: 'var(--color-primary)'
+            }}
+          >
             <Network className="w-8 h-8 animate-pulse" />
           </div>
-          <Loader2 className="w-5 h-5 text-cyan-400 animate-spin absolute -top-1 -right-1" />
+          <Loader2 
+            className="w-5 h-5 animate-spin absolute -top-1 -right-1" 
+            style={{ color: 'var(--color-primary)' }}
+          />
         </div>
 
         <div>
@@ -31,7 +41,10 @@ export const GraphSkeleton: React.FC = () => {
         </div>
 
         <div className="w-48 h-1.5 rounded-full bg-slate-800 overflow-hidden mt-1">
-          <div className="h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 animate-[pulse_1.5s_ease-in-out_infinite]" />
+          <div 
+            className="h-full animate-[pulse_1.5s_ease-in-out_infinite]" 
+            style={{ background: 'var(--gradient-primary)' }}
+          />
         </div>
       </div>
     </div>

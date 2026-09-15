@@ -76,7 +76,14 @@ export const AuthModal: React.FC = () => {
         {/* Cabecera */}
         <div className="p-6 border-b border-slate-800 bg-[#0d1527] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <div 
+              className="p-2 rounded-xl border"
+              style={{
+                backgroundColor: 'var(--color-primary-bg)',
+                borderColor: 'var(--color-primary-border)',
+                color: 'var(--color-primary)'
+              }}
+            >
               <Cloud className="w-5 h-5" />
             </div>
             <div>
@@ -109,9 +116,14 @@ export const AuthModal: React.FC = () => {
             }}
             className={`py-2 rounded-lg font-medium transition-all ${
               !isRegister
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                ? 'font-bold shadow-sm border'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
+            style={!isRegister ? {
+              backgroundColor: 'var(--color-primary-bg)',
+              borderColor: 'var(--color-primary-border)',
+              color: 'var(--color-primary)'
+            } : {}}
           >
             Iniciar Sesión
           </button>
@@ -123,9 +135,14 @@ export const AuthModal: React.FC = () => {
             }}
             className={`py-2 rounded-lg font-medium transition-all ${
               isRegister
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                ? 'font-bold shadow-sm border'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
+            style={isRegister ? {
+              backgroundColor: 'var(--color-primary-bg)',
+              borderColor: 'var(--color-primary-border)',
+              color: 'var(--color-primary)'
+            } : {}}
           >
             Registrarse
           </button>
@@ -150,7 +167,7 @@ export const AuthModal: React.FC = () => {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="tu.correo@ejemplo.com"
-                className="w-full pl-9 pr-3 py-2 bg-[#060a12] border border-slate-800 rounded-lg text-xs font-mono text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"
+                className="w-full pl-9 pr-3 py-2 bg-[#060a12] border border-slate-800 rounded-lg text-xs font-mono text-white placeholder:text-slate-600 focus:outline-none focus:border-slate-500"
               />
             </div>
           </div>
@@ -165,7 +182,7 @@ export const AuthModal: React.FC = () => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Mínimo 6 caracteres"
-                className="w-full pl-9 pr-10 py-2 bg-[#060a12] border border-slate-800 rounded-lg text-xs font-mono text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"
+                className="w-full pl-9 pr-10 py-2 bg-[#060a12] border border-slate-800 rounded-lg text-xs font-mono text-white placeholder:text-slate-600 focus:outline-none focus:border-slate-500"
               />
               <button
                 type="button"
@@ -183,7 +200,11 @@ export const AuthModal: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-mono font-bold text-xs shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+            className="w-full py-2.5 px-4 rounded-xl text-slate-950 font-mono font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+            style={{
+              background: 'var(--gradient-primary)',
+              boxShadow: '0 4px 15px var(--color-primary-glow)'
+            }}
           >
             {loading ? (
               <>

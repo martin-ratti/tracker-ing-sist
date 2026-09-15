@@ -77,7 +77,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
                 </h3>
               </div>
               <div className="text-right">
-                <span className="font-mono text-lg font-bold text-cyan-400">
+                <span className="font-mono text-lg font-bold" style={{ color: 'var(--color-primary)' }}>
                   {stats.adusiProgreso}%
                 </span>
               </div>
@@ -86,8 +86,11 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
             {/* Barra de progreso ADUSI */}
             <div className="h-2 rounded-full bg-slate-800 overflow-hidden mb-4">
               <div 
-                className="h-full bg-gradient-to-r from-pink-500 to-cyan-400 transition-all duration-500"
-                style={{ width: `${stats.adusiProgreso}%` }}
+                className="h-full transition-all duration-500"
+                style={{ 
+                  width: `${stats.adusiProgreso}%`,
+                  background: 'var(--gradient-primary)'
+                }}
               />
             </div>
 
@@ -149,7 +152,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
                 </h3>
               </div>
               <div className="text-right">
-                <span className="font-mono text-lg font-bold text-emerald-400">
+                <span className="font-mono text-lg font-bold" style={{ color: 'var(--color-aprobada)' }}>
                   {stats.ingenieroProgreso}%
                 </span>
               </div>
@@ -158,8 +161,11 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
             {/* Barra de progreso Ingeniería */}
             <div className="h-2 rounded-full bg-slate-800 overflow-hidden mb-4">
               <div 
-                className="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-emerald-400 transition-all duration-500"
-                style={{ width: `${stats.ingenieroProgreso}%` }}
+                className="h-full transition-all duration-500"
+                style={{ 
+                  width: `${stats.ingenieroProgreso}%`,
+                  background: 'var(--gradient-primary)'
+                }}
               />
             </div>
 
@@ -195,7 +201,8 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
                     step="10"
                     value={ppsHoras}
                     onChange={e => setPpsHoras(parseInt(e.target.value))}
-                    className="w-full accent-cyan-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+                    className="w-full bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+                    style={{ accentColor: 'var(--color-primary)' }}
                   />
                   <input
                     type="number"
@@ -203,7 +210,8 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
                     max="200"
                     value={ppsHoras}
                     onChange={e => setPpsHoras(Math.min(200, Math.max(0, parseInt(e.target.value) || 0)))}
-                    className="w-16 bg-[#0b101c] border border-slate-800 rounded px-2 py-1 text-right text-xs text-cyan-300 font-mono focus:outline-none"
+                    className="w-16 bg-[#0b101c] border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono focus:outline-none"
+                    style={{ color: 'var(--color-primary)' }}
                   />
                 </div>
               </div>

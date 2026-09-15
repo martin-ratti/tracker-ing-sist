@@ -36,7 +36,14 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
       >
         <div className="p-6 border-b border-slate-800 bg-[#0d1527] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <div 
+              className="p-2 rounded-xl border"
+              style={{
+                backgroundColor: 'var(--color-primary-bg)',
+                borderColor: 'var(--color-primary-border)',
+                color: 'var(--color-primary)'
+              }}
+            >
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
@@ -62,7 +69,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         <div className="p-6 space-y-5 text-xs font-mono text-slate-300 max-h-[calc(80vh-100px)] overflow-y-auto">
           
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-cyan-300 flex items-center gap-1.5">
+            <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--color-primary)' }}>
               <span>Flujo de Estados de una Materia</span>
             </h3>
             <p className="text-slate-400 leading-relaxed">
@@ -73,23 +80,35 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                 <div className="text-slate-200 font-bold mb-1">⚪ Pendiente</div>
                 <div className="text-slate-400">No cursada aún o bloqueada</div>
               </div>
-              <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                <div className="text-amber-300 font-bold mb-1">🟡 Regular</div>
+              <div 
+                className="p-2.5 rounded-lg border"
+                style={{
+                  backgroundColor: 'var(--color-regular-bg)',
+                  borderColor: 'var(--color-regular-border)'
+                }}
+              >
+                <div className="font-bold mb-1" style={{ color: 'var(--color-regular)' }}>🟡 Regular</div>
                 <div className="text-slate-400">Cursada aprobada, lista para rendir</div>
               </div>
-              <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                <div className="text-emerald-300 font-bold mb-1">🟢 Aprobada</div>
+              <div 
+                className="p-2.5 rounded-lg border"
+                style={{
+                  backgroundColor: 'var(--color-aprobada-bg)',
+                  borderColor: 'var(--color-aprobada-border)'
+                }}
+              >
+                <div className="font-bold mb-1" style={{ color: 'var(--color-aprobada)' }}>🟢 Aprobada</div>
                 <div className="text-slate-400">Final o promoción acreditada</div>
               </div>
             </div>
           </div>
 
           <div className="space-y-2 border-t border-slate-800/80 pt-4">
-            <h3 className="text-sm font-bold text-cyan-300">
+            <h3 className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
               Efecto Pulso y Estado Cursable
             </h3>
             <p className="text-slate-400 leading-relaxed">
-              Cuando una materia cumple con todos sus requisitos de correlatividades (regulares y aprobadas), se iluminará en color <strong className="text-cyan-300">Cian Brillante</strong> con una animación de pulso neón. Esto indica que estás habilitado para anotarte y cursarla en el período lectivo.
+              Cuando una materia cumple con todos sus requisitos de correlatividades (regulares y aprobadas), se iluminará en el color de estado cursable del tema seleccionado con una animación de pulso. Esto indica que estás habilitado para anotarte y cursarla en el período lectivo.
             </p>
           </div>
 

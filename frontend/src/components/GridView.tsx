@@ -48,7 +48,7 @@ export const GridView: React.FC = () => {
             aria-label="Buscar materia por nombre o código"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-[#0b101c] border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50"
+            className="w-full bg-[#0b101c] border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-slate-600"
           />
         </div>
       </div>
@@ -71,7 +71,10 @@ export const GridView: React.FC = () => {
               {/* Encabezado del Nivel */}
               <div className="border-b border-slate-800/60 pb-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-syne font-extrabold text-sm text-cyan-400 tracking-wider">
+                  <span 
+                    className="font-syne font-extrabold text-sm tracking-wider"
+                    style={{ color: 'var(--color-primary)' }}
+                  >
                     {nivel}º NIVEL
                   </span>
                   <span className="font-mono text-xs text-slate-400">
@@ -80,8 +83,11 @@ export const GridView: React.FC = () => {
                 </div>
                 <div className="h-1.5 rounded-full bg-slate-800 mt-2 overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all duration-300"
-                    style={{ width: `${pctNivel}%` }}
+                    className="h-full transition-all duration-300"
+                    style={{ 
+                      width: `${pctNivel}%`,
+                      background: 'var(--gradient-primary)'
+                    }}
                   />
                 </div>
               </div>
@@ -98,7 +104,7 @@ export const GridView: React.FC = () => {
                     const cursable = esMateriaCursable(m);
                     const nota = notas[m.id]?.nota;
 
-                    // Estilos de tarjeta según estado
+                    // Estilos de tarjeta según estado adaptados al tema
                     let cardStyle = 'bg-[#0d1527]/80 border-slate-800/80 text-slate-400';
                     let statusBadge = (
                       <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono border border-slate-700/60">
@@ -107,24 +113,49 @@ export const GridView: React.FC = () => {
                     );
 
                     if (est === 'aprobada') {
-                      cardStyle = 'bg-[#071f14]/80 border-emerald-500/40 text-emerald-100 shadow-[0_2px_12px_rgba(16,185,129,0.1)]';
+                      cardStyle = 'card-aprobada-theme text-slate-100';
                       statusBadge = (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30 flex items-center gap-1">
+                        <span 
+                          className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
+                          style={{ 
+                            color: 'var(--color-aprobada)', 
+                            borderColor: 'var(--color-aprobada-border)', 
+                            backgroundColor: 'var(--color-aprobada-bg)' 
+                          }}
+                        >
                           <CheckCircle2 className="w-3 h-3" /> Aprobada
                         </span>
                       );
                     } else if (est === 'regular') {
-                      cardStyle = 'bg-[#1a1400]/80 border-amber-500/40 text-amber-100 shadow-[0_2px_12px_rgba(245,158,11,0.1)]';
+                      cardStyle = 'card-regular-theme text-slate-100';
                       statusBadge = (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono border border-amber-500/30 flex items-center gap-1">
+                        <span 
+                          className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
+                          style={{ 
+                            color: 'var(--color-regular)', 
+                            borderColor: 'var(--color-regular-border)', 
+                            backgroundColor: 'var(--color-regular-bg)' 
+                          }}
+                        >
                           <Clock className="w-3 h-3" /> Regular
                         </span>
                       );
                     } else if (cursable) {
-                      cardStyle = 'bg-[#051520]/80 border-cyan-500/50 text-cyan-100 shadow-[0_2px_14px_rgba(34,211,238,0.2)] glow-cyan';
+                      cardStyle = 'card-cursable-theme glow-cursable-theme text-slate-100';
                       statusBadge = (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono border border-cyan-500/30 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" /> Cursable
+                        <span 
+                          className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
+                          style={{ 
+                            color: 'var(--color-cursable)', 
+                            borderColor: 'var(--color-cursable-border)', 
+                            backgroundColor: 'var(--color-cursable-bg)' 
+                          }}
+                        >
+                          <span 
+                            className="w-1.5 h-1.5 rounded-full animate-ping" 
+                            style={{ backgroundColor: 'var(--color-cursable)' }}
+                          />
+                          Cursable
                         </span>
                       );
                     }
@@ -135,7 +166,7 @@ export const GridView: React.FC = () => {
                         role="button"
                         tabIndex={0}
                         aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
-                        className={`group relative p-3 rounded-lg border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/80 ${cardStyle}`}
+                        className={`group relative p-3 rounded-lg border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${cardStyle}`}
                         onClick={() => toggleMateriaEstado(m.id)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
@@ -146,7 +177,7 @@ export const GridView: React.FC = () => {
                       >
                         {/* Fila superior: ID y Badges */}
                         <div className="flex items-center justify-between gap-1 mb-1.5 font-mono text-[10px]">
-                          <span className="font-bold text-slate-500 group-hover:text-cyan-300 transition-colors">
+                          <span className="font-bold text-slate-500 group-hover:text-slate-200 transition-colors">
                             #{String(m.id).padStart(2, '0')}
                           </span>
                           <div className="flex items-center gap-1">
@@ -192,7 +223,7 @@ export const GridView: React.FC = () => {
                               setSelectedSubjectId(m.id);
                             }}
                             aria-label={`Ver detalles, correlativas y notas de ${m.nombreCompleto}`}
-                            className="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-slate-800 transition-colors"
+                            className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                             title="Ver correlativas y registrar notas"
                           >
                             <Info className="w-3.5 h-3.5" />

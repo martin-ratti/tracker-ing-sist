@@ -148,24 +148,49 @@ export const ElectivasDrawer: React.FC = () => {
               );
 
               if (estSem === 'aprobada') {
-                cardStyle = 'bg-[#071f14]/80 border-emerald-500/40 text-emerald-100 shadow-[0_2px_12px_rgba(16,185,129,0.15)]';
+                cardStyle = 'card-aprobada-theme text-slate-100';
                 statusBadge = (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30 flex items-center gap-1">
+                  <span 
+                    className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
+                    style={{ 
+                      color: 'var(--color-aprobada)', 
+                      borderColor: 'var(--color-aprobada-border)', 
+                      backgroundColor: 'var(--color-aprobada-bg)' 
+                    }}
+                  >
                     <CheckCircle2 className="w-3 h-3" /> Aprobado
                   </span>
                 );
               } else if (estSem === 'regular') {
-                cardStyle = 'bg-[#1a1400]/80 border-amber-500/40 text-amber-100 shadow-[0_2px_12px_rgba(245,158,11,0.15)]';
+                cardStyle = 'card-regular-theme text-slate-100';
                 statusBadge = (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono border border-amber-500/30 flex items-center gap-1">
+                  <span 
+                    className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
+                    style={{ 
+                      color: 'var(--color-regular)', 
+                      borderColor: 'var(--color-regular-border)', 
+                      backgroundColor: 'var(--color-regular-bg)' 
+                    }}
+                  >
                     <Clock className="w-3 h-3" /> Regular
                   </span>
                 );
               } else if (puedeCursar) {
-                cardStyle = 'bg-[#051520]/80 border-cyan-500/50 text-cyan-100 shadow-[0_2px_14px_rgba(34,211,238,0.2)] glow-cyan';
+                cardStyle = 'card-cursable-theme glow-cursable-theme text-slate-100';
                 statusBadge = (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono border border-cyan-500/30 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" /> Cursable
+                  <span 
+                    className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
+                    style={{ 
+                      color: 'var(--color-cursable)', 
+                      borderColor: 'var(--color-cursable-border)', 
+                      backgroundColor: 'var(--color-cursable-bg)' 
+                    }}
+                  >
+                    <span 
+                      className="w-1.5 h-1.5 rounded-full animate-ping" 
+                      style={{ backgroundColor: 'var(--color-cursable)' }}
+                    /> 
+                    Cursable
                   </span>
                 );
               }
@@ -279,24 +304,49 @@ export const ElectivasDrawer: React.FC = () => {
                 );
 
                 if (est === 'aprobada') {
-                  cardStyle = 'bg-[#071f14]/80 border-emerald-500/40 text-emerald-100 shadow-[0_2px_12px_rgba(16,185,129,0.15)]';
+                  cardStyle = 'card-aprobada-theme text-slate-100';
                   statusBadge = (
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30 flex items-center gap-1">
+                    <span 
+                      className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
+                      style={{ 
+                        color: 'var(--color-aprobada)', 
+                        borderColor: 'var(--color-aprobada-border)', 
+                        backgroundColor: 'var(--color-aprobada-bg)' 
+                      }}
+                    >
                       <CheckCircle2 className="w-3 h-3" /> Aprobada (+{e.horas}hs)
                     </span>
                   );
                 } else if (est === 'regular') {
-                  cardStyle = 'bg-[#1a1400]/80 border-amber-500/40 text-amber-100 shadow-[0_2px_12px_rgba(245,158,11,0.15)]';
+                  cardStyle = 'card-regular-theme text-slate-100';
                   statusBadge = (
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono border border-amber-500/30 flex items-center gap-1">
+                    <span 
+                      className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
+                      style={{ 
+                        color: 'var(--color-regular)', 
+                        borderColor: 'var(--color-regular-border)', 
+                        backgroundColor: 'var(--color-regular-bg)' 
+                      }}
+                    >
                       <Clock className="w-3 h-3" /> Regular
                     </span>
                   );
                 } else if (cursable) {
-                  cardStyle = 'bg-[#051520]/80 border-cyan-500/50 text-cyan-100 shadow-[0_2px_14px_rgba(34,211,238,0.2)] glow-cyan';
+                  cardStyle = 'card-cursable-theme glow-cursable-theme text-slate-100';
                   statusBadge = (
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono border border-cyan-500/30 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" /> Cursable
+                    <span 
+                      className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
+                      style={{ 
+                        color: 'var(--color-cursable)', 
+                        borderColor: 'var(--color-cursable-border)', 
+                        backgroundColor: 'var(--color-cursable-bg)' 
+                      }}
+                    >
+                      <span 
+                        className="w-1.5 h-1.5 rounded-full animate-ping" 
+                        style={{ backgroundColor: 'var(--color-cursable)' }}
+                      /> 
+                      Cursable
                     </span>
                   );
                 }

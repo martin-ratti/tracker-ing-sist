@@ -101,7 +101,14 @@ export const SubjectModal: React.FC = () => {
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="font-mono text-xs font-bold text-cyan-400 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30">
+                <span 
+                  className="font-mono text-xs font-bold px-2 py-0.5 rounded border"
+                  style={{
+                    backgroundColor: 'var(--color-primary-bg)',
+                    borderColor: 'var(--color-primary-border)',
+                    color: 'var(--color-primary)'
+                  }}
+                >
                   Materia #{String(materia.id).padStart(2, '0')}
                 </span>
                 <span className="font-mono text-xs text-slate-400">
@@ -174,9 +181,15 @@ export const SubjectModal: React.FC = () => {
                 }}
                 className={`py-2 px-3 rounded-lg border flex items-center justify-center gap-1.5 transition-all ${
                   currentEstado === 'regular'
-                    ? 'bg-amber-500/20 border-amber-500/60 text-amber-300 font-bold shadow-md shadow-amber-500/10'
+                    ? 'font-bold shadow-md'
                     : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
                 }`}
+                style={currentEstado === 'regular' ? {
+                  backgroundColor: 'var(--color-regular-bg)',
+                  borderColor: 'var(--color-regular-border)',
+                  color: 'var(--color-regular)',
+                  boxShadow: '0 0 14px var(--color-regular-glow)'
+                } : {}}
               >
                 <span>🟡</span>
                 <span>Regular</span>
@@ -193,9 +206,15 @@ export const SubjectModal: React.FC = () => {
                 }}
                 className={`py-2 px-3 rounded-lg border flex items-center justify-center gap-1.5 transition-all ${
                   currentEstado === 'aprobada'
-                    ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold shadow-md shadow-emerald-500/10'
+                    ? 'font-bold shadow-md'
                     : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
                 }`}
+                style={currentEstado === 'aprobada' ? {
+                  backgroundColor: 'var(--color-aprobada-bg)',
+                  borderColor: 'var(--color-aprobada-border)',
+                  color: 'var(--color-aprobada)',
+                  boxShadow: '0 0 14px var(--color-aprobada-glow)'
+                } : {}}
               >
                 <span>🟢</span>
                 <span>Aprobada</span>
@@ -207,7 +226,10 @@ export const SubjectModal: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Para Cursar */}
             <div className="bg-[#070b13] p-4 rounded-xl border border-slate-800/80">
-              <h4 className="text-xs font-mono font-bold text-cyan-400 mb-2.5 flex items-center gap-1.5">
+              <h4 
+                className="text-xs font-mono font-bold mb-2.5 flex items-center gap-1.5"
+                style={{ color: 'var(--color-cursable)' }}
+              >
                 <span>Para Cursar (Regulares / Aprobadas)</span>
               </h4>
               
@@ -260,7 +282,10 @@ export const SubjectModal: React.FC = () => {
 
             {/* Para Rendir */}
             <div className="bg-[#070b13] p-4 rounded-xl border border-slate-800/80">
-              <h4 className="text-xs font-mono font-bold text-amber-400 mb-2.5 flex items-center gap-1.5">
+              <h4 
+                className="text-xs font-mono font-bold mb-2.5 flex items-center gap-1.5"
+                style={{ color: 'var(--color-regular)' }}
+              >
                 <span>Para Rendir Examen Final</span>
               </h4>
               <ul className="space-y-1.5 text-xs font-mono text-slate-300">
@@ -291,7 +316,7 @@ export const SubjectModal: React.FC = () => {
           {materiasQueDestraba.length > 0 && (
             <div>
               <h4 className="text-xs font-mono text-slate-400 mb-2 flex items-center gap-1.5">
-                <ArrowRight className="w-3.5 h-3.5 text-cyan-400" />
+                <ArrowRight className="w-3.5 h-3.5" style={{ color: 'var(--color-primary)' }} />
                 <span>Materias que ayuda a destrabar:</span>
               </h4>
               <div className="flex flex-wrap gap-1.5">
@@ -333,7 +358,7 @@ export const SubjectModal: React.FC = () => {
                     value={notaVal}
                     onChange={e => setNotaVal(e.target.value)}
                     placeholder="Ej: 8"
-                    className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500/50"
+                    className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-slate-500"
                   />
                 </div>
 
@@ -343,7 +368,7 @@ export const SubjectModal: React.FC = () => {
                     type="date"
                     value={fechaVal}
                     onChange={e => setFechaVal(e.target.value)}
-                    className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500/50"
+                    className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-slate-500"
                   />
                 </div>
 
@@ -355,7 +380,7 @@ export const SubjectModal: React.FC = () => {
                       value={libroVal}
                       onChange={e => setLibroVal(e.target.value)}
                       placeholder="Libro"
-                      className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-2 py-2 text-slate-200 focus:outline-none focus:border-cyan-500/50"
+                      className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-2 py-2 text-slate-200 focus:outline-none focus:border-slate-500"
                     />
                   </div>
                   <div>
@@ -365,7 +390,7 @@ export const SubjectModal: React.FC = () => {
                       value={folioVal}
                       onChange={e => setFolioVal(e.target.value)}
                       placeholder="Folio"
-                      className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-2 py-2 text-slate-200 focus:outline-none focus:border-cyan-500/50"
+                      className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-2 py-2 text-slate-200 focus:outline-none focus:border-slate-500"
                     />
                   </div>
                 </div>
@@ -378,14 +403,18 @@ export const SubjectModal: React.FC = () => {
                   value={comentarioVal}
                   onChange={e => setComentarioVal(e.target.value)}
                   placeholder="Ej: Aprobado con el Ing. Pérez en mesa de Febrero..."
-                  className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500/50"
+                  className="w-full bg-[#070b13] border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-slate-500"
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-2 font-mono text-xs">
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold transition-all shadow-md shadow-cyan-600/20"
+                  className="px-4 py-2 rounded-lg text-slate-950 font-bold transition-all shadow-md"
+                  style={{
+                    background: 'var(--gradient-primary)',
+                    boxShadow: '0 0 12px var(--color-primary-glow)'
+                  }}
                 >
                   Guardar Datos
                 </button>

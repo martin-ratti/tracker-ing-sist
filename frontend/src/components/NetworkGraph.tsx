@@ -273,7 +273,7 @@ export const NetworkGraph: React.FC = () => {
         tabIndex={0}
         role="region"
         aria-label="Grafo interactivo de correlatividades"
-        className="w-full h-full cursor-grab active:cursor-grabbing outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/50" 
+        className="w-full h-full cursor-grab active:cursor-grabbing outline-none focus-visible:ring-1 focus-visible:ring-slate-500" 
       />
 
       {/* Controles flotantes */}
@@ -282,7 +282,7 @@ export const NetworkGraph: React.FC = () => {
           type="button"
           onClick={handleZoomIn}
           aria-label="Acercar vista del grafo"
-          className="p-2 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-slate-800/80 transition-colors"
+          className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors"
           title="Acercar (Zoom In)"
         >
           <ZoomIn className="w-4 h-4" />
@@ -291,7 +291,7 @@ export const NetworkGraph: React.FC = () => {
           type="button"
           onClick={handleZoomOut}
           aria-label="Alejar vista del grafo"
-          className="p-2 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-slate-800/80 transition-colors"
+          className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors"
           title="Alejar (Zoom Out)"
         >
           <ZoomOut className="w-4 h-4" />
@@ -300,7 +300,7 @@ export const NetworkGraph: React.FC = () => {
           type="button"
           onClick={handleFit}
           aria-label="Ajustar y centrar grafo"
-          className="p-2 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-slate-800/80 transition-colors"
+          className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors"
           title="Ajustar y Centrar"
         >
           <Maximize2 className="w-4 h-4" />
