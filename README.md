@@ -142,6 +142,14 @@ Ambos módulos (`dist` en backend y frontend) se generarán listos para desplega
 
 ---
 
+## 📚 Documentación Oficial Incluida
+
+En la carpeta [`docs/`](./docs) se encuentran digitalizados los documentos oficiales de referencia:
+- 📄 [**Plan 2023 Gradiente UTN FRRo (PDF)**](./docs/isi-a4-plan-2023-gradiente-utn-frro.pdf): Cartilla A4 con las 36 materias troncales, Seminario Integrador ADUSI y correlatividades oficiales.
+- 🖼️ [**Grilla Oficial de Asignaturas Electivas Plan 2023**](./docs/electivas-plan-2023.png): Tabla de materias electivas organizadas por nivel, tipo de dictado y horas anuales.
+
+---
+
 ## 📜 Licencia y Créditos
 
 - Desarrollado por **Martín Ratti**.
