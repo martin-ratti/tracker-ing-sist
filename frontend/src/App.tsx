@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
+import { ThemeProvider } from './context/ThemeContext';
 import { TrackerProvider, useTracker } from './context/TrackerContext';
 import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/Header';
-import { NetworkGraph } from './components/NetworkGraph';
 import { GridView } from './components/GridView';
+import { GraphSkeleton } from './components/GraphSkeleton';
 import { ElectivasDrawer } from './components/ElectivasDrawer';
 import { SubjectModal } from './components/SubjectModal';
 import { TitlesModal } from './components/TitlesModal';
 import { HelpModal } from './components/HelpModal';
 import { AuthModal } from './components/AuthModal';
 import { Toast } from './components/Toast';
+
+const NetworkGraph = lazy(() => import('./components/NetworkGraph').then(m => ({ default: m.NetworkGraph })));
 
 const TrackerMain: React.FC = () => {
   const { viewMode, reloadProgress } = useTracker();
@@ -28,7 +31,9 @@ const TrackerMain: React.FC = () => {
         {/* Contenido principal según vista seleccionada */}
         <main className="flex-1 relative">
           {viewMode === 'grafo' ? (
-            <NetworkGraph />
+            <Suspense fallback={<GraphSkeleton />}>
+              <NetworkGraph />
+            </Suspense>
           ) : (
             <GridView />
           )}
@@ -64,8 +69,10 @@ const TrackerMain: React.FC = () => {
 
 export default function App() {
   return (
-    <TrackerProvider>
-      <TrackerMain />
-    </TrackerProvider>
+    <ThemeProvider>
+      <TrackerProvider>
+        <TrackerMain />
+      </TrackerProvider>
+    </ThemeProvider>
   );
 }
