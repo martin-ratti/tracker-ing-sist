@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useTracker } from '../context/TrackerContext';
 import { useAuth } from '../context/AuthContext';
+import { ThemeSelector } from './ThemeSelector';
 import { 
   Network, 
   LayoutGrid, 
@@ -188,6 +189,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]" title="ADUSI alcanzado" />
               )}
             </button>
+
+            <ThemeSelector />
 
             {user ? (
               <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800/80 rounded-lg py-1 px-2 font-mono text-xs">

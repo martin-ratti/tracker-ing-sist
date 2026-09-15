@@ -2,19 +2,72 @@
 @import "tailwindcss";
 
 @layer base {
-  :root {
+  :root, [data-theme="cyber"] {
     --font-mono: 'IBM Plex Mono', monospace;
     --font-syne: 'Syne', sans-serif;
+    --bg-base: #070b13;
+    --bg-surface: #0b101c;
+    --bg-elevated: #0d1527;
+    --color-primary: #22d3ee;
+    --color-accent: #10b981;
+    --color-warning: #f59e0b;
+    --glow-primary: rgba(34, 211, 238, 0.4);
+    --border-color: #1e293b;
+  }
+
+  [data-theme="synthwave"] {
+    --bg-base: #0f0817;
+    --bg-surface: #160c23;
+    --bg-elevated: #201133;
+    --color-primary: #f43f5e;
+    --color-accent: #c084fc;
+    --color-warning: #f59e0b;
+    --glow-primary: rgba(244, 63, 94, 0.45);
+    --border-color: #3b184f;
+  }
+
+  [data-theme="matrix"] {
+    --bg-base: #05100a;
+    --bg-surface: #091a10;
+    --bg-elevated: #0e2719;
+    --color-primary: #10b981;
+    --color-accent: #22c55e;
+    --color-warning: #eab308;
+    --glow-primary: rgba(16, 185, 129, 0.45);
+    --border-color: #164327;
+  }
+
+  [data-theme="sunset"] {
+    --bg-base: #140d07;
+    --bg-surface: #1d130a;
+    --bg-elevated: #2a1b0e;
+    --color-primary: #f59e0b;
+    --color-accent: #f97316;
+    --color-warning: #ef4444;
+    --glow-primary: rgba(245, 158, 11, 0.45);
+    --border-color: #452a15;
+  }
+
+  [data-theme="frost"] {
+    --bg-base: #090e17;
+    --bg-surface: #0d1524;
+    --bg-elevated: #131e33;
+    --color-primary: #38bdf8;
+    --color-accent: #818cf8;
+    --color-warning: #f59e0b;
+    --glow-primary: rgba(56, 189, 248, 0.45);
+    --border-color: #1c2b45;
   }
 
   body {
-    background-color: #080c14;
+    background-color: var(--bg-base);
     color: #e2e8f0;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
+    transition: background-color 0.3s ease;
     /* Firefox scrollbar */
     scrollbar-width: thin;
-    scrollbar-color: #1e293b #0b111e;
+    scrollbar-color: var(--border-color) var(--bg-surface);
   }
 
   /* Custom scrollbars (WebKit) */
@@ -23,10 +76,10 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0b111e;
+    background: var(--bg-surface);
   }
   ::-webkit-scrollbar-thumb {
-    background: #1e293b;
+    background: var(--border-color);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
@@ -45,10 +98,10 @@
 /* Glowing animations for cursable / rendible states */
 @keyframes pulseGlowCyan {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(34, 211, 238, 0.4), inset 0 0 8px rgba(34, 211, 238, 0.15);
+    box-shadow: 0 0 8px var(--glow-primary), inset 0 0 8px rgba(34, 211, 238, 0.15);
   }
   50% {
-    box-shadow: 0 0 16px rgba(34, 211, 238, 0.8), inset 0 0 12px rgba(34, 211, 238, 0.3);
+    box-shadow: 0 0 18px var(--glow-primary), inset 0 0 12px rgba(34, 211, 238, 0.3);
   }
 }
 

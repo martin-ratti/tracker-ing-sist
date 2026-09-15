@@ -2,17 +2,29 @@ import React, { useEffect, useRef } from 'react';
 import { Network } from 'vis-network/standalone';
 import { DataSet } from 'vis-data/standalone';
 import { useTracker } from '../context/TrackerContext';
+import { useTheme } from '../context/ThemeContext';
 import { MATERIAS_TRONCALES } from '../data/plan2023';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+
+import type { Node as VisBaseNode, Edge as VisBaseEdge } from 'vis-network/standalone';
+
+interface VisNode extends VisBaseNode {
+  id: number;
+}
+
+interface VisEdge extends VisBaseEdge {
+  id: number;
+  from: number;
+  to: number;
+  tipo: 'regular' | 'aprobada';
+}
 
 export const NetworkGraph: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
-  const nodesDatasetRef = useRef<DataSet<any> | null>(null);
-  const edgesDatasetRef = useRef<DataSet<any> | null>(null);
+  const nodesDatasetRef = useRef<DataSet<VisNode> | null>(null);
+  const edgesDatasetRef = useRef<DataSet<VisEdge> | null>(null);
 
-  // Refs estables para los handlers — evitan el problema de stale closure
-  // cuando el grafo se inicializa con [] y captura las funciones del primer render
   const toggleMateriaEstadoRef = useRef<(id: number) => void>(() => {});
   const setSelectedSubjectIdRef = useRef<(id: number | null) => void>(() => {});
 
@@ -25,7 +37,8 @@ export const NetworkGraph: React.FC = () => {
     setSelectedSubjectId
   } = useTracker();
 
-  // Mantener los refs siempre actualizados ante cada render
+  const { themeConfig } = useTheme();
+
   useEffect(() => {
     toggleMateriaEstadoRef.current = toggleMateriaEstado;
   }, [toggleMateriaEstado]);
@@ -34,30 +47,27 @@ export const NetworkGraph: React.FC = () => {
     setSelectedSubjectIdRef.current = setSelectedSubjectId;
   }, [setSelectedSubjectId]);
 
-  // Materias a mostrar en el grafo: excluir el Seminario ADUSI (id 99)
   const materiasGrafo = MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo);
 
-  // Inicializar Network una sola vez
+  // Inicializar Network
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Crear nodos iniciales
-    const initialNodes = materiasGrafo.map(m => ({
+    const initialNodes: VisNode[] = materiasGrafo.map(m => ({
       id: m.id,
       label: m.nombre,
       level: m.nivel,
       shape: 'box',
       borderRadius: 8,
       margin: { top: 10, bottom: 10, left: 14, right: 14 },
-      color: { background: '#0d1527', border: '#1e293b' },
-      font: { color: '#64748b', size: 13, face: 'IBM Plex Mono' },
+      color: { background: themeConfig.graph.pendiente.bg, border: themeConfig.graph.pendiente.border },
+      font: { color: themeConfig.graph.pendiente.font, size: 13, face: 'IBM Plex Mono' },
       borderWidth: 1.5,
       shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 8, x: 0, y: 3 }
     }));
 
-    // Crear aristas iniciales
     let edgeId = 1;
-    const rawEdges: any[] = [];
+    const rawEdges: VisEdge[] = [];
     materiasGrafo.forEach(m => {
       m.reqRegular.forEach(c => {
         rawEdges.push({
@@ -68,7 +78,7 @@ export const NetworkGraph: React.FC = () => {
           color: { color: '#1e293b', opacity: 0.8 },
           width: 1.4,
           arrows: { to: { enabled: true, scaleFactor: 0.45, type: 'arrow' } },
-          smooth: { type: 'cubicBezier', roundness: 0.5 }
+          smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 }
         });
       });
 
@@ -82,19 +92,19 @@ export const NetworkGraph: React.FC = () => {
             color: { color: '#1e293b', opacity: 0.8 },
             width: 2.2,
             arrows: { to: { enabled: true, scaleFactor: 0.5, type: 'arrow' } },
-            smooth: { type: 'cubicBezier', roundness: 0.5 }
+            smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 }
           });
         });
       }
     });
 
-    const nodesDataSet = new DataSet(initialNodes);
-    const edgesDataSet = new DataSet(rawEdges);
+    const nodesDataSet = new DataSet<VisNode>(initialNodes);
+    const edgesDataSet = new DataSet<VisEdge>(rawEdges);
 
     nodesDatasetRef.current = nodesDataSet;
     edgesDatasetRef.current = edgesDataSet;
 
-    const options: any = {
+    const options = {
       layout: {
         hierarchical: {
           enabled: true,
@@ -117,10 +127,9 @@ export const NetworkGraph: React.FC = () => {
       edges: { chosen: false }
     };
 
-    const net = new Network(containerRef.current, { nodes: nodesDataSet, edges: edgesDataSet }, options);
+    const net = new Network(containerRef.current, { nodes: nodesDataSet, edges: edgesDataSet }, options as any);
     networkRef.current = net;
 
-    // Click simple: alternar estado — usa ref para siempre tener la función actual
     net.on('click', params => {
       if (params.nodes.length > 0) {
         const clickedId = Number(params.nodes[0]);
@@ -128,7 +137,6 @@ export const NetworkGraph: React.FC = () => {
       }
     });
 
-    // Doble click: abrir modal de detalles
     net.on('doubleClick', params => {
       if (params.nodes.length > 0) {
         const clickedId = Number(params.nodes[0]);
@@ -136,7 +144,6 @@ export const NetworkGraph: React.FC = () => {
       }
     });
 
-    // Click derecho: abrir modal de detalles
     net.on('oncontext', params => {
       params.event.preventDefault();
       const nodeId = net.getNodeAt(params.pointer.DOM);
@@ -145,7 +152,6 @@ export const NetworkGraph: React.FC = () => {
       }
     });
 
-    // Redimensionar ante cambios de ventana (sin recentrar)
     const handleResize = () => {
       net.redraw();
     };
@@ -158,44 +164,43 @@ export const NetworkGraph: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Actualizar nodos y aristas cuando cambian los estados o filtros
+  // Actualizar nodos y aristas cuando cambian los estados, temas o filtros
   useEffect(() => {
     if (!nodesDatasetRef.current || !edgesDatasetRef.current) return;
 
-    // Actualizar nodos
-    const nodeUpdates: any[] = [];
+    const nodeUpdates: Partial<VisNode>[] = [];
     materiasGrafo.forEach(m => {
       const est = estados[m.id] || 'pendiente';
       const cursable = esMateriaCursable(m);
       const rendible = esMateriaRendible(m);
 
-      let bg = '#0d1527';
-      let border = '#1e293b';
-      let fontColor = '#64748b';
+      let bg = themeConfig.graph.pendiente.bg;
+      let border = themeConfig.graph.pendiente.border;
+      let fontColor = themeConfig.graph.pendiente.font;
       let bw = 1.5;
       let shadowColor = 'rgba(0,0,0,0.5)';
       let shadowSize = 8;
 
       if (est === 'aprobada') {
-        bg = '#062817';
-        border = '#10b981';
-        fontColor = '#34d399';
+        bg = themeConfig.graph.aprobada.bg;
+        border = themeConfig.graph.aprobada.border;
+        fontColor = themeConfig.graph.aprobada.font;
         bw = 2.2;
-        shadowColor = 'rgba(16,185,129,0.3)';
+        shadowColor = themeConfig.graph.aprobada.shadow;
         shadowSize = 10;
       } else if (est === 'regular') {
-        bg = '#241a02';
-        border = '#f59e0b';
-        fontColor = '#fbbf24';
+        bg = themeConfig.graph.regular.bg;
+        border = themeConfig.graph.regular.border;
+        fontColor = themeConfig.graph.regular.font;
         bw = 2.2;
-        shadowColor = rendible ? 'rgba(245,158,11,0.5)' : 'rgba(245,158,11,0.25)';
+        shadowColor = rendible ? themeConfig.graph.regular.shadow : 'rgba(245,158,11,0.25)';
         shadowSize = rendible ? 14 : 8;
       } else if (cursable) {
-        bg = '#042232';
-        border = '#22d3ee';
-        fontColor = '#38bdf8';
+        bg = themeConfig.graph.cursable.bg;
+        border = themeConfig.graph.cursable.border;
+        fontColor = themeConfig.graph.cursable.font;
         bw = 2.2;
-        shadowColor = 'rgba(34,211,238,0.55)';
+        shadowColor = themeConfig.graph.cursable.shadow;
         shadowSize = 14;
       }
 
@@ -208,12 +213,13 @@ export const NetworkGraph: React.FC = () => {
       });
     });
 
-    nodesDatasetRef.current.update(nodeUpdates);
+    nodesDatasetRef.current.update(nodeUpdates as VisNode[]);
 
     // Actualizar aristas
-    const edgeUpdates: any[] = [];
-    edgesDatasetRef.current.forEach((edge: any) => {
-      const estFrom = estados[edge.from] || 'pendiente';
+    const edgeUpdates: Partial<VisEdge>[] = [];
+    edgesDatasetRef.current.forEach(edge => {
+      const fromId = Number(edge.from);
+      const estFrom = estados[fromId] || 'pendiente';
       const hidden = edgeMode !== 'ambos' && edge.tipo !== edgeMode;
 
       let color = '#1e293b';
@@ -221,11 +227,11 @@ export const NetworkGraph: React.FC = () => {
 
       if (!hidden) {
         if (edge.tipo === 'regular') {
-          if (estFrom === 'aprobada') color = '#10b981';
-          else if (estFrom === 'regular') color = '#22d3ee';
+          if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
+          else if (estFrom === 'regular') color = themeConfig.graph.cursable.border;
           else color = '#1e293b';
         } else {
-          if (estFrom === 'aprobada') color = '#f59e0b';
+          if (estFrom === 'aprobada') color = themeConfig.graph.regular.border;
           else color = '#1e293b';
         }
       }
@@ -237,10 +243,9 @@ export const NetworkGraph: React.FC = () => {
       });
     });
 
-    edgesDatasetRef.current.update(edgeUpdates);
-  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, materiasGrafo]);
+    edgesDatasetRef.current.update(edgeUpdates as VisEdge[]);
+  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, materiasGrafo, themeConfig]);
 
-  // Controles de zoom y centrado
   const handleZoomIn = () => {
     if (!networkRef.current) return;
     const scale = networkRef.current.getScale();
@@ -259,28 +264,42 @@ export const NetworkGraph: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-[calc(100vh-125px)] bg-[#070b13] overflow-hidden">
-      {/* Contenedor Canvas de Vis Network */}
-      <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+    <div 
+      className="relative w-full h-[calc(100vh-125px)] overflow-hidden transition-colors duration-300"
+      style={{ backgroundColor: themeConfig.graph.bgBase }}
+    >
+      <div 
+        ref={containerRef} 
+        tabIndex={0}
+        role="region"
+        aria-label="Grafo interactivo de correlatividades"
+        className="w-full h-full cursor-grab active:cursor-grabbing outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/50" 
+      />
 
-      {/* Controles flotantes en pantalla */}
+      {/* Controles flotantes */}
       <div className="absolute bottom-5 right-5 flex flex-col gap-1.5 bg-[#0b101c]/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 shadow-xl z-10">
         <button
+          type="button"
           onClick={handleZoomIn}
+          aria-label="Acercar vista del grafo"
           className="p-2 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-slate-800/80 transition-colors"
           title="Acercar (Zoom In)"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
+          type="button"
           onClick={handleZoomOut}
+          aria-label="Alejar vista del grafo"
           className="p-2 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-slate-800/80 transition-colors"
           title="Alejar (Zoom Out)"
         >
           <ZoomOut className="w-4 h-4" />
         </button>
         <button
+          type="button"
           onClick={handleFit}
+          aria-label="Ajustar y centrar grafo"
           className="p-2 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-slate-800/80 transition-colors"
           title="Ajustar y Centrar"
         >
@@ -288,7 +307,7 @@ export const NetworkGraph: React.FC = () => {
         </button>
       </div>
 
-      {/* Guía rápida flotante al pie */}
+      {/* Guía rápida flotante */}
       <div className="absolute bottom-5 left-5 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-xl bg-[#0b101c]/85 backdrop-blur-md border border-slate-800/80 text-[11px] font-mono text-slate-400 pointer-events-none">
         <span className="flex items-center gap-1.5">
           <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">Click</kbd>
