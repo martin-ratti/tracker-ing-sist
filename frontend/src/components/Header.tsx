@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTracker } from '../context/TrackerContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   Network, 
   LayoutGrid, 
@@ -7,7 +8,10 @@ import {
   GraduationCap, 
   RotateCcw, 
   HelpCircle,
-  Award
+  Award,
+  X,
+  Cloud,
+  LogOut
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -27,16 +31,25 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     resetAll
   } = useTracker();
 
+  const { user, openAuthModal, logout } = useAuth();
+
   const [confirmReset, setConfirmReset] = useState(false);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleReset = () => {
     if (confirmReset) {
       resetAll();
       setConfirmReset(false);
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     } else {
       setConfirmReset(true);
-      setTimeout(() => setConfirmReset(false), 4000);
+      resetTimerRef.current = setTimeout(() => setConfirmReset(false), 4000);
     }
+  };
+
+  const handleCancelReset = () => {
+    setConfirmReset(false);
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
   };
 
   return (
@@ -107,7 +120,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </div>
 
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#051520]/80 border border-cyan-500/30 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span className={`w-2 h-2 rounded-full bg-cyan-400 ${stats.cursablesCount > 0 ? 'animate-ping' : ''}`}></span>
             <div className="text-left font-mono">
               <div className="text-cyan-400 font-bold text-xs sm:text-sm leading-none">{stats.cursablesCount}</div>
               <div className="text-[10px] text-cyan-300/60 uppercase leading-tight">Cursables</div>
@@ -118,8 +131,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#190c2e]/80 border border-purple-500/30 shadow-sm">
               <Award className="w-3.5 h-3.5 text-purple-400" />
               <div className="text-left font-mono">
-                <div className="text-purple-300 font-bold text-xs sm:text-sm leading-none">{stats.promedioSinAplazos ?? stats.promedioConAplazos}</div>
-                <div className="text-[10px] text-purple-300/60 uppercase leading-tight">Promedio</div>
+                <div className="text-purple-300 font-bold text-xs sm:text-sm leading-none">
+                  {stats.promedioSinAplazos ?? stats.promedioConAplazos}
+                </div>
+                <div
+                  className="text-[10px] text-purple-300/60 uppercase leading-tight"
+                  title={`Con aplazos: ${stats.promedioConAplazos} · Sin aplazos: ${stats.promedioSinAplazos ?? '—'}`}
+                >
+                  {stats.promedioSinAplazos !== null ? 'Prom. s/aplazos' : 'Promedio'}
+                </div>
               </div>
             </div>
           )}
@@ -153,7 +173,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>Electivas</span>
-              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[10px] text-amber-300">
+              <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-[10px] text-amber-300">
                 {stats.horasElectivasAprobadas}/20hs
               </span>
             </button>
@@ -168,6 +188,31 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]" title="ADUSI alcanzado" />
               )}
             </button>
+
+            {user ? (
+              <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800/80 rounded-lg py-1 px-2 font-mono text-xs">
+                <div className="flex items-center gap-1.5 text-slate-300 text-[11px]" title={`Sesión activa: ${user.email}`}>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_5px_#10b981]" />
+                  <span className="max-w-[110px] truncate font-medium">{user.email.split('@')[0]}</span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="ml-1 p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                  title="Cerrar sesión"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={openAuthModal}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/20 font-mono text-xs transition-colors shadow-sm"
+                title="Sincronizar avance en la nube para verlo desde otra PC o celular"
+              >
+                <Cloud className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Nube</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -271,6 +316,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{confirmReset ? '¿Confirmar?' : 'Reiniciar'}</span>
           </button>
+          {confirmReset && (
+            <button
+              onClick={handleCancelReset}
+              className="p-1 rounded text-slate-500 hover:text-slate-200 transition-colors"
+              title="Cancelar reinicio"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </header>
