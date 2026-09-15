@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTracker } from '../context/TrackerContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../data/plan2023';
 import { 
   X, 
@@ -28,6 +29,7 @@ export const SubjectModal: React.FC = () => {
   const [comentarioVal, setComentarioVal] = useState<string>('');
 
   const materia = selectedSubjectId ? MATERIAS_MAP[selectedSubjectId] : null;
+  const modalRef = useFocusTrap(Boolean(materia));
 
   // Cerrar con Escape
   useEffect(() => {
@@ -87,6 +89,10 @@ export const SubjectModal: React.FC = () => {
       onClick={() => setSelectedSubjectId(null)}
     >
       <div 
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="subject-modal-title"
         className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
@@ -102,13 +108,15 @@ export const SubjectModal: React.FC = () => {
                   {materia.nivel}º Nivel · {materia.horas} horas semanales
                 </span>
               </div>
-              <h2 className="text-xl font-bold font-syne text-white">
+              <h2 id="subject-modal-title" className="text-xl font-bold font-syne text-white">
                 {materia.nombreCompleto}
               </h2>
             </div>
 
             <button
+              type="button"
               onClick={() => setSelectedSubjectId(null)}
+              aria-label="Cerrar detalles de la materia"
               className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
               <X className="w-5 h-5" />

@@ -40,11 +40,12 @@ export const GridView: React.FC = () => {
           </p>
         </div>
 
-        <div className="relative w-full sm:w-72">
+        <div className="relative w-full sm:w-72" role="search">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
             placeholder="Buscar materia o código..."
+            aria-label="Buscar materia por nombre o código"
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full bg-[#0b101c] border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50"
@@ -131,8 +132,17 @@ export const GridView: React.FC = () => {
                     return (
                       <div
                         key={m.id}
-                        className={`group relative p-3 rounded-lg border transition-all duration-200 cursor-pointer select-none ${cardStyle}`}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
+                        className={`group relative p-3 rounded-lg border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/80 ${cardStyle}`}
                         onClick={() => toggleMateriaEstado(m.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleMateriaEstado(m.id);
+                          }
+                        }}
                       >
                         {/* Fila superior: ID y Badges */}
                         <div className="flex items-center justify-between gap-1 mb-1.5 font-mono text-[10px]">
@@ -181,6 +191,7 @@ export const GridView: React.FC = () => {
                               e.stopPropagation();
                               setSelectedSubjectId(m.id);
                             }}
+                            aria-label={`Ver detalles, correlativas y notas de ${m.nombreCompleto}`}
                             className="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-slate-800 transition-colors"
                             title="Ver correlativas y registrar notas"
                           >

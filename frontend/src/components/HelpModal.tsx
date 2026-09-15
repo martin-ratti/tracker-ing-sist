@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { X, HelpCircle, AlertTriangle } from 'lucide-react';
 
 interface HelpModalProps {
@@ -7,6 +8,8 @@ interface HelpModalProps {
 }
 
 export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
+  const modalRef = useFocusTrap(isOpen);
+
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -24,6 +27,10 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
       onClick={onClose}
     >
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="help-modal-title"
         className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
@@ -33,7 +40,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold font-syne text-white">
+              <h2 id="help-modal-title" className="text-lg font-bold font-syne text-white">
                 Guía del Tracker Plan 2023
               </h2>
               <p className="text-xs font-mono text-slate-400">
@@ -43,7 +50,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Cerrar guía de ayuda"
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />

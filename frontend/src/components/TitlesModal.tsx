@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useTracker } from '../context/TrackerContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { X, GraduationCap, Award, CheckCircle2 } from 'lucide-react';
 
 interface TitlesModalProps {
@@ -9,6 +10,7 @@ interface TitlesModalProps {
 
 export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => {
   const { stats, ppsHoras, setPpsHoras } = useTracker();
+  const modalRef = useFocusTrap(isOpen);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -27,6 +29,10 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
       onClick={onClose}
     >
       <div 
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titles-modal-title"
         className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
@@ -37,7 +43,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
               <GraduationCap className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold font-syne text-white tracking-wide">
+              <h2 id="titles-modal-title" className="text-xl font-bold font-syne text-white tracking-wide">
                 Titulación Universitaria
               </h2>
               <p className="text-xs font-mono text-slate-400">
@@ -47,7 +53,9 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
           </div>
 
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Cerrar seguimiento de títulos"
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />

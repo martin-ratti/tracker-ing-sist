@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { X, Mail, Lock, Eye, EyeOff, Cloud, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 export const AuthModal: React.FC = () => {
   const { isAuthModalOpen, closeAuthModal, login, register } = useAuth();
+  const modalRef = useFocusTrap(isAuthModalOpen);
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,20 +13,22 @@ export const AuthModal: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const handleClose = React.useCallback(() => {
+    setError(null);
+    setPassword('');
+    setLoading(false);
+    closeAuthModal();
+  }, [closeAuthModal]);
+
   useEffect(() => {
-    if (!isAuthModalOpen) {
-      setError(null);
-      setPassword('');
-      setLoading(false);
-      return;
-    }
+    if (!isAuthModalOpen) return;
 
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeAuthModal();
+      if (e.key === 'Escape') handleClose();
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
-  }, [isAuthModalOpen, closeAuthModal]);
+  }, [isAuthModalOpen, handleClose]);
 
   if (!isAuthModalOpen) return null;
 
@@ -59,9 +63,13 @@ export const AuthModal: React.FC = () => {
   return (
     <div
       className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
-      onClick={closeAuthModal}
+      onClick={handleClose}
     >
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
         className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
@@ -72,7 +80,7 @@ export const AuthModal: React.FC = () => {
               <Cloud className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold font-syne text-white">
+              <h2 id="auth-modal-title" className="text-lg font-bold font-syne text-white">
                 {isRegister ? 'Crear Cuenta en la Nube' : 'Iniciar Sesión'}
               </h2>
               <p className="text-xs font-mono text-slate-400">
@@ -82,7 +90,9 @@ export const AuthModal: React.FC = () => {
           </div>
 
           <button
-            onClick={closeAuthModal}
+            type="button"
+            onClick={handleClose}
+            aria-label="Cerrar modal de autenticación"
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -196,7 +206,7 @@ export const AuthModal: React.FC = () => {
           <div className="pt-3 border-t border-slate-800/60 text-center">
             <button
               type="button"
-              onClick={closeAuthModal}
+              onClick={handleClose}
               className="text-[11px] font-mono text-slate-500 hover:text-slate-300 transition-colors"
             >
               Continuar en modo local sin iniciar sesión
