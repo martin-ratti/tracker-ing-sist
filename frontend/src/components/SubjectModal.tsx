@@ -12,7 +12,14 @@ import {
   Calendar,
   Trash2
 } from 'lucide-react';
-import { TURNOS_EXAMEN_2026 } from '../data/calendario2026';
+import { 
+  TURNOS_EXAMEN_2026, 
+  isPastDate, 
+  getFechaExactaMesa,
+  DIAS_MESA_POR_MATERIA
+} from '../data/calendario2026';
+
+
 
 export const SubjectModal: React.FC = () => {
   const {
@@ -74,7 +81,8 @@ export const SubjectModal: React.FC = () => {
       setMetaComentario(m.comentario || '');
       setShowMetaForm(false);
     } else {
-      setSelectedTurnoId(TURNOS_EXAMEN_2026[0]?.id || 'feb-2026-l1');
+      const turnosFuturos = TURNOS_EXAMEN_2026.filter(t => !isPastDate(t.fechaFin));
+      setSelectedTurnoId(turnosFuturos[0]?.id || TURNOS_EXAMEN_2026[0]?.id || 'nov-2026-l1');
       setMetaComentario('');
       setShowMetaForm(false);
     }
@@ -85,7 +93,7 @@ export const SubjectModal: React.FC = () => {
   const currentEstado = estados[materia.id] || 'pendiente';
   const currentMeta = metasExamen[materia.id];
 
-  // Helper para días restantes de mesa de examen
+  // Helper para countdown de días
   const getDaysRemaining = (targetDateStr: string) => {
     const target = new Date(targetDateStr + 'T00:00:00');
     const now = new Date();
@@ -94,13 +102,13 @@ export const SubjectModal: React.FC = () => {
     const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
     if (days < 0) {
-      return { days, text: `Mesa finalizada (hace ${Math.abs(days)} d)`, badgeColor: 'bg-slate-800 text-slate-400 border border-slate-700' };
+      return { days, text: `Mesa finalizada hace ${Math.abs(days)} d`, badgeColor: 'bg-slate-800 text-slate-400 border border-slate-700' };
     }
     if (days === 0) {
-      return { days, text: '¡La mesa de examen comienza hoy!', badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' };
+      return { days, text: '¡La mesa es hoy!', badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' };
     }
     if (days <= 7) {
-      return { days, text: `¡Quedan solo ${days} días!`, badgeColor: 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold' };
+      return { days, text: `¡Quedan ${days} días!`, badgeColor: 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold' };
     }
     return { days, text: `Faltan ${days} días`, badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' };
   };
@@ -111,11 +119,13 @@ export const SubjectModal: React.FC = () => {
     const turno = TURNOS_EXAMEN_2026.find(t => t.id === selectedTurnoId);
     if (!turno) return;
 
+    const fechaExacta = getFechaExactaMesa(materia.id, turno);
+
     setMetaExamen(materia.id, {
       materiaId: materia.id,
       turnoId: turno.id,
       turnoNombre: turno.nombre,
-      fechaEstimada: turno.fechaInicio,
+      fechaEstimada: fechaExacta ? fechaExacta.fechaExactaStr : turno.fechaInicio,
       llamado: typeof turno.llamado === 'number' ? turno.llamado : undefined,
       comentario: metaComentario.trim() || undefined
     });
@@ -199,6 +209,11 @@ export const SubjectModal: React.FC = () => {
 
           {/* Badges de características */}
           <div className="flex flex-wrap gap-2 mt-3 font-mono text-[11px]">
+            {DIAS_MESA_POR_MATERIA[materia.id] && (
+              <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 font-semibold" title="Día oficial de mesa de examen según cronograma oficial UTN FRRo">
+                📅 Mesa: {DIAS_MESA_POR_MATERIA[materia.id]}
+              </span>
+            )}
             {materia.esIntegradora && (
               <span className="px-2 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300">
                 Materia Integradora
@@ -451,6 +466,18 @@ export const SubjectModal: React.FC = () => {
                       </span>
                     )}
                   </div>
+
+                  {(() => {
+                    const turno = TURNOS_EXAMEN_2026.find(t => t.id === currentMeta.turnoId);
+                    const exacta = turno ? getFechaExactaMesa(materia.id, turno) : null;
+                    if (!exacta) return null;
+                    return (
+                      <div className="text-[11px] text-emerald-400 flex items-center gap-1.5 font-semibold">
+                        <span>Día exacto: {exacta.diaNombre} {exacta.fechaExactaStr}</span>
+                      </div>
+                    );
+                  })()}
+
                   {currentMeta.comentario && (
                     <p className="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800/60">
                       "{currentMeta.comentario}"
@@ -477,11 +504,18 @@ export const SubjectModal: React.FC = () => {
                       onChange={e => setSelectedTurnoId(e.target.value)}
                       className="w-full bg-[#050b17] border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400"
                     >
-                      {TURNOS_EXAMEN_2026.map(t => (
-                        <option key={t.id} value={t.id}>
-                          {t.nombre} ({t.fechaInicio} al {t.fechaFin})
-                        </option>
-                      ))}
+                      {(() => {
+                        const turnosFuturos = TURNOS_EXAMEN_2026.filter(t => !isPastDate(t.fechaFin));
+                        const opciones = turnosFuturos.length > 0 ? turnosFuturos : TURNOS_EXAMEN_2026;
+                        return opciones.map(t => {
+                          const exacta = getFechaExactaMesa(materia.id, t);
+                          return (
+                            <option key={t.id} value={t.id}>
+                              {t.nombre} ({exacta ? `${exacta.diaNombre} ${exacta.fechaExactaStr}` : `${t.fechaInicio} al ${t.fechaFin}`})
+                            </option>
+                          );
+                        });
+                      })()}
                     </select>
                   </div>
 
