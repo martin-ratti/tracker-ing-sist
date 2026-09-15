@@ -6,49 +6,71 @@ import { ProgresoUsuario } from '../types/plan.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, '../../data');
-const DATA_FILE = path.join(DATA_DIR, 'progress.json');
+const PROGRESS_USERS_DIR = path.join(DATA_DIR, 'progress');
+const DEFAULT_FILE = path.join(DATA_DIR, 'progress.json');
 
-const DEFAULT_PROGRESS: ProgresoUsuario = {
-  estados: {},
-  estadosElectivas: {},
-  notas: {},
-  ppsHoras: 0,
-  actualizadoEn: new Date().toISOString()
-};
+function buildDefault(): ProgresoUsuario {
+  return {
+    estados: {},
+    estadosElectivas: {},
+    notas: {},
+    ppsHoras: 0,
+    actualizadoEn: new Date().toISOString()
+  };
+}
 
-function ensureDirExists() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+function ensureDirExists(dirPath: string): void {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
   }
 }
 
-export function getProgress(): ProgresoUsuario {
-  ensureDirExists();
-  if (!fs.existsSync(DATA_FILE)) {
-    saveProgress(DEFAULT_PROGRESS);
-    return DEFAULT_PROGRESS;
+function getFilePath(userId?: string): string {
+  if (userId) {
+    ensureDirExists(PROGRESS_USERS_DIR);
+    // Sanear userId para evitar path traversal
+    const safeId = userId.replace(/[^a-zA-Z0-9_-]/g, '');
+    return path.join(PROGRESS_USERS_DIR, `${safeId}.json`);
+  }
+  ensureDirExists(DATA_DIR);
+  return DEFAULT_FILE;
+}
+
+function writeFile(filePath: string, data: ProgresoUsuario): void {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+}
+
+export function getProgress(userId?: string): ProgresoUsuario {
+  const file = getFilePath(userId);
+  if (!fs.existsSync(file)) {
+    const defaultProgress = buildDefault();
+    writeFile(file, defaultProgress);
+    return defaultProgress;
   }
   try {
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(raw);
+    const raw = fs.readFileSync(file, 'utf-8');
+    return JSON.parse(raw) as ProgresoUsuario;
   } catch (error) {
-    console.error('Error al leer progress.json, usando predeterminado:', error);
-    return DEFAULT_PROGRESS;
+    console.error(`Error al leer progreso de ${userId ?? 'anon'}, usando default:`, error);
+    return buildDefault();
   }
 }
 
-export function saveProgress(progress: Partial<ProgresoUsuario>): ProgresoUsuario {
-  ensureDirExists();
-  const current = getProgress();
+export function saveProgress(progress: Partial<ProgresoUsuario>, userId?: string): ProgresoUsuario {
+  const current = getProgress(userId);
   const updated: ProgresoUsuario = {
     ...current,
     ...progress,
     actualizadoEn: new Date().toISOString()
   };
-  fs.writeFileSync(DATA_FILE, JSON.stringify(updated, null, 2), 'utf-8');
+  const file = getFilePath(userId);
+  writeFile(file, updated);
   return updated;
 }
 
-export function resetProgress(): ProgresoUsuario {
-  return saveProgress(DEFAULT_PROGRESS);
+export function resetProgress(userId?: string): ProgresoUsuario {
+  const fresh = buildDefault();
+  const file = getFilePath(userId);
+  writeFile(file, fresh);
+  return fresh;
 }
