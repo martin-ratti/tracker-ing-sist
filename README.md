@@ -9,43 +9,59 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
 ## ⚡ Características Principales
 
 - 🌐 **Grafo Interactivo de Correlativas:**
-  - Visualizador de red jerárquico por niveles utilizando `vis-network`.
-  - Estados reactivos:
-    - ⚪ **Pendiente / Bloqueada:** Sin requisitos cumplidos.
-    - 🔵 **Cursable (Brillante con Pulso):** Cumple con las materias regulares y aprobadas exigidas para iniciar el cursado.
-    - 🟡 **Regular:** Cursada aprobada, lista para rendir examen final.
-    - 🟢 **Aprobada:** Final o promoción acreditada.
-  - Filtro dinámico de aristas: *Todas*, *Solo para Cursar* (regulares) y *Solo para Rendir* (aprobadas).
-  - Controles táctiles y en pantalla: Zoom in/out, fit de pantalla y drag fluido.
+  - Visualizador de red jerárquico por niveles utilizando `vis-network` standalone optimizado.
+  - Estados reactivos sincronizados con el tema visual:
+    - ⚪ **Pendiente / Bloqueada:** Requisitos previos incompletos.
+    - 🔵 **Cursable (Brillante con Animación):** Habilitada para anotarse a cursar (regulares y aprobadas cumplidas).
+    - 🟡 **Regular:** Cursada acreditada, lista para rendir examen final.
+    - 🟢 **Aprobada:** Examen final o promoción aprobada.
+  - Filtro dinámico de conexiones: *Todas*, *Solo para Cursar* (regulares) y *Solo para Rendir* (aprobadas).
+  - Controles táctiles y en pantalla: Zoom in/out, ajustar y centrar pantalla, y paneo fluido.
 
-- 📋 **Vista Dual: Grafo / Malla Curricular:**
-  - Alterná con un clic entre el grafo de red y una cuadrícula estilo cartilla física organizada por niveles (1º a 5º año).
+- 📋 **Vista Dual: Grafo de Red / Malla Curricular:**
+  - Alterná con un clic entre el grafo de relaciones y una cuadrícula interactiva estilo cartilla física organizada por niveles (1º a 5º año).
   - Buscador predictivo por nombre o código de materia.
-  - Barras de progreso individuales por nivel académico.
+  - Barras de progreso de avance porcentual individuales por nivel académico.
+
+- 🎨 **Sistema Dinámico de 5 Temas Visuales:**
+  - Selector de paletas cromáticas accesibles desde la barra superior:
+    - **Cyber Blueprint:** Estética clásica cian tech y azul noche.
+    - **Neon Synthwave:** Púrpura retrofuturista con rosa fucsia, violeta y turquesa.
+    - **Emerald Matrix:** Verde hacker terminal con tonos menta y lima.
+    - **Amber Sunset:** Paleta solar cálida con ámbar, naranja fuego y esmeralda.
+    - **Nordic Frost:** Azul glacial nórdico con índigo y turquesa polar.
+  - Toda la interfaz (malla, grafo, modales, contadores métricos, botones y leyenda) se sincroniza reactivamente.
+
+- ☁️ **Sincronización en la Nube con Cuentas de Usuario:**
+  - Registro e inicio de sesión con correo y contraseña cifrada con `bcrypt`.
+  - Tokens JWT de sesión con persistencia multi-dispositivo (PC, celular, tablet).
+  - Protección de seguridad en el backend con limitador de tasa (*Rate Limiter*).
+  - **Modo Local Offline Híbrido:** Si preferís no registrarte, podés usar el tracker al 100% en local mediante `localStorage`.
 
 - 🛡️ **Validación Estricta y Reseteo en Cascada:**
   - No permite marcar estados inválidos si faltan correlativas. Muestra alertas contextuales (*Toast*) indicando con precisión qué materias faltan regularizar o aprobar.
-  - Si una materia correlativa vuelve a "Pendiente", el sistema recalcula en cascada e invalida de forma recursiva todas las materias dependientes para evitar inconsistencias académicas.
+  - **Seminario Integrador ADUSI:** Validación oficial que exige tener aprobadas las 23 materias de 1º, 2º y 3º año para poder asentarlo como aprobado.
+  - Si una materia correlativa vuelve a "Pendiente", el sistema recalcula en cascada e invalida de forma recursiva todas las materias dependientes para garantizar consistencia académica.
 
 - 🎓 **Seguimiento de Doble Titulación:**
   - **ADUSI (Analista Desarrollador Universitario en Sistemas de Información):**
-    - 1º, 2º y 3º año completos (23 materias) + Seminario Integrador + 4 hs de electivas.
+    - 1º, 2º y 3º año completos (23 materias) + Seminario Integrador ADUSI + 4 hs de electivas.
   - **Ingeniería en Sistemas de Información:**
     - 36 materias troncales + 20 hs de electivas + 200 hs de Prácticas Profesionales Supervisadas (PPS).
     - Barra interactiva para cargar las horas de PPS realizadas.
 
 - ✨ **Panel Inteligente de Electivas:**
-  - Catálogo completo con las 19 materias electivas oficiales del Plan 2023.
-  - Cómputo directo de horas reales según normativa de UTN FRRo.
-  - Indicador de cumplimiento para la meta de 4 hs (ADUSI) y 20 hs (Ingeniería).
+  - Catálogo completo con las 19 materias electivas oficiales del Plan 2023 de UTN FRRo.
+  - Cómputo directo de horas reales según normativa de la facultad.
+  - Indicadores de meta para 4 hs (ADUSI) y 20 hs (Ingeniería).
 
 - 📝 **Libreta de Exámenes y Promedios:**
-  - Doble clic en cualquier materia para registrar calificación numérica, fecha de examen, libro, folio y anotaciones sobre la cátedra.
+  - Formulario completo para registrar calificación (1 a 10), fecha de examen, libro, folio y anotaciones sobre la cátedra.
   - Cálculo automático del promedio general (con y sin aplazos).
 
-- 💾 **Persistencia Híbrida:**
-  - Guardado instantáneo en `localStorage` (cero latencia, funciona 100% offline).
-  - Sincronización automática en segundo plano con el backend en Node.js.
+- ♿ **Accesibilidad WCAG 2.2:**
+  - Soporte completo de navegación por teclado (`Escape` para cerrar, `Enter` / `Espacio` para interactuar, `Tab` con foco atrapado en modales `useFocusTrap`).
+  - Etiquetas ARIA y diálogos accesibles.
 
 ---
 
@@ -53,9 +69,10 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
 
 | Capa | Tecnologías |
 | :--- | :--- |
-| **Frontend** | React 19, TypeScript, Vite 8, Tailwind CSS v4, Vis-Network, Lucide Icons |
-| **Backend** | Node.js, Express, TypeScript, CORS, Dotenv, TSX |
-| **Persistencia** | Almacenamiento JSON persistente con debounce + LocalStorage offline |
+| **Frontend** | React 19, TypeScript, Vite 8 (Rolldown), Tailwind CSS v4, Vis-Network, Lucide Icons |
+| **Backend** | Node.js, Express, TypeScript, JWT, Bcrypt, Express-Rate-Limit, CORS, TSX |
+| **Linter & Tooling** | `oxlint` (Oxc Compiler Stack de ultra alto rendimiento) |
+| **Persistencia** | Almacenamiento JSON con debounce (cuentas y progreso) + LocalStorage offline |
 | **Gestor de Paquetes** | `pnpm` (Monorepo con workspaces) |
 
 ---
@@ -66,33 +83,44 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
 tracker-ing-sist/
 ├── backend/
 │   ├── src/
-│   │   ├── data/             # Materias troncales y electivas Plan 2023 FRRo
-│   │   ├── routes/           # Endpoints de la API (/api/plan, /api/progress)
-│   │   ├── storage/          # Persistencia en data/progress.json
-│   │   ├── types/            # Tipos de datos en TypeScript
+│   │   ├── auth/             # Generación y verificación de tokens JWT
+│   │   ├── data/             # Catálogo oficial de materias troncales y electivas Plan 2023
+│   │   ├── middleware/       # Limitador de peticiones (rate limiter) y autenticación
+│   │   ├── routes/           # Endpoints de API (/api/plan, /api/progress, /api/auth)
+│   │   ├── storage/          # Persistencia en JSON (usuarios y progresos)
+│   │   ├── types/            # Tipos TypeScript compartidos
 │   │   └── server.ts         # Servidor Express
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Header.tsx           # Barra superior con estadísticas en vivo
+│   │   │   ├── Header.tsx           # Barra superior con estadísticas en vivo y leyenda
+│   │   │   ├── ThemeSelector.tsx    # Menú desplegable para los 5 temas visuales
 │   │   │   ├── NetworkGraph.tsx     # Grafo interactivo con vis-network
+│   │   │   ├── GraphSkeleton.tsx    # Esqueleto de carga inicial del motor de red
 │   │   │   ├── GridView.tsx         # Vista de malla curricular por niveles
-│   │   │   ├── ElectivasDrawer.tsx  # Panel lateral de electivas
-│   │   │   ├── SubjectModal.tsx     # Modal de correlativas y notas de finales
-│   │   │   ├── TitlesModal.tsx      # Medidor de títulos ADUSI e Ingeniería
-│   │   │   ├── HelpModal.tsx        # Guía interactiva de uso
-│   │   │   └── Toast.tsx            # Alertas flotantes
-│   │   ├── context/                 # TrackerContext con la lógica de correlativas
-│   │   ├── data/                    # Catálogo local de materias y electivas
-│   │   ├── services/                # Cliente API para conectar con backend
+│   │   │   ├── ElectivasDrawer.tsx  # Panel lateral de electivas y Seminario ADUSI
+│   │   │   ├── SubjectModal.tsx     # Modal de correlativas, destrabes y notas de finales
+│   │   │   ├── TitlesModal.tsx      # Medidor de títulos ADUSI e Ingeniería + control PPS
+│   │   │   ├── AuthModal.tsx        # Modal de inicio de sesión y registro en la nube
+│   │   │   ├── HelpModal.tsx        # Guía interactiva de uso y correlatividades
+│   │   │   └── Toast.tsx            # Alertas contextuales flotantes
+│   │   ├── context/
+│   │   │   ├── TrackerContext.tsx   # Lógica de correlatividades, cascada y estados
+│   │   │   ├── ThemeContext.tsx     # Gestión de los 5 temas visuales
+│   │   │   └── AuthContext.tsx      # Sesión de usuario y sincronización remota
+│   │   ├── hooks/
+│   │   │   └── useFocusTrap.ts      # Atrapado de foco accesible para modales (WCAG)
+│   │   ├── data/                    # Catálogo local de materias y electivas Plan 2023
+│   │   ├── services/                # Cliente API para conectar con el backend
 │   │   ├── types/                   # Tipos de TypeScript compartidos
 │   │   ├── App.tsx
-│   │   └── index.css                # Estilos globales y efectos de pulso neón
+│   │   └── index.css                # Variables CSS semánticas de temas y estilos globales
 │   ├── package.json
 │   └── vite.config.ts
-├── ESTADO_DEL_PROYECTO.md    # Bitácora de implementación y roadmap
+├── docs/                            # Documentación y cartillas oficiales de UTN FRRo
+├── ESTADO_DEL_PROYECTO.md           # Bitácora detallada de implementación y roadmap
 ├── pnpm-workspace.yaml
 ├── package.json
 └── README.md

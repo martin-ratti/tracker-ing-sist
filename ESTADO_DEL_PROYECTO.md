@@ -1,6 +1,6 @@
 # Estado del Proyecto: Tracker Plan de Estudio UTN Sistemas (Plan 2023 · FRRo)
 
-**Fecha de actualización:** 14 de Septiembre de 2026  
+**Fecha de actualización:** 15 de Septiembre de 2026  
 **Repositorio GitHub:** [https://github.com/martin-ratti/tracker-ing-sist.git](https://github.com/martin-ratti/tracker-ing-sist.git)  
 **Inspiración:** [Tracker Plan de Estudio](https://tracker-plan-de-estudio.vercel.app/index.html) de Lucas Alonso
 
@@ -8,7 +8,7 @@
 
 ## 1. Resumen y Objetivos
 
-Este proyecto es una aplicación web moderna concebida para el seguimiento interactivo del plan de estudio de **Ingeniería en Sistemas de Información (Plan 2023 - UTN Facultad Regional Rosario)**. Permite a los alumnos gestionar su avance de carrera, validar en tiempo real correlatividades académicas para cursado y finales, calcular promedios, simular escenarios académicos y monitorear los requisitos para ambos títulos:
+Este proyecto es una aplicación web moderna concebida para el seguimiento interactivo del plan de estudio de **Ingeniería en Sistemas de Información (Plan 2023 - UTN Facultad Regional Rosario)**. Permite a los alumnos gestionar su avance de carrera, validar en tiempo real correlatividades académicas para cursado y finales, calcular promedios, simular escenarios académicos, guardar datos en la nube con cuenta personal y monitorear los requisitos para ambos títulos:
 - **Título Intermedio:** Analista Desarrollador Universitario en Sistemas de Información (ADUSI).
 - **Título de Grado:** Ingeniero/a en Sistemas de Información.
 
@@ -16,90 +16,99 @@ Este proyecto es una aplicación web moderna concebida para el seguimiento inter
 
 ## 2. Lo que se ha Implementado y Completado
 
-###  Base de Datos y Modelado Académico Oficial (Plan 2023)
+### 📚 Base de Datos y Modelado Académico Oficial (Plan 2023)
 - **36 Materias Troncales + Seminario Integrador ADUSI:**
-  - Extraídas directamente de la cartilla oficial de UTN FRRo (`isi-a4-plan-2023-gradiente-utn-frro.pdf`).
+  - Extraídas directamente de la cartilla oficial de UTN FRRo (`docs/isi-a4-plan-2023-gradiente-utn-frro.pdf`).
   - Correlatividades exactas de cursado (regulares y aprobadas) y de final.
-  - Inclusión del *Seminario Integrador (ADUSI)* de 3º nivel (id 99).
+  - Inclusión del *Seminario Integrador (ADUSI)* de 3º nivel (id 99) en el panel de electivas/título intermedio.
+  - **Validación Estricta de Final para Seminario:** Exige tener aprobadas la totalidad de las 23 materias de 1º, 2º y 3º año para poder pasarlo a estado "Aprobada", respetando la ordenanza de título intermedio.
+  - **Corrección de Correlatividades Oficiales:** Ajustada la materia electiva *Metodologías Ágiles en el Desarrollo de Software* (id 215), eliminando la exigencia errónea de Ingeniería de Calidad (id 25).
   - Reglas actualizadas para *Proyecto Final*: para cursar requiere regulares 25, 26, 30 y aprobadas 12, 20, 23; para rendir exige todas las materias restantes aprobadas.
 - **19 Materias Electivas Oficiales:**
-  - Sincronizadas según la grilla oficial de Asignaturas Electivas Plan 2023.
+  - Sincronizadas según la grilla oficial de Asignaturas Electivas Plan 2023 (`docs/electivas-plan-2023.png`).
   - Incorporación de *Programación Competitiva* (Nivel 2, Anual, 4 hs), *Química Aplicada a la Informática* (Nivel 3, Cuatrimestral, 3 hs), *Entornos Gráficos*, *Sistemas de Información Geográfica*, *Algoritmos Genéticos*, etc.
-  - Regla oficial: computación directa de horas reales según grilla (meta 20 hs para Ingeniería y 4 hs para ADUSI).
+  - Cómputo directo de horas reales según normativa de UTN FRRo (meta 20 hs para Ingeniería y 4 hs para ADUSI).
 
-###  Backend en Node.js + Express + TypeScript
-- **Arquitectura modular:**
-  - `src/types/plan.ts`: Tipos estrictos para materias, electivas, estados y notas.
+### 🔒 Autenticación y Sincronización en la Nube
+- **Cuentas de Alumno en la Nube:**
+  - Registro e inicio de sesión seguro con correo electrónico y contraseña.
+  - Cifrado unidireccional de contraseñas con algoritmo `bcrypt` (10 salt rounds).
+  - Emisión de tokens de sesión **JWT (JSON Web Tokens)** con expiración configurable.
+  - Almacenamiento independiente del progreso de cada usuario en `backend/data/users.json` y `backend/data/progress_users.json`.
+  - **Protección de Rutas (Rate Limiter):** Middleware de limitación de tasa contra ataques de fuerza bruta en endpoints `/api/auth/*`.
+  - **Modo Híbrido Flexible:** Los alumnos pueden usar la app 100% offline en local sin registrarse (usando `localStorage`), o iniciar sesión en cualquier momento para sincronizar y acceder a sus datos desde cualquier PC o celular.
+
+### 🎨 Sistema de 5 Temas Visuales Dinámicos
+- Selector interactivo en el Header (`ThemeSelector.tsx`) con 5 estilos visuales:
+  1. **Cyber Blueprint (Cian Tech):** Azul noche con cian neón, ámbar y esmeralda.
+  2. **Neon Synthwave (Rosa / Fucsia):** Púrpura oscuro con rosa vibrante, violeta y turquesa.
+  3. **Emerald Matrix (Verde Hacker):** Verde profundo terminal con lima y menta.
+  4. **Amber Sunset (Solar):** Tonos cálidos tierra con ámbar, naranja fuego y esmeralda.
+  5. **Nordic Frost (Azul Glacial):** Azul nórdico con celeste polar, índigo y turquesa.
+- **Arquitectura Cromática Desacoplada:** Variables semánticas globales en CSS (`--color-primary`, `--color-cursable`, `--color-regular`, `--color-aprobada`, `--gradient-primary`, etc.) que sincronizan al 100% el grafo de Vis Network, la malla curricular, los modales, drawers, botones, badges y la leyenda informativa.
+
+### ⚙️ Backend en Node.js + Express + TypeScript
+- **Arquitectura modular y escalable:**
+  - `src/types/plan.ts`: Tipos estrictos para materias, electivas, estados, notas y usuarios.
   - `src/data/plan2023.ts`: Fuente de datos estática oficial del plan 2023.
-  - `src/storage/progressStore.ts`: Almacenamiento persistente en JSON (`data/progress.json`) con debounce para escrituras concurrentes.
-  - `src/routes/api.ts`: Endpoints REST:
-    - `GET /api/plan`: devuelve la estructura completa de materias, electivas y requisitos de titulación.
-    - `GET /api/progress`: obtiene el progreso actual del alumno.
-    - `POST /api/progress`: guarda y sincroniza el estado de materias, electivas, notas y horas de PPS.
-    - `POST /api/progress/reset`: resetea el progreso a estado inicial.
-    - `GET /api/health`: chequeo de disponibilidad.
-  - `src/server.ts`: Servidor Express configurado con CORS y proxy habilitado.
+  - `src/storage/progressStore.ts`: Almacenamiento persistente con soporte para invitados y usuarios autenticados.
+  - `src/storage/userStore.ts`: Gestión de usuarios y credenciales.
+  - `src/auth/jwt.ts`: Generación y verificación de tokens JWT.
+  - `src/middleware/rateLimiter.ts`: Limitador de peticiones por IP.
+  - `src/routes/auth.ts`: Endpoints `/api/auth/register`, `/api/auth/login`, `/api/auth/me`.
+  - `src/routes/api.ts`: Endpoints `/api/plan`, `/api/progress`, `/api/progress/reset`, `/api/health`.
+  - `src/server.ts`: Servidor Express configurado con CORS, parsing JSON y middleware de logging.
 
-###  Frontend en React 19 + Vite + Tailwind CSS v4 + TypeScript
-- **Estética Cyberpunk / Dark Tech Premium:**
-  - Tipografías profesionales: *IBM Plex Mono* para datos técnicos y *Syne* para títulos destacados.
-  - Animaciones de pulso neón y sombras dinámicas según estado de la materia.
-- **Visualizador de Grafo Interactivo (`NetworkGraph.tsx`):**
+### 💻 Frontend en React 19 + Vite 8 + Tailwind CSS v4 + TypeScript
+- **Grafo Interactivo de Red (`NetworkGraph.tsx`):**
   - Implementado con `vis-network` standalone optimizado sin sobrecarga de física.
-  - Disposición jerárquica vertical (1º a 5º año).
-  - Colores reactivos por estado:
-    - ⚪ **Pendiente / Bloqueada:** Azul noche (#0d1527) con borde tenue.
-    - 🟡 **Regular:** Ámbar (#f59e0b) con brillo dorado.
-    - 🟢 **Aprobada:** Verde esmeralda (#10b981) con glow de logro.
-    - 🔵 **Cursable (Habilitada):** Cian brillante (#22d3ee) con efecto de pulso pulsante continuo.
-  - Filtro de conexiones de árbol: Ver todas / Solo para cursar (regulares) / Solo para rendir (aprobadas).
-  - Controles en pantalla: Zoom In, Zoom Out, Ajustar y Centrar pantalla.
-- **Vista Dual: Malla Curricular en Cuadrícula (`GridView.tsx`):**
-  - Alternador fluido entre el grafo de red y una vista estilo cartilla universitaria.
-  - 5 columnas organizadas por año (1º a 5º nivel) con barra de avance individual por nivel.
+  - Disposición jerárquica vertical (1º a 5º año) con colores reactivos al tema.
+  - Filtro de conexiones de árbol: Ver todas / Solo para cursar / Solo para rendir.
+  - Controles flotantes: Zoom In, Zoom Out, Ajustar y Centrar pantalla.
+- **Vista de Malla Curricular (`GridView.tsx`):**
+  - Alternador fluido entre el grafo y una cartilla organizada en 5 columnas por año.
+  - Barras de progreso individuales por nivel académico.
   - Tarjetas interactivas con badges (`INT`, `1C/2C`, `ADUSI`, `Horas`).
-  - Buscador en tiempo real por nombre o código de materia.
+  - Buscador predictivo en tiempo real por nombre o código de materia.
 - **Motor de Validación y Reseteo en Cascada (`TrackerContext.tsx`):**
-  - Valida antes de permitir cualquier cambio de estado si el alumno cumple con todas las correlatividades exigidas.
-  - Si no las cumple, muestra un Toast flotante indicando exactamente qué materias faltan regularizar o aprobar.
-  - Reseteo en cascada automático: si se desmarca una materia correlativa base (ej. *Álgebra* o *Algoritmos*), recalcula recursivamente e invalida todas las materias subsiguientes que hayan quedado sin sustento académico.
+  - Validación de requisitos previos antes de permitir regularizar o aprobar materias.
+  - Toasts contextuales con el detalle exacto de las correlativas faltantes.
+  - Reseteo en cascada recursivo al desmarcar cualquier materia correlativa base.
 - **Panel Lateral de Electivas (`ElectivasDrawer.tsx`):**
-  - Barra de progreso de horas hacia la meta de 20 hs de Ingeniería y 4 hs de ADUSI.
-  - Filtro por nivel (2º, 3º, 4º, 5º año).
-  - Validación de correlativas para electivas.
-- **Modal de Detalle de Materia y Libreta de Calificaciones (`SubjectModal.tsx`):**
-  - Consulta de correlativas requeridas y verificación con checkmarks.
-  - Visualización de materias que ayuda a destrabar a futuro.
-  - Formulario de examen final: registro de calificación (1 a 10), fecha de mesa, libro, folio y notas sobre la cátedra/profesor.
-  - Cálculo automático de promedio de la carrera (con aplazos y sin aplazos).
-- **Modal de Titulación Dual (`TitlesModal.tsx`):**
-  - Seguimiento del título intermedio ADUSI con checklist y porcentaje.
-  - Seguimiento del título de Ingeniero/a con medidor de materias, horas de electivas y barra deslizante para las 200 hs de Prácticas Profesionales Supervisadas (PPS).
-- **Persistencia Híbrida (`api.ts`):**
-  - Guarda en `localStorage` al instante (cero latencia, funciona 100% offline).
-  - Sincroniza en segundo plano con la API de Node.js con estrategia de debounce.
+  - Medidor de horas hacia las metas de 20 hs (Ingeniería) y 4 hs (ADUSI).
+  - Filtro por nivel (2º a 5º año) y tarjeta destacada del Seminario ADUSI.
+- **Libreta de Calificaciones (`SubjectModal.tsx`):**
+  - Formulario de examen final: nota (1 a 10), fecha de mesa, libro, folio y notas de cátedra.
+  - Cálculo automático en vivo de promedios general y sin aplazos.
+- **Medidor de Titulación Dual (`TitlesModal.tsx`):**
+  - Checklist y porcentaje hacia el título de ADUSI e Ingeniería.
+  - Control interactivo para registrar las 200 hs de Prácticas Profesionales Supervisadas (PPS).
+- **Accesibilidad WCAG 2.2:**
+  - Trampas de foco (`useFocusTrap`) en todos los modales.
+  - Navegación completa por teclado (Escape, Enter, Espacio, Tab).
+  - Atributos semánticos ARIA (`role="dialog"`, `aria-modal="true"`, `role="region"`, `role="search"`).
 
 ---
 
-## 3. Estado de Compilación y Verificación
+## 3. Estado de Compilación, Calidad y Verificación
 
 - `backend`: Compila con `tsc` sin ningún error (`exit code 0`).
-- `frontend`: Compila con `tsc -b && vite build` sin ningún error (`exit code 0`).
-- Estructura de workspaces configurada con `pnpm-workspace.yaml` y script orquestador en la raíz.
+- `frontend`: Compila con `tsc -b && vite build` (Vite 8 + Rolldown) en 2.62s sin ningún error (`exit code 0`).
+- `linter`: Validado con **`oxlint`** sobre los 29 archivos del monorepo con 0 errores.
+- Monorepo gestionado limpiamente con `pnpm-workspace.yaml`.
+- Todos los commits siguen la especificación de **Conventional Commits** y se encuentran sincronizados en la rama `main` de GitHub.
 
 ---
 
-## 4. Qué Falta Hacer (Pendientes y Próximos Pasos)
+## 4. Próximos Pasos y Roadmap Futuro
 
-1. **Subir cambios iniciales a GitHub:**
-   - Realizar el `git add`, `git commit` inicial y hacer el primer push al repositorio remoto `https://github.com/martin-ratti/tracker-ing-sist.git`.
-2. **Exportación e Importación de Progreso:**
-   - Botón para exportar el avance académico del alumno en un archivo `.json` de respaldo.
-   - Opción para importar un respaldo JSON o compartir el plan con compañeros.
-   - Opción de exportar resumen a PDF / imagen imprimible para presentar en la facu.
-3. **Autenticación Multiusuario (Opcional):**
-   - Actualmente el backend almacena el progreso de forma persistente y el frontend tiene soporte multi-sesión con localStorage. Si se desea soporte multi-alumno en la nube, se puede integrar Supabase Auth o JWT con SQLite / PostgreSQL.
-4. **PWA (Progressive Web App):**
-   - Configurar `vite-plugin-pwa` para poder instalar el tracker en el celular o escritorio como app nativa sin barra de navegación.
-5. **Simulador de Inscripción Cuatrimestral:**
-   - Permitir al alumno seleccionar qué materias planea cursar el próximo cuatrimestre para verificar carga horaria semanal total y que no se superpongan días/requisitos.
+1. **Exportación e Importación Local de Respaldo:**
+   - Botón para descargar el avance en archivo `.json`.
+   - Opción para importar un archivo `.json` de respaldo sin requerir cuenta.
+2. **Exportación a Formato Imprimible / PDF:**
+   - Generación de informe académico en PDF o imagen para imprimir la cartilla con los estados coloreados.
+3. **PWA (Progressive Web App):**
+   - Configuración de `vite-plugin-pwa` con Service Worker para instalación como app nativa en dispositivos móviles y funcionamiento offline total.
+4. **Simulador de Inscripción por Cuatrimestre:**
+   - Planificador semestral para seleccionar materias a cursar en el período entrante y previsualizar carga horaria semanal.
+
