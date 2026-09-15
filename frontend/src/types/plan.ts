@@ -33,11 +33,27 @@ export interface NotaMateria {
   comentario?: string;
 }
 
+export interface PerfilAlumno {
+  nombre: string;
+  legajo: string;
+}
+
+export interface MetaExamen {
+  materiaId: number;
+  turnoId: string;
+  turnoNombre: string;
+  fechaEstimada?: string;
+  llamado?: number;
+  comentario?: string;
+}
+
 export interface ProgresoUsuario {
   estados: Record<number, EstadoMateria>;
   estadosElectivas: Record<number, EstadoMateria>;
   notas: Record<number, NotaMateria>;
   ppsHoras: number;
+  perfil?: PerfilAlumno;
+  metasExamen?: Record<number, MetaExamen>;
   actualizadoEn?: string;
 }
 

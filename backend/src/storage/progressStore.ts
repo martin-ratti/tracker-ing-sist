@@ -15,6 +15,8 @@ function buildDefault(): ProgresoUsuario {
     estadosElectivas: {},
     notas: {},
     ppsHoras: 0,
+    perfil: { nombre: '', legajo: '' },
+    metasExamen: {},
     actualizadoEn: new Date().toISOString()
   };
 }

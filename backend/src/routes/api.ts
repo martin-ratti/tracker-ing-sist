@@ -133,7 +133,7 @@ apiRouter.get('/progress', optionalAuthMiddleware, (req: AuthenticatedRequest, r
 
 apiRouter.post('/progress', optionalAuthMiddleware, (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.userId;
-  const { estados, estadosElectivas, notas, ppsHoras } = req.body;
+  const { estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen } = req.body;
 
   // Validación básica de tipos
   if (estados !== undefined && typeof estados !== 'object') {
@@ -152,13 +152,23 @@ apiRouter.post('/progress', optionalAuthMiddleware, (req: AuthenticatedRequest, 
     res.status(400).json({ error: 'El campo ppsHoras debe ser un número.' });
     return;
   }
+  if (perfil !== undefined && typeof perfil !== 'object') {
+    res.status(400).json({ error: 'El campo perfil debe ser un objeto.' });
+    return;
+  }
+  if (metasExamen !== undefined && typeof metasExamen !== 'object') {
+    res.status(400).json({ error: 'El campo metasExamen debe ser un objeto.' });
+    return;
+  }
 
   try {
     const updated = saveProgress({
       ...(estados !== undefined && { estados }),
       ...(estadosElectivas !== undefined && { estadosElectivas }),
       ...(notas !== undefined && { notas }),
-      ...(ppsHoras !== undefined && { ppsHoras })
+      ...(ppsHoras !== undefined && { ppsHoras }),
+      ...(perfil !== undefined && { perfil }),
+      ...(metasExamen !== undefined && { metasExamen })
     }, userId);
     res.json({ success: true, data: updated });
   } catch (err) {

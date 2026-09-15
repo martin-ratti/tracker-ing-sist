@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario } from '../types/plan';
+import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen } from '../types/plan';
 import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
 import { fetchProgress, persistProgress, clearProgress } from '../services/api';
+
+export type GridFilterOption = 'todas' | 'cursables' | 'regulares' | 'aprobadas' | 'con-meta';
 
 interface Stats {
   aprobadasCount: number;
@@ -18,6 +20,7 @@ interface Stats {
   ingenieroCumplido: boolean;
   ingenieroProgreso: number; // 0 - 100
   ingenieroFaltantes: string[];
+  metasCount: number;
 }
 
 interface TrackerContextType {
@@ -26,12 +29,27 @@ interface TrackerContextType {
   notas: Record<number, NotaMateria>;
   ppsHoras: number;
   setPpsHoras: (hs: number) => void;
+  perfil: PerfilAlumno;
+  setPerfil: (p: PerfilAlumno) => void;
+  metasExamen: Record<number, MetaExamen>;
+  setMetaExamen: (materiaId: number, meta: MetaExamen) => void;
+  removeMetaExamen: (materiaId: number) => void;
   edgeMode: 'ambos' | 'regular' | 'aprobada';
   setEdgeMode: (mode: 'ambos' | 'regular' | 'aprobada') => void;
   viewMode: 'grafo' | 'malla';
   setViewMode: (mode: 'grafo' | 'malla') => void;
+  gridFilter: GridFilterOption;
+  setGridFilter: (filter: GridFilterOption) => void;
   electivasOpen: boolean;
   setElectivasOpen: (open: boolean) => void;
+  calendarOpen: boolean;
+  setCalendarOpen: (open: boolean) => void;
+  reportOpen: boolean;
+  setReportOpen: (open: boolean) => void;
+  profileModalOpen: boolean;
+  setProfileModalOpen: (open: boolean) => void;
+  focusedSubjectId: number | null;
+  setFocusedSubjectId: (id: number | null) => void;
   selectedSubjectId: number | null;
   setSelectedSubjectId: (id: number | null) => void;
   toastMessage: string | null;
@@ -58,6 +76,13 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [estadosElectivas, setEstadosElectivas] = useState<Record<number, EstadoMateria>>({});
   const [notas, setNotas] = useState<Record<number, NotaMateria>>({});
   const [ppsHoras, setPpsHorasState] = useState<number>(0);
+  const [perfil, setPerfilState] = useState<PerfilAlumno>({ nombre: '', legajo: '' });
+  const [metasExamen, setMetasExamenState] = useState<Record<number, MetaExamen>>({});
+  const [gridFilter, setGridFilter] = useState<GridFilterOption>('todas');
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [focusedSubjectId, setFocusedSubjectId] = useState<number | null>(null);
   const [edgeMode, setEdgeMode] = useState<'ambos' | 'regular' | 'aprobada'>('ambos');
   const [viewMode, setViewMode] = useState<'grafo' | 'malla'>('grafo');
   const [electivasOpen, setElectivasOpen] = useState(false);
@@ -76,6 +101,8 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setEstadosElectivas(data.estadosElectivas || {});
         setNotas(data.notas || {});
         setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
+        setPerfilState(data.perfil || { nombre: '', legajo: '' });
+        setMetasExamenState(data.metasExamen || {});
       })
       .catch(err => console.error('Error al cargar progreso:', err));
   }, []);
@@ -365,11 +392,37 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     persistProgress({ ppsHoras: hs });
   }, []);
 
+  const setPerfil = useCallback((p: PerfilAlumno) => {
+    setPerfilState(p);
+    persistProgress({ perfil: p });
+  }, []);
+
+  const setMetaExamen = useCallback((materiaId: number, meta: MetaExamen) => {
+    setMetasExamenState(prev => {
+      const next = { ...prev, [materiaId]: meta };
+      persistProgress({ metasExamen: next });
+      return next;
+    });
+    showToast(`🎯 Meta agendada: ${meta.turnoNombre}`);
+  }, [showToast]);
+
+  const removeMetaExamen = useCallback((materiaId: number) => {
+    setMetasExamenState(prev => {
+      const next = { ...prev };
+      delete next[materiaId];
+      persistProgress({ metasExamen: next });
+      return next;
+    });
+    showToast('Meta de examen eliminada');
+  }, [showToast]);
+
   const resetAll = useCallback(() => {
     setEstados({});
     setEstadosElectivas({});
     setNotas({});
     setPpsHorasState(0);
+    setPerfilState({ nombre: '', legajo: '' });
+    setMetasExamenState({});
     clearProgress();
     showToast('Plan reseteado por completo.');
   }, [showToast]);
@@ -444,6 +497,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const ingenieroProgreso = Math.round((ingPuntosActuales / ingPuntosTotales) * 100);
 
     const ingenieroCumplido = todasTroncalesOk && ingElectivasOk && ppsOk;
+    const metasCount = Object.keys(metasExamen).length;
 
     return {
       aprobadasCount: aprobadas,
@@ -459,9 +513,10 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       adusiFaltantes,
       ingenieroCumplido,
       ingenieroProgreso,
-      ingenieroFaltantes
+      ingenieroFaltantes,
+      metasCount
     };
-  }, [getEstado, getEstadoElectiva, notas, ppsHoras, esMateriaCursable]);
+  }, [getEstado, getEstadoElectiva, notas, ppsHoras, metasExamen, esMateriaCursable]);
 
   return (
     <TrackerContext.Provider
@@ -471,12 +526,27 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         notas,
         ppsHoras,
         setPpsHoras,
+        perfil,
+        setPerfil,
+        metasExamen,
+        setMetaExamen,
+        removeMetaExamen,
         edgeMode,
         setEdgeMode,
         viewMode,
         setViewMode,
+        gridFilter,
+        setGridFilter,
         electivasOpen,
         setElectivasOpen,
+        calendarOpen,
+        setCalendarOpen,
+        reportOpen,
+        setReportOpen,
+        profileModalOpen,
+        setProfileModalOpen,
+        focusedSubjectId,
+        setFocusedSubjectId,
         selectedSubjectId,
         setSelectedSubjectId,
         toastMessage,

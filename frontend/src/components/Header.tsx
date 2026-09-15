@@ -12,7 +12,11 @@ import {
   Award,
   X,
   Cloud,
-  LogOut
+  LogOut,
+  CalendarDays,
+  FileText,
+  User as UserIcon,
+  Target
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -29,6 +33,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     setViewMode, 
     electivasOpen, 
     setElectivasOpen,
+    setCalendarOpen,
+    setReportOpen,
+    setProfileModalOpen,
+    perfil,
     resetAll
   } = useTracker();
 
@@ -91,6 +99,20 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
 
           {/* Botones rápidos en móvil */}
           <div className="flex items-center gap-1 md:hidden">
+            <button
+              onClick={() => setCalendarOpen(true)}
+              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-cyan-400 text-xs font-mono"
+              title="Calendario y Metas"
+            >
+              <CalendarDays className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setReportOpen(true)}
+              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-purple-400 text-xs font-mono"
+              title="Ficha PDF"
+            >
+              <FileText className="w-4 h-4" />
+            </button>
             <button
               onClick={() => setElectivasOpen(!electivasOpen)}
               className={`p-2 rounded border text-xs font-mono transition-colors ${
@@ -222,6 +244,48 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
 
           {/* Botones de navegación y modales */}
           <div className="hidden md:flex items-center gap-2">
+            {/* Botón Calendario Oficial y Metas */}
+            <button
+              onClick={() => setCalendarOpen(true)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono text-xs transition-all ${
+                stats.metasCount > 0
+                  ? 'bg-cyan-500/20 border-cyan-400/60 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
+              }`}
+              title="Calendario Académico UTN 2026/2027 y Metas de Examen"
+            >
+              <CalendarDays className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Calendario</span>
+              {stats.metasCount > 0 && (
+                <span className="px-1.5 py-0.5 rounded bg-cyan-500/30 text-[10px] text-cyan-200 font-bold flex items-center gap-1">
+                  <Target className="w-2.5 h-2.5" />
+                  {stats.metasCount}
+                </span>
+              )}
+            </button>
+
+            {/* Botón Ficha Analítica / Reporte PDF */}
+            <button
+              onClick={() => setReportOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-xs transition-colors"
+              title="Descargar o imprimir ficha analítica oficial en PDF"
+            >
+              <FileText className="w-3.5 h-3.5 text-purple-400" />
+              <span>Ficha PDF</span>
+            </button>
+
+            {/* Perfil del Alumno */}
+            <button
+              onClick={() => setProfileModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-mono text-xs transition-colors"
+              title="Configurar nombre y legajo universitario del alumno"
+            >
+              <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="max-w-[110px] truncate">
+                {perfil.nombre || 'Perfil'}
+              </span>
+            </button>
+
             <button
               onClick={() => setElectivasOpen(!electivasOpen)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono text-xs transition-all ${

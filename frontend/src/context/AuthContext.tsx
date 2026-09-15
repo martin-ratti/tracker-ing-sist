@@ -9,6 +9,7 @@ interface AuthContextType {
   closeAuthModal: () => void;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
+  completeAuth: (authUser: UserAuth) => void;
   logout: () => void;
 }
 
@@ -30,19 +31,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
   const openAuthModal = useCallback(() => setIsAuthModalOpen(true), []);
   const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await loginApi(email, password);
-    setUser(res.user);
+  const completeAuth = useCallback((authUser: UserAuth) => {
+    setUser(authUser);
     setIsAuthModalOpen(false);
     if (onUserChanged) onUserChanged();
   }, [onUserChanged]);
 
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await loginApi(email, password);
+    completeAuth(res.user);
+  }, [completeAuth]);
+
   const register = useCallback(async (email: string, password: string) => {
     const res = await registerApi(email, password);
-    setUser(res.user);
-    setIsAuthModalOpen(false);
-    if (onUserChanged) onUserChanged();
-  }, [onUserChanged]);
+    completeAuth(res.user);
+  }, [completeAuth]);
 
   const logout = useCallback(() => {
     clearAuthSession();
@@ -59,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
         closeAuthModal,
         login,
         register,
+        completeAuth,
         logout
       }}
     >

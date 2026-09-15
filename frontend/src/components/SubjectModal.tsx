@@ -7,8 +7,12 @@ import {
   CheckCircle2, 
   XCircle, 
   Award, 
-  ArrowRight
+  ArrowRight,
+  Target,
+  Calendar,
+  Trash2
 } from 'lucide-react';
+import { TURNOS_EXAMEN_2026 } from '../data/calendario2026';
 
 export const SubjectModal: React.FC = () => {
   const {
@@ -16,6 +20,9 @@ export const SubjectModal: React.FC = () => {
     setSelectedSubjectId,
     estados,
     notas,
+    metasExamen,
+    setMetaExamen,
+    removeMetaExamen,
     toggleMateriaEstado,
     setEstadoDirecto,
     setNotaMateria,
@@ -27,6 +34,11 @@ export const SubjectModal: React.FC = () => {
   const [libroVal, setLibroVal] = useState<string>('');
   const [folioVal, setFolioVal] = useState<string>('');
   const [comentarioVal, setComentarioVal] = useState<string>('');
+
+  // Estados para Meta de Examen
+  const [selectedTurnoId, setSelectedTurnoId] = useState<string>(TURNOS_EXAMEN_2026[0]?.id || 'feb-2026-l1');
+  const [metaComentario, setMetaComentario] = useState<string>('');
+  const [showMetaForm, setShowMetaForm] = useState<boolean>(false);
 
   const materia = selectedSubjectId ? MATERIAS_MAP[selectedSubjectId] : null;
   const modalRef = useFocusTrap(Boolean(materia));
@@ -55,11 +67,66 @@ export const SubjectModal: React.FC = () => {
       setFolioVal('');
       setComentarioVal('');
     }
-  }, [selectedSubjectId, notas]);
+
+    if (selectedSubjectId && metasExamen[selectedSubjectId]) {
+      const m = metasExamen[selectedSubjectId];
+      setSelectedTurnoId(m.turnoId);
+      setMetaComentario(m.comentario || '');
+      setShowMetaForm(false);
+    } else {
+      setSelectedTurnoId(TURNOS_EXAMEN_2026[0]?.id || 'feb-2026-l1');
+      setMetaComentario('');
+      setShowMetaForm(false);
+    }
+  }, [selectedSubjectId, notas, metasExamen]);
 
   if (!materia) return null;
 
   const currentEstado = estados[materia.id] || 'pendiente';
+  const currentMeta = metasExamen[materia.id];
+
+  // Helper para días restantes de mesa de examen
+  const getDaysRemaining = (targetDateStr: string) => {
+    const target = new Date(targetDateStr + 'T00:00:00');
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const diffMs = target.getTime() - now.getTime();
+    const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    if (days < 0) {
+      return { days, text: `Mesa finalizada (hace ${Math.abs(days)} d)`, badgeColor: 'bg-slate-800 text-slate-400 border border-slate-700' };
+    }
+    if (days === 0) {
+      return { days, text: '¡La mesa de examen comienza hoy!', badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' };
+    }
+    if (days <= 7) {
+      return { days, text: `¡Quedan solo ${days} días!`, badgeColor: 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold' };
+    }
+    return { days, text: `Faltan ${days} días`, badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' };
+  };
+
+  const handleSaveMeta = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!materia) return;
+    const turno = TURNOS_EXAMEN_2026.find(t => t.id === selectedTurnoId);
+    if (!turno) return;
+
+    setMetaExamen(materia.id, {
+      materiaId: materia.id,
+      turnoId: turno.id,
+      turnoNombre: turno.nombre,
+      fechaEstimada: turno.fechaInicio,
+      llamado: typeof turno.llamado === 'number' ? turno.llamado : undefined,
+      comentario: metaComentario.trim() || undefined
+    });
+    setShowMetaForm(false);
+  };
+
+  const handleRemoveMeta = () => {
+    if (!materia) return;
+    removeMetaExamen(materia.id);
+    setShowMetaForm(false);
+  };
 
   // Guardar notas
   const handleSaveNotas = (e: React.FormEvent) => {
@@ -329,6 +396,125 @@ export const SubjectModal: React.FC = () => {
                   </span>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Planificación de Meta de Examen Final (habilitado para materias Regulares) */}
+          {currentEstado === 'regular' && (
+            <div className="bg-[#081226]/90 border border-cyan-500/30 rounded-xl p-4.5 space-y-3 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                    <Target className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="font-syne font-bold text-xs text-white">
+                      Meta de Examen Final · Calendario UTN 2026/2027
+                    </h4>
+                    <p className="text-[11px] font-mono text-slate-400">
+                      Asigna la mesa oficial en la que planeas rendir esta materia
+                    </p>
+                  </div>
+                </div>
+
+                {currentMeta && !showMetaForm && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowMetaForm(true)}
+                      className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-mono text-slate-300 transition-colors"
+                    >
+                      Cambiar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRemoveMeta}
+                      className="p-1.5 rounded text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                      title="Quitar meta de examen"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {currentMeta && !showMetaForm ? (
+                <div className="bg-[#050b17] border border-slate-800/80 rounded-lg p-3 font-mono text-xs space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-bold text-cyan-300 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {currentMeta.turnoNombre}
+                    </span>
+                    {currentMeta.fechaEstimada && (
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-mono ${getDaysRemaining(currentMeta.fechaEstimada).badgeColor}`}>
+                        {getDaysRemaining(currentMeta.fechaEstimada).text}
+                      </span>
+                    )}
+                  </div>
+                  {currentMeta.comentario && (
+                    <p className="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800/60">
+                      "{currentMeta.comentario}"
+                    </p>
+                  )}
+                </div>
+              ) : !currentMeta && !showMetaForm ? (
+                <button
+                  type="button"
+                  onClick={() => setShowMetaForm(true)}
+                  className="w-full py-2.5 px-3 rounded-lg border border-dashed border-cyan-500/40 hover:border-cyan-400/80 bg-cyan-500/5 hover:bg-cyan-500/10 text-cyan-300 font-mono text-xs flex items-center justify-center gap-2 transition-all"
+                >
+                  <Target className="w-3.5 h-3.5" />
+                  <span>Programar mesa tentativa de final para este ciclo</span>
+                </button>
+              ) : (
+                <form onSubmit={handleSaveMeta} className="space-y-3 pt-1">
+                  <div>
+                    <label className="block text-[11px] font-mono text-slate-400 mb-1">
+                      Seleccionar Turno Oficial UTN FRRo:
+                    </label>
+                    <select
+                      value={selectedTurnoId}
+                      onChange={e => setSelectedTurnoId(e.target.value)}
+                      className="w-full bg-[#050b17] border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400"
+                    >
+                      {TURNOS_EXAMEN_2026.map(t => (
+                        <option key={t.id} value={t.id}>
+                          {t.nombre} ({t.fechaInicio} al {t.fechaFin})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-mono text-slate-400 mb-1">
+                      Notas / Recordatorios de estudio (opcional):
+                    </label>
+                    <input
+                      type="text"
+                      value={metaComentario}
+                      onChange={e => setMetaComentario(e.target.value)}
+                      placeholder="Ej: Repasar unidades 3 y 4 de la guía..."
+                      className="w-full bg-[#050b17] border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowMetaForm(false)}
+                      className="px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 font-mono text-xs transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-mono text-xs transition-colors shadow-md"
+                    >
+                      Guardar Meta
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           )}
 

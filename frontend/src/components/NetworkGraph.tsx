@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Network } from 'vis-network/standalone';
 import { DataSet } from 'vis-data/standalone';
 import { useTracker } from '../context/TrackerContext';
 import { useTheme } from '../context/ThemeContext';
-import { MATERIAS_TRONCALES } from '../data/plan2023';
-import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../data/plan2023';
+import { ZoomIn, ZoomOut, Maximize2, X, Compass, MousePointerClick } from 'lucide-react';
 
 import type { Node as VisBaseNode, Edge as VisBaseEdge } from 'vis-network/standalone';
 
@@ -25,8 +25,12 @@ export const NetworkGraph: React.FC = () => {
   const nodesDatasetRef = useRef<DataSet<VisNode> | null>(null);
   const edgesDatasetRef = useRef<DataSet<VisEdge> | null>(null);
 
+  const [interactionMode, setInteractionMode] = useState<'estado' | 'camino'>('estado');
+  const interactionModeRef = useRef<'estado' | 'camino'>('estado');
+
   const toggleMateriaEstadoRef = useRef<(id: number) => void>(() => {});
   const setSelectedSubjectIdRef = useRef<(id: number | null) => void>(() => {});
+  const setFocusedSubjectIdRef = useRef<(id: number | null) => void>(() => {});
 
   const {
     estados,
@@ -34,10 +38,16 @@ export const NetworkGraph: React.FC = () => {
     toggleMateriaEstado,
     esMateriaCursable,
     esMateriaRendible,
-    setSelectedSubjectId
+    setSelectedSubjectId,
+    focusedSubjectId,
+    setFocusedSubjectId
   } = useTracker();
 
   const { themeConfig } = useTheme();
+
+  useEffect(() => {
+    interactionModeRef.current = interactionMode;
+  }, [interactionMode]);
 
   useEffect(() => {
     toggleMateriaEstadoRef.current = toggleMateriaEstado;
@@ -46,6 +56,10 @@ export const NetworkGraph: React.FC = () => {
   useEffect(() => {
     setSelectedSubjectIdRef.current = setSelectedSubjectId;
   }, [setSelectedSubjectId]);
+
+  useEffect(() => {
+    setFocusedSubjectIdRef.current = setFocusedSubjectId;
+  }, [setFocusedSubjectId]);
 
   const materiasGrafo = MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo);
 
@@ -133,7 +147,13 @@ export const NetworkGraph: React.FC = () => {
     net.on('click', params => {
       if (params.nodes.length > 0) {
         const clickedId = Number(params.nodes[0]);
-        toggleMateriaEstadoRef.current(clickedId);
+        if (interactionModeRef.current === 'camino') {
+          setFocusedSubjectIdRef.current(clickedId);
+        } else {
+          toggleMateriaEstadoRef.current(clickedId);
+        }
+      } else {
+        setFocusedSubjectIdRef.current(null);
       }
     });
 
@@ -164,7 +184,50 @@ export const NetworkGraph: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Actualizar nodos y aristas cuando cambian los estados, temas o filtros
+  // Cálculo de dependencias (Camino Crítico: ancestros y descendientes)
+  const dependenciesTree = useMemo(() => {
+    if (!focusedSubjectId) return null;
+
+    const ancestors = new Set<number>();
+    const descendants = new Set<number>();
+
+    function findAncestors(currId: number) {
+      const m = MATERIAS_MAP[currId];
+      if (!m) return;
+      const reqs = [
+        ...m.reqRegular,
+        ...(Array.isArray(m.reqAprobada) ? m.reqAprobada : []),
+        ...(Array.isArray(m.reqRendirAprobada) ? m.reqRendirAprobada : [])
+      ];
+      reqs.forEach(r => {
+        if (!ancestors.has(r)) {
+          ancestors.add(r);
+          findAncestors(r);
+        }
+      });
+    }
+
+    function findDescendants(currId: number) {
+      materiasGrafo.forEach(candidate => {
+        const depends =
+          candidate.reqRegular.includes(currId) ||
+          (Array.isArray(candidate.reqAprobada) && candidate.reqAprobada.includes(currId)) ||
+          (Array.isArray(candidate.reqRendirAprobada) && candidate.reqRendirAprobada.includes(currId));
+
+        if (depends && !descendants.has(candidate.id)) {
+          descendants.add(candidate.id);
+          findDescendants(candidate.id);
+        }
+      });
+    }
+
+    findAncestors(focusedSubjectId);
+    findDescendants(focusedSubjectId);
+
+    return { ancestors, descendants };
+  }, [focusedSubjectId, materiasGrafo]);
+
+  // Actualizar nodos y aristas cuando cambian los estados, temas, filtros o camino crítico
   useEffect(() => {
     if (!nodesDatasetRef.current || !edgesDatasetRef.current) return;
 
@@ -181,27 +244,64 @@ export const NetworkGraph: React.FC = () => {
       let shadowColor = 'rgba(0,0,0,0.5)';
       let shadowSize = 8;
 
-      if (est === 'aprobada') {
-        bg = themeConfig.graph.aprobada.bg;
-        border = themeConfig.graph.aprobada.border;
-        fontColor = themeConfig.graph.aprobada.font;
-        bw = 2.2;
-        shadowColor = themeConfig.graph.aprobada.shadow;
-        shadowSize = 10;
-      } else if (est === 'regular') {
-        bg = themeConfig.graph.regular.bg;
-        border = themeConfig.graph.regular.border;
-        fontColor = themeConfig.graph.regular.font;
-        bw = 2.2;
-        shadowColor = rendible ? themeConfig.graph.regular.shadow : 'rgba(245,158,11,0.25)';
-        shadowSize = rendible ? 14 : 8;
-      } else if (cursable) {
-        bg = themeConfig.graph.cursable.bg;
-        border = themeConfig.graph.cursable.border;
-        fontColor = themeConfig.graph.cursable.font;
-        bw = 2.2;
-        shadowColor = themeConfig.graph.cursable.shadow;
-        shadowSize = 14;
+      if (dependenciesTree) {
+        const isSelf = m.id === focusedSubjectId;
+        const isAncestor = dependenciesTree.ancestors.has(m.id);
+        const isDescendant = dependenciesTree.descendants.has(m.id);
+        const inChain = isSelf || isAncestor || isDescendant;
+
+        if (!inChain) {
+          bg = '#080c16';
+          border = '#141d2f';
+          fontColor = '#334155';
+          bw = 1;
+          shadowSize = 0;
+          shadowColor = 'transparent';
+        } else if (isSelf) {
+          bg = themeConfig.graph.cursable.bg;
+          border = '#ffffff';
+          fontColor = '#ffffff';
+          bw = 3.5;
+          shadowSize = 20;
+          shadowColor = 'rgba(255,255,255,0.75)';
+        } else if (isAncestor) {
+          bg = '#042232';
+          border = '#38bdf8';
+          fontColor = '#7dd3fc';
+          bw = 2.5;
+          shadowSize = 14;
+          shadowColor = 'rgba(56,189,248,0.5)';
+        } else if (isDescendant) {
+          bg = '#331b04';
+          border = '#f59e0b';
+          fontColor = '#fbbf24';
+          bw = 2.5;
+          shadowSize = 14;
+          shadowColor = 'rgba(245,158,11,0.5)';
+        }
+      } else {
+        if (est === 'aprobada') {
+          bg = themeConfig.graph.aprobada.bg;
+          border = themeConfig.graph.aprobada.border;
+          fontColor = themeConfig.graph.aprobada.font;
+          bw = 2.2;
+          shadowColor = themeConfig.graph.aprobada.shadow;
+          shadowSize = 10;
+        } else if (est === 'regular') {
+          bg = themeConfig.graph.regular.bg;
+          border = themeConfig.graph.regular.border;
+          fontColor = themeConfig.graph.regular.font;
+          bw = 2.2;
+          shadowColor = rendible ? themeConfig.graph.regular.shadow : 'rgba(245,158,11,0.25)';
+          shadowSize = rendible ? 14 : 8;
+        } else if (cursable) {
+          bg = themeConfig.graph.cursable.bg;
+          border = themeConfig.graph.cursable.border;
+          fontColor = themeConfig.graph.cursable.font;
+          bw = 2.2;
+          shadowColor = themeConfig.graph.cursable.shadow;
+          shadowSize = 14;
+        }
       }
 
       nodeUpdates.push({
@@ -209,7 +309,7 @@ export const NetworkGraph: React.FC = () => {
         color: { background: bg, border },
         font: { color: fontColor, size: 13, face: 'IBM Plex Mono' },
         borderWidth: bw,
-        shadow: { enabled: true, color: shadowColor, size: shadowSize, x: 0, y: 3 }
+        shadow: { enabled: shadowSize > 0, color: shadowColor, size: shadowSize, x: 0, y: 3 }
       });
     });
 
@@ -219,13 +319,25 @@ export const NetworkGraph: React.FC = () => {
     const edgeUpdates: Partial<VisEdge>[] = [];
     edgesDatasetRef.current.forEach(edge => {
       const fromId = Number(edge.from);
+      const toId = Number(edge.to);
       const estFrom = estados[fromId] || 'pendiente';
       const hidden = edgeMode !== 'ambos' && edge.tipo !== edgeMode;
 
       let color = '#1e293b';
-      const width = edge.tipo === 'aprobada' ? 2.2 : 1.4;
+      let width = edge.tipo === 'aprobada' ? 2.2 : 1.4;
 
-      if (!hidden) {
+      if (dependenciesTree) {
+        const fromInChain = fromId === focusedSubjectId || dependenciesTree.ancestors.has(fromId) || dependenciesTree.descendants.has(fromId);
+        const toInChain = toId === focusedSubjectId || dependenciesTree.ancestors.has(toId) || dependenciesTree.descendants.has(toId);
+
+        if (fromInChain && toInChain) {
+          color = '#38bdf8';
+          width = 2.8;
+        } else {
+          color = 'rgba(15,23,42,0.06)';
+          width = 0.5;
+        }
+      } else if (!hidden) {
         if (edge.tipo === 'regular') {
           if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
           else if (estFrom === 'regular') color = themeConfig.graph.cursable.border;
@@ -238,13 +350,13 @@ export const NetworkGraph: React.FC = () => {
 
       edgeUpdates.push({
         id: edge.id,
-        color: { color: hidden ? 'transparent' : color },
+        color: { color: hidden && !dependenciesTree ? 'transparent' : color },
         width
       });
     });
 
     edgesDatasetRef.current.update(edgeUpdates as VisEdge[]);
-  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, materiasGrafo, themeConfig]);
+  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, materiasGrafo, themeConfig, dependenciesTree, focusedSubjectId]);
 
   const handleZoomIn = () => {
     if (!networkRef.current) return;
@@ -275,6 +387,73 @@ export const NetworkGraph: React.FC = () => {
         aria-label="Grafo interactivo de correlatividades"
         className="w-full h-full cursor-grab active:cursor-grabbing outline-none focus-visible:ring-1 focus-visible:ring-slate-500" 
       />
+
+      {/* Banner flotante de Camino Crítico activo */}
+      {focusedSubjectId && MATERIAS_MAP[focusedSubjectId] && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-[#0b101c]/95 backdrop-blur-md border border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.3)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="text-slate-400">Camino Crítico:</span>
+            <span className="font-bold text-white">{MATERIAS_MAP[focusedSubjectId].nombreCompleto}</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-[11px]">
+            <span className="px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-semibold">
+              {dependenciesTree?.ancestors.size || 0} requisitos
+            </span>
+            <span className="px-2 py-0.5 rounded bg-amber-950/80 border border-amber-500/40 text-amber-300 font-semibold">
+              {dependenciesTree?.descendants.size || 0} desbloquea
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 ml-1">
+            <button
+              onClick={() => setSelectedSubjectId(focusedSubjectId)}
+              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 text-[11px] transition-colors"
+            >
+              Ficha
+            </button>
+            <button
+              onClick={() => setFocusedSubjectId(null)}
+              className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              title="Restablecer vista completa"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Selector flotante de modo de interacción */}
+      <div className="absolute top-4 right-4 z-10 flex items-center bg-[#0b101c]/90 backdrop-blur-md border border-slate-800 p-1 rounded-xl shadow-lg font-mono text-xs">
+        <button
+          type="button"
+          onClick={() => setInteractionMode('estado')}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
+            interactionMode === 'estado'
+              ? 'bg-slate-800 text-white font-bold border border-slate-700'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+          title="Al hacer clic en una materia, cambia entre Pendiente, Regular y Aprobada"
+        >
+          <MousePointerClick className="w-3.5 h-3.5" />
+          <span>Alternar Estado</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setInteractionMode('camino')}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
+            interactionMode === 'camino'
+              ? 'bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40 shadow-sm'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+          title="Al hacer clic en una materia, resalta toda su cadena de requisitos y materias desbloqueadas"
+        >
+          <Compass className="w-3.5 h-3.5" />
+          <span>Camino Crítico</span>
+        </button>
+      </div>
 
       {/* Controles flotantes */}
       <div className="absolute bottom-5 right-5 flex flex-col gap-1.5 bg-[#0b101c]/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 shadow-xl z-10">
@@ -311,11 +490,15 @@ export const NetworkGraph: React.FC = () => {
       <div className="absolute bottom-5 left-5 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-xl bg-[#0b101c]/85 backdrop-blur-md border border-slate-800/80 text-[11px] font-mono text-slate-400 pointer-events-none">
         <span className="flex items-center gap-1.5">
           <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">Click</kbd>
-          <span>Cambiar estado</span>
+          <span>{interactionMode === 'camino' ? 'Resaltar dependencias' : 'Cambiar estado'}</span>
         </span>
         <span className="flex items-center gap-1.5">
           <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">Doble Click</kbd>
           <span>Detalles y notas</span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">Fondo</kbd>
+          <span>Desactivar foco</span>
         </span>
       </div>
     </div>

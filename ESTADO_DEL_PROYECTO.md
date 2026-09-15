@@ -88,27 +88,69 @@ Este proyecto es una aplicación web moderna concebida para el seguimiento inter
   - Navegación completa por teclado (Escape, Enter, Espacio, Tab).
   - Atributos semánticos ARIA (`role="dialog"`, `aria-modal="true"`, `role="region"`, `role="search"`).
 
+### 📅 Agenda de Mesas de Finales & Metas Tentativas (Calendario 2026-2027)
+- **Calendario Académico Oficial Digitalizado:**
+  - Extraído del documento oficial de UTN FRRo (`docs/calendario-2026-2027-gradiente.pdf`).
+  - Catálogo completo en `frontend/src/data/calendario2026.ts` con los 16 llamados de examen (Feb, Mar, Abr Esp, May, Jul, Ago, Sep, Nov, Dic 2026, Feb/Mar 2027) y fechas clave de cursado/recesos.
+  - Regla oficial Sysacad visibilizada: inscripción hasta las 18:00 hs del penúltimo día hábil previo a la mesa.
+- **Asignación de Metas a Materias Regulares:**
+  - En el modal de cada materia regular (`SubjectModal.tsx`), el alumno puede definir un turno objetivo de examen o una fecha personalizada con observaciones de estudio.
+  - Cálculo dinámico de días restantes en tiempo real ("Faltan 14 días", "¡Es hoy!", etc.).
+- **Modal de Calendario y Metas (`CalendarModal.tsx`):**
+  - Pestaña de "Mis Metas": resumen unificado de todas las metas activas con cuenta regresiva y botón de acceso directo.
+  - Pestaña de "Turnos de Examen": lista ordenada de los 16 llamados del ciclo lectivo.
+  - Pestaña de "Hitos de Cursado / Sysacad": recordatorio de inscripciones, receso invernal y directivas de examen.
+  - Badge numérico en el botón de la barra superior indicando cantidad de metas vigentes.
+
+### 🔍 Resaltado de Árbol de Dependencias / Camino Crítico (`NetworkGraph.tsx`)
+- **Modo Camino Crítico Integrado:**
+  - Conmutador en el grafo para alternar entre "Alternar Estado" y "Camino Crítico".
+  - Al seleccionar un nodo, calcula recursivamente todos los ancestros (requisitos necesarios hacia atrás) y todos los descendientes (materias que desbloquea hacia adelante).
+  - Atenúa el resto de nodos y aristas no relacionados con opacidad reducida (`0.15`), resaltando con precisión el impacto de una materia en la carrera.
+  - Banner superior informativo con nombre de la materia en foco y botón para restablecer la vista.
+
+### 🎛️ Filtros Rápidos de Estado en Malla (`GridView.tsx`)
+- Barra de chips interactivos en la vista de cuadrícula con contadores dinámicos actualizados en vivo:
+  - `Todas`, `Cursables`, `Regulares`, `Aprobadas`, `Con Meta 🎯`.
+- Badges visuales en las tarjetas de materias con meta de examen agendada mostrando el turno y días restantes.
+
+### 👤 Perfil del Alumno (`ProfileModal.tsx`)
+- Configuración de Nombre completo y Legajo de estudiante.
+- Almacenamiento sincronizado tanto en `localStorage` como en el backend (`progress_users.json`).
+- Botón de perfil en el Header con avatar de iniciales y acceso instantáneo.
+
+### 🔄 Fusión Inteligente de Progreso (Merge Local ↔ Nube)
+- Detección automática al iniciar sesión si existen materias marcadas en el almacenamiento local que difieren de la nube.
+- Pantalla interactiva en `AuthModal.tsx` con 3 alternativas:
+  1. *Combinar inteligentemente (Recomendado)*: preserva el estado más avanzado por materia, fusiona calificaciones y unifica metas.
+  2. *Usar datos de la nube*: reemplaza el navegador local con los datos remotos.
+  3. *Sobrescribir nube con datos locales*: sube la información local a la cuenta.
+
+### 📄 Exportar a PDF / Analítico Imprimible Oficial (`PrintableReportModal.tsx`)
+- Ficha formal de analítico con escudo oficial de UTN FRRo, datos del alumno (nombre, legajo, fecha de emisión).
+- Métricas integradas: Promedio general, Promedio sin aplazos, Porcentaje ADUSI, Porcentaje Ingeniería, Horas de Electivas y Horas PPS.
+- Grilla completa y tabulada de las 36 materias troncales por año con código, nombre, tipo de dictado, estado, nota final, fecha de acreditación y libro/folio.
+- Tabla suplementaria de materias electivas aprobadas y horas acumuladas.
+- Hoja de estilos `@media print` optimizada para impresión directa o guardado en PDF tamaño A4 sin elementos superfluos de navegación.
+
 ---
 
 ## 3. Estado de Compilación, Calidad y Verificación
 
 - `backend`: Compila con `tsc` sin ningún error (`exit code 0`).
-- `frontend`: Compila con `tsc -b && vite build` (Vite 8 + Rolldown) en 2.62s sin ningún error (`exit code 0`).
-- `linter`: Validado con **`oxlint`** sobre los 29 archivos del monorepo con 0 errores.
+- `frontend`: Compila con `tsc -b && vite build` (Vite 8 + Rolldown) en ~580ms sin ningún error (`exit code 0`).
+- `linter`: Validado con **`oxlint`** sobre todo el monorepo con 0 errores (`exit code 0`).
 - Monorepo gestionado limpiamente con `pnpm-workspace.yaml`.
-- Todos los commits siguen la especificación de **Conventional Commits** y se encuentran sincronizados en la rama `main` de GitHub.
+- Todos los componentes cumplen con estándares de accesibilidad WCAG 2.2.
 
 ---
 
 ## 4. Próximos Pasos y Roadmap Futuro
 
-1. **Exportación e Importación Local de Respaldo:**
-   - Botón para descargar el avance en archivo `.json`.
-   - Opción para importar un archivo `.json` de respaldo sin requerir cuenta.
-2. **Exportación a Formato Imprimible / PDF:**
-   - Generación de informe académico en PDF o imagen para imprimir la cartilla con los estados coloreados.
-3. **PWA (Progressive Web App):**
-   - Configuración de `vite-plugin-pwa` con Service Worker para instalación como app nativa en dispositivos móviles y funcionamiento offline total.
-4. **Simulador de Inscripción por Cuatrimestre:**
-   - Planificador semestral para seleccionar materias a cursar en el período entrante y previsualizar carga horaria semanal.
+1. **Exportación e Importación Local de Respaldo (.json):**
+   - Descarga de snapshot en archivo JSON para compartir o migrar sin cuenta.
+2. **PWA (Progressive Web App):**
+   - Configuración de `vite-plugin-pwa` con Service Worker para instalación en celulares y soporte offline completo.
+3. **Simulador de Cursado Semestral:**
+   - Planificador interactivo para armar la agenda de cursado del cuatrimestre entrante con cálculo de horas semanales.
 

@@ -125,22 +125,105 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
     estados: {},
     estadosElectivas: {},
     notas: {},
-    ppsHoras: 0
+    ppsHoras: 0,
+    perfil: { nombre: '', legajo: '' },
+    metasExamen: {}
+  };
+}
+
+export function getLocalProgress(): ProgresoUsuario {
+  const local = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (local) {
+    try {
+      return JSON.parse(local);
+    } catch {
+      // Ignorar
+    }
+  }
+  return {
+    estados: {},
+    estadosElectivas: {},
+    notas: {},
+    ppsHoras: 0,
+    perfil: { nombre: '', legajo: '' },
+    metasExamen: {}
+  };
+}
+
+export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): ProgresoUsuario {
+  const rank: Record<string, number> = { aprobada: 3, regular: 2, pendiente: 1 };
+
+  // Estados troncales
+  const allTroncalKeys = Array.from(new Set([
+    ...Object.keys(local.estados || {}),
+    ...Object.keys(cloud.estados || {})
+  ])).map(Number);
+
+  const mergedEstados: Record<number, any> = {};
+  allTroncalKeys.forEach(id => {
+    const estL = local.estados?.[id] || 'pendiente';
+    const estC = cloud.estados?.[id] || 'pendiente';
+    mergedEstados[id] = (rank[estL] || 1) >= (rank[estC] || 1) ? estL : estC;
+  });
+
+  // Estados electivas
+  const allElectivaKeys = Array.from(new Set([
+    ...Object.keys(local.estadosElectivas || {}),
+    ...Object.keys(cloud.estadosElectivas || {})
+  ])).map(Number);
+
+  const mergedElectivas: Record<number, any> = {};
+  allElectivaKeys.forEach(id => {
+    const estL = local.estadosElectivas?.[id] || 'pendiente';
+    const estC = cloud.estadosElectivas?.[id] || 'pendiente';
+    mergedElectivas[id] = (rank[estL] || 1) >= (rank[estC] || 1) ? estL : estC;
+  });
+
+  // Notas
+  const allNotasKeys = Array.from(new Set([
+    ...Object.keys(local.notas || {}),
+    ...Object.keys(cloud.notas || {})
+  ])).map(Number);
+
+  const mergedNotas: Record<number, any> = {};
+  allNotasKeys.forEach(id => {
+    const notaL = local.notas?.[id];
+    const notaC = cloud.notas?.[id];
+    if (notaL && notaC) {
+      // Preferir la nota más alta o con mayor detalle
+      mergedNotas[id] = (notaL.nota || 0) >= (notaC.nota || 0) ? { ...notaC, ...notaL } : { ...notaL, ...notaC };
+    } else {
+      mergedNotas[id] = notaL || notaC;
+    }
+  });
+
+  // Metas de examen
+  const mergedMetas = {
+    ...(cloud.metasExamen || {}),
+    ...(local.metasExamen || {})
+  };
+
+  // Perfil
+  const mergedPerfil = {
+    nombre: local.perfil?.nombre || cloud.perfil?.nombre || '',
+    legajo: local.perfil?.legajo || cloud.perfil?.legajo || ''
+  };
+
+  return {
+    estados: mergedEstados,
+    estadosElectivas: mergedElectivas,
+    notas: mergedNotas,
+    ppsHoras: Math.max(local.ppsHoras || 0, cloud.ppsHoras || 0),
+    perfil: mergedPerfil,
+    metasExamen: mergedMetas,
+    actualizadoEn: new Date().toISOString()
   };
 }
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 export async function persistProgress(progress: Partial<ProgresoUsuario>): Promise<void> {
-  let current: ProgresoUsuario = { estados: {}, estadosElectivas: {}, notas: {}, ppsHoras: 0 };
-  const local = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (local) {
-    try {
-      current = JSON.parse(local);
-    } catch {
-      console.warn('localStorage corrupto al persistir, usando estado vacío.');
-    }
-  }
+  let current: ProgresoUsuario = getLocalProgress();
 
   const updated: ProgresoUsuario = {
     ...current,

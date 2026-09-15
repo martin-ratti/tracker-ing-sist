@@ -8,20 +8,45 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
 
 ## ⚡ Características Principales
 
-- 🌐 **Grafo Interactivo de Correlativas:**
+- 🌐 **Grafo Interactivo de Correlativas & Camino Crítico:**
   - Visualizador de red jerárquico por niveles utilizando `vis-network` standalone optimizado.
+  - **Modo Camino Crítico:** selector en pantalla para alternar entre "Alternar Estado" e "Inspeccionar Dependencias". Al hacer clic en un nodo, ilumina toda la cadena de requisitos previos (ancestros) y las materias que desbloquea (descendientes), atenuando el resto de nodos no relacionados (`opacity: 0.15`).
+  - Banner informativo en vivo con botón para restablecer el enfoque.
   - Estados reactivos sincronizados con el tema visual:
     - ⚪ **Pendiente / Bloqueada:** Requisitos previos incompletos.
-    - 🔵 **Cursable (Brillante con Animación):** Habilitada para anotarse a cursar (regulares y aprobadas cumplidas).
+    - 🔵 **Cursable (Brillante con Animación):** Habilitada para anotarse a cursar.
     - 🟡 **Regular:** Cursada acreditada, lista para rendir examen final.
     - 🟢 **Aprobada:** Examen final o promoción aprobada.
   - Filtro dinámico de conexiones: *Todas*, *Solo para Cursar* (regulares) y *Solo para Rendir* (aprobadas).
   - Controles táctiles y en pantalla: Zoom in/out, ajustar y centrar pantalla, y paneo fluido.
 
-- 📋 **Vista Dual: Grafo de Red / Malla Curricular:**
+- 📋 **Vista Dual: Grafo de Red / Malla Curricular con Filtros Rápidos:**
   - Alterná con un clic entre el grafo de relaciones y una cuadrícula interactiva estilo cartilla física organizada por niveles (1º a 5º año).
+  - **Filtros Rápidos Tipo Chip:** *Todas*, *Cursables*, *Regulares*, *Aprobadas* y *Con Meta 🎯* con contadores en vivo.
   - Buscador predictivo por nombre o código de materia.
   - Barras de progreso de avance porcentual individuales por nivel académico.
+  - Badges contextuales de metas agendadas con cuenta regresiva en días.
+
+- 📅 **Agenda de Mesas de Finales & Metas Tentativas (Calendario 2026-2027):**
+  - Integración del Calendario Académico Oficial de UTN FRRo (`docs/calendario-2026-2027-gradiente.pdf`).
+  - Selección de turno de examen (16 turnos oficiales entre Feb 2026 y Mar 2027) para cualquier materia regular.
+  - Cuenta regresiva automática en días ("Faltan 12 días", "¡Es hoy!").
+  - Modal del Calendario Académico (`CalendarModal.tsx`) con pestañas para "Mis Metas Activas", lista cronológica de turnos y directivas de Sysacad (cierre 18:00 hs del penúltimo día hábil).
+
+- 📄 **Exportar a PDF / Analítico Imprimible Oficial:**
+  - Ficha formal con membrete oficial de UTN Facultad Regional Rosario.
+  - Identificación del estudiante (Nombre y Legajo universitario).
+  - Métricas completas: promedios (con y sin aplazos), avance ADUSI / Ingeniería, horas de electivas y PPS.
+  - Grilla analítica por nivel académico con códigos de asignatura, notas, libros, folios y fechas.
+  - Optimizado para impresión directa o guardado en formato PDF estándar A4 sin barras ni botones superfluos.
+
+- 👤 **Perfil Universitario del Alumno:**
+  - Modal interactivo para configurar Nombre y Legajo estudiantil (`ProfileModal.tsx`).
+  - Persistencia automática tanto en local como en la nube.
+  - Avatar de iniciales en la barra superior.
+
+- 🔄 **Fusión Inteligente de Progreso (Merge Local ↔ Nube):**
+  - Al iniciar sesión con datos existentes en el dispositivo, ofrece fusionar de forma inteligente para no perder avances, dando prioridad al estado más avanzado, combinando notas y conservando metas de examen.
 
 - 🎨 **Sistema Dinámico de 5 Temas Visuales:**
   - Selector de paletas cromáticas accesibles desde la barra superior:
@@ -88,39 +113,47 @@ tracker-ing-sist/
 │   │   ├── middleware/       # Limitador de peticiones (rate limiter) y autenticación
 │   │   ├── routes/           # Endpoints de API (/api/plan, /api/progress, /api/auth)
 │   │   ├── storage/          # Persistencia en JSON (usuarios y progresos)
-│   │   ├── types/            # Tipos TypeScript compartidos
+│   │   ├── types/            # Tipos TypeScript compartidos (incluye PerfilAlumno y MetaExamen)
 │   │   └── server.ts         # Servidor Express
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Header.tsx           # Barra superior con estadísticas en vivo y leyenda
-│   │   │   ├── ThemeSelector.tsx    # Menú desplegable para los 5 temas visuales
-│   │   │   ├── NetworkGraph.tsx     # Grafo interactivo con vis-network
-│   │   │   ├── GraphSkeleton.tsx    # Esqueleto de carga inicial del motor de red
-│   │   │   ├── GridView.tsx         # Vista de malla curricular por niveles
-│   │   │   ├── ElectivasDrawer.tsx  # Panel lateral de electivas y Seminario ADUSI
-│   │   │   ├── SubjectModal.tsx     # Modal de correlativas, destrabes y notas de finales
-│   │   │   ├── TitlesModal.tsx      # Medidor de títulos ADUSI e Ingeniería + control PPS
-│   │   │   ├── AuthModal.tsx        # Modal de inicio de sesión y registro en la nube
-│   │   │   ├── HelpModal.tsx        # Guía interactiva de uso y correlatividades
-│   │   │   └── Toast.tsx            # Alertas contextuales flotantes
+│   │   │   ├── Header.tsx              # Barra superior con estadísticas en vivo, metas, PDF y perfil
+│   │   │   ├── ThemeSelector.tsx       # Menú desplegable para los 5 temas visuales
+│   │   │   ├── NetworkGraph.tsx        # Grafo interactivo con modo Camino Crítico
+│   │   │   ├── GraphSkeleton.tsx       # Esqueleto de carga inicial del motor de red
+│   │   │   ├── GridView.tsx            # Vista de malla curricular con chips de filtro rápido
+│   │   │   ├── CalendarModal.tsx       # Modal de Calendario Académico 2026 y Metas de Finales
+│   │   │   ├── PrintableReportModal.tsx# Analítico formal imprimible (A4 / PDF)
+│   │   │   ├── ProfileModal.tsx        # Edición de Nombre y Legajo del estudiante
+│   │   │   ├── ElectivasDrawer.tsx     # Panel lateral de electivas y Seminario ADUSI
+│   │   │   ├── SubjectModal.tsx        # Modal de correlativas, destrabes, notas y meta de examen
+│   │   │   ├── TitlesModal.tsx         # Medidor de títulos ADUSI e Ingeniería + control PPS
+│   │   │   ├── AuthModal.tsx           # Modal de autenticación con Fusión Inteligente
+│   │   │   ├── HelpModal.tsx           # Guía interactiva de uso y correlatividades
+│   │   │   └── Toast.tsx               # Alertas contextuales flotantes
 │   │   ├── context/
-│   │   │   ├── TrackerContext.tsx   # Lógica de correlatividades, cascada y estados
-│   │   │   ├── ThemeContext.tsx     # Gestión de los 5 temas visuales
-│   │   │   └── AuthContext.tsx      # Sesión de usuario y sincronización remota
+│   │   │   ├── TrackerContext.tsx      # Lógica de correlativas, filtros, metas y perfil
+│   │   │   ├── ThemeContext.tsx        # Gestión de los 5 temas visuales
+│   │   │   └── AuthContext.tsx         # Sesión de usuario y sincronización remota
 │   │   ├── hooks/
-│   │   │   └── useFocusTrap.ts      # Atrapado de foco accesible para modales (WCAG)
-│   │   ├── data/                    # Catálogo local de materias y electivas Plan 2023
-│   │   ├── services/                # Cliente API para conectar con el backend
-│   │   ├── types/                   # Tipos de TypeScript compartidos
+│   │   │   └── useFocusTrap.ts         # Atrapado de foco accesible para modales (WCAG)
+│   │   ├── data/
+│   │   │   ├── plan2023.ts             # Catálogo local de materias y electivas Plan 2023
+│   │   │   └── calendario2026.ts       # Calendario oficial 2026-2027 y fechas de exámenes UTN
+│   │   ├── services/                   # Cliente API y algoritmo de merge inteligente
+│   │   ├── types/                      # Tipos de TypeScript compartidos
 │   │   ├── App.tsx
-│   │   └── index.css                # Variables CSS semánticas de temas y estilos globales
+│   │   └── index.css                   # Variables CSS semánticas y reglas @media print
 │   ├── package.json
 │   └── vite.config.ts
-├── docs/                            # Documentación y cartillas oficiales de UTN FRRo
-├── ESTADO_DEL_PROYECTO.md           # Bitácora detallada de implementación y roadmap
+├── docs/                               # Documentación y cartillas oficiales de UTN FRRo
+│   ├── isi-a4-plan-2023-gradiente-utn-frro.pdf
+│   ├── electivas-plan-2023.png
+│   └── calendario-2026-2027-gradiente.pdf
+├── ESTADO_DEL_PROYECTO.md              # Bitácora detallada de implementación y roadmap
 ├── pnpm-workspace.yaml
 ├── package.json
 └── README.md

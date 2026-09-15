@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { useTracker } from '../context/TrackerContext';
 import { MATERIAS_TRONCALES } from '../data/plan2023';
-import { Info, CheckCircle2, Clock, Search } from 'lucide-react';
+import { Info, CheckCircle2, Clock, Search, Target } from 'lucide-react';
 
 export const GridView: React.FC = () => {
   const {
     estados,
     notas,
+    metasExamen,
+    gridFilter,
+    setGridFilter,
+    stats,
     toggleMateriaEstado,
     esMateriaCursable,
     setSelectedSubjectId
@@ -18,6 +22,17 @@ export const GridView: React.FC = () => {
 
   const filteredMaterias = MATERIAS_TRONCALES.filter(m => {
     if (m.esAdusiSolo) return false; // Seminario va en el drawer de Electivas
+
+    // Filtro rápido por estado
+    const est = estados[m.id] || 'pendiente';
+    const cursable = esMateriaCursable(m);
+    const hasMeta = Boolean(metasExamen[m.id]);
+
+    if (gridFilter === 'cursables' && !cursable) return false;
+    if (gridFilter === 'regulares' && est !== 'regular') return false;
+    if (gridFilter === 'aprobadas' && est !== 'aprobada') return false;
+    if (gridFilter === 'con-meta' && !hasMeta) return false;
+
     if (!search.trim()) return true;
     const query = search.toLowerCase();
     return (
@@ -29,8 +44,8 @@ export const GridView: React.FC = () => {
 
   return (
     <div className="max-w-[1700px] mx-auto p-4 sm:p-6 overflow-y-auto min-h-[calc(100vh-130px)]">
-      {/* Barra de búsqueda y filtros */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+      {/* Barra de búsqueda y título */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
         <div>
           <h2 className="text-xl font-syne font-bold text-white tracking-wide">
             Malla Curricular Plan 2023
@@ -51,6 +66,81 @@ export const GridView: React.FC = () => {
             className="w-full bg-[#0b101c] border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-slate-600"
           />
         </div>
+      </div>
+
+      {/* Chips de filtro rápido por estado */}
+      <div className="flex flex-wrap items-center gap-2 mb-6 font-mono text-xs">
+        <span className="text-slate-500 text-[11px] hidden sm:inline mr-1">Filtrar:</span>
+        <button
+          onClick={() => setGridFilter('todas')}
+          className={`px-3 py-1 rounded-lg border transition-all ${
+            gridFilter === 'todas'
+              ? 'bg-slate-800 border-slate-600 text-white font-bold shadow-sm'
+              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          Todas ({MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo).length})
+        </button>
+
+        <button
+          onClick={() => setGridFilter('cursables')}
+          className={`px-3 py-1 rounded-lg border transition-all ${
+            gridFilter === 'cursables'
+              ? 'font-bold shadow-sm'
+              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+          }`}
+          style={gridFilter === 'cursables' ? {
+            backgroundColor: 'var(--color-cursable-bg)',
+            borderColor: 'var(--color-cursable-border)',
+            color: 'var(--color-cursable)'
+          } : {}}
+        >
+          Cursables ({stats.cursablesCount})
+        </button>
+
+        <button
+          onClick={() => setGridFilter('regulares')}
+          className={`px-3 py-1 rounded-lg border transition-all ${
+            gridFilter === 'regulares'
+              ? 'font-bold shadow-sm'
+              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+          }`}
+          style={gridFilter === 'regulares' ? {
+            backgroundColor: 'var(--color-regular-bg)',
+            borderColor: 'var(--color-regular-border)',
+            color: 'var(--color-regular)'
+          } : {}}
+        >
+          Regulares ({stats.regularesCount})
+        </button>
+
+        <button
+          onClick={() => setGridFilter('aprobadas')}
+          className={`px-3 py-1 rounded-lg border transition-all ${
+            gridFilter === 'aprobadas'
+              ? 'font-bold shadow-sm'
+              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+          }`}
+          style={gridFilter === 'aprobadas' ? {
+            backgroundColor: 'var(--color-aprobada-bg)',
+            borderColor: 'var(--color-aprobada-border)',
+            color: 'var(--color-aprobada)'
+          } : {}}
+        >
+          Aprobadas ({stats.aprobadasCount})
+        </button>
+
+        <button
+          onClick={() => setGridFilter('con-meta')}
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border transition-all ${
+            gridFilter === 'con-meta'
+              ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 font-bold shadow-sm'
+              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Target className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Con Meta 🎯 ({Object.keys(metasExamen).length})</span>
+        </button>
       </div>
 
       {/* Columnas por Nivel */}
@@ -205,13 +295,22 @@ export const GridView: React.FC = () => {
                           {m.nombreCompleto}
                         </div>
 
-                        {/* Fila inferior: Estado, Nota y Botón de Información */}
+                        {/* Fila inferior: Estado, Nota, Meta y Botón de Información */}
                         <div className="flex items-center justify-between pt-1 border-t border-slate-800/40 mt-1">
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             {statusBadge}
                             {nota !== undefined && (
                               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300">
                                 Nota: {nota}
+                              </span>
+                            )}
+                            {metasExamen[m.id] && (
+                              <span 
+                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 flex items-center gap-1"
+                                title={`Meta agendada: ${metasExamen[m.id].turnoNombre}`}
+                              >
+                                <Target className="w-2.5 h-2.5" />
+                                <span>{metasExamen[m.id].turnoNombre.split('(')[0].trim()}</span>
                               </span>
                             )}
                           </div>

@@ -10,6 +10,9 @@ import { SubjectModal } from './components/SubjectModal';
 import { TitlesModal } from './components/TitlesModal';
 import { HelpModal } from './components/HelpModal';
 import { AuthModal } from './components/AuthModal';
+import { CalendarModal } from './components/CalendarModal';
+import { PrintableReportModal } from './components/PrintableReportModal';
+import { ProfileModal } from './components/ProfileModal';
 import { Toast } from './components/Toast';
 
 const NetworkGraph = lazy(() => import('./components/NetworkGraph').then(m => ({ default: m.NetworkGraph })));
@@ -50,6 +53,15 @@ const TrackerMain: React.FC = () => {
           isOpen={titlesModalOpen} 
           onClose={() => setTitlesModalOpen(false)} 
         />
+
+        {/* Modal de Calendario Académico Oficial y Metas */}
+        <CalendarModal />
+
+        {/* Modal de Ficha Curricular Imprimible / PDF */}
+        <PrintableReportModal />
+
+        {/* Modal de Perfil de Alumno */}
+        <ProfileModal />
 
         {/* Modal de Guía / Ayuda */}
         <HelpModal 
