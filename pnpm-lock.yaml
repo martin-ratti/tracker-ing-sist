@@ -11,6 +11,9 @@ importers:
       concurrently:
         specifier: ^10.0.5
         version: 10.0.5
+      oxlint:
+        specifier: ^1.83.0
+        version: 1.83.0
 
   backend:
     dependencies:

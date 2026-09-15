@@ -4,8 +4,16 @@ import { getProgress, saveProgress, resetProgress } from '../storage/progressSto
 import { registerUser, loginUser, getUserById } from '../auth/userService.js';
 import { signToken } from '../auth/jwtService.js';
 import { optionalAuthMiddleware, requireAuthMiddleware, AuthenticatedRequest } from '../auth/authMiddleware.js';
+import { createRateLimiter } from '../middleware/rateLimiter.js';
 
 export const apiRouter = Router();
+
+// Limitador de peticiones para rutas de autenticación
+const authLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 10,
+  message: 'Demasiados intentos de autenticación. Por favor espera un minuto antes de reintentar.'
+});
 
 // Health check
 apiRouter.get('/health', (_req: Request, res: Response) => {
@@ -43,7 +51,7 @@ apiRouter.get('/plan', (_req: Request, res: Response) => {
 
 // --- RUTAS DE AUTENTICACIÓN ---
 
-apiRouter.post('/auth/register', async (req: Request, res: Response) => {
+apiRouter.post('/auth/register', authLimiter, async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || typeof email !== 'string' || !email.includes('@')) {
@@ -74,7 +82,7 @@ apiRouter.post('/auth/register', async (req: Request, res: Response) => {
   }
 });
 
-apiRouter.post('/auth/login', async (req: Request, res: Response) => {
+apiRouter.post('/auth/login', authLimiter, async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
