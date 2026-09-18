@@ -86,35 +86,35 @@ export const ElectivasDrawer: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-400">
+              <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)] text-[11px] font-mono text-slate-600 dark:text-slate-400">
                 <span>Requisito ADUSI (4 hs):</span>
                 {stats.horasElectivasAprobadas >= 4 ? (
-                  <span className="text-emerald-400 flex items-center gap-1 font-bold">
+                  <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Cumplido ({stats.horasElectivasAprobadas} hs)
                   </span>
                 ) : (
-                  <span className="text-slate-400">
+                  <span className="text-slate-600 dark:text-slate-400">
                     Faltan {4 - stats.horasElectivasAprobadas} hs
                   </span>
                 )}
               </div>
 
-              <div className="text-[10px] font-mono text-slate-500 italic bg-slate-900/50 p-1.5 rounded border border-slate-800/50">
+              <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 italic bg-[var(--bg-base)] p-1.5 rounded border border-[var(--border-color)]">
                 * Las horas que figuran en la grilla son las que suman directamente al total (Resolución Plan 2023).
               </div>
             </div>
 
             {/* Filtros por nivel */}
             <div className="flex items-center gap-1.5 mt-4 font-mono text-xs">
-              <span className="text-slate-500 text-[11px]">Nivel:</span>
+              <span className="text-slate-600 dark:text-slate-400 text-[11px]">Nivel:</span>
               {(['todos', 2, 3, 4, 5] as const).map(nivel => (
                 <button
                   key={nivel}
                   onClick={() => setNivelFilter(nivel)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] transition-colors ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                     nivelFilter === nivel
-                      ? 'bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold'
-                      : 'bg-slate-800/60 text-slate-400 hover:text-slate-200'
+                      ? 'bg-amber-500/20 border border-amber-500/50 text-amber-800 dark:text-amber-300 font-bold shadow-sm'
+                      : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-base)]'
                   }`}
                 >
                   {nivel === 'todos' ? 'Todas' : `${nivel}º Año`}
@@ -198,8 +198,8 @@ export const ElectivasDrawer: React.FC = () => {
               return (
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <BookOpen className="w-3.5 h-3.5 text-pink-400" />
-                    <span className="text-[11px] font-mono font-bold text-pink-300 uppercase tracking-wider">
+                    <BookOpen className="w-3.5 h-3.5 text-pink-600 dark:text-pink-400" />
+                    <span className="text-[11px] font-mono font-bold text-pink-700 dark:text-pink-300 uppercase tracking-wider">
                       Título Intermedio ADUSI
                     </span>
                   </div>
@@ -209,38 +209,38 @@ export const ElectivasDrawer: React.FC = () => {
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
                       <div>
-                        <span className="text-[10px] font-mono text-pink-400 font-bold mr-2">
+                        <span className="text-[10px] font-mono text-pink-600 dark:text-pink-400 font-bold mr-2">
                           3er NIVEL · ADUSI
                         </span>
-                        <h3 className="font-semibold text-sm leading-snug font-mono text-white mt-0.5">
+                        <h3 className="font-semibold text-sm leading-snug font-mono text-[var(--text-body)] mt-0.5">
                           {seminario.nombreCompleto}
                         </h3>
-                        <p className="text-[10px] font-mono text-slate-400 mt-1">
+                        <p className="text-[10px] font-mono text-slate-600 dark:text-slate-400 mt-1">
                           Requerido para tramitar el título de ADUSI. No computa para Ingeniería.
                         </p>
                       </div>
-                      <span className="px-2 py-1 rounded bg-pink-500/10 border border-pink-500/30 text-pink-300 font-mono font-bold text-xs shrink-0">
+                      <span className="px-2 py-1 rounded bg-pink-500/10 border border-pink-500/30 text-pink-700 dark:text-pink-300 font-mono font-bold text-xs shrink-0">
                         {seminario.horas} hs
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-slate-800/60 text-[10px] font-mono">
-                      <span className="text-slate-400">Cuatrimestral</span>
-                      <span className="text-slate-600">•</span>
+                    <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono">
+                      <span className="text-slate-600 dark:text-slate-400">Cuatrimestral</span>
+                      <span className="text-slate-400 dark:text-slate-600">•</span>
                       {statusBadge}
                     </div>
 
                     {/* Correlativas del Seminario */}
                     {(seminario.reqRegular.length > 0 || (Array.isArray(seminario.reqAprobada) && seminario.reqAprobada.length > 0)) && (
-                      <div className="mt-2.5 pt-2 border-t border-slate-800/40 text-[10px] font-mono space-y-1">
+                      <div className="mt-2.5 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono space-y-1">
                         {seminario.reqRegular.length > 0 && (
-                          <div className="text-slate-400 flex flex-wrap items-center gap-1">
-                            <span className="text-slate-500">Regulares:</span>
+                          <div className="text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-1">
+                            <span className="text-slate-600 dark:text-slate-500 font-medium">Regulares:</span>
                             {seminario.reqRegular.map(reqId => {
                               const reqEst = estados[reqId] || 'pendiente';
                               const ok = reqEst === 'regular' || reqEst === 'aprobada';
                               return (
-                                <span key={reqId} className={`px-1.5 py-0.5 rounded border ${ok ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
+                                <span key={reqId} className={`px-1.5 py-0.5 rounded border ${ok ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-medium' : 'bg-slate-200/80 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-400'}`}>
                                   {MATERIAS_MAP[reqId]?.nombre || `#${reqId}`}
                                 </span>
                               );
@@ -248,12 +248,12 @@ export const ElectivasDrawer: React.FC = () => {
                           </div>
                         )}
                         {Array.isArray(seminario.reqAprobada) && seminario.reqAprobada.length > 0 && (
-                          <div className="text-slate-400 flex flex-wrap items-center gap-1">
-                            <span className="text-slate-500">Aprobadas:</span>
+                          <div className="text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-1">
+                            <span className="text-slate-600 dark:text-slate-500 font-medium">Aprobadas:</span>
                             {seminario.reqAprobada.map(reqId => {
                               const ok = (estados[reqId] || 'pendiente') === 'aprobada';
                               return (
-                                <span key={reqId} className={`px-1.5 py-0.5 rounded border ${ok ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
+                                <span key={reqId} className={`px-1.5 py-0.5 rounded border ${ok ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-medium' : 'bg-slate-200/80 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-400'}`}>
                                   {MATERIAS_MAP[reqId]?.nombre || `#${reqId}`}
                                 </span>
                               );
@@ -261,12 +261,12 @@ export const ElectivasDrawer: React.FC = () => {
                           </div>
                         )}
                         {Array.isArray(seminario.reqRendirAprobada) && (
-                          <div className="text-slate-400 flex flex-wrap items-center gap-1 pt-1 border-t border-slate-800/40">
-                            <span className="text-slate-500">Para Rendir Final:</span>
+                          <div className="text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-1 pt-1 border-t border-[var(--border-color)]">
+                            <span className="text-slate-600 dark:text-slate-500 font-medium">Para Rendir Final:</span>
                             <span className={`px-1.5 py-0.5 rounded border font-bold ${
                               seminario.reqRendirAprobada.every(id => (estados[id] || 'pendiente') === 'aprobada')
-                                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
-                                : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300'
+                                : 'bg-amber-500/15 border-amber-500/35 text-amber-800 dark:text-amber-300'
                             }`}>
                               Todo 1º, 2º y 3º año ({seminario.reqRendirAprobada.filter(id => (estados[id] || 'pendiente') === 'aprobada').length}/{seminario.reqRendirAprobada.length})
                             </span>
@@ -281,8 +281,8 @@ export const ElectivasDrawer: React.FC = () => {
 
             {/* Divisor */}
             <div className="flex items-center gap-2 pt-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-[11px] font-mono font-bold text-amber-300 uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span className="text-[11px] font-mono font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider">
                 Electivas Optativas
               </span>
             </div>

@@ -101,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   </span>
                 </h1>
               </div>
-              <p className="text-[11px] text-slate-400 font-mono">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                 Tracker Pro de Correlativas y Avance Académico
               </p>
             </div>
@@ -111,24 +111,24 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           <div className="flex items-center gap-1 md:hidden">
             <button
               onClick={() => setCalendarOpen(true)}
-              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-cyan-400 text-xs font-mono"
+              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-cyan-700 dark:text-cyan-400 hover:bg-[var(--bg-base)] text-xs font-mono"
               title="Calendario y Metas"
             >
               <CalendarDays className="w-4 h-4" />
             </button>
             <button
               onClick={() => setReportOpen(true)}
-              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-purple-400 text-xs font-mono"
+              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-purple-700 dark:text-purple-400 hover:bg-[var(--bg-base)] text-xs font-mono"
               title="Ficha PDF"
             >
               <FileText className="w-4 h-4" />
             </button>
             <button
               onClick={() => setElectivasOpen(!electivasOpen)}
-              className={`p-2 rounded border text-xs font-mono transition-colors ${
+              className={`p-2 rounded-lg border text-xs font-mono transition-colors ${
                 electivasOpen 
-                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' 
-                  : 'bg-slate-800/60 border-slate-700 text-slate-300'
+                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-800 dark:text-amber-300 font-bold' 
+                  : 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:bg-[var(--bg-base)]'
               }`}
               title="Electivas"
             >
@@ -136,21 +136,21 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             </button>
             <button
               onClick={onOpenTitles}
-              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-slate-300 text-xs font-mono"
+              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:bg-[var(--bg-base)] text-xs font-mono"
               title="Títulos"
             >
               <GraduationCap className="w-4 h-4" />
             </button>
             <button
               onClick={() => setStatsModalOpen(true)}
-              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-pink-400 text-xs font-mono"
+              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-pink-700 dark:text-pink-400 hover:bg-[var(--bg-base)] text-xs font-mono"
               title="Estadísticas"
             >
               <BarChart3 className="w-4 h-4" />
             </button>
             <button
               onClick={() => setShareModalOpen(true)}
-              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-sky-400 text-xs font-mono"
+              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-sky-700 dark:text-sky-400 hover:bg-[var(--bg-base)] text-xs font-mono"
               title="Compartir"
             >
               <Share2 className="w-4 h-4" />
@@ -158,13 +158,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             <button
               type="button"
               onClick={toggleColorMode}
-              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-xs font-mono"
+              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-xs font-mono hover:bg-[var(--bg-base)]"
               title={colorMode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
             >
               {colorMode === 'dark' ? (
                 <Sun className="w-4 h-4 text-amber-400" />
               ) : (
-                <Moon className="w-4 h-4 text-indigo-400" />
+                <Moon className="w-4 h-4 text-indigo-500" />
               )}
             </button>
           </div>
@@ -353,7 +353,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             <button
               onClick={() => setViewMode('grafo')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-                viewMode === 'grafo' ? 'border font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                viewMode === 'grafo' ? 'border font-semibold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)]'
               }`}
               style={viewMode === 'grafo' ? {
                 backgroundColor: 'var(--color-primary-bg)',
@@ -367,7 +367,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             <button
               onClick={() => setViewMode('malla')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-                viewMode === 'malla' ? 'border font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                viewMode === 'malla' ? 'border font-semibold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)]'
               }`}
               style={viewMode === 'malla' ? {
                 backgroundColor: 'var(--color-primary-bg)',
@@ -591,7 +591,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           <div className="flex items-center gap-1">
             <button
               onClick={onOpenHelp}
-              className="text-slate-400 hover:text-white p-1 rounded transition-colors"
+              className="text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] p-1 rounded transition-colors"
               title="Ayuda y atajos"
             >
               <HelpCircle className="w-4 h-4" />
@@ -601,8 +601,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               onClick={handleReset}
               className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] transition-all ${
                 confirmReset 
-                  ? 'bg-rose-500/30 border border-rose-500 text-rose-300 animate-pulse font-bold' 
-                  : 'text-slate-500 hover:text-rose-400'
+                  ? 'bg-rose-500/30 border border-rose-500 text-rose-700 dark:text-rose-300 animate-pulse font-bold' 
+                  : 'text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-[var(--bg-elevated)]'
               }`}
               title="Reiniciar todos los estados a pendiente"
             >
@@ -612,7 +612,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {confirmReset && (
               <button
                 onClick={handleCancelReset}
-                className="p-1 rounded text-slate-500 hover:text-slate-200 transition-colors"
+                className="p-1 rounded text-slate-500 hover:text-[var(--text-body)] transition-colors"
                 title="Cancelar reinicio"
               >
                 <X className="w-3.5 h-3.5" />

@@ -9,6 +9,8 @@ export interface GraphColorConfig {
   regular: { bg: string; border: string; font: string; shadow: string };
   aprobada: { bg: string; border: string; font: string; shadow: string };
   pendiente: { bg: string; border: string; font: string };
+  edgeDefault: string;
+  edgeMuted: string;
 }
 
 export interface ThemeOption {
@@ -37,14 +39,18 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
       cursable: { bg: '#042232', border: '#22d3ee', font: '#38bdf8', shadow: 'rgba(34,211,238,0.55)' },
       regular: { bg: '#241a02', border: '#f59e0b', font: '#fbbf24', shadow: 'rgba(245,158,11,0.4)' },
       aprobada: { bg: '#062817', border: '#10b981', font: '#34d399', shadow: 'rgba(16,185,129,0.35)' },
-      pendiente: { bg: '#0d1527', border: '#1e293b', font: '#64748b' }
+      pendiente: { bg: '#0d1527', border: '#1e293b', font: '#64748b' },
+      edgeDefault: '#1e293b',
+      edgeMuted: 'rgba(15,23,42,0.08)'
     },
     lightGraph: {
-      bgBase: '#f8fafc',
-      cursable: { bg: '#ecfeff', border: '#0891b2', font: '#155e75', shadow: 'rgba(8,145,178,0.2)' },
-      regular: { bg: '#fffbeb', border: '#d97706', font: '#92400e', shadow: 'rgba(217,119,6,0.2)' },
-      aprobada: { bg: '#ecfdf5', border: '#059669', font: '#065f46', shadow: 'rgba(5,150,105,0.2)' },
-      pendiente: { bg: '#f1f5f9', border: '#cbd5e1', font: '#64748b' }
+      bgBase: '#f1f5f9',
+      cursable: { bg: '#ecfeff', border: '#0891b2', font: '#0e7490', shadow: 'rgba(8,145,178,0.25)' },
+      regular: { bg: '#fffbeb', border: '#d97706', font: '#78350f', shadow: 'rgba(217,119,6,0.25)' },
+      aprobada: { bg: '#ecfdf5', border: '#059669', font: '#064e3b', shadow: 'rgba(5,150,105,0.25)' },
+      pendiente: { bg: '#ffffff', border: '#cbd5e1', font: '#1e293b' },
+      edgeDefault: '#94a3b8',
+      edgeMuted: 'rgba(203,213,225,0.45)'
     }
   },
   synthwave: {
@@ -60,14 +66,18 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
       cursable: { bg: '#2d081f', border: '#f43f5e', font: '#fb7185', shadow: 'rgba(244,63,94,0.55)' },
       regular: { bg: '#230a2e', border: '#c084fc', font: '#e879f9', shadow: 'rgba(192,132,252,0.45)' },
       aprobada: { bg: '#06261f', border: '#2dd4bf', font: '#5eead4', shadow: 'rgba(45,212,191,0.4)' },
-      pendiente: { bg: '#170f26', border: '#2d1b46', font: '#7c6a96' }
+      pendiente: { bg: '#170f26', border: '#2d1b46', font: '#7c6a96' },
+      edgeDefault: '#2d1b46',
+      edgeMuted: 'rgba(45,27,70,0.2)'
     },
     lightGraph: {
-      bgBase: '#f8fafc',
-      cursable: { bg: '#fff1f2', border: '#e11d48', font: '#9f1239', shadow: 'rgba(225,29,72,0.2)' },
-      regular: { bg: '#faf5ff', border: '#9333ea', font: '#6b21a8', shadow: 'rgba(147,51,234,0.2)' },
-      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#115e59', shadow: 'rgba(13,148,136,0.2)' },
-      pendiente: { bg: '#f8f7fa', border: '#d8d2e3', font: '#726588' }
+      bgBase: '#fbf7ff',
+      cursable: { bg: '#fff1f2', border: '#e11d48', font: '#9f1239', shadow: 'rgba(225,29,72,0.25)' },
+      regular: { bg: '#faf5ff', border: '#9333ea', font: '#581c87', shadow: 'rgba(147,51,234,0.25)' },
+      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#115e59', shadow: 'rgba(13,148,136,0.25)' },
+      pendiente: { bg: '#ffffff', border: '#e4d4f7', font: '#2e1065' },
+      edgeDefault: '#c084fc',
+      edgeMuted: 'rgba(228,212,247,0.45)'
     }
   },
   matrix: {
@@ -83,14 +93,18 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
       cursable: { bg: '#062d17', border: '#10b981', font: '#34d399', shadow: 'rgba(16,185,129,0.55)' },
       regular: { bg: '#1c2604', border: '#84cc16', font: '#a3e635', shadow: 'rgba(132,204,22,0.4)' },
       aprobada: { bg: '#053123', border: '#059669', font: '#6ee7b7', shadow: 'rgba(5,150,105,0.4)' },
-      pendiente: { bg: '#0b1f13', border: '#173622', font: '#4d7c5b' }
+      pendiente: { bg: '#0b1f13', border: '#173622', font: '#4d7c5b' },
+      edgeDefault: '#173622',
+      edgeMuted: 'rgba(23,54,34,0.2)'
     },
     lightGraph: {
-      bgBase: '#f8fafc',
-      cursable: { bg: '#ecfdf5', border: '#059669', font: '#065f46', shadow: 'rgba(5,150,105,0.2)' },
-      regular: { bg: '#f7fee7', border: '#65a30d', font: '#3f6212', shadow: 'rgba(101,163,13,0.2)' },
-      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#115e59', shadow: 'rgba(13,148,136,0.2)' },
-      pendiente: { bg: '#f0f5f2', border: '#cbd8d0', font: '#4d6e5a' }
+      bgBase: '#f0fdf4',
+      cursable: { bg: '#ecfdf5', border: '#059669', font: '#064e3b', shadow: 'rgba(5,150,105,0.25)' },
+      regular: { bg: '#f7fee7', border: '#65a30d', font: '#365314', shadow: 'rgba(101,163,13,0.25)' },
+      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#115e59', shadow: 'rgba(13,148,136,0.25)' },
+      pendiente: { bg: '#ffffff', border: '#bbf7d0', font: '#064e3b' },
+      edgeDefault: '#86efac',
+      edgeMuted: 'rgba(187,247,208,0.45)'
     }
   },
   sunset: {
@@ -106,14 +120,18 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
       cursable: { bg: '#331b04', border: '#f59e0b', font: '#fbbf24', shadow: 'rgba(245,158,11,0.55)' },
       regular: { bg: '#351208', border: '#f97316', font: '#fb923c', shadow: 'rgba(249,115,22,0.45)' },
       aprobada: { bg: '#0b2914', border: '#10b981', font: '#34d399', shadow: 'rgba(16,185,129,0.35)' },
-      pendiente: { bg: '#1f160f', border: '#382517', font: '#7d6957' }
+      pendiente: { bg: '#1f160f', border: '#382517', font: '#7d6957' },
+      edgeDefault: '#382517',
+      edgeMuted: 'rgba(56,37,23,0.2)'
     },
     lightGraph: {
-      bgBase: '#f8fafc',
-      cursable: { bg: '#fffbeb', border: '#d97706', font: '#92400e', shadow: 'rgba(217,119,6,0.2)' },
-      regular: { bg: '#fff7ed', border: '#ea580c', font: '#9a3412', shadow: 'rgba(234,88,12,0.2)' },
-      aprobada: { bg: '#ecfdf5', border: '#059669', font: '#065f46', shadow: 'rgba(5,150,105,0.2)' },
-      pendiente: { bg: '#f7f4f0', border: '#dfd7ce', font: '#756554' }
+      bgBase: '#fffaf5',
+      cursable: { bg: '#fffbeb', border: '#d97706', font: '#78350f', shadow: 'rgba(217,119,6,0.25)' },
+      regular: { bg: '#fff7ed', border: '#ea580c', font: '#7c2d12', shadow: 'rgba(234,88,12,0.25)' },
+      aprobada: { bg: '#ecfdf5', border: '#059669', font: '#064e3b', shadow: 'rgba(5,150,105,0.25)' },
+      pendiente: { bg: '#ffffff', border: '#fed7aa', font: '#451a03' },
+      edgeDefault: '#fdba74',
+      edgeMuted: 'rgba(254,215,170,0.45)'
     }
   },
   frost: {
@@ -129,14 +147,18 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
       cursable: { bg: '#082538', border: '#38bdf8', font: '#7dd3fc', shadow: 'rgba(56,189,248,0.55)' },
       regular: { bg: '#151936', border: '#818cf8', font: '#a5b4fc', shadow: 'rgba(129,140,248,0.45)' },
       aprobada: { bg: '#072b22', border: '#34d399', font: '#6ee7b7', shadow: 'rgba(52,211,153,0.35)' },
-      pendiente: { bg: '#101a2b', border: '#1e2e4a', font: '#627699' }
+      pendiente: { bg: '#101a2b', border: '#1e2e4a', font: '#627699' },
+      edgeDefault: '#1e2e4a',
+      edgeMuted: 'rgba(30,46,74,0.2)'
     },
     lightGraph: {
-      bgBase: '#f8fafc',
-      cursable: { bg: '#f0f9ff', border: '#0284c7', font: '#075985', shadow: 'rgba(2,132,199,0.2)' },
-      regular: { bg: '#eef2ff', border: '#6366f1', font: '#3730a3', shadow: 'rgba(99,102,241,0.2)' },
-      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#115e59', shadow: 'rgba(13,148,136,0.2)' },
-      pendiente: { bg: '#f0f4f9', border: '#cdd8e7', font: '#556885' }
+      bgBase: '#f0f7ff',
+      cursable: { bg: '#f0f9ff', border: '#0284c7', font: '#0369a1', shadow: 'rgba(2,132,199,0.25)' },
+      regular: { bg: '#eef2ff', border: '#6366f1', font: '#312e81', shadow: 'rgba(99,102,241,0.25)' },
+      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#115e59', shadow: 'rgba(13,148,136,0.25)' },
+      pendiente: { bg: '#ffffff', border: '#bfdbfe', font: '#0f172a' },
+      edgeDefault: '#93c5fd',
+      edgeMuted: 'rgba(191,219,254,0.45)'
     }
   }
 };

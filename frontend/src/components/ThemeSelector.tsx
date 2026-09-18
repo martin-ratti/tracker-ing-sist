@@ -48,7 +48,7 @@ export const ThemeSelector: React.FC = () => {
         >
           {/* Selector de Modo Global (Oscuro / Claro) */}
           <div className="mb-2 pb-2 border-b border-[var(--border-color)]">
-            <div className="px-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">
+            <div className="px-1 text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1.5">
               Modo Global
             </div>
             <div className="grid grid-cols-2 gap-1 bg-[var(--bg-base)] p-1 rounded-lg border border-[var(--border-color)]">
@@ -58,7 +58,7 @@ export const ThemeSelector: React.FC = () => {
                 className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium transition-all ${
                   colorMode === 'dark'
                     ? 'bg-slate-800 text-white font-bold shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 <Moon className="w-3 h-3 text-indigo-400" />
@@ -69,8 +69,8 @@ export const ThemeSelector: React.FC = () => {
                 onClick={() => setColorMode('light')}
                 className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium transition-all ${
                   colorMode === 'light'
-                    ? 'bg-white text-slate-900 font-bold shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-white text-slate-900 font-bold shadow-sm border border-slate-200'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 <Sun className="w-3 h-3 text-amber-500" />
@@ -80,7 +80,7 @@ export const ThemeSelector: React.FC = () => {
           </div>
 
           {/* Listado de Paletas de Color */}
-          <div className="px-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+          <div className="px-1 text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">
             Paleta de Acento
           </div>
           {(Object.keys(THEMES) as ThemeId[]).map(id => {
@@ -97,7 +97,7 @@ export const ThemeSelector: React.FC = () => {
                 className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-all ${
                   isSelected
                     ? 'bg-[var(--bg-elevated)] text-[var(--text-body)] font-bold border border-[var(--border-color)]'
-                    : 'text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)]/60'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)]'
                 }`}
               >
                 <div className="flex items-center gap-2">

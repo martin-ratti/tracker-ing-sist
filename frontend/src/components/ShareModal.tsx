@@ -66,7 +66,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
               <h2 className="text-base font-bold font-syne text-[var(--text-body)]">
                 Compartir Avance de Carrera
               </h2>
-              <p className="text-xs text-slate-400 font-mono">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                 Genera un enlace público en modo solo lectura
               </p>
             </div>
@@ -74,7 +74,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -83,38 +83,38 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
         {/* Content */}
         <div className="p-6 space-y-4">
           <div className="p-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border-color)] space-y-2 text-xs font-mono">
-            <div className="flex items-center justify-between text-slate-400 pb-2 border-b border-[var(--border-color)]">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 pb-2 border-b border-[var(--border-color)]">
               <span>Resumen compartido:</span>
               <span className="font-bold text-[var(--text-body)]">{perfil.nombre || 'Estudiante'}</span>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
               <div>
-                <span className="text-slate-400">Aprobadas: </span>
+                <span className="text-slate-600 dark:text-slate-400">Aprobadas: </span>
                 <span className="font-bold" style={{ color: 'var(--color-aprobada)' }}>{stats.aprobadasCount}</span>
               </div>
               <div>
-                <span className="text-slate-400">Regulares: </span>
+                <span className="text-slate-600 dark:text-slate-400">Regulares: </span>
                 <span className="font-bold" style={{ color: 'var(--color-regular)' }}>{stats.regularesCount}</span>
               </div>
               <div>
-                <span className="text-slate-400">Avance carrera: </span>
+                <span className="text-slate-600 dark:text-slate-400">Avance carrera: </span>
                 <span className="font-bold" style={{ color: 'var(--color-primary)' }}>{stats.porcentajeCarrera}%</span>
               </div>
               <div>
-                <span className="text-slate-400">Electivas: </span>
-                <span className="font-bold text-amber-400">{stats.horasElectivasAprobadas} hs</span>
+                <span className="text-slate-600 dark:text-slate-400">Electivas: </span>
+                <span className="font-bold text-amber-700 dark:text-amber-400">{stats.horasElectivasAprobadas} hs</span>
               </div>
             </div>
           </div>
 
           <div className="space-y-1.5 font-mono text-xs">
-            <label className="text-slate-400 block">Enlace de lectura:</label>
+            <label className="text-slate-600 dark:text-slate-400 block font-medium">Enlace de lectura:</label>
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 readOnly
                 value={shareUrl}
-                className="flex-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none select-all"
+                className="flex-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-xs font-mono text-[var(--text-body)] focus:outline-none select-all"
               />
               <button
                 type="button"
@@ -122,7 +122,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-bold transition-all shrink-0"
                 style={{
                   background: copied ? 'var(--color-aprobada)' : 'var(--gradient-primary)',
-                  color: '#070b13'
+                  color: '#ffffff'
                 }}
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -131,8 +131,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-sky-500/10 border border-sky-500/20 text-[11px] text-sky-300/90 font-mono">
-            <Eye className="w-4 h-4 shrink-0 mt-0.5 text-sky-400" />
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-sky-500/10 border border-sky-500/20 text-[11px] text-sky-800 dark:text-sky-300 font-mono">
+            <Eye className="w-4 h-4 shrink-0 mt-0.5 text-sky-600 dark:text-sky-400" />
             <span>
               Quien reciba este enlace podrá visualizar tu grafo y malla curricular sin modificar tus datos guardados.
             </span>

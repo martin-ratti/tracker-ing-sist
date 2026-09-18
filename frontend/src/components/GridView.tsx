@@ -56,27 +56,27 @@ export const GridView: React.FC = () => {
         </div>
 
         <div className="relative w-full sm:w-72" role="search">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             placeholder="Buscar materia o código..."
             aria-label="Buscar materia por nombre o código"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg pl-9 pr-3 py-1.5 text-xs font-mono text-[var(--text-body)] placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
+            className="w-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg pl-9 pr-3 py-1.5 text-xs font-mono text-[var(--text-body)] placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
           />
         </div>
       </div>
 
       {/* Chips de filtro rápido por estado */}
       <div className="flex flex-wrap items-center gap-2 mb-6 font-mono text-xs">
-        <span className="text-slate-500 text-[11px] hidden sm:inline mr-1">Filtrar:</span>
+        <span className="text-slate-600 dark:text-slate-400 text-[11px] hidden sm:inline mr-1">Filtrar:</span>
         <button
           onClick={() => setGridFilter('todas')}
           className={`px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'todas'
               ? 'bg-[var(--bg-elevated)] border-[var(--color-primary)] text-[var(--text-body)] font-bold shadow-sm'
-              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
+              : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
         >
           Todas ({MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo).length})
@@ -87,7 +87,7 @@ export const GridView: React.FC = () => {
           className={`px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'cursables'
               ? 'font-bold shadow-sm'
-              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
+              : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
           style={gridFilter === 'cursables' ? {
             backgroundColor: 'var(--color-cursable-bg)',
@@ -103,7 +103,7 @@ export const GridView: React.FC = () => {
           className={`px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'regulares'
               ? 'font-bold shadow-sm'
-              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
+              : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
           style={gridFilter === 'regulares' ? {
             backgroundColor: 'var(--color-regular-bg)',
@@ -119,7 +119,7 @@ export const GridView: React.FC = () => {
           className={`px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'aprobadas'
               ? 'font-bold shadow-sm'
-              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
+              : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
           style={gridFilter === 'aprobadas' ? {
             backgroundColor: 'var(--color-aprobada-bg)',
@@ -135,7 +135,7 @@ export const GridView: React.FC = () => {
           className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'con-meta'
               ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-800 dark:text-cyan-300 font-bold shadow-sm'
-              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
+              : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
         >
           <Target className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
@@ -195,7 +195,7 @@ export const GridView: React.FC = () => {
                     const nota = notas[m.id]?.nota;
 
                     // Estilos de tarjeta según estado adaptados al tema
-                    let cardStyle = 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-500 dark:text-slate-400';
+                    let cardStyle = 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-700 dark:text-slate-400';
                     let statusBadge = (
                       <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono border border-slate-300 dark:border-slate-700/60 font-medium">
                         Bloqueada
@@ -267,7 +267,7 @@ export const GridView: React.FC = () => {
                       >
                         {/* Fila superior: ID y Badges */}
                         <div className="flex items-center justify-between gap-1 mb-1.5 font-mono text-[10px]">
-                          <span className="font-bold text-slate-400 dark:text-slate-500 group-hover:text-[var(--text-body)] transition-colors">
+                          <span className="font-bold text-slate-500 dark:text-slate-400 group-hover:text-[var(--text-body)] transition-colors">
                             #{String(m.id).padStart(2, '0')}
                           </span>
                           <div className="flex items-center gap-1">
@@ -286,7 +286,7 @@ export const GridView: React.FC = () => {
                                 ADUSI
                               </span>
                             )}
-                            <span className="text-slate-500 dark:text-slate-400">{m.horas}hs</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-medium">{m.horas}hs</span>
                           </div>
                         </div>
 
@@ -322,7 +322,7 @@ export const GridView: React.FC = () => {
                               setSelectedSubjectId(m.id);
                             }}
                             aria-label={`Ver detalles, correlativas y notas de ${m.nombreCompleto}`}
-                            className="p-1 rounded text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
+                            className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
                             title="Ver correlativas y registrar notas"
                           >
                             <Info className="w-3.5 h-3.5" />

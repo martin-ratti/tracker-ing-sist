@@ -47,7 +47,7 @@ export const NetworkGraph: React.FC = () => {
     setFocusedSubjectId
   } = useTracker();
 
-  const { themeConfig } = useTheme();
+  const { themeConfig, colorMode } = useTheme();
 
   useEffect(() => {
     interactionModeRef.current = interactionMode;
@@ -65,7 +65,7 @@ export const NetworkGraph: React.FC = () => {
     setFocusedSubjectIdRef.current = setFocusedSubjectId;
   }, [setFocusedSubjectId]);
 
-  // Inicializar Network
+  // Inicializar vis-network una sola vez
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -79,7 +79,7 @@ export const NetworkGraph: React.FC = () => {
       color: { background: themeConfig.graph.pendiente.bg, border: themeConfig.graph.pendiente.border },
       font: { color: themeConfig.graph.pendiente.font, size: 13, face: 'IBM Plex Mono' },
       borderWidth: 1.5,
-      shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 8, x: 0, y: 3 }
+      shadow: { enabled: true, color: colorMode === 'light' ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.5)', size: 8, x: 0, y: 3 }
     }));
 
     let edgeId = 1;
@@ -91,7 +91,7 @@ export const NetworkGraph: React.FC = () => {
           from: c,
           to: m.id,
           tipo: 'regular',
-          color: { color: '#1e293b', opacity: 0.8 },
+          color: { color: themeConfig.graph.edgeDefault, opacity: 0.8 },
           width: 1.4,
           arrows: { to: { enabled: true, scaleFactor: 0.45, type: 'arrow' } },
           smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 }
@@ -105,7 +105,7 @@ export const NetworkGraph: React.FC = () => {
             from: c,
             to: m.id,
             tipo: 'aprobada',
-            color: { color: '#1e293b', opacity: 0.8 },
+            color: { color: themeConfig.graph.edgeDefault, opacity: 0.8 },
             width: 2.2,
             arrows: { to: { enabled: true, scaleFactor: 0.5, type: 'arrow' } },
             smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 }
@@ -245,7 +245,7 @@ export const NetworkGraph: React.FC = () => {
       let border = themeConfig.graph.pendiente.border;
       let fontColor = themeConfig.graph.pendiente.font;
       let bw = 1.5;
-      let shadowColor = 'rgba(0,0,0,0.5)';
+      let shadowColor = colorMode === 'light' ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.5)';
       let shadowSize = 8;
 
       if (dependenciesTree) {
@@ -255,33 +255,33 @@ export const NetworkGraph: React.FC = () => {
         const inChain = isSelf || isAncestor || isDescendant;
 
         if (!inChain) {
-          bg = '#080c16';
-          border = '#141d2f';
-          fontColor = '#334155';
+          bg = colorMode === 'light' ? '#f8fafc' : '#080c16';
+          border = colorMode === 'light' ? '#cbd5e1' : '#141d2f';
+          fontColor = colorMode === 'light' ? '#94a3b8' : '#334155';
           bw = 1;
           shadowSize = 0;
           shadowColor = 'transparent';
         } else if (isSelf) {
           bg = themeConfig.graph.cursable.bg;
-          border = '#ffffff';
-          fontColor = '#ffffff';
+          border = colorMode === 'light' ? '#0f172a' : '#ffffff';
+          fontColor = colorMode === 'light' ? '#0f172a' : '#ffffff';
           bw = 3.5;
           shadowSize = 20;
-          shadowColor = 'rgba(255,255,255,0.75)';
+          shadowColor = colorMode === 'light' ? 'rgba(15,23,42,0.25)' : 'rgba(255,255,255,0.75)';
         } else if (isAncestor) {
-          bg = '#042232';
-          border = '#38bdf8';
-          fontColor = '#7dd3fc';
+          bg = colorMode === 'light' ? '#e0f2fe' : '#042232';
+          border = colorMode === 'light' ? '#0284c7' : '#38bdf8';
+          fontColor = colorMode === 'light' ? '#0369a1' : '#7dd3fc';
           bw = 2.5;
           shadowSize = 14;
-          shadowColor = 'rgba(56,189,248,0.5)';
+          shadowColor = colorMode === 'light' ? 'rgba(2,132,199,0.3)' : 'rgba(56,189,248,0.5)';
         } else if (isDescendant) {
-          bg = '#331b04';
-          border = '#f59e0b';
-          fontColor = '#fbbf24';
+          bg = colorMode === 'light' ? '#fef3c7' : '#331b04';
+          border = colorMode === 'light' ? '#d97706' : '#f59e0b';
+          fontColor = colorMode === 'light' ? '#b45309' : '#fbbf24';
           bw = 2.5;
           shadowSize = 14;
-          shadowColor = 'rgba(245,158,11,0.5)';
+          shadowColor = colorMode === 'light' ? 'rgba(217,119,6,0.3)' : 'rgba(245,158,11,0.5)';
         }
       } else {
         if (est === 'aprobada') {
@@ -296,7 +296,7 @@ export const NetworkGraph: React.FC = () => {
           border = themeConfig.graph.regular.border;
           fontColor = themeConfig.graph.regular.font;
           bw = 2.2;
-          shadowColor = rendible ? themeConfig.graph.regular.shadow : 'rgba(245,158,11,0.25)';
+          shadowColor = rendible ? themeConfig.graph.regular.shadow : (colorMode === 'light' ? 'rgba(217,119,6,0.15)' : 'rgba(245,158,11,0.25)');
           shadowSize = rendible ? 14 : 8;
         } else if (cursable) {
           bg = themeConfig.graph.cursable.bg;
@@ -308,7 +308,7 @@ export const NetworkGraph: React.FC = () => {
         }
       }
 
-      const sig = `${themeConfig.id}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
+      const sig = `${themeConfig.id}_${colorMode}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
       nextNodeSignatures.set(m.id, sig);
 
       if (prevNodeSignaturesRef.current.get(m.id) !== sig) {
@@ -337,7 +337,7 @@ export const NetworkGraph: React.FC = () => {
       const estFrom = estados[fromId] || 'pendiente';
       const hidden = edgeMode !== 'ambos' && edge.tipo !== edgeMode;
 
-      let color = '#1e293b';
+      let color = themeConfig.graph.edgeDefault || '#1e293b';
       let width = edge.tipo === 'aprobada' ? 2.2 : 1.4;
 
       if (dependenciesTree) {
@@ -345,20 +345,20 @@ export const NetworkGraph: React.FC = () => {
         const toInChain = toId === focusedSubjectId || dependenciesTree.ancestors.has(toId) || dependenciesTree.descendants.has(toId);
 
         if (fromInChain && toInChain) {
-          color = '#38bdf8';
+          color = colorMode === 'light' ? '#0284c7' : '#38bdf8';
           width = 2.8;
         } else {
-          color = 'rgba(15,23,42,0.06)';
+          color = themeConfig.graph.edgeMuted || 'rgba(15,23,42,0.06)';
           width = 0.5;
         }
       } else if (!hidden) {
         if (edge.tipo === 'regular') {
           if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
           else if (estFrom === 'regular') color = themeConfig.graph.cursable.border;
-          else color = '#1e293b';
+          else color = themeConfig.graph.edgeDefault;
         } else {
           if (estFrom === 'aprobada') color = themeConfig.graph.regular.border;
-          else color = '#1e293b';
+          else color = themeConfig.graph.edgeDefault;
         }
       }
 
@@ -379,7 +379,7 @@ export const NetworkGraph: React.FC = () => {
       edgesDatasetRef.current.update(edgeUpdates as VisEdge[]);
     }
     prevEdgeSignaturesRef.current = nextEdgeSignatures;
-  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, themeConfig, dependenciesTree, focusedSubjectId]);
+  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, themeConfig, colorMode, dependenciesTree, focusedSubjectId]);
 
   const handleZoomIn = () => {
     if (!networkRef.current) return;

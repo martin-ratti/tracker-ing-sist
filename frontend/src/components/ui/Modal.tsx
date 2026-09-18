@@ -50,16 +50,16 @@ export const Modal: React.FC<ModalProps> = ({
           <div className="flex items-start justify-between gap-4">
             <div>
               {badge && <div className="mb-1.5">{badge}</div>}
-              <h2 className="text-xl font-bold font-syne text-white">{title}</h2>
+              <h2 className="text-xl font-bold font-syne text-[var(--text-body)]">{title}</h2>
               {subtitle && (
-                <p className="text-xs text-slate-400 font-mono mt-1">{subtitle}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1">{subtitle}</p>
               )}
             </div>
             <button
               type="button"
               onClick={onClose}
               aria-label="Cerrar"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
