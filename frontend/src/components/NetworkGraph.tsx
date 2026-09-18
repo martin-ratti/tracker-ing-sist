@@ -455,7 +455,7 @@ export const NetworkGraph: React.FC = () => {
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
             interactionMode === 'estado'
               ? 'bg-[var(--bg-elevated)] text-[var(--text-body)] font-bold border border-[var(--border-color)] shadow-sm'
-              : 'text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)]'
+              : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
           }`}
           title="Al hacer clic en una materia, cambia entre Pendiente, Regular y Aprobada"
         >
@@ -468,8 +468,8 @@ export const NetworkGraph: React.FC = () => {
           onClick={() => setInteractionMode('camino')}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
             interactionMode === 'camino'
-              ? 'bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 font-bold border border-cyan-500/40 shadow-sm'
-              : 'text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)]'
+              ? 'bg-cyan-500/20 text-cyan-950 dark:text-cyan-300 font-bold border border-cyan-500/50 shadow-sm'
+              : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
           }`}
           title="Al hacer clic en una materia, resalta toda su cadena de requisitos y materias desbloqueadas"
         >
@@ -479,7 +479,7 @@ export const NetworkGraph: React.FC = () => {
       </div>
 
       {/* Controles flotantes */}
-      <div className="absolute bottom-5 right-5 flex flex-col gap-1.5 bg-[var(--bg-surface)]/90 backdrop-blur-md p-1.5 rounded-xl border border-[var(--border-color)] shadow-xl z-10">
+      <div className="absolute bottom-5 right-5 flex flex-col gap-1.5 bg-[var(--bg-surface)]/95 backdrop-blur-md p-1.5 rounded-xl border border-[var(--border-color)] shadow-xl z-10">
         <button
           type="button"
           onClick={handleZoomIn}
@@ -510,17 +510,17 @@ export const NetworkGraph: React.FC = () => {
       </div>
 
       {/* Guía rápida flotante */}
-      <div className="absolute bottom-5 left-5 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-xl bg-[var(--bg-surface)]/85 backdrop-blur-md border border-[var(--border-color)] text-[11px] font-mono text-slate-500 dark:text-slate-400 pointer-events-none shadow-md">
+      <div className="absolute bottom-5 left-5 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-xl bg-[var(--bg-surface)]/95 backdrop-blur-md border border-[var(--border-color)] text-[11px] font-mono text-slate-800 dark:text-slate-200 pointer-events-none shadow-md font-medium">
         <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)]">Click</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] font-bold">Click</kbd>
           <span>{interactionMode === 'camino' ? 'Resaltar dependencias' : 'Cambiar estado'}</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)]">Doble Click</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] font-bold">Doble Click</kbd>
           <span>Detalles y notas</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)]">Fondo</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] font-bold">Fondo</kbd>
           <span>Desactivar foco</span>
         </span>
       </div>

@@ -45,10 +45,10 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
     },
     lightGraph: {
       bgBase: '#f1f5f9',
-      cursable: { bg: '#ecfeff', border: '#0891b2', font: '#0e7490', shadow: 'rgba(8,145,178,0.25)' },
-      regular: { bg: '#fffbeb', border: '#d97706', font: '#78350f', shadow: 'rgba(217,119,6,0.25)' },
-      aprobada: { bg: '#ecfdf5', border: '#059669', font: '#064e3b', shadow: 'rgba(5,150,105,0.25)' },
-      pendiente: { bg: '#ffffff', border: '#cbd5e1', font: '#1e293b' },
+      cursable: { bg: '#ecfeff', border: '#0891b2', font: '#0f172a', shadow: 'rgba(8,145,178,0.2)' },
+      regular: { bg: '#fffbeb', border: '#d97706', font: '#0f172a', shadow: 'rgba(217,119,6,0.2)' },
+      aprobada: { bg: '#ecfdf5', border: '#059669', font: '#0f172a', shadow: 'rgba(5,150,105,0.2)' },
+      pendiente: { bg: '#ffffff', border: '#cbd5e1', font: '#334155' },
       edgeDefault: '#94a3b8',
       edgeMuted: 'rgba(203,213,225,0.45)'
     }
@@ -72,10 +72,10 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
     },
     lightGraph: {
       bgBase: '#fbf7ff',
-      cursable: { bg: '#fff1f2', border: '#e11d48', font: '#9f1239', shadow: 'rgba(225,29,72,0.25)' },
-      regular: { bg: '#faf5ff', border: '#9333ea', font: '#581c87', shadow: 'rgba(147,51,234,0.25)' },
-      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#115e59', shadow: 'rgba(13,148,136,0.25)' },
-      pendiente: { bg: '#ffffff', border: '#e4d4f7', font: '#2e1065' },
+      cursable: { bg: '#fff1f2', border: '#e11d48', font: '#0f172a', shadow: 'rgba(225,29,72,0.2)' },
+      regular: { bg: '#faf5ff', border: '#9333ea', font: '#0f172a', shadow: 'rgba(147,51,234,0.2)' },
+      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#0f172a', shadow: 'rgba(13,148,136,0.2)' },
+      pendiente: { bg: '#ffffff', border: '#e4d4f7', font: '#334155' },
       edgeDefault: '#c084fc',
       edgeMuted: 'rgba(228,212,247,0.45)'
     }
@@ -99,10 +99,10 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
     },
     lightGraph: {
       bgBase: '#f0fdf4',
-      cursable: { bg: '#ecfdf5', border: '#059669', font: '#064e3b', shadow: 'rgba(5,150,105,0.25)' },
-      regular: { bg: '#f7fee7', border: '#65a30d', font: '#365314', shadow: 'rgba(101,163,13,0.25)' },
-      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#115e59', shadow: 'rgba(13,148,136,0.25)' },
-      pendiente: { bg: '#ffffff', border: '#bbf7d0', font: '#064e3b' },
+      cursable: { bg: '#ecfdf5', border: '#059669', font: '#0f172a', shadow: 'rgba(5,150,105,0.2)' },
+      regular: { bg: '#f7fee7', border: '#65a30d', font: '#0f172a', shadow: 'rgba(101,163,13,0.2)' },
+      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#0f172a', shadow: 'rgba(13,148,136,0.2)' },
+      pendiente: { bg: '#ffffff', border: '#bbf7d0', font: '#334155' },
       edgeDefault: '#86efac',
       edgeMuted: 'rgba(187,247,208,0.45)'
     }
@@ -126,10 +126,10 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
     },
     lightGraph: {
       bgBase: '#fffaf5',
-      cursable: { bg: '#fffbeb', border: '#d97706', font: '#78350f', shadow: 'rgba(217,119,6,0.25)' },
-      regular: { bg: '#fff7ed', border: '#ea580c', font: '#7c2d12', shadow: 'rgba(234,88,12,0.25)' },
-      aprobada: { bg: '#ecfdf5', border: '#059669', font: '#064e3b', shadow: 'rgba(5,150,105,0.25)' },
-      pendiente: { bg: '#ffffff', border: '#fed7aa', font: '#451a03' },
+      cursable: { bg: '#fffbeb', border: '#d97706', font: '#0f172a', shadow: 'rgba(217,119,6,0.2)' },
+      regular: { bg: '#fff7ed', border: '#ea580c', font: '#0f172a', shadow: 'rgba(234,88,12,0.2)' },
+      aprobada: { bg: '#ecfdf5', border: '#059669', font: '#0f172a', shadow: 'rgba(5,150,105,0.2)' },
+      pendiente: { bg: '#ffffff', border: '#fed7aa', font: '#334155' },
       edgeDefault: '#fdba74',
       edgeMuted: 'rgba(254,215,170,0.45)'
     }
@@ -153,10 +153,10 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
     },
     lightGraph: {
       bgBase: '#f0f7ff',
-      cursable: { bg: '#f0f9ff', border: '#0284c7', font: '#0369a1', shadow: 'rgba(2,132,199,0.25)' },
-      regular: { bg: '#eef2ff', border: '#6366f1', font: '#312e81', shadow: 'rgba(99,102,241,0.25)' },
-      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#115e59', shadow: 'rgba(13,148,136,0.25)' },
-      pendiente: { bg: '#ffffff', border: '#bfdbfe', font: '#0f172a' },
+      cursable: { bg: '#f0f9ff', border: '#0284c7', font: '#0f172a', shadow: 'rgba(2,132,199,0.2)' },
+      regular: { bg: '#eef2ff', border: '#6366f1', font: '#0f172a', shadow: 'rgba(99,102,241,0.2)' },
+      aprobada: { bg: '#f0fdfa', border: '#0d9488', font: '#0f172a', shadow: 'rgba(13,148,136,0.2)' },
+      pendiente: { bg: '#ffffff', border: '#bfdbfe', font: '#334155' },
       edgeDefault: '#93c5fd',
       edgeMuted: 'rgba(191,219,254,0.45)'
     }
@@ -200,6 +200,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setColorModeState(newMode);
     localStorage.setItem(MODE_STORAGE_KEY, newMode);
     document.documentElement.setAttribute('data-mode', newMode);
+    if (newMode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   };
 
   const toggleColorMode = () => {
@@ -209,6 +214,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.setAttribute('data-mode', colorMode);
+    if (colorMode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [theme, colorMode]);
 
   const activeThemeConfig = useMemo(() => {
