@@ -50,7 +50,7 @@ export const GridView: React.FC = () => {
           <h2 className="text-xl font-syne font-bold text-[var(--text-body)] tracking-wide">
             Malla Curricular Plan 2023
           </h2>
-          <p className="text-xs text-slate-400 font-mono">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
             Estructura cronológica por niveles académicos y estado de correlatividades
           </p>
         </div>
@@ -167,11 +167,11 @@ export const GridView: React.FC = () => {
                   >
                     {nivel}º NIVEL
                   </span>
-                  <span className="font-mono text-xs text-slate-400">
+                  <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
                     {aprobadasNivel}/{totalNivel} ({pctNivel}%)
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full bg-slate-800/40 mt-2 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800/40 mt-2 overflow-hidden border border-[var(--border-color)]">
                   <div
                     className="h-full transition-all duration-300"
                     style={{ 

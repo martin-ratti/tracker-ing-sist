@@ -102,7 +102,7 @@ export const SubjectModal: React.FC = () => {
     const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
     if (days < 0) {
-      return { days, text: `Mesa finalizada hace ${Math.abs(days)} d`, badgeColor: 'bg-slate-800 text-slate-400 border border-slate-700' };
+      return { days, text: `Mesa finalizada hace ${Math.abs(days)} d`, badgeColor: 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border border-slate-300 dark:border-slate-700' };
     }
     if (days === 0) {
       return { days, text: '¡La mesa es hoy!', badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' };
@@ -416,7 +416,7 @@ export const SubjectModal: React.FC = () => {
 
           {/* Planificación de Meta de Examen Final (habilitado para materias Regulares) */}
           {currentEstado === 'regular' && (
-            <div className="bg-cyan-500/10 dark:bg-[#081226]/90 border border-cyan-500/30 rounded-xl p-4.5 space-y-3 shadow-lg">
+            <div className="bg-cyan-500/10 dark:bg-[#081226]/90 border border-cyan-500/30 rounded-xl p-4 space-y-3 shadow-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30">
