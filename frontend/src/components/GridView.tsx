@@ -75,8 +75,8 @@ export const GridView: React.FC = () => {
           onClick={() => setGridFilter('todas')}
           className={`px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'todas'
-              ? 'bg-slate-800 border-slate-600 text-white font-bold shadow-sm'
-              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+              ? 'bg-[var(--bg-elevated)] border-[var(--color-primary)] text-[var(--text-body)] font-bold shadow-sm'
+              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
         >
           Todas ({MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo).length})
@@ -87,7 +87,7 @@ export const GridView: React.FC = () => {
           className={`px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'cursables'
               ? 'font-bold shadow-sm'
-              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
           style={gridFilter === 'cursables' ? {
             backgroundColor: 'var(--color-cursable-bg)',
@@ -103,7 +103,7 @@ export const GridView: React.FC = () => {
           className={`px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'regulares'
               ? 'font-bold shadow-sm'
-              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
           style={gridFilter === 'regulares' ? {
             backgroundColor: 'var(--color-regular-bg)',
@@ -119,7 +119,7 @@ export const GridView: React.FC = () => {
           className={`px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'aprobadas'
               ? 'font-bold shadow-sm'
-              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
           style={gridFilter === 'aprobadas' ? {
             backgroundColor: 'var(--color-aprobada-bg)',
@@ -134,11 +134,11 @@ export const GridView: React.FC = () => {
           onClick={() => setGridFilter('con-meta')}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border transition-all ${
             gridFilter === 'con-meta'
-              ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 font-bold shadow-sm'
-              : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200'
+              ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-800 dark:text-cyan-300 font-bold shadow-sm'
+              : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-slate-500 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
         >
-          <Target className="w-3.5 h-3.5 text-cyan-400" />
+          <Target className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
           <span>Con Meta 🎯 ({Object.keys(metasExamen).length})</span>
         </button>
       </div>
@@ -195,15 +195,15 @@ export const GridView: React.FC = () => {
                     const nota = notas[m.id]?.nota;
 
                     // Estilos de tarjeta según estado adaptados al tema
-                    let cardStyle = 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-400';
+                    let cardStyle = 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-500 dark:text-slate-400';
                     let statusBadge = (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono border border-slate-700/60">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono border border-slate-300 dark:border-slate-700/60 font-medium">
                         Bloqueada
                       </span>
                     );
 
                     if (est === 'aprobada') {
-                      cardStyle = 'card-aprobada-theme text-slate-100';
+                      cardStyle = 'card-aprobada-theme text-[var(--text-body)]';
                       statusBadge = (
                         <span 
                           className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -217,7 +217,7 @@ export const GridView: React.FC = () => {
                         </span>
                       );
                     } else if (est === 'regular') {
-                      cardStyle = 'card-regular-theme text-slate-100';
+                      cardStyle = 'card-regular-theme text-[var(--text-body)]';
                       statusBadge = (
                         <span 
                           className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -231,7 +231,7 @@ export const GridView: React.FC = () => {
                         </span>
                       );
                     } else if (cursable) {
-                      cardStyle = 'card-cursable-theme glow-cursable-theme text-slate-100';
+                      cardStyle = 'card-cursable-theme glow-cursable-theme text-[var(--text-body)]';
                       statusBadge = (
                         <span 
                           className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -267,46 +267,46 @@ export const GridView: React.FC = () => {
                       >
                         {/* Fila superior: ID y Badges */}
                         <div className="flex items-center justify-between gap-1 mb-1.5 font-mono text-[10px]">
-                          <span className="font-bold text-slate-500 group-hover:text-slate-200 transition-colors">
+                          <span className="font-bold text-slate-400 dark:text-slate-500 group-hover:text-[var(--text-body)] transition-colors">
                             #{String(m.id).padStart(2, '0')}
                           </span>
                           <div className="flex items-center gap-1">
                             {m.esIntegradora && (
-                              <span className="px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[9px]">
+                              <span className="px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-700 dark:text-purple-300 text-[9px] font-semibold">
                                 INT
                               </span>
                             )}
                             {m.esCuatrimestral && (
-                              <span className="px-1.5 py-0.5 rounded bg-blue-500/20 border border-blue-500/40 text-blue-300 text-[9px]">
+                              <span className="px-1.5 py-0.5 rounded bg-blue-500/20 border border-blue-500/40 text-blue-700 dark:text-blue-300 text-[9px] font-semibold">
                                 1C/2C
                               </span>
                             )}
                             {m.esAdusiSolo && (
-                              <span className="px-1.5 py-0.5 rounded bg-pink-500/20 border border-pink-500/40 text-pink-300 text-[9px]">
+                              <span className="px-1.5 py-0.5 rounded bg-pink-500/20 border border-pink-500/40 text-pink-700 dark:text-pink-300 text-[9px] font-semibold">
                                 ADUSI
                               </span>
                             )}
-                            <span className="text-slate-400">{m.horas}hs</span>
+                            <span className="text-slate-500 dark:text-slate-400">{m.horas}hs</span>
                           </div>
                         </div>
 
                         {/* Nombre de la materia */}
-                        <div className="font-semibold text-xs leading-snug mb-2 font-mono">
+                        <div className="font-semibold text-xs leading-snug mb-2 font-mono text-[var(--text-body)]">
                           {m.nombreCompleto}
                         </div>
 
                         {/* Fila inferior: Estado, Nota, Meta y Botón de Información */}
-                        <div className="flex items-center justify-between pt-1 border-t border-slate-800/40 mt-1">
+                        <div className="flex items-center justify-between pt-1 border-t border-[var(--border-color)] mt-1">
                           <div className="flex flex-wrap items-center gap-1.5">
                             {statusBadge}
                             {nota !== undefined && (
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300">
+                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-800 dark:text-purple-300">
                                 Nota: {nota}
                               </span>
                             )}
                             {metasExamen[m.id] && (
                               <span 
-                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 flex items-center gap-1"
+                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 text-cyan-800 dark:text-cyan-300 flex items-center gap-1"
                                 title={`Meta agendada: ${metasExamen[m.id].turnoNombre}`}
                               >
                                 <Target className="w-2.5 h-2.5" />
@@ -322,7 +322,7 @@ export const GridView: React.FC = () => {
                               setSelectedSubjectId(m.id);
                             }}
                             aria-label={`Ver detalles, correlativas y notas de ${m.nombreCompleto}`}
-                            className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                            className="p-1 rounded text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
                             title="Ver correlativas y registrar notas"
                           >
                             <Info className="w-3.5 h-3.5" />

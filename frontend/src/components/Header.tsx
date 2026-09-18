@@ -188,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               >
                 {stats.aprobadasCount}
               </div>
-              <div className="text-[10px] text-slate-300/70 uppercase leading-tight">Aprobadas</div>
+              <div className="text-[10px] text-slate-600 dark:text-slate-300/80 uppercase leading-tight font-medium">Aprobadas</div>
             </div>
           </div>
 
@@ -210,7 +210,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               >
                 {stats.regularesCount}
               </div>
-              <div className="text-[10px] text-slate-300/70 uppercase leading-tight">Regulares</div>
+              <div className="text-[10px] text-slate-600 dark:text-slate-300/80 uppercase leading-tight font-medium">Regulares</div>
             </div>
           </div>
 
@@ -232,19 +232,19 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               >
                 {stats.cursablesCount}
               </div>
-              <div className="text-[10px] text-slate-300/70 uppercase leading-tight">Cursables</div>
+              <div className="text-[10px] text-slate-600 dark:text-slate-300/80 uppercase leading-tight font-medium">Cursables</div>
             </div>
           </div>
 
           {stats.promedioConAplazos !== null && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#190c2e]/80 border border-purple-500/30 shadow-sm">
-              <Award className="w-3.5 h-3.5 text-purple-400" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-[#190c2e]/80 border border-purple-500/30 shadow-sm">
+              <Award className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
               <div className="text-left font-mono">
-                <div className="text-purple-300 font-bold text-xs sm:text-sm leading-none">
+                <div className="text-purple-700 dark:text-purple-300 font-bold text-xs sm:text-sm leading-none">
                   {stats.promedioSinAplazos ?? stats.promedioConAplazos}
                 </div>
                 <div
-                  className="text-[10px] text-purple-300/60 uppercase leading-tight"
+                  className="text-[10px] text-purple-700/70 dark:text-purple-300/60 uppercase leading-tight font-medium"
                   title={`Con aplazos: ${stats.promedioConAplazos} · Sin aplazos: ${stats.promedioSinAplazos ?? '—'}`}
                 >
                   {stats.promedioSinAplazos !== null ? 'Prom. s/aplazos' : 'Promedio'}
@@ -259,10 +259,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           {/* Perfil del Alumno */}
           <button
             onClick={() => setProfileModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-mono text-xs transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] hover:border-slate-400 dark:hover:border-slate-700 text-[var(--text-body)] font-mono text-xs transition-colors shadow-sm"
             title="Configurar nombre y legajo universitario del alumno"
           >
-            <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
+            <UserIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             <span className="max-w-[120px] truncate">
               {perfil.nombre || 'Perfil'}
             </span>
@@ -286,14 +286,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </button>
 
           {user ? (
-            <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800/80 rounded-lg py-1 px-2.5 font-mono text-xs">
-              <div className="flex items-center gap-1.5 text-slate-300 text-[11px]" title={`Sesión activa: ${user.email}`}>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_5px_#10b981]" />
+            <div className="flex items-center gap-1 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg py-1 px-2.5 font-mono text-xs shadow-sm">
+              <div className="flex items-center gap-1.5 text-[var(--text-body)] text-[11px]" title={`Sesión activa: ${user.email}`}>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]" />
                 <span className="max-w-[110px] truncate font-medium">{user.email.split('@')[0]}</span>
               </div>
               <button
                 onClick={logout}
-                className="ml-1 p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                className="ml-1 p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
                 title="Cerrar sesión"
               >
                 <LogOut className="w-3.5 h-3.5" />
@@ -357,11 +357,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           {viewMode === 'grafo' && (
             <div className="flex items-center gap-1.5">
               <span className="text-slate-500 text-[11px] hidden sm:inline">Correlativas:</span>
-              <div className="flex items-center bg-slate-900/80 p-1 rounded-lg border border-slate-800">
+              <div className="flex items-center bg-[var(--bg-elevated)] p-1 rounded-lg border border-[var(--border-color)]">
                 <button
                   onClick={() => setEdgeMode('ambos')}
                   className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                    edgeMode === 'ambos' ? 'bg-slate-800 font-bold' : 'text-slate-400 hover:text-slate-200'
+                    edgeMode === 'ambos' ? 'bg-[var(--bg-surface)] font-bold shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)]'
                   }`}
                   style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
                 >
@@ -370,7 +370,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <button
                   onClick={() => setEdgeMode('regular')}
                   className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                    edgeMode === 'regular' ? 'font-bold' : 'text-slate-400 hover:text-slate-200'
+                    edgeMode === 'regular' ? 'font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)]'
                   }`}
                   style={edgeMode === 'regular' ? {
                     backgroundColor: 'var(--color-cursable-bg)',
@@ -382,7 +382,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <button
                   onClick={() => setEdgeMode('aprobada')}
                   className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                    edgeMode === 'aprobada' ? 'font-bold' : 'text-slate-400 hover:text-slate-200'
+                    edgeMode === 'aprobada' ? 'font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)]'
                   }`}
                   style={edgeMode === 'aprobada' ? {
                     backgroundColor: 'var(--color-regular-bg)',
@@ -397,13 +397,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
 
           {/* Porcentaje y barra de avance de la carrera larga y satisfactoria */}
           <div className="flex items-center gap-3 px-3.5 py-1.5 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-color)] shadow-inner">
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium whitespace-nowrap">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">
               <span>Avance:</span>
               <span className="text-[var(--text-body)] font-bold">
                 {stats.aprobadasCount} / {stats.totalTroncales} materias
               </span>
             </div>
-            <div className="w-36 sm:w-56 md:w-72 lg:w-[340px] xl:w-[460px] 2xl:w-[560px] h-2.5 sm:h-3 rounded-full bg-slate-950/90 overflow-hidden border border-slate-700/60 p-0.5 relative shadow-inner">
+            <div className="w-36 sm:w-56 md:w-72 lg:w-[340px] xl:w-[460px] 2xl:w-[560px] h-2.5 sm:h-3 rounded-full bg-slate-200 dark:bg-slate-950/90 overflow-hidden border border-slate-300 dark:border-slate-700/60 p-0.5 relative shadow-inner">
               <div 
                 className="h-full rounded-full transition-all duration-700 ease-out relative"
                 style={{ 
@@ -431,17 +431,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Calendario Oficial y Metas */}
             <button
               onClick={() => setCalendarOpen(true)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all shadow-sm ${
                 stats.metasCount > 0
-                  ? 'bg-cyan-500/20 border-cyan-400/60 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                  : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
+                  ? 'bg-cyan-500/20 border-cyan-400/60 text-cyan-800 dark:text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                  : 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)]'
               }`}
               title="Calendario Académico UTN 2026/2027 y Metas de Examen"
             >
-              <CalendarDays className="w-3.5 h-3.5 text-cyan-400" />
+              <CalendarDays className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
               <span>Calendario</span>
               {stats.metasCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded bg-cyan-500/30 text-[10px] text-cyan-200 font-bold flex items-center gap-0.5">
+                <span className="px-1.5 py-0.2 rounded bg-cyan-500/30 text-[10px] text-cyan-800 dark:text-cyan-200 font-bold flex items-center gap-0.5">
                   <Target className="w-2.5 h-2.5" />
                   {stats.metasCount}
                 </span>
@@ -451,26 +451,26 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Ficha Analítica / Reporte PDF */}
             <button
               onClick={() => setReportOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-[11px] transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)] font-mono text-[11px] transition-colors shadow-sm"
               title="Descargar o imprimir ficha analítica oficial en PDF"
             >
-              <FileText className="w-3.5 h-3.5 text-purple-400" />
+              <FileText className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
               <span>Ficha PDF</span>
             </button>
 
             {/* Botón Electivas */}
             <button
               onClick={() => setElectivasOpen(!electivasOpen)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all shadow-sm ${
                 electivasOpen
-                  ? 'bg-amber-500/20 border-amber-400/60 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
-                  : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
+                  ? 'bg-amber-500/20 border-amber-400/60 text-amber-800 dark:text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+                  : 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)]'
               }`}
               title="Panel de Materias Electivas y cálculo de horas"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
               <span>Electivas</span>
-              <span className="px-1 py-0.2 rounded bg-amber-500/20 text-[10px] text-amber-300 font-medium">
+              <span className="px-1 py-0.2 rounded bg-amber-500/20 text-[10px] text-amber-800 dark:text-amber-300 font-medium">
                 {stats.horasElectivasAprobadas}/20hs
               </span>
             </button>
@@ -478,10 +478,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Títulos */}
             <button
               onClick={onOpenTitles}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-[11px] transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)] font-mono text-[11px] transition-colors shadow-sm"
               title="Requisitos para Título Intermedio ADUSI e Ingeniería"
             >
-              <GraduationCap className="w-3.5 h-3.5 text-indigo-400" />
+              <GraduationCap className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               <span>Títulos</span>
               {stats.adusiCumplido && (
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]" title="ADUSI alcanzado" />
@@ -491,28 +491,28 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Estadísticas */}
             <button
               onClick={() => setStatsModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-[11px] transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)] font-mono text-[11px] transition-colors shadow-sm"
               title="Dashboard de Estadísticas Avanzadas"
             >
-              <BarChart3 className="w-3.5 h-3.5 text-pink-400" />
+              <BarChart3 className="w-3.5 h-3.5 text-pink-600 dark:text-pink-400" />
               <span>Estadísticas</span>
             </button>
 
             {/* Botón Compartir */}
             <button
               onClick={() => setShareModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-[11px] transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)] font-mono text-[11px] transition-colors shadow-sm"
               title="Generar enlace compartible de tu progreso"
             >
-              <Share2 className="w-3.5 h-3.5 text-sky-400" />
+              <Share2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
               <span>Compartir</span>
             </button>
           </div>
 
-          <div className="h-4 w-px bg-slate-800 hidden xl:block" />
+          <div className="h-4 w-px bg-[var(--border-color)] hidden xl:block" />
 
           {/* Leyenda compacta */}
-          <div className="hidden lg:flex items-center gap-2.5 text-[11px] text-slate-400">
+          <div className="hidden lg:flex items-center gap-2.5 text-[11px] text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
               <span 
                 className="w-2 h-2 rounded-full" 

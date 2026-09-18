@@ -161,11 +161,11 @@ export const AuthModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Cabecera */}
-        <div className="p-6 border-b border-slate-800 bg-[#0d1527] flex items-center justify-between">
+        <div className="p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div 
               className="p-2 rounded-xl border"
@@ -178,12 +178,12 @@ export const AuthModal: React.FC = () => {
               {isMergeStep ? <GitMerge className="w-5 h-5" /> : <Cloud className="w-5 h-5" />}
             </div>
             <div>
-              <h2 id="auth-modal-title" className="text-lg font-bold font-syne text-white">
+              <h2 id="auth-modal-title" className="text-lg font-bold font-syne text-[var(--text-body)]">
                 {isMergeStep 
                   ? 'Fusión Inteligente' 
                   : isRegister ? 'Crear Cuenta en la Nube' : 'Iniciar Sesión'}
               </h2>
-              <p className="text-xs font-mono text-slate-400">
+              <p className="text-xs font-mono text-slate-500 dark:text-slate-400">
                 {isMergeStep 
                   ? 'Detectamos progreso previo en esta computadora'
                   : 'Sincronizá tu avance en cualquier PC o celular'}
@@ -195,7 +195,7 @@ export const AuthModal: React.FC = () => {
             type="button"
             onClick={handleClose}
             aria-label="Cerrar modal de autenticación"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -279,40 +279,40 @@ export const AuthModal: React.FC = () => {
             )}
 
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1.5 font-semibold">
+              <label className="block text-xs font-mono text-slate-600 dark:text-slate-400 mb-1.5 font-semibold">
                 Correo Electrónico:
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="email"
                   required
                   placeholder="alumno@utn.edu.ar"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full bg-[#070b13] border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs font-mono text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400"
+                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg pl-9 pr-3 py-2 text-xs font-mono text-[var(--text-body)] placeholder:text-slate-400 focus:outline-none focus:border-cyan-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1.5 font-semibold">
+              <label className="block text-xs font-mono text-slate-600 dark:text-slate-400 mb-1.5 font-semibold">
                 Contraseña:
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="Mínimo 6 caracteres"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-[#070b13] border border-slate-800 rounded-lg pl-9 pr-9 py-2 text-xs font-mono text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400"
+                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg pl-9 pr-9 py-2 text-xs font-mono text-[var(--text-body)] placeholder:text-slate-400 focus:outline-none focus:border-cyan-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[var(--text-body)]"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>

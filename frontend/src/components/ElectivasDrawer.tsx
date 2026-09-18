@@ -42,17 +42,17 @@ export const ElectivasDrawer: React.FC = () => {
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-xl bg-[#090e1a] border-l border-slate-800 shadow-2xl flex flex-col">
+        <div className="w-screen max-w-xl bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-2xl flex flex-col">
           
           {/* Header del Panel */}
-          <div className="p-5 border-b border-slate-800/80 bg-[#0b1222]">
+          <div className="p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="font-syne font-bold text-lg text-white tracking-wide">
+                  <h2 className="font-syne font-bold text-lg text-[var(--text-body)] tracking-wide">
                     Materias Electivas
                   </h2>
                   <p className="text-[11px] font-mono text-slate-400">
@@ -63,22 +63,22 @@ export const ElectivasDrawer: React.FC = () => {
 
               <button
                 onClick={() => setElectivasOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Medidor de horas para Título */}
-            <div className="bg-[#0f172a]/90 rounded-xl p-3.5 border border-slate-800 space-y-3">
+            <div className="bg-[var(--bg-base)] rounded-xl p-3.5 border border-[var(--border-color)] space-y-3">
               <div>
                 <div className="flex justify-between text-xs font-mono mb-1">
-                  <span className="text-slate-300 font-semibold">Meta de Ingeniería:</span>
-                  <span className="text-amber-400 font-bold">
+                  <span className="text-slate-500 dark:text-slate-300 font-semibold">Meta de Ingeniería:</span>
+                  <span className="text-amber-500 dark:text-amber-400 font-bold">
                     {stats.horasElectivasAprobadas} / 20 hs ({Math.min(Math.round((stats.horasElectivasAprobadas / 20) * 100), 100)}%)
                   </span>
                 </div>
-                <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-500"
                     style={{ width: `${Math.min((stats.horasElectivasAprobadas / 20) * 100, 100)}%` }}
@@ -140,15 +140,15 @@ export const ElectivasDrawer: React.FC = () => {
                 : true;
               const puedeCursar = estSem === 'pendiente' && reqRegOk && reqAprOk;
 
-              let cardStyle = 'bg-[#0d1527]/70 border-pink-500/20 text-slate-300';
+              let cardStyle = 'bg-[var(--bg-elevated)] border-pink-500/30 text-slate-500 dark:text-slate-300';
               let statusBadge = (
-                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono font-medium">
                   Pendiente
                 </span>
               );
 
               if (estSem === 'aprobada') {
-                cardStyle = 'card-aprobada-theme text-slate-100';
+                cardStyle = 'card-aprobada-theme text-[var(--text-body)]';
                 statusBadge = (
                   <span 
                     className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -162,7 +162,7 @@ export const ElectivasDrawer: React.FC = () => {
                   </span>
                 );
               } else if (estSem === 'regular') {
-                cardStyle = 'card-regular-theme text-slate-100';
+                cardStyle = 'card-regular-theme text-[var(--text-body)]';
                 statusBadge = (
                   <span 
                     className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -176,7 +176,7 @@ export const ElectivasDrawer: React.FC = () => {
                   </span>
                 );
               } else if (puedeCursar) {
-                cardStyle = 'card-cursable-theme glow-cursable-theme text-slate-100';
+                cardStyle = 'card-cursable-theme glow-cursable-theme text-[var(--text-body)]';
                 statusBadge = (
                   <span 
                     className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -296,15 +296,15 @@ export const ElectivasDrawer: React.FC = () => {
                 const est = estadosElectivas[e.id] || 'pendiente';
                 const cursable = esElectivaCursable(e);
 
-                let cardStyle = 'bg-[#0d1527]/70 border-slate-800 text-slate-300';
+                let cardStyle = 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-600 dark:text-slate-300';
                 let statusBadge = (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono border border-slate-300 dark:border-slate-700/60 font-medium">
                     Pendiente
                   </span>
                 );
 
                 if (est === 'aprobada') {
-                  cardStyle = 'card-aprobada-theme text-slate-100';
+                  cardStyle = 'card-aprobada-theme text-[var(--text-body)]';
                   statusBadge = (
                     <span 
                       className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -318,7 +318,7 @@ export const ElectivasDrawer: React.FC = () => {
                     </span>
                   );
                 } else if (est === 'regular') {
-                  cardStyle = 'card-regular-theme text-slate-100';
+                  cardStyle = 'card-regular-theme text-[var(--text-body)]';
                   statusBadge = (
                     <span 
                       className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -332,7 +332,7 @@ export const ElectivasDrawer: React.FC = () => {
                     </span>
                   );
                 } else if (cursable) {
-                  cardStyle = 'card-cursable-theme glow-cursable-theme text-slate-100';
+                  cardStyle = 'card-cursable-theme glow-cursable-theme text-[var(--text-body)]';
                   statusBadge = (
                     <span 
                       className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -355,37 +355,37 @@ export const ElectivasDrawer: React.FC = () => {
                   <div
                     key={e.id}
                     onClick={() => toggleElectivaEstado(e.id)}
-                    className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer select-none hover:border-slate-700 ${cardStyle}`}
+                    className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer select-none hover:border-slate-500/50 ${cardStyle}`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
                       <div>
-                        <span className="text-[10px] font-mono text-amber-400 font-bold mr-2">
+                        <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold mr-2">
                           {e.nivel}º NIVEL
                         </span>
-                        <h3 className="font-semibold text-sm leading-snug font-mono text-white mt-0.5">
+                        <h3 className="font-semibold text-sm leading-snug font-mono text-[var(--text-body)] mt-0.5">
                           {e.nombre}
                         </h3>
                       </div>
 
                       <div className="text-right shrink-0">
-                        <span className="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono font-bold text-xs">
+                        <span className="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-mono font-bold text-xs">
                           +{e.horas} hs
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-slate-800/60 text-[10px] font-mono">
-                      <span className="text-slate-400">{e.tipo} ({e.cuatrimestre})</span>
-                      <span className="text-slate-600">•</span>
+                    <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono">
+                      <span className="text-slate-500 dark:text-slate-400">{e.tipo} ({e.cuatrimestre})</span>
+                      <span className="text-slate-400 dark:text-slate-600">•</span>
                       {statusBadge}
                     </div>
 
                     {/* Correlatividades exigidas */}
                     {(e.reqRegular.length > 0 || e.reqAprobada.length > 0) && (
-                      <div className="mt-2.5 pt-2 border-t border-slate-800/40 text-[10px] font-mono space-y-1">
+                      <div className="mt-2.5 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono space-y-1">
                         {e.reqRegular.length > 0 && (
-                          <div className="text-slate-400 flex flex-wrap items-center gap-1">
-                            <span className="text-slate-500">Regulares:</span>
+                          <div className="text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-1">
+                            <span className="font-semibold text-slate-600 dark:text-slate-400">Regulares:</span>
                             {e.reqRegular.map(reqId => {
                               const reqEst = estados[reqId] || 'pendiente';
                               const ok = reqEst === 'regular' || reqEst === 'aprobada';
@@ -394,8 +394,8 @@ export const ElectivasDrawer: React.FC = () => {
                                   key={reqId}
                                   className={`px-1.5 py-0.5 rounded border ${
                                     ok
-                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                                      : 'bg-slate-800 border-slate-700 text-slate-400'
+                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-medium'
+                                      : 'bg-slate-200/80 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-400'
                                   }`}
                                 >
                                   {MATERIAS_MAP[reqId]?.nombre || `#${reqId}`}
@@ -406,8 +406,8 @@ export const ElectivasDrawer: React.FC = () => {
                         )}
 
                         {e.reqAprobada.length > 0 && (
-                          <div className="text-slate-400 flex flex-wrap items-center gap-1">
-                            <span className="text-slate-500">Aprobadas:</span>
+                          <div className="text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-1">
+                            <span className="font-semibold text-slate-600 dark:text-slate-400">Aprobadas:</span>
                             {e.reqAprobada.map(reqId => {
                               const reqEst = estados[reqId] || 'pendiente';
                               const ok = reqEst === 'aprobada';
@@ -416,8 +416,8 @@ export const ElectivasDrawer: React.FC = () => {
                                   key={reqId}
                                   className={`px-1.5 py-0.5 rounded border ${
                                     ok
-                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                                      : 'bg-slate-800 border-slate-700 text-slate-400'
+                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-medium'
+                                      : 'bg-slate-200/80 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-400'
                                   }`}
                                 >
                                   {MATERIAS_MAP[reqId]?.nombre || `#${reqId}`}
