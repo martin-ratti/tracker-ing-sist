@@ -56,9 +56,10 @@ const TrackerMain: React.FC = () => {
       'c': () => setCalendarOpen(true),
       'r': () => setReportOpen(true),
       'p': () => setProfileModalOpen(true),
+      's': () => setShareModalOpen(true),
       '?': () => setHelpModalOpen(true),
     }),
-    [setViewMode, setElectivasOpen, setCalendarOpen, setReportOpen, setProfileModalOpen, setHelpModalOpen]
+    [setViewMode, setElectivasOpen, setCalendarOpen, setReportOpen, setProfileModalOpen, setShareModalOpen, setHelpModalOpen]
   );
 
   useKeyboardShortcuts(shortcuts);
