@@ -31,6 +31,8 @@ export const NetworkGraph: React.FC = () => {
   const toggleMateriaEstadoRef = useRef<(id: number) => void>(() => {});
   const setSelectedSubjectIdRef = useRef<(id: number | null) => void>(() => {});
   const setFocusedSubjectIdRef = useRef<(id: number | null) => void>(() => {});
+  const prevNodeSignaturesRef = useRef<Map<number, string>>(new Map());
+  const prevEdgeSignaturesRef = useRef<Map<number, string>>(new Map());
 
   const {
     estados,
@@ -232,6 +234,8 @@ export const NetworkGraph: React.FC = () => {
     if (!nodesDatasetRef.current || !edgesDatasetRef.current) return;
 
     const nodeUpdates: Partial<VisNode>[] = [];
+    const nextNodeSignatures = new Map<number, string>();
+
     materiasGrafo.forEach(m => {
       const est = estados[m.id] || 'pendiente';
       const cursable = esMateriaCursable(m);
@@ -304,19 +308,29 @@ export const NetworkGraph: React.FC = () => {
         }
       }
 
-      nodeUpdates.push({
-        id: m.id,
-        color: { background: bg, border },
-        font: { color: fontColor, size: 13, face: 'IBM Plex Mono' },
-        borderWidth: bw,
-        shadow: { enabled: shadowSize > 0, color: shadowColor, size: shadowSize, x: 0, y: 3 }
-      });
+      const sig = `${themeConfig.id}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
+      nextNodeSignatures.set(m.id, sig);
+
+      if (prevNodeSignaturesRef.current.get(m.id) !== sig) {
+        nodeUpdates.push({
+          id: m.id,
+          color: { background: bg, border },
+          font: { color: fontColor, size: 13, face: 'IBM Plex Mono' },
+          borderWidth: bw,
+          shadow: { enabled: shadowSize > 0, color: shadowColor, size: shadowSize, x: 0, y: 3 }
+        });
+      }
     });
 
-    nodesDatasetRef.current.update(nodeUpdates as VisNode[]);
+    if (nodeUpdates.length > 0) {
+      nodesDatasetRef.current.update(nodeUpdates as VisNode[]);
+    }
+    prevNodeSignaturesRef.current = nextNodeSignatures;
 
-    // Actualizar aristas
+    // Actualizar aristas con diffing
     const edgeUpdates: Partial<VisEdge>[] = [];
+    const nextEdgeSignatures = new Map<number, string>();
+
     edgesDatasetRef.current.forEach(edge => {
       const fromId = Number(edge.from);
       const toId = Number(edge.to);
@@ -348,14 +362,23 @@ export const NetworkGraph: React.FC = () => {
         }
       }
 
-      edgeUpdates.push({
-        id: edge.id,
-        color: { color: hidden && !dependenciesTree ? 'transparent' : color },
-        width
-      });
+      const finalColor = hidden && !dependenciesTree ? 'transparent' : color;
+      const sig = `${finalColor}_${width}`;
+      nextEdgeSignatures.set(edge.id, sig);
+
+      if (prevEdgeSignaturesRef.current.get(edge.id) !== sig) {
+        edgeUpdates.push({
+          id: edge.id,
+          color: { color: finalColor },
+          width
+        });
+      }
     });
 
-    edgesDatasetRef.current.update(edgeUpdates as VisEdge[]);
+    if (edgeUpdates.length > 0) {
+      edgesDatasetRef.current.update(edgeUpdates as VisEdge[]);
+    }
+    prevEdgeSignaturesRef.current = nextEdgeSignatures;
   }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, materiasGrafo, themeConfig, dependenciesTree, focusedSubjectId]);
 
   const handleZoomIn = () => {
