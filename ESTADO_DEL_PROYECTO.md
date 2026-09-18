@@ -1,6 +1,7 @@
 # Estado del Proyecto: Tracker Plan de Estudio UTN Sistemas (Plan 2023 · FRRo)
 
-**Fecha de actualización:** 15 de Septiembre de 2026  
+**Fecha de actualización:** 18 de Septiembre de 2026  
+**Hosting en Producción:** [https://tracker-isi-utn-6f213.web.app](https://tracker-isi-utn-6f213.web.app)  
 **Repositorio GitHub:** [https://github.com/martin-ratti/tracker-ing-sist.git](https://github.com/martin-ratti/tracker-ing-sist.git)  
 **Inspiración:** [Tracker Plan de Estudio](https://tracker-plan-de-estudio.vercel.app/index.html) de Lucas Alonso
 
