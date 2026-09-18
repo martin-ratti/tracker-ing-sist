@@ -18,6 +18,7 @@ import {
   onSnapshot, 
   type Firestore 
 } from 'firebase/firestore';
+import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
 import type { ProgresoUsuario } from '../types/plan';
 
 // Configuración leída de variables de entorno Vite
@@ -27,7 +28,8 @@ const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || ''
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ''
 };
 
 // Verifica si las credenciales mínimas de Firebase están presentes
@@ -40,6 +42,7 @@ export const isFirebaseConfigured = Boolean(
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
+let analytics: Analytics | null = null;
 let googleProvider: GoogleAuthProvider | null = null;
 
 if (isFirebaseConfigured) {
@@ -49,6 +52,14 @@ if (isFirebaseConfigured) {
     db = getFirestore(app);
     googleProvider = new GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
+      isSupported().then((supported) => {
+        if (supported && app) {
+          analytics = getAnalytics(app);
+        }
+      }).catch(() => {});
+    }
   } catch (err) {
     console.warn('⚠️ Error al inicializar Firebase SDK:', err);
   }
@@ -56,7 +67,7 @@ if (isFirebaseConfigured) {
   console.info('ℹ️ Firebase no configurado: la aplicación funcionará en modo Local/Offline. Para habilitar la nube, crea un archivo .env con tus credenciales de Firebase.');
 }
 
-export { auth, db, googleProvider };
+export { auth, db, analytics, googleProvider };
 
 /**
  * Autenticación con Google (Popup)
