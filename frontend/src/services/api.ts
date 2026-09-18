@@ -1,4 +1,10 @@
 import type { ProgresoUsuario } from '../types/plan';
+import { 
+  auth, 
+  isFirebaseConfigured, 
+  saveProgressToFirestore, 
+  fetchProgressFromFirestore 
+} from './firebase';
 
 const LOCAL_STORAGE_KEY = 'utn-sistemas-tracker-2023';
 const AUTH_TOKEN_KEY = 'utn_auth_token';
@@ -99,6 +105,20 @@ export async function checkAuthMe(): Promise<UserAuth | null> {
 // --- API PROGRESO ---
 
 export async function fetchProgress(): Promise<ProgresoUsuario> {
+  // 1. Intentar desde Cloud Firestore si hay usuario activo en Firebase
+  if (isFirebaseConfigured && auth?.currentUser?.uid) {
+    try {
+      const firestoreData = await fetchProgressFromFirestore(auth.currentUser.uid);
+      if (firestoreData) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(firestoreData));
+        return firestoreData;
+      }
+    } catch (err) {
+      console.warn('Error al cargar progreso de Firestore, probando fallback:', err);
+    }
+  }
+
+  // 2. Fallback a Backend Express (si está disponible)
   try {
     const res = await fetch('/api/progress', {
       headers: getAuthHeaders()
@@ -112,6 +132,7 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
     console.warn('Backend no disponible, cargando desde localStorage:', error);
   }
 
+  // 3. Fallback a LocalStorage
   const local = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (local) {
     try {
@@ -223,7 +244,7 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 export async function persistProgress(progress: Partial<ProgresoUsuario>): Promise<void> {
-  let current: ProgresoUsuario = getLocalProgress();
+  const current: ProgresoUsuario = getLocalProgress();
 
   const updated: ProgresoUsuario = {
     ...current,
@@ -232,6 +253,14 @@ export async function persistProgress(progress: Partial<ProgresoUsuario>): Promi
   };
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
 
+  // 1. Sincronización en la nube con Firestore en tiempo real
+  if (isFirebaseConfigured && auth?.currentUser?.uid) {
+    saveProgressToFirestore(auth.currentUser.uid, updated).catch(err => {
+      console.warn('No se pudo persistir en Firestore (offline):', err);
+    });
+  }
+
+  // 2. Sincronización secundaria con backend Express si está activo
   if (saveTimeout) clearTimeout(saveTimeout);
   saveTimeout = setTimeout(async () => {
     try {
@@ -240,8 +269,8 @@ export async function persistProgress(progress: Partial<ProgresoUsuario>): Promi
         headers: getAuthHeaders(),
         body: JSON.stringify(updated)
       });
-    } catch (err) {
-      console.warn('No se pudo sincronizar con backend (offline):', err);
+    } catch {
+      // Ignorar fallo de backend tradicional cuando está en modo serverless
     }
   }, 400);
 }
@@ -252,12 +281,29 @@ export async function clearProgress(): Promise<void> {
     saveTimeout = null;
   }
   localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+  const emptyProgress: ProgresoUsuario = {
+    estados: {},
+    estadosElectivas: {},
+    notas: {},
+    ppsHoras: 0,
+    perfil: { nombre: '', legajo: '' },
+    metasExamen: {},
+    actualizadoEn: new Date().toISOString()
+  };
+
+  if (isFirebaseConfigured && auth?.currentUser?.uid) {
+    saveProgressToFirestore(auth.currentUser.uid, emptyProgress).catch(err => {
+      console.warn('No se pudo resetear en Firestore:', err);
+    });
+  }
+
   try {
     await fetch('/api/progress/reset', {
       method: 'POST',
       headers: getAuthHeaders()
     });
-  } catch (err) {
-    console.warn('No se pudo resetear en backend:', err);
+  } catch {
+    // Ignorar
   }
 }

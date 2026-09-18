@@ -9,23 +9,15 @@ import {
   EyeOff, 
   Cloud, 
   AlertCircle, 
-  Loader2, 
-  GitMerge, 
-  UploadCloud, 
-  DownloadCloud 
+  Loader2 
 } from 'lucide-react';
-import type { ProgresoUsuario } from '../types/plan';
 import { 
-  loginApi, 
-  registerApi, 
   getLocalProgress, 
-  mergeProgress, 
-  persistProgress, 
-  type UserAuth 
+  persistProgress 
 } from '../services/api';
 
 export const AuthModal: React.FC = () => {
-  const { isAuthModalOpen, closeAuthModal, completeAuth } = useAuth();
+  const { isAuthModalOpen, closeAuthModal, login, register, loginWithGoogle } = useAuth();
   const modalRef = useFocusTrap(isAuthModalOpen);
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
@@ -34,18 +26,10 @@ export const AuthModal: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Estados para Fusión Inteligente
-  const [isMergeStep, setIsMergeStep] = useState(false);
-  const [pendingAuthUser, setPendingAuthUser] = useState<UserAuth | null>(null);
-  const [cloudProgressData, setCloudProgressData] = useState<ProgresoUsuario | null>(null);
-  const [localProgressData, setLocalProgressData] = useState<ProgresoUsuario | null>(null);
-
   const handleClose = React.useCallback(() => {
     setError(null);
     setPassword('');
     setLoading(false);
-    setIsMergeStep(false);
-    setPendingAuthUser(null);
     closeAuthModal();
   }, [closeAuthModal]);
 
@@ -60,6 +44,25 @@ export const AuthModal: React.FC = () => {
   }, [isAuthModalOpen, handleClose]);
 
   if (!isAuthModalOpen) return null;
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    try {
+      setLoading(true);
+      await loginWithGoogle();
+      const localData = getLocalProgress();
+      const countLocal = Object.values(localData.estados || {}).filter(e => e !== 'pendiente').length + (localData.ppsHoras || 0);
+      if (countLocal > 0) {
+        await persistProgress(localData);
+      }
+    } catch (err: any) {
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setError(err.message || 'Error al autenticarse con Google');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,75 +80,20 @@ export const AuthModal: React.FC = () => {
 
     try {
       setLoading(true);
-      const authRes = isRegister 
-        ? await registerApi(email, password) 
-        : await loginApi(email, password);
+      if (isRegister) {
+        await register(email, password);
+      } else {
+        await login(email, password);
+      }
 
-      // Chequear si hay datos guardados localmente para comparar con la nube
+      // Si había progreso local previo, sincronizarlo
       const localData = getLocalProgress();
       const countLocal = Object.values(localData.estados || {}).filter(e => e !== 'pendiente').length + (localData.ppsHoras || 0);
-
-      // Traer datos de la nube
-      const cloudRes = await fetch('/api/progress', {
-        headers: { Authorization: `Bearer ${authRes.token}` }
-      });
-      const cloudData: ProgresoUsuario = cloudRes.ok 
-        ? await cloudRes.json() 
-        : { estados: {}, estadosElectivas: {}, notas: {}, ppsHoras: 0 };
-      const countCloud = Object.values(cloudData.estados || {}).filter(e => e !== 'pendiente').length + (cloudData.ppsHoras || 0);
-
-      // Si ambos lados tienen materias y difieren, ofrecer fusión inteligente
-      if (countLocal > 0 && countCloud > 0 && JSON.stringify(localData.estados) !== JSON.stringify(cloudData.estados)) {
-        setPendingAuthUser(authRes.user);
-        setLocalProgressData(localData);
-        setCloudProgressData(cloudData);
-        setIsMergeStep(true);
-        setLoading(false);
-        return;
-      }
-
-      // Si la cuenta estaba vacía pero en local tenía datos (ej: usuario que usó la app y recién se registra):
-      if (countLocal > 0 && countCloud === 0) {
+      if (countLocal > 0) {
         await persistProgress(localData);
       }
-
-      completeAuth(authRes.user);
     } catch (err: any) {
       setError(err.message || 'Ocurrió un error. Intenta nuevamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Acciones de fusión
-  const handleMergeBoth = async () => {
-    if (!pendingAuthUser || !localProgressData || !cloudProgressData) return;
-    setLoading(true);
-    try {
-      const merged = mergeProgress(localProgressData, cloudProgressData);
-      await persistProgress(merged);
-      completeAuth(pendingAuthUser);
-    } catch {
-      setError('Error al fusionar progreso.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUseCloud = () => {
-    if (!pendingAuthUser || !cloudProgressData) return;
-    localStorage.setItem('utn-sistemas-tracker-2023', JSON.stringify(cloudProgressData));
-    completeAuth(pendingAuthUser);
-  };
-
-  const handleUseLocal = async () => {
-    if (!pendingAuthUser || !localProgressData) return;
-    setLoading(true);
-    try {
-      await persistProgress(localProgressData);
-      completeAuth(pendingAuthUser);
-    } catch {
-      setError('Error al subir progreso local a la nube.');
     } finally {
       setLoading(false);
     }
@@ -175,18 +123,14 @@ export const AuthModal: React.FC = () => {
                 color: 'var(--color-primary)'
               }}
             >
-              {isMergeStep ? <GitMerge className="w-5 h-5" /> : <Cloud className="w-5 h-5" />}
+              <Cloud className="w-5 h-5" />
             </div>
             <div>
               <h2 id="auth-modal-title" className="text-lg font-bold font-syne text-[var(--text-body)]">
-                {isMergeStep 
-                  ? 'Fusión Inteligente' 
-                  : isRegister ? 'Crear Cuenta en la Nube' : 'Iniciar Sesión'}
+                {isRegister ? 'Crear Cuenta en la Nube' : 'Iniciar Sesión'}
               </h2>
               <p className="text-xs font-mono text-slate-500 dark:text-slate-400">
-                {isMergeStep 
-                  ? 'Detectamos progreso previo en esta computadora'
-                  : 'Sincronizá tu avance en cualquier PC o celular'}
+                Sincronizá tu avance en cualquier PC o celular
               </p>
             </div>
           </div>
@@ -201,82 +145,36 @@ export const AuthModal: React.FC = () => {
           </button>
         </div>
 
-        {/* PANTALLA DE FUSIÓN INTELIGENTE */}
-        {isMergeStep ? (
-          <div className="p-6 space-y-4 font-mono text-xs">
-            <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/40 text-cyan-300 space-y-2">
-              <div className="font-bold flex items-center gap-2">
-                <GitMerge className="w-4 h-4 text-cyan-400" />
-                <span>¿Cómo deseas gestionar tus datos?</span>
-              </div>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Tienes materias cargadas de forma local en esta PC y también guardadas en tu cuenta de la nube.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-center text-[11px]">
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase">En esta PC (Local)</span>
-                <span className="font-bold text-sm text-white">
-                  {Object.values(localProgressData?.estados || {}).filter(e => e === 'aprobada').length} Aprobadas
-                </span>
-                <span className="text-[10px] text-slate-500 block">
-                  {Object.values(localProgressData?.estados || {}).filter(e => e === 'regular').length} Regulares
-                </span>
-              </div>
-
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase">En tu Cuenta (Nube)</span>
-                <span className="font-bold text-sm text-cyan-400">
-                  {Object.values(cloudProgressData?.estados || {}).filter(e => e === 'aprobada').length} Aprobadas
-                </span>
-                <span className="text-[10px] text-slate-500 block">
-                  {Object.values(cloudProgressData?.estados || {}).filter(e => e === 'regular').length} Regulares
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-2 pt-2">
-              <button
-                type="button"
-                onClick={handleMergeBoth}
-                disabled={loading}
-                className="w-full p-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition-all shadow-md flex items-center justify-center gap-2"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <GitMerge className="w-4 h-4" />}
-                <span>Combinar ambos (Recomendado)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleUseCloud}
-                disabled={loading}
-                className="w-full p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition-colors flex items-center justify-center gap-2"
-              >
-                <DownloadCloud className="w-4 h-4 text-indigo-400" />
-                <span>Usar datos de la Nube (descarta local)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleUseLocal}
-                disabled={loading}
-                className="w-full p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition-colors flex items-center justify-center gap-2"
-              >
-                <UploadCloud className="w-4 h-4 text-amber-400" />
-                <span>Sobreescribir Nube con esta PC</span>
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* FORMULARIO DE LOGIN / REGISTRO */
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* FORMULARIO DE LOGIN / REGISTRO */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {error && (
               <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-start gap-2 text-rose-300 text-xs font-mono">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
+
+            {/* Botón de Google Sign-In */}
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="w-full py-2.5 px-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-body)] font-mono text-xs font-semibold flex items-center justify-center gap-2.5 transition-all shadow-sm hover:border-slate-400 dark:hover:border-slate-600 disabled:opacity-50"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Continuar con Google</span>
+            </button>
+
+            <div className="flex items-center gap-3 my-2">
+              <div className="flex-1 h-px bg-[var(--border-color)]" />
+              <span className="text-[10px] uppercase font-mono text-slate-500">o con correo</span>
+              <div className="flex-1 h-px bg-[var(--border-color)]" />
+            </div>
 
             <div>
               <label className="block text-xs font-mono text-slate-600 dark:text-slate-400 mb-1.5 font-semibold">
@@ -357,7 +255,6 @@ export const AuthModal: React.FC = () => {
               </button>
             </div>
           </form>
-        )}
       </div>
     </div>
   );

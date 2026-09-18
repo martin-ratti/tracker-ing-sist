@@ -1,10 +1,22 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen } from '../types/plan';
 import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
+import { TURNOS_EXAMEN_2026, getFechaExactaMesa } from '../data/calendario2026';
 import { fetchProgress, persistProgress, clearProgress } from '../services/api';
 import { decodeProgress } from '../utils/share';
+import { subscribeToUserProgress, onFirebaseAuthStateChanged, isFirebaseConfigured } from '../services/firebase';
 
 export type GridFilterOption = 'todas' | 'cursables' | 'regulares' | 'aprobadas' | 'con-meta';
+
+export interface ProximaMetaInfo {
+  materiaId: number;
+  materiaNombre: string;
+  materiaNombreCorto: string;
+  turnoNombre: string;
+  fechaExamenStr: string;
+  diasFaltantes: number;
+  urgencia: 'urgente' | 'proxima' | 'lejana';
+}
 
 interface Stats {
   aprobadasCount: number;
@@ -22,6 +34,7 @@ interface Stats {
   ingenieroProgreso: number; // 0 - 100
   ingenieroFaltantes: string[];
   metasCount: number;
+  proximaMeta: ProximaMetaInfo | null;
 }
 
 export interface ToastItem {
@@ -202,6 +215,39 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     reloadProgress();
   }, [reloadProgress]);
+
+  // Sincronización en tiempo real con Firestore para multidispositivo
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+
+    let unsubscribeSnapshot: (() => void) | null = null;
+
+    const unsubscribeAuth = onFirebaseAuthStateChanged((fbUser) => {
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = null;
+      }
+
+      if (fbUser) {
+        unsubscribeSnapshot = subscribeToUserProgress(fbUser.uid, (data) => {
+          if (window.location.hash.startsWith('#share=')) return;
+          if (data) {
+            setEstados(data.estados || {});
+            setEstadosElectivas(data.estadosElectivas || {});
+            setNotas(data.notas || {});
+            setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
+            setPerfilState(data.perfil || { nombre: '', legajo: '' });
+            setMetasExamenState(data.metasExamen || {});
+          }
+        });
+      }
+    });
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+    };
+  }, []);
 
   const getEstado = useCallback((id: number): EstadoMateria => {
     return estados[id] || 'pendiente';
@@ -605,6 +651,57 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const ingenieroCumplido = todasTroncalesOk && ingElectivasOk && ppsOk;
     const metasCount = Object.keys(metasExamen).length;
 
+    // Próxima meta de examen más cercana (Item 17)
+    let proximaMeta: ProximaMetaInfo | null = null;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const metasArray = Object.values(metasExamen);
+    if (metasArray.length > 0) {
+      const metasFuturas: ProximaMetaInfo[] = [];
+
+      for (const meta of metasArray) {
+        if (getEstado(meta.materiaId) === 'aprobada') continue;
+
+        const materia = MATERIAS_MAP[meta.materiaId];
+        let fechaStr = meta.fechaEstimada;
+
+        if (!fechaStr) {
+          const turno = TURNOS_EXAMEN_2026.find(t => t.id === meta.turnoId);
+          if (turno) {
+            const fechaExacta = getFechaExactaMesa(meta.materiaId, turno);
+            fechaStr = fechaExacta ? fechaExacta.fechaExactaStr : turno.fechaInicio;
+          }
+        }
+
+        if (fechaStr) {
+          const target = new Date(fechaStr + 'T00:00:00');
+          const diffMs = target.getTime() - now.getTime();
+          const diasFaltantes = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+          if (diasFaltantes >= 0) {
+            const urgencia: 'urgente' | 'proxima' | 'lejana' =
+              diasFaltantes <= 7 ? 'urgente' : diasFaltantes <= 30 ? 'proxima' : 'lejana';
+
+            metasFuturas.push({
+              materiaId: meta.materiaId,
+              materiaNombre: materia ? materia.nombreCompleto : `Materia #${meta.materiaId}`,
+              materiaNombreCorto: materia ? materia.nombre : `#${meta.materiaId}`,
+              turnoNombre: meta.turnoNombre,
+              fechaExamenStr: fechaStr,
+              diasFaltantes,
+              urgencia
+            });
+          }
+        }
+      }
+
+      metasFuturas.sort((a, b) => a.diasFaltantes - b.diasFaltantes);
+      if (metasFuturas.length > 0) {
+        proximaMeta = metasFuturas[0];
+      }
+    }
+
     return {
       aprobadasCount: aprobadas,
       regularesCount: regulares,
@@ -620,7 +717,8 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ingenieroCumplido,
       ingenieroProgreso,
       ingenieroFaltantes,
-      metasCount
+      metasCount,
+      proximaMeta
     };
   }, [getEstado, getEstadoElectiva, notas, ppsHoras, metasExamen, esMateriaCursable]);
 

@@ -21,7 +21,8 @@ import {
   BarChart3,
   Share2,
   Sun,
-  Moon
+  Moon,
+  Clock
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -43,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     setProfileModalOpen,
     setStatsModalOpen,
     setShareModalOpen,
+    setSelectedSubjectId,
     perfil,
     resetAll
   } = useTracker();
@@ -252,6 +254,31 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               </div>
             </div>
           )}
+
+          {stats.proximaMeta && (
+            <button
+              type="button"
+              onClick={() => setSelectedSubjectId(stats.proximaMeta!.materiaId)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all text-left ${
+                stats.proximaMeta.urgencia === 'urgente'
+                  ? 'bg-rose-500/15 border-rose-500/50 text-rose-700 dark:text-rose-300 animate-pulse'
+                  : stats.proximaMeta.urgencia === 'proxima'
+                  ? 'bg-amber-500/15 border-amber-500/50 text-amber-700 dark:text-amber-300'
+                  : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-700 dark:text-cyan-300'
+              }`}
+              title={`Meta de examen: ${stats.proximaMeta.materiaNombre} (${stats.proximaMeta.fechaExamenStr}). Clic para ver.`}
+            >
+              <Clock className="w-3.5 h-3.5 shrink-0" />
+              <div className="font-mono">
+                <div className="font-bold text-xs sm:text-sm leading-none flex items-center gap-1">
+                  <span>{stats.proximaMeta.diasFaltantes === 0 ? '¡Rinde Hoy!' : `${stats.proximaMeta.diasFaltantes}d`}</span>
+                </div>
+                <div className="text-[10px] truncate max-w-[85px] leading-tight font-medium opacity-85">
+                  {stats.proximaMeta.materiaNombreCorto}
+                </div>
+              </div>
+            </button>
+          )}
         </div>
 
         {/* Acciones de usuario y personalización (superior derecha) */}
@@ -447,6 +474,30 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 </span>
               )}
             </button>
+
+            {/* Chip de Próxima Meta de Examen con Cuenta Regresiva (Item 17) */}
+            {stats.proximaMeta && (
+              <button
+                type="button"
+                onClick={() => setSelectedSubjectId(stats.proximaMeta!.materiaId)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all shadow-sm ${
+                  stats.proximaMeta.urgencia === 'urgente'
+                    ? 'bg-rose-500/15 border-rose-500/50 text-rose-700 dark:text-rose-300 animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.25)]'
+                    : stats.proximaMeta.urgencia === 'proxima'
+                    ? 'bg-amber-500/15 border-amber-500/50 text-amber-700 dark:text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                    : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-700 dark:text-cyan-300'
+                }`}
+                title={`Meta agendada: ${stats.proximaMeta.materiaNombre} (${stats.proximaMeta.fechaExamenStr} - ${stats.proximaMeta.turnoNombre}). Clic para ver materia.`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span className="font-semibold">{stats.proximaMeta.materiaNombreCorto}:</span>
+                <span className="font-bold">
+                  {stats.proximaMeta.diasFaltantes === 0
+                    ? '¡Hoy!'
+                    : `Faltan ${stats.proximaMeta.diasFaltantes}d`}
+                </span>
+              </button>
+            )}
 
             {/* Botón Ficha Analítica / Reporte PDF */}
             <button
