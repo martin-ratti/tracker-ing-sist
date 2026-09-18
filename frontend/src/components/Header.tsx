@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useTracker } from '../context/TrackerContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { ThemeSelector } from './ThemeSelector';
 import { 
   Network, 
@@ -18,7 +19,9 @@ import {
   User as UserIcon,
   Target,
   BarChart3,
-  Share2
+  Share2,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -45,6 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
   } = useTracker();
 
   const { user, openAuthModal, logout } = useAuth();
+  const { colorMode, toggleColorMode } = useTheme();
 
   const [confirmReset, setConfirmReset] = useState(false);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -148,6 +152,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               title="Compartir"
             >
               <Share2 className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={toggleColorMode}
+              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-xs font-mono"
+              title={colorMode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
+            >
+              {colorMode === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-400" />
+              )}
             </button>
           </div>
         </div>
@@ -253,6 +269,21 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </button>
 
           <ThemeSelector />
+
+          {/* Botón rápido modo claro/oscuro */}
+          <button
+            type="button"
+            onClick={toggleColorMode}
+            className="p-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] hover:border-slate-500 transition-colors"
+            title={colorMode === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+            aria-label={colorMode === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+          >
+            {colorMode === 'dark' ? (
+              <Sun className="w-3.5 h-3.5 text-amber-400" />
+            ) : (
+              <Moon className="w-3.5 h-3.5 text-indigo-500" />
+            )}
+          </button>
 
           {user ? (
             <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800/80 rounded-lg py-1 px-2.5 font-mono text-xs">

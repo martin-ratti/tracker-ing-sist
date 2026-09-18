@@ -9,6 +9,7 @@
     --bg-surface: #0b101c;
     --bg-elevated: #0d1527;
     --border-color: #1e293b;
+    --text-body: #e2e8f0;
 
     /* Primario */
     --color-primary: #22d3ee;
@@ -39,6 +40,7 @@
     --bg-surface: #160c23;
     --bg-elevated: #201133;
     --border-color: #3b184f;
+    --text-body: #e2e8f0;
 
     /* Primario */
     --color-primary: #f43f5e;
@@ -69,6 +71,7 @@
     --bg-surface: #091a10;
     --bg-elevated: #0e2719;
     --border-color: #164327;
+    --text-body: #e2e8f0;
 
     /* Primario */
     --color-primary: #10b981;
@@ -99,6 +102,7 @@
     --bg-surface: #1d130a;
     --bg-elevated: #2a1b0e;
     --border-color: #452a15;
+    --text-body: #e2e8f0;
 
     /* Primario */
     --color-primary: #f59e0b;
@@ -129,6 +133,7 @@
     --bg-surface: #0d1524;
     --bg-elevated: #131e33;
     --border-color: #1c2b45;
+    --text-body: #e2e8f0;
 
     /* Primario */
     --color-primary: #38bdf8;
@@ -154,9 +159,126 @@
     --color-aprobada-glow: rgba(45, 212, 191, 0.35);
   }
 
+  /* ==========================================================================
+     GLOBAL LIGHT MODE (CADA TEMA CONSERVA SU IDENTIDAD CON CONTRASTE ADAPTADO)
+     ========================================================================== */
+  [data-mode="light"] {
+    --bg-base: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-elevated: #f1f5f9;
+    --border-color: #e2e8f0;
+    --text-body: #0f172a;
+    --text-muted: #64748b;
+  }
+
+  [data-mode="light"][data-theme="cyber"],
+  [data-mode="light"] [data-theme="cyber"] {
+    --color-primary: #0891b2;
+    --color-primary-bg: rgba(8, 145, 178, 0.12);
+    --color-primary-border: rgba(8, 145, 178, 0.35);
+    --color-primary-glow: rgba(8, 145, 178, 0.2);
+    --gradient-primary: linear-gradient(to right, #0891b2, #0d9488, #059669);
+    --color-cursable: #0891b2;
+    --color-cursable-bg: #ecfeff;
+    --color-cursable-border: #0891b2;
+    --color-cursable-glow: rgba(8, 145, 178, 0.25);
+    --color-regular: #d97706;
+    --color-regular-bg: #fffbeb;
+    --color-regular-border: #d97706;
+    --color-regular-glow: rgba(217, 119, 6, 0.25);
+    --color-aprobada: #059669;
+    --color-aprobada-bg: #ecfdf5;
+    --color-aprobada-border: #059669;
+    --color-aprobada-glow: rgba(5, 150, 105, 0.25);
+  }
+
+  [data-mode="light"][data-theme="synthwave"],
+  [data-mode="light"] [data-theme="synthwave"] {
+    --color-primary: #e11d48;
+    --color-primary-bg: rgba(225, 29, 72, 0.12);
+    --color-primary-border: rgba(225, 29, 72, 0.35);
+    --color-primary-glow: rgba(225, 29, 72, 0.2);
+    --gradient-primary: linear-gradient(to right, #e11d48, #9333ea, #0d9488);
+    --color-cursable: #e11d48;
+    --color-cursable-bg: #fff1f2;
+    --color-cursable-border: #e11d48;
+    --color-cursable-glow: rgba(225, 29, 72, 0.25);
+    --color-regular: #9333ea;
+    --color-regular-bg: #faf5ff;
+    --color-regular-border: #9333ea;
+    --color-regular-glow: rgba(147, 51, 234, 0.25);
+    --color-aprobada: #0d9488;
+    --color-aprobada-bg: #f0fdfa;
+    --color-aprobada-border: #0d9488;
+    --color-aprobada-glow: rgba(13, 148, 136, 0.25);
+  }
+
+  [data-mode="light"][data-theme="matrix"],
+  [data-mode="light"] [data-theme="matrix"] {
+    --color-primary: #059669;
+    --color-primary-bg: rgba(5, 150, 105, 0.12);
+    --color-primary-border: rgba(5, 150, 105, 0.35);
+    --color-primary-glow: rgba(5, 150, 105, 0.2);
+    --gradient-primary: linear-gradient(to right, #047857, #059669, #65a30d);
+    --color-cursable: #059669;
+    --color-cursable-bg: #ecfdf5;
+    --color-cursable-border: #059669;
+    --color-cursable-glow: rgba(5, 150, 105, 0.25);
+    --color-regular: #65a30d;
+    --color-regular-bg: #f7fee7;
+    --color-regular-border: #65a30d;
+    --color-regular-glow: rgba(101, 163, 13, 0.25);
+    --color-aprobada: #0d9488;
+    --color-aprobada-bg: #f0fdfa;
+    --color-aprobada-border: #0d9488;
+    --color-aprobada-glow: rgba(13, 148, 136, 0.25);
+  }
+
+  [data-mode="light"][data-theme="sunset"],
+  [data-mode="light"] [data-theme="sunset"] {
+    --color-primary: #d97706;
+    --color-primary-bg: rgba(217, 119, 6, 0.12);
+    --color-primary-border: rgba(217, 119, 6, 0.35);
+    --color-primary-glow: rgba(217, 119, 6, 0.2);
+    --gradient-primary: linear-gradient(to right, #d97706, #ea580c, #dc2626);
+    --color-cursable: #d97706;
+    --color-cursable-bg: #fffbeb;
+    --color-cursable-border: #d97706;
+    --color-cursable-glow: rgba(217, 119, 6, 0.25);
+    --color-regular: #ea580c;
+    --color-regular-bg: #fff7ed;
+    --color-regular-border: #ea580c;
+    --color-regular-glow: rgba(234, 88, 12, 0.25);
+    --color-aprobada: #059669;
+    --color-aprobada-bg: #ecfdf5;
+    --color-aprobada-border: #059669;
+    --color-aprobada-glow: rgba(5, 150, 105, 0.25);
+  }
+
+  [data-mode="light"][data-theme="frost"],
+  [data-mode="light"] [data-theme="frost"] {
+    --color-primary: #0284c7;
+    --color-primary-bg: rgba(2, 132, 199, 0.12);
+    --color-primary-border: rgba(2, 132, 199, 0.35);
+    --color-primary-glow: rgba(2, 132, 199, 0.2);
+    --gradient-primary: linear-gradient(to right, #0284c7, #6366f1, #0d9488);
+    --color-cursable: #0284c7;
+    --color-cursable-bg: #f0f9ff;
+    --color-cursable-border: #0284c7;
+    --color-cursable-glow: rgba(2, 132, 199, 0.25);
+    --color-regular: #6366f1;
+    --color-regular-bg: #eef2ff;
+    --color-regular-border: #6366f1;
+    --color-regular-glow: rgba(99, 102, 241, 0.25);
+    --color-aprobada: #0d9488;
+    --color-aprobada-bg: #f0fdfa;
+    --color-aprobada-border: #0d9488;
+    --color-aprobada-glow: rgba(13, 148, 136, 0.25);
+  }
+
   body {
     background-color: var(--bg-base);
-    color: #e2e8f0;
+    color: var(--text-body);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
     transition: background-color 0.3s ease;
@@ -218,6 +340,21 @@
 
 .glow-cursable-theme {
   animation: pulseGlowTheme 2.2s infinite ease-in-out;
+}
+
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view-transition-enter {
+  animation: viewFadeIn 0.25s ease-out;
 }
 
 /* Reglas de Impresión Formal (A4) */
