@@ -19,6 +19,8 @@ interface VisEdge extends VisBaseEdge {
   tipo: 'regular' | 'aprobada';
 }
 
+const MATERIAS_GRAFO = MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo);
+
 export const NetworkGraph: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
@@ -63,13 +65,11 @@ export const NetworkGraph: React.FC = () => {
     setFocusedSubjectIdRef.current = setFocusedSubjectId;
   }, [setFocusedSubjectId]);
 
-  const materiasGrafo = MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo);
-
   // Inicializar Network
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const initialNodes: VisNode[] = materiasGrafo.map(m => ({
+    const initialNodes: VisNode[] = MATERIAS_GRAFO.map(m => ({
       id: m.id,
       label: m.nombre,
       level: m.nivel,
@@ -84,7 +84,7 @@ export const NetworkGraph: React.FC = () => {
 
     let edgeId = 1;
     const rawEdges: VisEdge[] = [];
-    materiasGrafo.forEach(m => {
+    MATERIAS_GRAFO.forEach(m => {
       m.reqRegular.forEach(c => {
         rawEdges.push({
           id: edgeId++,
@@ -210,7 +210,7 @@ export const NetworkGraph: React.FC = () => {
     }
 
     function findDescendants(currId: number) {
-      materiasGrafo.forEach(candidate => {
+      MATERIAS_GRAFO.forEach(candidate => {
         const depends =
           candidate.reqRegular.includes(currId) ||
           (Array.isArray(candidate.reqAprobada) && candidate.reqAprobada.includes(currId)) ||
@@ -227,7 +227,7 @@ export const NetworkGraph: React.FC = () => {
     findDescendants(focusedSubjectId);
 
     return { ancestors, descendants };
-  }, [focusedSubjectId, materiasGrafo]);
+  }, [focusedSubjectId]);
 
   // Actualizar nodos y aristas cuando cambian los estados, temas, filtros o camino crítico
   useEffect(() => {
@@ -236,7 +236,7 @@ export const NetworkGraph: React.FC = () => {
     const nodeUpdates: Partial<VisNode>[] = [];
     const nextNodeSignatures = new Map<number, string>();
 
-    materiasGrafo.forEach(m => {
+    MATERIAS_GRAFO.forEach(m => {
       const est = estados[m.id] || 'pendiente';
       const cursable = esMateriaCursable(m);
       const rendible = esMateriaRendible(m);
@@ -379,7 +379,7 @@ export const NetworkGraph: React.FC = () => {
       edgesDatasetRef.current.update(edgeUpdates as VisEdge[]);
     }
     prevEdgeSignaturesRef.current = nextEdgeSignatures;
-  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, materiasGrafo, themeConfig, dependenciesTree, focusedSubjectId]);
+  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, themeConfig, dependenciesTree, focusedSubjectId]);
 
   const handleZoomIn = () => {
     if (!networkRef.current) return;
