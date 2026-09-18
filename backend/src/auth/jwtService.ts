@@ -1,6 +1,9 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tracker-utn-dev-secret-change-in-prod';
+const JWT_SECRET = process.env.JWT_SECRET || (() => {
+  console.warn('⚠️  JWT_SECRET no configurado en .env — usando secreto de desarrollo. NO usar en producción.');
+  return 'tracker-utn-dev-secret-change-in-prod';
+})();
 const JWT_EXPIRES_IN = '30d';
 
 export interface JwtPayload {

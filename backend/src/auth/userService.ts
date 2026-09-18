@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DATA_DIR = path.join(__dirname, '../../../data');
+const DATA_DIR = path.join(__dirname, '../../data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const PROGRESS_DIR = path.join(DATA_DIR, 'progress');
 
