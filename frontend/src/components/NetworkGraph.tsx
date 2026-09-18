@@ -39,6 +39,7 @@ export const NetworkGraph: React.FC = () => {
   const {
     estados,
     edgeMode,
+    setViewMode,
     toggleMateriaEstado,
     esMateriaCursable,
     esMateriaRendible,
@@ -447,12 +448,31 @@ export const NetworkGraph: React.FC = () => {
         </div>
       )}
 
+      {/* Banner flotante de sugerencia para celulares */}
+      <div className="md:hidden absolute top-3 left-3 right-3 z-20 flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[var(--bg-surface)]/95 backdrop-blur-md border border-[var(--border-color)] shadow-lg text-[11px] font-mono">
+        <span className="text-slate-800 dark:text-slate-200 leading-tight font-medium">
+          📱 <strong>Grafo de Red</strong> · En celular se recomienda la Malla Curricular.
+        </span>
+        <button
+          type="button"
+          onClick={() => setViewMode('malla')}
+          className="px-2.5 py-1 rounded-lg border font-bold text-xs shrink-0 transition-colors shadow-sm"
+          style={{
+            backgroundColor: 'var(--color-primary-bg)',
+            borderColor: 'var(--color-primary-border)',
+            color: 'var(--color-primary)'
+          }}
+        >
+          Ver Malla
+        </button>
+      </div>
+
       {/* Selector flotante de modo de interacción */}
-      <div className="absolute top-4 right-4 z-10 flex items-center bg-[var(--bg-surface)]/90 backdrop-blur-md border border-[var(--border-color)] p-1 rounded-xl shadow-lg font-mono text-xs">
+      <div className="absolute top-16 right-3 md:top-4 md:right-4 z-10 flex items-center bg-[var(--bg-surface)]/90 backdrop-blur-md border border-[var(--border-color)] p-1 rounded-xl shadow-lg font-mono text-xs">
         <button
           type="button"
           onClick={() => setInteractionMode('estado')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[36px] ${
             interactionMode === 'estado'
               ? 'bg-[var(--bg-elevated)] text-[var(--text-body)] font-bold border border-[var(--border-color)] shadow-sm'
               : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
@@ -466,7 +486,7 @@ export const NetworkGraph: React.FC = () => {
         <button
           type="button"
           onClick={() => setInteractionMode('camino')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[36px] ${
             interactionMode === 'camino'
               ? 'bg-cyan-500/20 text-cyan-950 dark:text-cyan-300 font-bold border border-cyan-500/50 shadow-sm'
               : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
@@ -478,13 +498,13 @@ export const NetworkGraph: React.FC = () => {
         </button>
       </div>
 
-      {/* Controles flotantes */}
-      <div className="absolute bottom-5 right-5 flex flex-col gap-1.5 bg-[var(--bg-surface)]/95 backdrop-blur-md p-1.5 rounded-xl border border-[var(--border-color)] shadow-xl z-10">
+      {/* Controles flotantes de Zoom con touch targets de 44px */}
+      <div className="absolute bottom-5 right-4 md:right-5 flex flex-col gap-1.5 bg-[var(--bg-surface)]/95 backdrop-blur-md p-1 rounded-xl border border-[var(--border-color)] shadow-xl z-10">
         <button
           type="button"
           onClick={handleZoomIn}
           aria-label="Acercar vista del grafo"
-          className="p-2 rounded-lg text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
+          className="p-2.5 rounded-lg text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
           title="Acercar (Zoom In)"
         >
           <ZoomIn className="w-4 h-4" />
@@ -493,7 +513,7 @@ export const NetworkGraph: React.FC = () => {
           type="button"
           onClick={handleZoomOut}
           aria-label="Alejar vista del grafo"
-          className="p-2 rounded-lg text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
+          className="p-2.5 rounded-lg text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
           title="Alejar (Zoom Out)"
         >
           <ZoomOut className="w-4 h-4" />
@@ -502,7 +522,7 @@ export const NetworkGraph: React.FC = () => {
           type="button"
           onClick={handleFit}
           aria-label="Ajustar y centrar grafo"
-          className="p-2 rounded-lg text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
+          className="p-2.5 rounded-lg text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
           title="Ajustar y Centrar"
         >
           <Maximize2 className="w-4 h-4" />

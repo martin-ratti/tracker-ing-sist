@@ -119,7 +119,12 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [sharedName, setSharedName] = useState<string | null>(null);
   const [focusedSubjectId, setFocusedSubjectId] = useState<number | null>(null);
   const [edgeMode, setEdgeMode] = useState<'ambos' | 'regular' | 'aprobada'>('ambos');
-  const [viewMode, setViewMode] = useState<'grafo' | 'malla'>('grafo');
+  const [viewMode, setViewMode] = useState<'grafo' | 'malla'>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return 'malla';
+    }
+    return 'grafo';
+  });
   const [electivasOpen, setElectivasOpen] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);

@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTracker } from '../context/TrackerContext';
 import { MATERIAS_TRONCALES } from '../data/plan2023';
-import { Info, CheckCircle2, Clock, Search, Target } from 'lucide-react';
+import { Info, CheckCircle2, Clock, Search, Target, X } from 'lucide-react';
+
+const NIVELES = [1, 2, 3, 4, 5];
 
 export const GridView: React.FC = () => {
   const {
@@ -17,8 +19,26 @@ export const GridView: React.FC = () => {
   } = useTracker();
 
   const [search, setSearch] = useState('');
+  const [activeNivel, setActiveNivel] = useState<number | 'todos'>('todos');
 
-  const niveles = [1, 2, 3, 4, 5];
+  const nivelStats = useMemo(() => {
+    return NIVELES.reduce((acc, n) => {
+      const total = MATERIAS_TRONCALES.filter(m => m.nivel === n && !m.esAdusiSolo).length;
+      const aprobadas = MATERIAS_TRONCALES.filter(
+        m => m.nivel === n && !m.esAdusiSolo && estados[m.id] === 'aprobada'
+      ).length;
+      const regulares = MATERIAS_TRONCALES.filter(
+        m => m.nivel === n && !m.esAdusiSolo && estados[m.id] === 'regular'
+      ).length;
+      acc[n] = {
+        total,
+        aprobadas,
+        regulares,
+        pct: total > 0 ? Math.round((aprobadas / total) * 100) : 0
+      };
+      return acc;
+    }, {} as Record<number, { total: number; aprobadas: number; regulares: number; pct: number }>);
+  }, [estados]);
 
   const filteredMaterias = MATERIAS_TRONCALES.filter(m => {
     if (m.esAdusiSolo) return false; // Seminario va en el drawer de Electivas
@@ -42,49 +62,109 @@ export const GridView: React.FC = () => {
     );
   });
 
+  const displayedNiveles = activeNivel === 'todos' ? NIVELES : [activeNivel];
+
   return (
-    <div className="max-w-[1700px] mx-auto p-4 sm:p-6 overflow-y-auto min-h-[calc(100vh-130px)]">
+    <div className="max-w-[1700px] mx-auto p-3.5 sm:p-6 overflow-y-auto min-h-[calc(100vh-130px)]">
       {/* Barra de búsqueda y título */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mb-4">
         <div>
-          <h2 className="text-xl font-syne font-bold text-[var(--text-body)] tracking-wide">
+          <h2 className="text-lg sm:text-xl font-syne font-bold text-[var(--text-body)] tracking-wide">
             Malla Curricular Plan 2023
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-            Estructura cronológica por niveles académicos y estado de correlatividades
+            Estructura cronológica por niveles académicos y correlatividades
           </p>
         </div>
 
-        <div className="relative w-full sm:w-72" role="search">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
+        <div className="relative w-full sm:w-80" role="search">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
           <input
             type="text"
             placeholder="Buscar materia o código..."
             aria-label="Buscar materia por nombre o código"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg pl-9 pr-3 py-1.5 text-xs font-mono text-[var(--text-body)] placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
+            className="w-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl pl-9 pr-9 py-2 text-xs font-mono text-[var(--text-body)] placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors shadow-sm"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              aria-label="Limpiar búsqueda"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-slate-400 hover:text-[var(--text-body)] transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Chips de filtro rápido por estado */}
-      <div className="flex flex-wrap items-center gap-2 mb-6 font-mono text-xs">
-        <span className="text-slate-600 dark:text-slate-400 text-[11px] hidden sm:inline mr-1">Filtrar:</span>
+      {/* Selector de Nivel Académico (Tabs táctiles para celular y escritorio) */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-3 no-scrollbar font-mono text-xs">
+        <button
+          type="button"
+          onClick={() => setActiveNivel('todos')}
+          className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all font-semibold ${
+            activeNivel === 'todos'
+              ? 'bg-[var(--bg-elevated)] border-[var(--color-primary)] text-[var(--text-body)] font-bold shadow-sm'
+              : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)]'
+          }`}
+        >
+          Todos los Años ({MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo).length})
+        </button>
+
+        {NIVELES.map(n => {
+          const st = nivelStats[n];
+          const isSelected = activeNivel === n;
+          return (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setActiveNivel(n)}
+              className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all flex items-center gap-1.5 font-semibold ${
+                isSelected
+                  ? 'border shadow-sm font-bold'
+                  : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)]'
+              }`}
+              style={isSelected ? {
+                backgroundColor: 'var(--color-primary-bg)',
+                borderColor: 'var(--color-primary-border)',
+                color: 'var(--color-primary)'
+              } : {}}
+            >
+              <span>{n}º Año</span>
+              <span 
+                className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                  st.pct === 100 
+                    ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold' 
+                    : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                {st.aprobadas}/{st.total}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Chips de filtro rápido por estado con scroll horizontal táctil */}
+      <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1 no-scrollbar font-mono text-xs">
+        <span className="text-slate-600 dark:text-slate-400 text-[11px] hidden sm:inline mr-1 shrink-0 font-medium">Filtrar:</span>
         <button
           onClick={() => setGridFilter('todas')}
-          className={`px-3 py-1 rounded-lg border transition-all ${
+          className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all ${
             gridFilter === 'todas'
               ? 'bg-[var(--bg-elevated)] border-[var(--color-primary)] text-[var(--text-body)] font-bold shadow-sm'
               : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
           }`}
         >
-          Todas ({MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo).length})
+          Todas
         </button>
 
         <button
           onClick={() => setGridFilter('cursables')}
-          className={`px-3 py-1 rounded-lg border transition-all ${
+          className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all ${
             gridFilter === 'cursables'
               ? 'font-bold shadow-sm'
               : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
@@ -100,7 +180,7 @@ export const GridView: React.FC = () => {
 
         <button
           onClick={() => setGridFilter('regulares')}
-          className={`px-3 py-1 rounded-lg border transition-all ${
+          className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all ${
             gridFilter === 'regulares'
               ? 'font-bold shadow-sm'
               : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
@@ -116,7 +196,7 @@ export const GridView: React.FC = () => {
 
         <button
           onClick={() => setGridFilter('aprobadas')}
-          className={`px-3 py-1 rounded-lg border transition-all ${
+          className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all ${
             gridFilter === 'aprobadas'
               ? 'font-bold shadow-sm'
               : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
@@ -132,7 +212,7 @@ export const GridView: React.FC = () => {
 
         <button
           onClick={() => setGridFilter('con-meta')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shrink-0 transition-all ${
             gridFilter === 'con-meta'
               ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-800 dark:text-cyan-300 font-bold shadow-sm'
               : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:border-slate-400'
@@ -144,8 +224,12 @@ export const GridView: React.FC = () => {
       </div>
 
       {/* Columnas por Nivel */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {niveles.map(nivel => {
+      <div className={`grid gap-4 ${
+        activeNivel === 'todos'
+          ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
+          : 'grid-cols-1 max-w-xl mx-auto'
+      }`}>
+        {displayedNiveles.map(nivel => {
           const materiasNivel = filteredMaterias.filter(m => m.nivel === nivel);
           const totalNivel = MATERIAS_TRONCALES.filter(m => m.nivel === nivel && !m.esAdusiSolo).length;
           const aprobadasNivel = MATERIAS_TRONCALES.filter(
@@ -322,10 +406,10 @@ export const GridView: React.FC = () => {
                               setSelectedSubjectId(m.id);
                             }}
                             aria-label={`Ver detalles, correlativas y notas de ${m.nombreCompleto}`}
-                            className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
+                            className="p-2 -mr-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
                             title="Ver correlativas y registrar notas"
                           >
-                            <Info className="w-3.5 h-3.5" />
+                            <Info className="w-4 h-4" />
                           </button>
                         </div>
                       </div>

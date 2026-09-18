@@ -41,29 +41,31 @@ export const ElectivasDrawer: React.FC = () => {
         onClick={() => setElectivasOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-xl bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-2xl flex flex-col">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
+        <div className="w-full sm:w-screen max-w-xl bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-2xl flex flex-col">
           
           {/* Header del Panel */}
-          <div className="p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
+          <div className="p-4 sm:p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="font-syne font-bold text-lg text-[var(--text-body)] tracking-wide">
+                  <h2 className="font-syne font-bold text-base sm:text-lg text-[var(--text-body)] tracking-wide">
                     Materias Electivas
                   </h2>
-                  <p className="text-[11px] font-mono text-slate-400">
+                  <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
                     Plan 2023 · UTN FRRo
                   </p>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={() => setElectivasOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
+                aria-label="Cerrar panel de electivas"
+                className="p-2 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>

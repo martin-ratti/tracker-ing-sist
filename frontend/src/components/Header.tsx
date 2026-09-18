@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useTracker } from '../context/TrackerContext';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { ThemeSelector } from './ThemeSelector';
 import { 
   Network, 
@@ -22,8 +21,11 @@ import {
   Share2,
   Sun,
   Moon,
-  Clock
+  Clock,
+  Menu,
+  ChevronRight
 } from 'lucide-react';
+import { useTheme, THEMES, type ThemeId } from '../context/ThemeContext';
 
 interface HeaderProps {
   onOpenTitles: () => void;
@@ -50,8 +52,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
   } = useTracker();
 
   const { user, openAuthModal, logout } = useAuth();
-  const { colorMode, toggleColorMode } = useTheme();
+  const { theme, setTheme, colorMode, toggleColorMode } = useTheme();
 
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -107,59 +110,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             </div>
           </div>
 
-          {/* Botones rápidos en móvil */}
-          <div className="flex items-center gap-1 md:hidden">
-            <button
-              onClick={() => setCalendarOpen(true)}
-              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-cyan-700 dark:text-cyan-400 hover:bg-[var(--bg-base)] text-xs font-mono"
-              title="Calendario y Metas"
-            >
-              <CalendarDays className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setReportOpen(true)}
-              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-purple-700 dark:text-purple-400 hover:bg-[var(--bg-base)] text-xs font-mono"
-              title="Ficha PDF"
-            >
-              <FileText className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setElectivasOpen(!electivasOpen)}
-              className={`p-2 rounded-lg border text-xs font-mono transition-colors ${
-                electivasOpen 
-                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-800 dark:text-amber-300 font-bold' 
-                  : 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:bg-[var(--bg-base)]'
-              }`}
-              title="Electivas"
-            >
-              <Sparkles className="w-4 h-4" />
-            </button>
-            <button
-              onClick={onOpenTitles}
-              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:bg-[var(--bg-base)] text-xs font-mono"
-              title="Títulos"
-            >
-              <GraduationCap className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setStatsModalOpen(true)}
-              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-pink-700 dark:text-pink-400 hover:bg-[var(--bg-base)] text-xs font-mono"
-              title="Estadísticas"
-            >
-              <BarChart3 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setShareModalOpen(true)}
-              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-sky-700 dark:text-sky-400 hover:bg-[var(--bg-base)] text-xs font-mono"
-              title="Compartir"
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
+          {/* Botones rápidos en móvil (Top-right) */}
+          <div className="flex items-center gap-1.5 md:hidden">
+            {/* Modo Claro / Oscuro */}
             <button
               type="button"
               onClick={toggleColorMode}
-              className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-xs font-mono hover:bg-[var(--bg-base)]"
+              className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-xs hover:bg-[var(--bg-base)] transition-colors min-w-[38px] min-h-[38px] flex items-center justify-center"
               title={colorMode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
+              aria-label={colorMode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
             >
               {colorMode === 'dark' ? (
                 <Sun className="w-4 h-4 text-amber-400" />
@@ -167,11 +126,52 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <Moon className="w-4 h-4 text-indigo-500" />
               )}
             </button>
+
+            {/* Acceso Nube / Usuario */}
+            {user ? (
+              <button
+                type="button"
+                onClick={() => setMobileDrawerOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-xs font-mono min-h-[38px]"
+                title={`Sesión iniciada como ${user.email}`}
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" />
+                <span className="text-[11px] font-bold truncate max-w-[70px]">
+                  {perfil.nombre?.split(' ')[0] || user.email?.split('@')[0]}
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={openAuthModal}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all min-h-[38px]"
+                style={{ 
+                  backgroundColor: 'var(--color-primary-bg)', 
+                  borderColor: 'var(--color-primary-border)', 
+                  color: 'var(--color-primary)' 
+                }}
+                title="Sincronizar avance en la nube"
+              >
+                <Cloud className="w-3.5 h-3.5" />
+                <span className="text-[11px]">Nube</span>
+              </button>
+            )}
+
+            {/* Botón Menú Hamburguesa */}
+            <button
+              type="button"
+              onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+              className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] hover:bg-[var(--bg-base)] transition-colors min-w-[38px] min-h-[38px] flex items-center justify-center"
+              aria-label="Abrir menú de herramientas"
+              title="Menú de herramientas académicas"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        {/* Estadísticas en vivo adaptadas al tema */}
-        <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto py-1 w-full md:w-auto justify-center">
+        {/* Estadísticas en vivo adaptadas al tema (solo escritorio) */}
+        <div className="hidden md:flex items-center gap-2 sm:gap-4 overflow-x-auto py-1 w-full md:w-auto justify-center">
           <div 
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all"
             style={{ 
@@ -344,8 +344,185 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
         </div>
       </div>
 
-      {/* Sub-barra: Selector de Vistas, Filtros de Correlativas, % de Avance y Botones de Acción */}
-      <div className="w-full mt-3 pt-2.5 border-t border-[var(--border-color)] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+      {/* Sub-barra exclusiva para móviles */}
+      <div className="flex md:hidden flex-col gap-2 mt-2 pt-2 border-t border-[var(--border-color)] w-full">
+        {/* Selector de vistas en móvil: Malla vs Grafo */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center bg-[var(--bg-elevated)] p-1 rounded-xl border border-[var(--border-color)] w-full">
+            <button
+              type="button"
+              onClick={() => setViewMode('malla')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-mono transition-all min-h-[38px] ${
+                viewMode === 'malla'
+                  ? 'border font-bold shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 font-medium'
+              }`}
+              style={viewMode === 'malla' ? {
+                backgroundColor: 'var(--color-primary-bg)',
+                borderColor: 'var(--color-primary-border)',
+                color: 'var(--color-primary)'
+              } : {}}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>Malla Curricular</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setViewMode('grafo')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-mono transition-all min-h-[38px] ${
+                viewMode === 'grafo'
+                  ? 'border font-bold shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 font-medium'
+              }`}
+              style={viewMode === 'grafo' ? {
+                backgroundColor: 'var(--color-primary-bg)',
+                borderColor: 'var(--color-primary-border)',
+                color: 'var(--color-primary)'
+              } : {}}
+            >
+              <Network className="w-4 h-4" />
+              <span>Grafo de Red</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Si está en modo Grafo en móvil, selector de correlativas */}
+        {viewMode === 'grafo' && (
+          <div className="flex items-center justify-between bg-[var(--bg-elevated)] p-1 rounded-xl border border-[var(--border-color)] text-xs font-mono">
+            <button
+              type="button"
+              onClick={() => setEdgeMode('ambos')}
+              className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
+                edgeMode === 'ambos' ? 'bg-[var(--bg-surface)] font-bold shadow-sm border border-[var(--border-color)]' : 'text-slate-600 dark:text-slate-400'
+              }`}
+              style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
+            >
+              Todas
+            </button>
+            <button
+              type="button"
+              onClick={() => setEdgeMode('regular')}
+              className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
+                edgeMode === 'regular' ? 'font-bold shadow-sm border border-[var(--color-cursable-border)]' : 'text-slate-600 dark:text-slate-400'
+              }`}
+              style={edgeMode === 'regular' ? {
+                backgroundColor: 'var(--color-cursable-bg)',
+                color: 'var(--color-cursable)'
+              } : {}}
+            >
+              Para Cursar
+            </button>
+            <button
+              type="button"
+              onClick={() => setEdgeMode('aprobada')}
+              className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
+                edgeMode === 'aprobada' ? 'font-bold shadow-sm border border-[var(--color-regular-border)]' : 'text-slate-600 dark:text-slate-400'
+              }`}
+              style={edgeMode === 'aprobada' ? {
+                backgroundColor: 'var(--color-regular-bg)',
+                color: 'var(--color-regular)'
+              } : {}}
+            >
+              Para Rendir
+            </button>
+          </div>
+        )}
+
+        {/* Barra compacta de Avance de Carrera */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-[11px] font-mono">
+            <span className="text-slate-600 dark:text-slate-400 font-medium">Avance de Carrera:</span>
+            <span className="font-bold font-syne text-xs" style={{ color: 'var(--color-primary)' }}>
+              {stats.aprobadasCount}/{stats.totalTroncales} ({stats.porcentajeCarrera}%)
+            </span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-900 border border-[var(--border-color)] overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${stats.porcentajeCarrera}%`,
+                background: 'var(--gradient-primary)'
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Micro-estadísticas en 4 columnas */}
+        <div className="grid grid-cols-4 gap-1.5 font-mono text-[11px] text-center">
+          <div 
+            className="p-1.5 rounded-lg border shadow-sm"
+            style={{ 
+              backgroundColor: 'var(--color-aprobada-bg)', 
+              borderColor: 'var(--color-aprobada-border)' 
+            }}
+          >
+            <div className="text-[9px] uppercase font-bold text-slate-800 dark:text-slate-200">Apr</div>
+            <div className="text-xs font-extrabold" style={{ color: 'var(--color-aprobada)' }}>
+              {stats.aprobadasCount}
+            </div>
+          </div>
+
+          <div 
+            className="p-1.5 rounded-lg border shadow-sm"
+            style={{ 
+              backgroundColor: 'var(--color-regular-bg)', 
+              borderColor: 'var(--color-regular-border)' 
+            }}
+          >
+            <div className="text-[9px] uppercase font-bold text-slate-800 dark:text-slate-200">Reg</div>
+            <div className="text-xs font-extrabold" style={{ color: 'var(--color-regular)' }}>
+              {stats.regularesCount}
+            </div>
+          </div>
+
+          <div 
+            className="p-1.5 rounded-lg border shadow-sm"
+            style={{ 
+              backgroundColor: 'var(--color-cursable-bg)', 
+              borderColor: 'var(--color-cursable-border)' 
+            }}
+          >
+            <div className="text-[9px] uppercase font-bold text-slate-800 dark:text-slate-200">Cur</div>
+            <div className="text-xs font-extrabold" style={{ color: 'var(--color-cursable)' }}>
+              {stats.cursablesCount}
+            </div>
+          </div>
+
+          <div className="p-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 shadow-sm">
+            <div className="text-[9px] uppercase font-bold text-purple-900 dark:text-purple-300">Prom</div>
+            <div className="text-xs font-extrabold text-purple-900 dark:text-purple-300">
+              {stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : (stats.promedioConAplazos ?? '—')}
+            </div>
+          </div>
+        </div>
+
+        {/* Próxima meta de examen en móvil */}
+        {stats.proximaMeta && (
+          <button
+            type="button"
+            onClick={() => setSelectedSubjectId(stats.proximaMeta!.materiaId)}
+            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-mono transition-all min-h-[36px] ${
+              stats.proximaMeta.urgencia === 'urgente'
+                ? 'bg-rose-500/15 border-rose-500/50 text-rose-800 dark:text-rose-300 animate-pulse font-bold'
+                : stats.proximaMeta.urgencia === 'proxima'
+                ? 'bg-amber-500/15 border-amber-500/50 text-amber-800 dark:text-amber-300 font-semibold'
+                : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-800 dark:text-cyan-300'
+            }`}
+          >
+            <span className="flex items-center gap-1.5 truncate">
+              <Clock className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">🎯 Final: {stats.proximaMeta.materiaNombreCorto}</span>
+            </span>
+            <span className="font-bold shrink-0 ml-2">
+              {stats.proximaMeta.diasFaltantes === 0 ? '¡Hoy!' : `${stats.proximaMeta.diasFaltantes}d`}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* Sub-barra Desktop: Selector de Vistas, Filtros de Correlativas, % de Avance y Botones de Acción */}
+      <div className="hidden md:flex w-full mt-3 pt-2.5 border-t border-[var(--border-color)] flex-wrap items-center justify-between gap-3 text-xs font-mono">
         {/* Bloque Izquierdo: Vistas, Filtro de Correlativas y % de Carrera */}
         <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
           {/* Selector de vistas: Grafo vs Malla */}
@@ -621,6 +798,286 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </div>
         </div>
       </div>
+
+      {/* Drawer Móvil de Herramientas y Opciones */}
+      {mobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden md:hidden animate-in fade-in duration-200">
+          <div 
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setMobileDrawerOpen(false)}
+          />
+
+          <div className="fixed inset-y-0 right-0 max-w-full flex">
+            <div className="w-screen max-w-xs sm:max-w-sm bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-2xl flex flex-col p-5 overflow-y-auto">
+              
+              {/* Header del Drawer */}
+              <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
+                <div className="flex items-center gap-2.5">
+                  <div 
+                    className="w-8 h-8 rounded-xl flex items-center justify-center text-black font-extrabold font-syne text-sm shadow-md"
+                    style={{ backgroundColor: 'var(--color-primary)' }}
+                  >
+                    ISI
+                  </div>
+                  <div>
+                    <h3 className="font-syne font-bold text-sm text-[var(--text-body)]">Herramientas</h3>
+                    <p className="text-[10px] font-mono text-slate-500">Plan 2023 · UTN FRRo</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  aria-label="Cerrar menú"
+                  className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Tarjeta de Perfil de Alumno */}
+              <div className="my-4 p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
+                    <UserIcon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-syne font-bold text-xs text-[var(--text-body)] truncate">
+                      {perfil.nombre || 'Estudiante UTN'}
+                    </div>
+                    <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate">
+                      Legajo: {perfil.legajo || 'Sin registrar'}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    setProfileModalOpen(true);
+                  }}
+                  className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:text-[var(--text-body)] shrink-0 ml-2 shadow-xs"
+                >
+                  Editar
+                </button>
+              </div>
+
+              {/* Sincronización en la Nube */}
+              <div className="mb-4 p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] font-mono text-xs shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Nube Firebase</span>
+                  {user ? (
+                    <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Conectado
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">Desconectado</span>
+                  )}
+                </div>
+                {user ? (
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--border-color)]">
+                    <span className="text-[11px] truncate text-[var(--text-body)] font-medium">{user.email}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        setMobileDrawerOpen(false);
+                      }}
+                      className="p-1.5 rounded text-rose-500 hover:bg-rose-500/10 transition-colors"
+                      title="Cerrar sesión"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      openAuthModal();
+                    }}
+                    className="w-full py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+                    style={{
+                      backgroundColor: 'var(--color-primary-bg)',
+                      borderColor: 'var(--color-primary-border)',
+                      color: 'var(--color-primary)'
+                    }}
+                  >
+                    <Cloud className="w-4 h-4" />
+                    <span>Iniciar Sesión / Nube</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Selector de Paleta de Color en Móvil */}
+              <div className="mb-4">
+                <div className="text-[10px] uppercase font-mono font-bold text-slate-500 dark:text-slate-400 mb-2">
+                  Paleta Cromática
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {(Object.keys(THEMES) as ThemeId[]).map(id => {
+                    const opt = THEMES[id];
+                    const isSelected = theme === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setTheme(id)}
+                        title={opt.name}
+                        className={`h-10 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all ${
+                          isSelected ? 'border-2 scale-105 shadow-md font-bold' : 'opacity-75 hover:opacity-100'
+                        }`}
+                        style={{
+                          backgroundColor: 'var(--bg-elevated)',
+                          borderColor: isSelected ? opt.primaryColor : 'var(--border-color)'
+                        }}
+                      >
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: opt.primaryColor }} />
+                        <span className="text-[8px] font-mono uppercase text-slate-600 dark:text-slate-400">{id.slice(0, 3)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Lista de Acciones y Modales */}
+              <div className="space-y-2 flex-1 font-mono text-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    setCalendarOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <CalendarDays className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                    <span>Calendario y Metas</span>
+                  </div>
+                  {stats.metasCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 font-bold text-[10px]">
+                      {stats.metasCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    setElectivasOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <span>Materias Electivas</span>
+                  </div>
+                  <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-900 dark:text-amber-300 font-bold text-[10px]">
+                    {stats.horasElectivasAprobadas}/20hs
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    onOpenTitles();
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>Títulos (ADUSI / Ing.)</span>
+                  </div>
+                  <span className="text-[10px] font-bold" style={{ color: 'var(--color-primary)' }}>
+                    {stats.adusiProgreso}%
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    setReportOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span>Ficha Curricular (PDF)</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    setStatsModalOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <BarChart3 className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+                    <span>Estadísticas Avanzadas</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    setShareModalOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Share2 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                    <span>Compartir Progreso</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    onOpenHelp();
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <HelpCircle className="w-4 h-4 text-slate-500" />
+                    <span>Guía y Atajos</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+              </div>
+
+              {/* Botón de Reiniciar Progreso */}
+              <div className="pt-4 mt-4 border-t border-[var(--border-color)]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleReset();
+                    if (confirmReset) setMobileDrawerOpen(false);
+                  }}
+                  className={`w-full py-2.5 px-3 rounded-xl border text-xs font-mono flex items-center justify-center gap-2 transition-all min-h-[44px] ${
+                    confirmReset
+                      ? 'bg-rose-500/20 border-rose-500 text-rose-700 dark:text-rose-300 font-bold animate-pulse'
+                      : 'border-slate-300 dark:border-slate-800 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10'
+                  }`}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>{confirmReset ? '¿Confirmar Reinicio?' : 'Reiniciar Todo'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

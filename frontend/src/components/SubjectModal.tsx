@@ -174,10 +174,10 @@ export const SubjectModal: React.FC = () => {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] relative">
-          <div className="flex items-start justify-between gap-4">
+        <div className="p-4 sm:p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] relative">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                 <span 
                   className="font-mono text-xs font-bold px-2 py-0.5 rounded border"
                   style={{
@@ -189,10 +189,10 @@ export const SubjectModal: React.FC = () => {
                   Materia #{String(materia.id).padStart(2, '0')}
                 </span>
                 <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
-                  {materia.nivel}º Nivel · {materia.horas} horas semanales
+                  {materia.nivel}º Nivel · {materia.horas} horas
                 </span>
               </div>
-              <h2 id="subject-modal-title" className="text-xl font-bold font-syne text-[var(--text-body)]">
+              <h2 id="subject-modal-title" className="text-lg sm:text-xl font-bold font-syne text-[var(--text-body)]">
                 {materia.nombreCompleto}
               </h2>
             </div>
@@ -201,14 +201,14 @@ export const SubjectModal: React.FC = () => {
               type="button"
               onClick={() => setSelectedSubjectId(null)}
               aria-label="Cerrar detalles de la materia"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Badges de características */}
-          <div className="flex flex-wrap gap-2 mt-3 font-mono text-[11px]">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-3 font-mono text-[11px]">
             {DIAS_MESA_POR_MATERIA[materia.id] && (
               <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/35 text-emerald-700 dark:text-emerald-300 font-semibold" title="Día oficial de mesa de examen según cronograma oficial UTN FRRo">
                 📅 Mesa: {DIAS_MESA_POR_MATERIA[materia.id]}
@@ -233,20 +233,20 @@ export const SubjectModal: React.FC = () => {
         </div>
 
         {/* Cuerpo del modal */}
-        <div className="p-6 space-y-6 max-h-[calc(85vh-180px)] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-h-[calc(85vh-180px)] overflow-y-auto">
           
           {/* Selector de Estado */}
           <div>
             <label className="block text-xs font-mono text-slate-600 dark:text-slate-400 mb-2">
               Estado Actual de la Materia:
             </label>
-            <div className="grid grid-cols-3 gap-2 font-mono text-xs">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 font-mono text-[11px] sm:text-xs">
               <button
                 type="button"
                 onClick={() => {
                   if (currentEstado !== 'pendiente') toggleMateriaEstado(materia.id);
                 }}
-                className={`py-2 px-3 rounded-lg border flex items-center justify-center gap-1.5 transition-all ${
+                className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 transition-all min-h-[44px] ${
                   currentEstado === 'pendiente'
                     ? 'bg-slate-200 dark:bg-slate-800 border-slate-400 dark:border-slate-600 text-[var(--text-body)] font-bold shadow-md'
                     : 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-500 dark:text-slate-400 hover:border-slate-400'
@@ -261,7 +261,7 @@ export const SubjectModal: React.FC = () => {
                 onClick={() => {
                   if (currentEstado === 'pendiente') toggleMateriaEstado(materia.id);
                 }}
-                className={`py-2 px-3 rounded-lg border flex items-center justify-center gap-1.5 transition-all ${
+                className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 transition-all min-h-[44px] ${
                   currentEstado === 'regular'
                     ? 'font-bold shadow-md'
                     : 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-500 dark:text-slate-400 hover:border-slate-400'
@@ -286,7 +286,7 @@ export const SubjectModal: React.FC = () => {
                     showToast(`🟢 ${materia.nombre} marcada como APROBADA`, 'success');
                   }
                 }}
-                className={`py-2 px-3 rounded-lg border flex items-center justify-center gap-1.5 transition-all ${
+                className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 transition-all min-h-[44px] ${
                   currentEstado === 'aprobada'
                     ? 'font-bold shadow-md'
                     : 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-500 dark:text-slate-400 hover:border-slate-400'
