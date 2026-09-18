@@ -47,7 +47,7 @@ export const GridView: React.FC = () => {
       {/* Barra de búsqueda y título */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
         <div>
-          <h2 className="text-xl font-syne font-bold text-white tracking-wide">
+          <h2 className="text-xl font-syne font-bold text-[var(--text-body)] tracking-wide">
             Malla Curricular Plan 2023
           </h2>
           <p className="text-xs text-slate-400 font-mono">
@@ -63,7 +63,7 @@ export const GridView: React.FC = () => {
             aria-label="Buscar materia por nombre o código"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-[#0b101c] border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-slate-600"
+            className="w-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg pl-9 pr-3 py-1.5 text-xs font-mono text-[var(--text-body)] placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
           />
         </div>
       </div>
@@ -156,10 +156,10 @@ export const GridView: React.FC = () => {
           return (
             <div
               key={nivel}
-              className="bg-[#0b111e]/90 border border-slate-800/80 rounded-xl p-3 flex flex-col gap-3 shadow-lg"
+              className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-3 flex flex-col gap-3 shadow-lg"
             >
               {/* Encabezado del Nivel */}
-              <div className="border-b border-slate-800/60 pb-2.5">
+              <div className="border-b border-[var(--border-color)] pb-2.5">
                 <div className="flex items-center justify-between">
                   <span 
                     className="font-syne font-extrabold text-sm tracking-wider"
@@ -171,7 +171,7 @@ export const GridView: React.FC = () => {
                     {aprobadasNivel}/{totalNivel} ({pctNivel}%)
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full bg-slate-800 mt-2 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-slate-800/40 mt-2 overflow-hidden">
                   <div
                     className="h-full transition-all duration-300"
                     style={{ 
@@ -195,7 +195,7 @@ export const GridView: React.FC = () => {
                     const nota = notas[m.id]?.nota;
 
                     // Estilos de tarjeta según estado adaptados al tema
-                    let cardStyle = 'bg-[#0d1527]/80 border-slate-800/80 text-slate-400';
+                    let cardStyle = 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-400';
                     let statusBadge = (
                       <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono border border-slate-700/60">
                         Bloqueada

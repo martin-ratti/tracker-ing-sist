@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen } from '../types/plan';
 import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
 import { fetchProgress, persistProgress, clearProgress } from '../services/api';
+import { decodeProgress } from '../utils/share';
 
 export type GridFilterOption = 'todas' | 'cursables' | 'regulares' | 'aprobadas' | 'con-meta';
 
@@ -21,6 +22,13 @@ interface Stats {
   ingenieroProgreso: number; // 0 - 100
   ingenieroFaltantes: string[];
   metasCount: number;
+}
+
+export interface ToastItem {
+  id: string;
+  message: string;
+  variant: 'success' | 'warning' | 'error' | 'info';
+  duration: number;
 }
 
 interface TrackerContextType {
@@ -48,12 +56,22 @@ interface TrackerContextType {
   setReportOpen: (open: boolean) => void;
   profileModalOpen: boolean;
   setProfileModalOpen: (open: boolean) => void;
+  statsModalOpen: boolean;
+  setStatsModalOpen: (open: boolean) => void;
+  shareModalOpen: boolean;
+  setShareModalOpen: (open: boolean) => void;
+  isViewingShared: boolean;
+  sharedName: string | null;
+  exitSharedMode: () => void;
+  importSharedProgress: () => void;
   focusedSubjectId: number | null;
   setFocusedSubjectId: (id: number | null) => void;
   selectedSubjectId: number | null;
   setSelectedSubjectId: (id: number | null) => void;
   toastMessage: string | null;
-  showToast: (msg: string) => void;
+  toasts: ToastItem[];
+  showToast: (msg: string, variant?: 'success' | 'warning' | 'error' | 'info') => void;
+  dismissToast: (id: string) => void;
   toggleMateriaEstado: (id: number) => void;
   setEstadoDirecto: (id: number, estado: EstadoMateria) => void;
   toggleElectivaEstado: (id: number) => void;
@@ -82,19 +100,64 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [isViewingShared, setIsViewingShared] = useState(false);
+  const [sharedName, setSharedName] = useState<string | null>(null);
   const [focusedSubjectId, setFocusedSubjectId] = useState<number | null>(null);
   const [edgeMode, setEdgeMode] = useState<'ambos' | 'regular' | 'aprobada'>('ambos');
   const [viewMode, setViewMode] = useState<'grafo' | 'malla'>('grafo');
   const [electivasOpen, setElectivasOpen] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  const showToast = useCallback((msg: string) => {
-    setToastMessage(msg);
+  const toastMessage = toasts.length > 0 ? toasts[0].message : null;
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const showToast = useCallback((msg: string, variant: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+    if (!msg) return;
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const duration = 3500;
+    setToasts(prev => {
+      const next = [...prev, { id, message: msg, variant, duration }];
+      return next.slice(-3);
+    });
+  }, []);
+
+  // Detect shared progress via URL hash
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#share=')) {
+        const code = hash.slice(7);
+        const decoded = decodeProgress(code);
+        if (decoded) {
+          setEstados(decoded.estados);
+          setEstadosElectivas(decoded.estadosElectivas);
+          setPerfilState(decoded.perfil);
+          setPpsHorasState(decoded.ppsHoras);
+          setIsViewingShared(true);
+          setSharedName(decoded.perfil.nombre || 'Compañero/a');
+          return;
+        }
+      }
+      setIsViewingShared(false);
+      setSharedName(null);
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
   // Cargar estado
   const reloadProgress = useCallback(() => {
+    if (window.location.hash.startsWith('#share=')) {
+      return;
+    }
     fetchProgress()
       .then((data: ProgresoUsuario) => {
         setEstados(data.estados || {});
@@ -106,6 +169,35 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       })
       .catch(err => console.error('Error al cargar progreso:', err));
   }, []);
+
+  const exitSharedMode = useCallback(() => {
+    window.location.hash = '';
+    setIsViewingShared(false);
+    setSharedName(null);
+    fetchProgress()
+      .then((data: ProgresoUsuario) => {
+        setEstados(data.estados || {});
+        setEstadosElectivas(data.estadosElectivas || {});
+        setNotas(data.notas || {});
+        setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
+        setPerfilState(data.perfil || { nombre: '', legajo: '' });
+        setMetasExamenState(data.metasExamen || {});
+      })
+      .catch(err => console.error('Error al cargar progreso:', err));
+  }, []);
+
+  const importSharedProgress = useCallback(() => {
+    persistProgress({
+      estados,
+      estadosElectivas,
+      perfil,
+      ppsHoras
+    });
+    window.location.hash = '';
+    setIsViewingShared(false);
+    setSharedName(null);
+    showToast('✅ Progreso importado a tu cuenta', 'success');
+  }, [estados, estadosElectivas, perfil, ppsHoras, showToast]);
 
   useEffect(() => {
     reloadProgress();
@@ -239,6 +331,10 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Alternar estado de una materia
   const toggleMateriaEstado = useCallback((id: number) => {
+    if (isViewingShared) {
+      showToast('⚠️ Estás en modo de solo lectura del progreso compartido', 'warning');
+      return;
+    }
     const m = MATERIAS_MAP[id];
     if (!m) return;
     const actual = getEstado(id);
@@ -295,10 +391,14 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setEstados(nextEstados);
     setEstadosElectivas(nextElectivas);
     persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas });
-  }, [estados, estadosElectivas, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, applyCascade]);
+  }, [estados, estadosElectivas, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, applyCascade, isViewingShared]);
 
   // Establecer un estado concreto sin pasar por el ciclo de toggle
   const setEstadoDirecto = useCallback((id: number, estado: EstadoMateria) => {
+    if (isViewingShared) {
+      showToast('⚠️ Estás en modo de solo lectura del progreso compartido', 'warning');
+      return;
+    }
     const m = MATERIAS_MAP[id];
     if (!m) return;
 
@@ -336,10 +436,14 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setEstados(nextEstados);
     setEstadosElectivas(nextElectivas);
     persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas, notas, ppsHoras });
-  }, [estados, estadosElectivas, notas, ppsHoras, applyCascade, puedeRegularMateria, puedeAprobarMateria, cumpleReqsCursada, showToast]);
+  }, [estados, estadosElectivas, notas, ppsHoras, applyCascade, puedeRegularMateria, puedeAprobarMateria, cumpleReqsCursada, showToast, isViewingShared]);
 
   // Alternar estado de una electiva
   const toggleElectivaEstado = useCallback((id: number) => {
+    if (isViewingShared) {
+      showToast('⚠️ Estás en modo de solo lectura del progreso compartido', 'warning');
+      return;
+    }
     const e = ELECTIVAS_MAP[id];
     if (!e) return;
     const actual = getEstadoElectiva(id);
@@ -377,7 +481,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     setEstadosElectivas(nextElectivas);
     persistProgress({ estadosElectivas: nextElectivas });
-  }, [estadosElectivas, getEstadoElectiva, puedeRegularElectiva, getEstado, showToast]);
+  }, [estadosElectivas, getEstadoElectiva, puedeRegularElectiva, getEstado, showToast, isViewingShared]);
 
   const setNotaMateria = useCallback((id: number, notaData: NotaMateria) => {
     setNotas(prev => {
@@ -547,12 +651,22 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setReportOpen,
         profileModalOpen,
         setProfileModalOpen,
+        statsModalOpen,
+        setStatsModalOpen,
+        shareModalOpen,
+        setShareModalOpen,
+        isViewingShared,
+        sharedName,
+        exitSharedMode,
+        importSharedProgress,
         focusedSubjectId,
         setFocusedSubjectId,
         selectedSubjectId,
         setSelectedSubjectId,
         toastMessage,
+        toasts,
         showToast,
+        dismissToast,
         toggleMateriaEstado,
         setEstadoDirecto,
         toggleElectivaEstado,

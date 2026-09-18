@@ -16,7 +16,9 @@ import {
   CalendarDays,
   FileText,
   User as UserIcon,
-  Target
+  Target,
+  BarChart3,
+  Share2
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -36,6 +38,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     setCalendarOpen,
     setReportOpen,
     setProfileModalOpen,
+    setStatsModalOpen,
+    setShareModalOpen,
     perfil,
     resetAll
   } = useTracker();
@@ -62,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
   };
 
   return (
-    <header className="bg-[#0b101c]/95 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-30 px-4 sm:px-8 xl:px-12 py-3 w-full">
+    <header className="bg-[var(--bg-surface)]/95 backdrop-blur-md border-b border-[var(--border-color)] sticky top-0 z-30 px-4 sm:px-8 xl:px-12 py-3 w-full">
       {/* Barra superior con título y controles */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
         
@@ -77,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-syne font-extrabold text-base sm:text-lg text-white tracking-wider flex items-center gap-2">
+                <h1 className="font-syne font-extrabold text-base sm:text-lg text-[var(--text-body)] tracking-wider flex items-center gap-2">
                   UTN SISTEMAS
                   <span 
                     className="text-[10px] uppercase font-mono px-2 py-0.5 rounded border transition-colors"
@@ -130,6 +134,20 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               title="Títulos"
             >
               <GraduationCap className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setStatsModalOpen(true)}
+              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-pink-400 text-xs font-mono"
+              title="Estadísticas"
+            >
+              <BarChart3 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="p-2 rounded bg-slate-800/60 border border-slate-700 text-sky-400 text-xs font-mono"
+              title="Compartir"
+            >
+              <Share2 className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -269,11 +287,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
       </div>
 
       {/* Sub-barra: Selector de Vistas, Filtros de Correlativas, % de Avance y Botones de Acción */}
-      <div className="w-full mt-3 pt-2.5 border-t border-slate-800/40 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+      <div className="w-full mt-3 pt-2.5 border-t border-[var(--border-color)] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
         {/* Bloque Izquierdo: Vistas, Filtro de Correlativas y % de Carrera */}
         <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
           {/* Selector de vistas: Grafo vs Malla */}
-          <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-lg border border-slate-800">
+          <div className="flex items-center gap-1 bg-[var(--bg-elevated)] p-1 rounded-lg border border-[var(--border-color)]">
             <button
               onClick={() => setViewMode('grafo')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
@@ -347,10 +365,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           )}
 
           {/* Porcentaje y barra de avance de la carrera larga y satisfactoria */}
-          <div className="flex items-center gap-3 px-3.5 py-1.5 bg-slate-900/80 rounded-xl border border-slate-800 shadow-inner">
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-300 font-medium whitespace-nowrap">
-              <span className="text-slate-400">Avance:</span>
-              <span className="text-white font-bold">
+          <div className="flex items-center gap-3 px-3.5 py-1.5 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-color)] shadow-inner">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium whitespace-nowrap">
+              <span>Avance:</span>
+              <span className="text-[var(--text-body)] font-bold">
                 {stats.aprobadasCount} / {stats.totalTroncales} materias
               </span>
             </div>
@@ -437,6 +455,26 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               {stats.adusiCumplido && (
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]" title="ADUSI alcanzado" />
               )}
+            </button>
+
+            {/* Botón Estadísticas */}
+            <button
+              onClick={() => setStatsModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-[11px] transition-colors"
+              title="Dashboard de Estadísticas Avanzadas"
+            >
+              <BarChart3 className="w-3.5 h-3.5 text-pink-400" />
+              <span>Estadísticas</span>
+            </button>
+
+            {/* Botón Compartir */}
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white font-mono text-[11px] transition-colors"
+              title="Generar enlace compartible de tu progreso"
+            >
+              <Share2 className="w-3.5 h-3.5 text-sky-400" />
+              <span>Compartir</span>
             </button>
           </div>
 
