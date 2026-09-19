@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useTracker } from '../context/TrackerContext';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../data/plan2023';
+import { useTracker } from '../../context/TrackerContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { 
   X, 
   CheckCircle2, 
@@ -17,7 +17,7 @@ import {
   isPastDate, 
   getFechaExactaMesa,
   DIAS_MESA_POR_MATERIA
-} from '../data/calendario2026';
+} from '../../data/calendario2026';
 
 
 

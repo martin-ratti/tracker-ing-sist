@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useTracker } from '../context/TrackerContext';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { encodeProgress } from '../utils/share';
+import { useTracker } from '../../context/TrackerContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { encodeProgress } from '../../utils/share';
 import { X, Share2, Copy, Check, Eye } from 'lucide-react';
 
 interface ShareModalProps {

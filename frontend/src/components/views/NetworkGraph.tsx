@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Network } from 'vis-network/standalone';
 import { DataSet } from 'vis-data/standalone';
-import { useTracker } from '../context/TrackerContext';
-import { useTheme } from '../context/ThemeContext';
-import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../data/plan2023';
+import { useTracker } from '../../context/TrackerContext';
+import { useTheme } from '../../context/ThemeContext';
+import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../../data/plan2023';
 import { ZoomIn, ZoomOut, Maximize2, X, Compass, MousePointerClick, Eye, EyeOff, Sparkles } from 'lucide-react';
 
 import type { Node as VisBaseNode, Edge as VisBaseEdge } from 'vis-network/standalone';

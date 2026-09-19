@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { useTracker } from '../context/TrackerContext';
-import type { ToastItem } from '../context/TrackerContext';
+import { useTracker } from '../../context/TrackerContext';
+import type { ToastItem } from '../../context/TrackerContext';
 
 const VARIANT_STYLES: Record<ToastItem['variant'], { border: string; dot: string; bg: string }> = {
   success: {

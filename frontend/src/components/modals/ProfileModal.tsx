@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useTracker } from '../context/TrackerContext';
-import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useTracker } from '../../context/TrackerContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { X, User, Check, GraduationCap, Download, Upload, Database } from 'lucide-react';
 
 export const ProfileModal: React.FC = () => {

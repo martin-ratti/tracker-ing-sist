@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { useTracker } from '../context/TrackerContext';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../data/plan2023';
+import { useTracker } from '../../context/TrackerContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../../data/plan2023';
 import { 
   X, 
   BarChart3, 

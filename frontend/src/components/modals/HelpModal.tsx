@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { X, HelpCircle, AlertTriangle } from 'lucide-react';
 
 interface HelpModalProps {

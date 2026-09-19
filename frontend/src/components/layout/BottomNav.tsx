@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTracker } from '../context/TrackerContext';
+import { useTracker } from '../../context/TrackerContext';
 import { LayoutGrid, Network, CalendarDays, Sparkles, Menu } from 'lucide-react';
 
 interface BottomNavProps {

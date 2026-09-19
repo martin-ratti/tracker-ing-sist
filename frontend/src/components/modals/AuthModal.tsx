@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useAuth } from '../../context/AuthContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { 
   X, 
   Mail, 
@@ -14,7 +14,7 @@ import {
 import { 
   getLocalProgress, 
   persistProgress 
-} from '../services/api';
+} from '../../services/api';
 
 export const AuthModal: React.FC = () => {
   const { isAuthModalOpen, closeAuthModal, login, register, loginWithGoogle } = useAuth();

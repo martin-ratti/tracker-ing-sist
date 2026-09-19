@@ -193,19 +193,23 @@ pnpm dev:frontend  # en otra terminal (puerto 5173)
 - **Frontend:** [http://localhost:5173](http://localhost:5173)
 - **Backend API:** [http://localhost:3001/api/plan](http://localhost:3001/api/plan)
 
-### Compilar para Producción
+### Compilar y Desplegar para Producción
 
 ```bash
+# Compilación completa del monorepo
 pnpm build
-```
 
-Ambos módulos (`dist` en backend y frontend) se generarán listos para desplegar en cualquier plataforma (Vercel, Render, Railway, etc.).
+# Compilar y desplegar automáticamente en Firebase Hosting
+pnpm deploy
+```
 
 ---
 
-## 📚 Documentación Oficial Incluida
+## 📚 Documentación Oficial y Arquitectura
 
-En la carpeta [`docs/`](./docs) se encuentran digitalizados los documentos oficiales de referencia:
+En la carpeta [`docs/`](./docs) se encuentran los documentos del proyecto y normativas de referencia:
+- 📋 [**Estado del Proyecto y Roadmap**](./docs/ESTADO_DEL_PROYECTO.md): Relevamiento detallado de funcionalidades implementadas y pendientes.
+- 🎯 [**Plan de Acción**](./docs/PLAN_DE_ACCION.md): Tareas prioritarias y arquitectura.
 - 📄 [**Plan 2023 Gradiente UTN FRRo (PDF)**](./docs/isi-a4-plan-2023-gradiente-utn-frro.pdf): Cartilla A4 con las 36 materias troncales, Seminario Integrador ADUSI y correlatividades oficiales.
 - 🖼️ [**Grilla Oficial de Asignaturas Electivas Plan 2023**](./docs/electivas-plan-2023.png): Tabla de materias electivas organizadas por nivel, tipo de dictado y horas anuales.
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useTracker } from '../context/TrackerContext';
-import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useTracker } from '../../context/TrackerContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { 
   TURNOS_EXAMEN_2026, 
   HITOS_ACADEMICOS_2026, 
@@ -9,8 +9,8 @@ import {
   getFechaExactaMesa,
   DIAS_MESA_POR_MATERIA,
   type TurnoExamenOficial
-} from '../data/calendario2026';
-import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../data/plan2023';
+} from '../../data/calendario2026';
+import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { 
   X, 
   Calendar as CalendarIcon, 
@@ -25,7 +25,7 @@ import {
   List,
   Download
 } from 'lucide-react';
-import { exportMetasToICS } from '../utils/icsExporter';
+import { exportMetasToICS } from '../../utils/icsExporter';
 
 const NOMBRES_MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useTracker } from '../context/TrackerContext';
-import { MATERIAS_TRONCALES } from '../data/plan2023';
+import { useTracker } from '../../context/TrackerContext';
+import { MATERIAS_TRONCALES } from '../../data/plan2023';
 import { Info, CheckCircle2, Clock, Search, Target, X } from 'lucide-react';
 
 const NIVELES = [1, 2, 3, 4, 5];

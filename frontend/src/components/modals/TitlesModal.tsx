@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useTracker } from '../context/TrackerContext';
-import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useTracker } from '../../context/TrackerContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { X, GraduationCap, Award, CheckCircle2 } from 'lucide-react';
 
 interface TitlesModalProps {

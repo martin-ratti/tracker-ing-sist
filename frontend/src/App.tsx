@@ -1,26 +1,28 @@
 import React, { useState, lazy, Suspense, useMemo, useRef, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { TrackerProvider, useTracker } from './context/TrackerContext';
-import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
-import { Header } from './components/Header';
-import { GridView } from './components/GridView';
-import { GraphSkeleton } from './components/GraphSkeleton';
-import { ElectivasDrawer } from './components/ElectivasDrawer';
-import { SubjectModal } from './components/SubjectModal';
-import { TitlesModal } from './components/TitlesModal';
-import { HelpModal } from './components/HelpModal';
-import { AuthModal } from './components/AuthModal';
-import { CalendarModal } from './components/CalendarModal';
-import { PrintableReportModal } from './components/PrintableReportModal';
-import { ProfileModal } from './components/ProfileModal';
-import { StatsModal } from './components/StatsModal';
-import { ShareModal } from './components/ShareModal';
-import { BottomNav } from './components/BottomNav';
-import { Toast } from './components/Toast';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import {
+  Header,
+  BottomNav,
+  Toast,
+  ErrorBoundary,
+  GridView,
+  GraphSkeleton,
+  ElectivasDrawer,
+  SubjectModal,
+  TitlesModal,
+  HelpModal,
+  AuthModal,
+  CalendarModal,
+  PrintableReportModal,
+  ProfileModal,
+  StatsModal,
+  ShareModal
+} from './components';
 
-const NetworkGraph = lazy(() => import('./components/NetworkGraph').then(m => ({ default: m.NetworkGraph })));
+const NetworkGraph = lazy(() => import('./components/views/NetworkGraph').then(m => ({ default: m.NetworkGraph })));
 
 const TrackerMain: React.FC = () => {
   const {

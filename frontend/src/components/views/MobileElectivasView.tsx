@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useTracker } from '../context/TrackerContext';
-import { MATERIAS_ELECTIVAS, MATERIAS_MAP, MATERIAS_TRONCALES } from '../data/plan2023';
+import { useTracker } from '../../context/TrackerContext';
+import { MATERIAS_ELECTIVAS, MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { X, Sparkles, CheckCircle2, Clock, BookOpen, ChevronLeft } from 'lucide-react';
 
 interface MobileElectivasViewProps {

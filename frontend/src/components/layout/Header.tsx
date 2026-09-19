@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useTracker } from '../context/TrackerContext';
-import { useAuth } from '../context/AuthContext';
+import { useTracker } from '../../context/TrackerContext';
+import { useAuth } from '../../context/AuthContext';
 import { ThemeSelector } from './ThemeSelector';
-import { MobileElectivasView } from './MobileElectivasView';
+import { MobileElectivasView } from '../views/MobileElectivasView';
 import { 
   Network, 
   LayoutGrid, 
@@ -26,7 +26,7 @@ import {
   Clock,
   ChevronRight
 } from 'lucide-react';
-import { useTheme, THEMES, type ThemeId } from '../context/ThemeContext';
+import { useTheme, THEMES, type ThemeId } from '../../context/ThemeContext';
 
 interface HeaderProps {
   onOpenTitles: () => void;
