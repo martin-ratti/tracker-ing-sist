@@ -4,7 +4,7 @@ import { DataSet } from 'vis-data/standalone';
 import { useTracker } from '../context/TrackerContext';
 import { useTheme } from '../context/ThemeContext';
 import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../data/plan2023';
-import { ZoomIn, ZoomOut, Maximize2, X, Compass, MousePointerClick } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, X, Compass, MousePointerClick, Eye, EyeOff, Sparkles } from 'lucide-react';
 
 import type { Node as VisBaseNode, Edge as VisBaseEdge } from 'vis-network/standalone';
 
@@ -20,6 +20,23 @@ interface VisEdge extends VisBaseEdge {
 }
 
 const MATERIAS_GRAFO = MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo);
+
+// Materias troncales de la columna vertebral que conducen a Proyecto Final (#36)
+const CADENA_CRITICA_IDS = new Set<number>([
+  6,  // Algoritmos y Estructuras de Datos
+  8,  // Sistemas y Procesos de Negocio
+  5,  // Lógica y Estructuras Discretas
+  13, // Sintaxis y Semántica de los Lenguajes
+  14, // Paradigmas de Programación
+  16, // Análisis de Sistemas de Información
+  19, // Base de Datos
+  20, // Desarrollo de Software
+  23, // Diseño de Sistemas de Información
+  25, // Ingeniería y Calidad de Software
+  26, // Redes de Datos
+  30, // Administración de Sistemas de Información
+  36  // Proyecto Final
+]);
 
 export const NetworkGraph: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,7 +62,11 @@ export const NetworkGraph: React.FC = () => {
     esMateriaRendible,
     setSelectedSubjectId,
     focusedSubjectId,
-    setFocusedSubjectId
+    setFocusedSubjectId,
+    dimApproved,
+    setDimApproved,
+    criticalChainActive,
+    setCriticalChainActive
   } = useTracker();
 
   const { themeConfig, colorMode } = useTheme();
@@ -157,14 +178,70 @@ export const NetworkGraph: React.FC = () => {
         shadowSize = 14;
         shadowColor = colorMode === 'light' ? 'rgba(217,119,6,0.3)' : 'rgba(245,158,11,0.5)';
       }
+    } else if (criticalChainActive) {
+      const inCritical = CADENA_CRITICA_IDS.has(m.id);
+      if (!inCritical) {
+        bg = colorMode === 'light' ? '#f8fafc' : '#080c16';
+        border = colorMode === 'light' ? '#e2e8f0' : '#141d2f';
+        fontColor = colorMode === 'light' ? '#94a3b8' : '#334155';
+        bw = 1;
+        shadowSize = 0;
+        shadowColor = 'transparent';
+      } else {
+        if (m.id === 36) {
+          bg = colorMode === 'light' ? '#fef9c3' : '#382502';
+          border = '#eab308';
+          fontColor = colorMode === 'light' ? '#854d0e' : '#fef08a';
+          bw = 3.5;
+          shadowColor = 'rgba(234,179,8,0.6)';
+          shadowSize = 20;
+        } else if (est === 'aprobada') {
+          bg = themeConfig.graph.aprobada.bg;
+          border = '#10b981';
+          fontColor = themeConfig.graph.aprobada.font;
+          bw = 2.8;
+          shadowColor = 'rgba(16,185,129,0.4)';
+          shadowSize = 14;
+        } else if (est === 'regular') {
+          bg = themeConfig.graph.regular.bg;
+          border = '#f59e0b';
+          fontColor = themeConfig.graph.regular.font;
+          bw = 2.8;
+          shadowColor = 'rgba(245,158,11,0.45)';
+          shadowSize = 14;
+        } else if (cursable) {
+          bg = themeConfig.graph.cursable.bg;
+          border = '#06b6d4';
+          fontColor = themeConfig.graph.cursable.font;
+          bw = 3;
+          shadowColor = 'rgba(6,182,212,0.6)';
+          shadowSize = 18;
+        } else {
+          bg = colorMode === 'light' ? '#e0f2fe' : '#071f30';
+          border = '#0284c7';
+          fontColor = colorMode === 'light' ? '#0369a1' : '#7dd3fc';
+          bw = 2.2;
+          shadowColor = 'rgba(2,132,199,0.3)';
+          shadowSize = 10;
+        }
+      }
     } else {
       if (est === 'aprobada') {
-        bg = themeConfig.graph.aprobada.bg;
-        border = themeConfig.graph.aprobada.border;
-        fontColor = themeConfig.graph.aprobada.font;
-        bw = 2.2;
-        shadowColor = themeConfig.graph.aprobada.shadow;
-        shadowSize = 10;
+        if (dimApproved) {
+          bg = colorMode === 'light' ? '#f1f5f9' : '#080d17';
+          border = colorMode === 'light' ? '#cbd5e1' : '#172236';
+          fontColor = colorMode === 'light' ? '#64748b' : '#3e4c5f';
+          bw = 1;
+          shadowColor = 'transparent';
+          shadowSize = 0;
+        } else {
+          bg = themeConfig.graph.aprobada.bg;
+          border = themeConfig.graph.aprobada.border;
+          fontColor = themeConfig.graph.aprobada.font;
+          bw = 2.2;
+          shadowColor = themeConfig.graph.aprobada.shadow;
+          shadowSize = 10;
+        }
       } else if (est === 'regular') {
         bg = themeConfig.graph.regular.bg;
         border = themeConfig.graph.regular.border;
@@ -182,13 +259,14 @@ export const NetworkGraph: React.FC = () => {
       }
     }
 
-    const sig = `${themeConfig.id}_${colorMode}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
+    const sig = `${themeConfig.id}_${colorMode}_${dimApproved}_${criticalChainActive}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
     return { bg, border, fontColor, bw, shadowColor, shadowSize, sig };
-  }, [estados, esMateriaCursable, esMateriaRendible, themeConfig, colorMode, dependenciesTree, focusedSubjectId]);
+  }, [estados, esMateriaCursable, esMateriaRendible, themeConfig, colorMode, dependenciesTree, focusedSubjectId, dimApproved, criticalChainActive]);
 
   // Función pura para obtener configuración visual de una arista
   const getEdgeVisualConfig = useCallback((fromId: number, toId: number, tipo: 'regular' | 'aprobada') => {
     const estFrom = estados[fromId] || 'pendiente';
+    const estTo = estados[toId] || 'pendiente';
     const hidden = edgeMode !== 'ambos' && tipo !== edgeMode;
 
     let color = themeConfig.graph.edgeDefault || '#1e293b';
@@ -205,8 +283,22 @@ export const NetworkGraph: React.FC = () => {
         color = themeConfig.graph.edgeMuted || 'rgba(15,23,42,0.06)';
         width = 0.5;
       }
+    } else if (criticalChainActive) {
+      const fromInCritical = CADENA_CRITICA_IDS.has(fromId);
+      const toInCritical = CADENA_CRITICA_IDS.has(toId);
+
+      if (fromInCritical && toInCritical) {
+        color = colorMode === 'light' ? '#0891b2' : '#22d3ee';
+        width = 3.0;
+      } else {
+        color = colorMode === 'light' ? 'rgba(15,23,42,0.05)' : 'rgba(255,255,255,0.04)';
+        width = 0.5;
+      }
     } else if (!hidden) {
-      if (tipo === 'regular') {
+      if (dimApproved && estFrom === 'aprobada' && estTo === 'aprobada') {
+        color = colorMode === 'light' ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)';
+        width = 0.8;
+      } else if (tipo === 'regular') {
         if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
         else if (estFrom === 'regular') color = themeConfig.graph.cursable.border;
         else color = themeConfig.graph.edgeDefault;
@@ -216,10 +308,10 @@ export const NetworkGraph: React.FC = () => {
       }
     }
 
-    const finalColor = hidden && !dependenciesTree ? 'transparent' : color;
-    const sig = `${finalColor}_${width}`;
+    const finalColor = hidden && !dependenciesTree && !criticalChainActive ? 'transparent' : color;
+    const sig = `${finalColor}_${width}_${dimApproved}_${criticalChainActive}`;
     return { color: finalColor, width, sig };
-  }, [estados, edgeMode, dependenciesTree, focusedSubjectId, themeConfig, colorMode]);
+  }, [estados, edgeMode, dependenciesTree, focusedSubjectId, themeConfig, colorMode, criticalChainActive, dimApproved]);
 
   // Inicializar vis-network una sola vez con los colores reales de entrada
   useEffect(() => {
@@ -502,35 +594,88 @@ export const NetworkGraph: React.FC = () => {
         </button>
       </div>
 
-      {/* Selector flotante de modo de interacción */}
-      <div className="absolute top-16 right-3 md:top-4 md:right-4 z-10 flex items-center bg-[var(--bg-surface)]/90 backdrop-blur-md border border-[var(--border-color)] p-1 rounded-xl shadow-lg font-mono text-xs">
-        <button
-          type="button"
-          onClick={() => setInteractionMode('estado')}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[36px] ${
-            interactionMode === 'estado'
-              ? 'bg-[var(--bg-elevated)] text-[var(--text-body)] font-bold border border-[var(--border-color)] shadow-sm'
-              : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
-          }`}
-          title="Al hacer clic en una materia, cambia entre Pendiente, Regular y Aprobada"
-        >
-          <MousePointerClick className="w-3.5 h-3.5" />
-          <span>Alternar Estado</span>
-        </button>
+      {/* Banner flotante de Cadena Crítica hacia Graduación */}
+      {criticalChainActive && !focusedSubjectId && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-[var(--bg-surface)]/95 backdrop-blur-md border border-amber-500/50 shadow-[0_0_25px_rgba(245,158,11,0.25)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+            <span className="font-bold text-[var(--text-body)]">Columna Vertebral: Proyecto Final</span>
+            <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">(13 materias clave)</span>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => setInteractionMode('camino')}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[36px] ${
-            interactionMode === 'camino'
-              ? 'bg-cyan-500/20 text-cyan-950 dark:text-cyan-300 font-bold border border-cyan-500/50 shadow-sm'
-              : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
-          }`}
-          title="Al hacer clic en una materia, resalta toda su cadena de requisitos y materias desbloqueadas"
-        >
-          <Compass className="w-3.5 h-3.5" />
-          <span>Camino Crítico</span>
-        </button>
+          <button
+            onClick={() => setCriticalChainActive(false)}
+            className="p-1 rounded text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors ml-1"
+            title="Desactivar filtro de cadena crítica"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Controles flotantes superiores derechos */}
+      <div className="absolute top-16 right-3 md:top-4 md:right-4 z-10 flex flex-col items-end gap-2">
+        {/* Selector de modo de interacción */}
+        <div className="flex items-center bg-[var(--bg-surface)]/90 backdrop-blur-md border border-[var(--border-color)] p-1 rounded-xl shadow-lg font-mono text-xs">
+          <button
+            type="button"
+            onClick={() => setInteractionMode('estado')}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[36px] ${
+              interactionMode === 'estado'
+                ? 'bg-[var(--bg-elevated)] text-[var(--text-body)] font-bold border border-[var(--border-color)] shadow-sm'
+                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
+            }`}
+            title="Al hacer clic en una materia, cambia entre Pendiente, Regular y Aprobada"
+          >
+            <MousePointerClick className="w-3.5 h-3.5" />
+            <span>Alternar Estado</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setInteractionMode('camino')}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[36px] ${
+              interactionMode === 'camino'
+                ? 'bg-cyan-500/20 text-cyan-950 dark:text-cyan-300 font-bold border border-cyan-500/50 shadow-sm'
+                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
+            }`}
+            title="Al hacer clic en una materia, resalta toda su cadena de requisitos y materias desbloqueadas"
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>Camino Crítico</span>
+          </button>
+        </div>
+
+        {/* Filtros visuales rápidos: Atenuar Aprobadas & Cadena Crítica */}
+        <div className="flex items-center gap-1.5 bg-[var(--bg-surface)]/90 backdrop-blur-md border border-[var(--border-color)] p-1 rounded-xl shadow-lg font-mono text-xs">
+          <button
+            type="button"
+            onClick={() => setDimApproved(prev => !prev)}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[34px] ${
+              dimApproved
+                ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/40 shadow-sm'
+                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
+            }`}
+            title="Atenuar materias ya aprobadas para concentrarse en las materias pendientes y regulares"
+          >
+            {dimApproved ? <EyeOff className="w-3.5 h-3.5 text-emerald-500" /> : <Eye className="w-3.5 h-3.5" />}
+            <span>Atenuar Aprobadas</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCriticalChainActive(prev => !prev)}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[34px] ${
+              criticalChainActive
+                ? 'bg-amber-500/25 text-amber-900 dark:text-amber-200 font-bold border border-amber-500/50 shadow-sm'
+                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
+            }`}
+            title="Destacar la cadena crítica indispensable hacia el Proyecto Final de carrera"
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${criticalChainActive ? 'text-amber-400 animate-pulse' : ''}`} />
+            <span>Cadena Crítica</span>
+          </button>
+        </div>
       </div>
 
       {/* Controles flotantes de Zoom con touch targets de 44px */}

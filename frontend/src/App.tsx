@@ -16,6 +16,7 @@ import { PrintableReportModal } from './components/PrintableReportModal';
 import { ProfileModal } from './components/ProfileModal';
 import { StatsModal } from './components/StatsModal';
 import { ShareModal } from './components/ShareModal';
+import { BottomNav } from './components/BottomNav';
 import { Toast } from './components/Toast';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
@@ -39,6 +40,7 @@ const TrackerMain: React.FC = () => {
     sharedName,
     exitSharedMode,
     importSharedProgress,
+    openMobileDrawer,
   } = useTracker();
   const [titlesModalOpen, setTitlesModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
@@ -102,7 +104,7 @@ const TrackerMain: React.FC = () => {
         />
 
         {/* Contenido principal según vista seleccionada */}
-        <main className="flex-1 relative">
+        <main className="flex-1 relative pb-16 sm:pb-0">
           <div key={viewMode} className="view-transition-enter h-full">
             {viewMode === 'grafo' ? (
               <Suspense fallback={<GraphSkeleton />}>
@@ -155,6 +157,12 @@ const TrackerMain: React.FC = () => {
 
         {/* Modal de Autenticación / Nube */}
         <AuthModal />
+
+        {/* Barra de navegación inferior móvil */}
+        <BottomNav 
+          onOpenMenu={() => openMobileDrawer('menu')} 
+          onOpenElectivas={() => openMobileDrawer('electivas')} 
+        />
 
         {/* Notificaciones flotantes */}
         <Toast />

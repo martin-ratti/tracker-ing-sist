@@ -50,7 +50,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     setShareModalOpen,
     setSelectedSubjectId,
     perfil,
-    resetAll
+    resetAll,
+    mobileDrawerOpen,
+    mobileDrawerView,
+    closeMobileDrawer
   } = useTracker();
 
   const { user, openAuthModal, logout } = useAuth();
@@ -77,6 +80,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
 
   const closeDrawer = (callback?: () => void) => {
     setDrawerVisible(false);
+    closeMobileDrawer();
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     closeTimeoutRef.current = setTimeout(() => {
       setDrawerMounted(false);
@@ -85,6 +89,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
       if (callback) callback();
     }, 280);
   };
+
+  // Sincronizar apertura del drawer disparada desde BottomNav o contexto global
+  useEffect(() => {
+    if (mobileDrawerOpen) {
+      openDrawer(mobileDrawerView);
+    }
+  }, [mobileDrawerOpen, mobileDrawerView]);
 
   // En móvil, si se intenta abrir electivas desde otro lugar, abrir directamente en el drawer
   useEffect(() => {
@@ -234,6 +245,30 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </div>
         </div>
 
+        {/* Widget de Próximo Examen en móvil */}
+        {stats.proximaMeta && (
+          <div className="w-full md:hidden pt-2 border-t border-[var(--border-color)]/60">
+            <button
+              type="button"
+              onClick={() => setCalendarOpen(true)}
+              className={`w-full flex items-center justify-between px-2.5 py-1 rounded-lg border text-xs font-mono transition-all ${
+                stats.proximaMeta.urgencia === 'urgente'
+                  ? 'bg-rose-500/15 border-rose-500/40 text-rose-300'
+                  : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 truncate">
+                <Clock className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+                <span className="text-slate-400 text-[10px]">Próximo final:</span>
+                <span className="font-bold truncate text-[11px] text-white">{stats.proximaMeta.materiaNombreCorto}</span>
+              </div>
+              <span className="shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-black/40 border border-slate-700/50">
+                {stats.proximaMeta.diasFaltantes === 0 ? '¡Rinde hoy!' : `en ${stats.proximaMeta.diasFaltantes} d`}
+              </span>
+            </button>
+          </div>
+        )}
+
         {/* Estadísticas en vivo adaptadas al tema (solo escritorio) */}
         <div className="hidden md:flex items-center gap-2 sm:gap-4 overflow-x-auto py-1 w-full md:w-auto justify-center">
           <div 
@@ -322,7 +357,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           {stats.proximaMeta && (
             <button
               type="button"
-              onClick={() => setSelectedSubjectId(stats.proximaMeta!.materiaId)}
+              onClick={() => setCalendarOpen(true)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all text-left ${
                 stats.proximaMeta.urgencia === 'urgente'
                   ? 'bg-rose-500/15 border-rose-500/50 text-rose-700 dark:text-rose-300 animate-pulse'

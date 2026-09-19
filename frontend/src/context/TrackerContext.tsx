@@ -98,6 +98,18 @@ interface TrackerContextType {
   stats: Stats;
   resetAll: () => void;
   reloadProgress: () => void;
+  mobileDrawerOpen: boolean;
+  setMobileDrawerOpen: (open: boolean) => void;
+  mobileDrawerView: 'menu' | 'electivas';
+  setMobileDrawerView: (view: 'menu' | 'electivas') => void;
+  openMobileDrawer: (view?: 'menu' | 'electivas') => void;
+  closeMobileDrawer: () => void;
+  dimApproved: boolean;
+  setDimApproved: React.Dispatch<React.SetStateAction<boolean>>;
+  criticalChainActive: boolean;
+  setCriticalChainActive: React.Dispatch<React.SetStateAction<boolean>>;
+  exportBackupJson: () => void;
+  importBackupJson: (jsonStr: string) => boolean;
 }
 
 const TrackerContext = createContext<TrackerContextType | undefined>(undefined);
@@ -158,6 +170,19 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [electivasOpen, setElectivasOpen] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [mobileDrawerView, setMobileDrawerView] = useState<'menu' | 'electivas'>('menu');
+  const [dimApproved, setDimApproved] = useState(false);
+  const [criticalChainActive, setCriticalChainActive] = useState(false);
+
+  const openMobileDrawer = useCallback((view: 'menu' | 'electivas' = 'menu') => {
+    setMobileDrawerView(view);
+    setMobileDrawerOpen(true);
+  }, []);
+
+  const closeMobileDrawer = useCallback(() => {
+    setMobileDrawerOpen(false);
+  }, []);
 
   const toastMessage = toasts.length > 0 ? toasts[0].message : null;
 
@@ -757,6 +782,69 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [getEstado, getEstadoElectiva, notas, ppsHoras, metasExamen, esMateriaCursable]);
 
+  const exportBackupJson = useCallback(() => {
+    const backupData = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      plan: 'Plan 2023 ISI UTN FRRo',
+      estados,
+      estadosElectivas,
+      notas,
+      ppsHoras,
+      perfil,
+      metasExamen
+    };
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const fileName = `tracker-isi-${perfil.legajo || 'backup'}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('💾 Copia de seguridad exportada con éxito', 'success');
+  }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, showToast]);
+
+  const importBackupJson = useCallback((jsonStr: string): boolean => {
+    try {
+      const data = JSON.parse(jsonStr);
+      if (!data || typeof data !== 'object') {
+        showToast('⚠️ Archivo de copia de seguridad no válido', 'error');
+        return false;
+      }
+      const newEstados = data.estados && typeof data.estados === 'object' ? data.estados : estados;
+      const newElectivas = data.estadosElectivas && typeof data.estadosElectivas === 'object' ? data.estadosElectivas : estadosElectivas;
+      const newNotas = data.notas && typeof data.notas === 'object' ? data.notas : notas;
+      const newPps = typeof data.ppsHoras === 'number' ? data.ppsHoras : ppsHoras;
+      const newPerfil = data.perfil && typeof data.perfil === 'object' ? data.perfil : perfil;
+      const newMetas = data.metasExamen && typeof data.metasExamen === 'object' ? data.metasExamen : metasExamen;
+
+      setEstados(newEstados);
+      setEstadosElectivas(newElectivas);
+      setNotas(newNotas);
+      setPpsHorasState(newPps);
+      setPerfilState(newPerfil);
+      setMetasExamenState(newMetas);
+
+      persistProgress({
+        estados: newEstados,
+        estadosElectivas: newElectivas,
+        notas: newNotas,
+        ppsHoras: newPps,
+        perfil: newPerfil,
+        metasExamen: newMetas
+      });
+
+      showToast('✅ ¡Progreso restaurado correctamente!', 'success');
+      return true;
+    } catch {
+      showToast('❌ Error al procesar el archivo JSON', 'error');
+      return false;
+    }
+  }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, persistProgress, showToast]);
+
   return (
     <TrackerContext.Provider
       value={{
@@ -812,7 +900,19 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         esElectivaCursable,
         stats,
         resetAll,
-        reloadProgress
+        reloadProgress,
+        mobileDrawerOpen,
+        setMobileDrawerOpen,
+        mobileDrawerView,
+        setMobileDrawerView,
+        openMobileDrawer,
+        closeMobileDrawer,
+        dimApproved,
+        setDimApproved,
+        criticalChainActive,
+        setCriticalChainActive,
+        exportBackupJson,
+        importBackupJson
       }}
     >
       {children}

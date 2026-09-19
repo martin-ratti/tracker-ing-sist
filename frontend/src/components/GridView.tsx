@@ -64,15 +64,27 @@ export const GridView: React.FC = () => {
 
   const displayedNiveles = activeNivel === 'todos' ? NIVELES : [activeNivel];
 
+  // Helper de cambio de estado con vibración háptica en móvil
+  const handleToggleMateria = (id: number) => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(12);
+      } catch {
+        // Ignorar si el navegador o SO no tiene soporte háptico
+      }
+    }
+    toggleMateriaEstado(id);
+  };
+
   return (
-    <div className="max-w-[1700px] mx-auto p-3.5 sm:p-6 overflow-y-auto min-h-[calc(100vh-130px)]">
+    <div className="max-w-[1700px] mx-auto p-3 sm:p-6 overflow-y-auto min-h-[calc(100vh-130px)]">
       {/* Barra de búsqueda y título */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 mb-3 sm:mb-4">
         <div>
-          <h2 className="text-lg sm:text-xl font-syne font-bold text-[var(--text-body)] tracking-wide">
+          <h2 className="text-base sm:text-xl font-syne font-bold text-[var(--text-body)] tracking-wide">
             Malla Curricular Plan 2023
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono">
             Estructura cronológica por niveles académicos y correlatividades
           </p>
         </div>
@@ -100,18 +112,18 @@ export const GridView: React.FC = () => {
         </div>
       </div>
 
-      {/* Selector de Nivel Académico (Tabs táctiles para celular y escritorio) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-3 no-scrollbar font-mono text-xs">
+      {/* Selector de Nivel Académico (Carrusel táctil con scroll suave) */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-2.5 no-scrollbar font-mono text-xs">
         <button
           type="button"
           onClick={() => setActiveNivel('todos')}
-          className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all font-semibold ${
+          className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all font-semibold text-xs ${
             activeNivel === 'todos'
               ? 'bg-[var(--bg-elevated)] border-[var(--color-primary)] text-[var(--text-body)] font-bold shadow-sm'
               : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)]'
           }`}
         >
-          Todos los Años ({MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo).length})
+          Todos ({MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo).length})
         </button>
 
         {NIVELES.map(n => {
@@ -122,7 +134,7 @@ export const GridView: React.FC = () => {
               key={n}
               type="button"
               onClick={() => setActiveNivel(n)}
-              className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all flex items-center gap-1.5 font-semibold ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl border shrink-0 transition-all flex items-center gap-1.5 font-semibold text-xs ${
                 isSelected
                   ? 'border shadow-sm font-bold'
                   : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)]'
@@ -341,11 +353,11 @@ export const GridView: React.FC = () => {
                         tabIndex={0}
                         aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
                         className={`group relative p-3 rounded-lg border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${cardStyle}`}
-                        onClick={() => toggleMateriaEstado(m.id)}
+                        onClick={() => handleToggleMateria(m.id)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            toggleMateriaEstado(m.id);
+                            handleToggleMateria(m.id);
                           }
                         }}
                       >

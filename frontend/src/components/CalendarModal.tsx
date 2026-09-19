@@ -17,13 +17,15 @@ import {
   Target, 
   Clock, 
   CalendarDays, 
-  Trash2,
-  ExternalLink,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  List
+  Trash2, 
+  ExternalLink, 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  List,
+  Download
 } from 'lucide-react';
+import { exportMetasToICS } from '../utils/icsExporter';
 
 const NOMBRES_MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
@@ -50,10 +52,23 @@ export const CalendarModal: React.FC = () => {
     setMetaExamen,
     removeMetaExamen, 
     estados,
-    setSelectedSubjectId 
+    setSelectedSubjectId,
+    showToast
   } = useTracker();
 
   const [activeTab, setActiveTab] = useState<'calendario' | 'metas' | 'turnos'>('calendario');
+
+  const handleExportICS = () => {
+    const metas = Object.values(metasExamen);
+    if (metas.length === 0) {
+      showToast('⚠️ No tienes metas de final agendadas para exportar', 'warning');
+      return;
+    }
+    const ok = exportMetasToICS(metas);
+    if (ok) {
+      showToast('📅 ¡Archivo .ics descargado con éxito!', 'success');
+    }
+  };
   const modalRef = useFocusTrap(calendarOpen);
 
   // Fecha actual de referencia
@@ -295,14 +310,28 @@ export const CalendarModal: React.FC = () => {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setCalendarOpen(false)}
-            aria-label="Cerrar calendario académico"
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {metasArray.length > 0 && (
+              <button
+                type="button"
+                onClick={handleExportICS}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400 transition-colors shadow-sm"
+                title="Exportar mis metas a formato .ics para Google Calendar y Apple Calendar"
+              >
+                <Download className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">Exportar .ics</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setCalendarOpen(false)}
+              aria-label="Cerrar calendario académico"
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Pestañas de navegación */}
@@ -660,9 +689,21 @@ export const CalendarModal: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-3 font-mono">
-                  <div className="flex items-center justify-between text-xs text-slate-400 pb-1">
-                    <span>Materias con mesa tentativa de examen agendada:</span>
-                    <span>{metasArray.length} meta{metasArray.length !== 1 ? 's' : ''}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-400 pb-1">
+                    <div className="flex items-center gap-2">
+                      <span>Materias con mesa tentativa de examen agendada:</span>
+                      <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-300 font-semibold">{metasArray.length} meta{metasArray.length !== 1 ? 's' : ''}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleExportICS}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400 transition-colors self-start sm:self-auto shadow-sm"
+                      title="Descargar archivo .ics compatible con Google Calendar, Apple Calendar y Outlook"
+                    >
+                      <Download className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Exportar a Calendario (.ics)</span>
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
