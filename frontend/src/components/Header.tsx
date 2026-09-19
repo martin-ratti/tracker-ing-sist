@@ -810,300 +810,293 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
         </div>
       </div>
 
-      {/* Menú Móvil Desplegable: Top-Sheet de ancho completo que cubre más de la mitad de la pantalla */}
+      {/* Drawer Móvil Lateral Tipo Carrito (De derecha a izquierda, con fondo difuminado) */}
       {mobileDrawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex flex-col justify-start animate-in fade-in duration-200">
-          {/* Fondo inferior difuminado (tocar aquí cierra el menú) */}
+        <div className="fixed inset-0 z-50 overflow-hidden md:hidden animate-in fade-in duration-200">
+          {/* Fondo izquierdo difuminado sobre la pantalla actual (tocar aquí cierra el menú) */}
           <div 
-            className="absolute inset-0 bg-black/55 backdrop-blur-sm transition-opacity"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileDrawerOpen(false)}
           />
 
-          {/* Panel Superior Desplegable que ocupa todo el ancho de la pantalla */}
-          <div 
-            className="relative w-full max-h-[85vh] bg-[var(--bg-surface)]/98 border-b border-[var(--border-color)] shadow-[0_25px_60px_rgba(0,0,0,0.7)] rounded-b-3xl flex flex-col z-10 animate-in slide-in-from-top duration-300 overflow-hidden"
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Header del Menú */}
-            <div className="flex items-center justify-between px-4 py-3 sm:px-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div 
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-black font-extrabold font-syne text-sm shadow-md"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
-                >
-                  ISI
-                </div>
-                <div>
-                  <h3 className="font-syne font-bold text-sm text-[var(--text-body)]">Herramientas</h3>
-                  <p className="text-[10px] font-mono text-slate-500">Plan 2023 · UTN FRRo</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setMobileDrawerOpen(false)}
-                aria-label="Cerrar menú"
-                className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Contenido con ancho completo y distribución en 2 columnas */}
-            <div className="p-4 sm:p-6 overflow-y-auto no-scrollbar overscroll-contain flex flex-col gap-3 max-w-2xl mx-auto w-full">
-              {/* Fila Superior: Perfil + Nube Firebase (2 Columnas) */}
-              <div className="grid grid-cols-2 gap-2.5">
-                {/* Tarjeta de Perfil */}
-                <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between gap-2 shadow-sm min-w-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
-                      <UserIcon className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-syne font-bold text-xs text-[var(--text-body)] truncate">
-                        {perfil.nombre || 'Estudiante'}
-                      </div>
-                      <div className="text-[10px] font-mono text-slate-500 truncate">
-                        {perfil.legajo ? `Leg: ${perfil.legajo}` : 'Sin legajo'}
-                      </div>
-                    </div>
+          {/* Panel Lateral que entra de derecha a izquierda por encima de la pantalla */}
+          <div className="fixed inset-y-0 right-0 max-w-full flex">
+            <div 
+              className="w-[85vw] max-w-sm sm:max-w-md bg-[var(--bg-surface)]/98 border-l border-[var(--border-color)] shadow-[-15px_0_40px_rgba(0,0,0,0.6)] flex flex-col h-full overflow-hidden animate-in slide-in-from-right duration-300"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header del Panel (Fijo) */}
+              <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div 
+                    className="w-8 h-8 rounded-xl flex items-center justify-center text-black font-extrabold font-syne text-sm shadow-md"
+                    style={{ backgroundColor: 'var(--color-primary)' }}
+                  >
+                    ISI
                   </div>
+                  <div>
+                    <h3 className="font-syne font-bold text-sm text-[var(--text-body)]">Herramientas</h3>
+                    <p className="text-[10px] font-mono text-slate-500">Plan 2023 · UTN FRRo</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  aria-label="Cerrar menú"
+                  className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Cuerpo del Panel con scroll táctil sin scrollbar tosca */}
+              <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 no-scrollbar overscroll-contain flex flex-col">
+                {/* Fila Superior: Perfil + Nube Firebase (2 Columnas compactas) */}
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Tarjeta de Perfil */}
+                  <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between gap-1 shadow-sm min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className="p-1 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
+                        <UserIcon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-syne font-bold text-[11px] text-[var(--text-body)] truncate">
+                          {perfil.nombre || 'Estudiante'}
+                        </div>
+                        <div className="text-[9px] font-mono text-slate-500 truncate">
+                          {perfil.legajo ? `Leg: ${perfil.legajo}` : 'Sin legajo'}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileDrawerOpen(false);
+                        setProfileModalOpen(true);
+                      }}
+                      className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:text-[var(--text-body)] shrink-0 shadow-xs"
+                    >
+                      Editar
+                    </button>
+                  </div>
+
+                  {/* Sincronización en la Nube */}
+                  <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between gap-1 shadow-sm font-mono text-xs min-w-0">
+                    <div className="min-w-0">
+                      <div className="text-[9px] uppercase font-bold text-slate-500 truncate">Nube Firebase</div>
+                      {user ? (
+                        <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold truncate">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                          {user.email?.split('@')[0]}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold truncate">Offline</span>
+                      )}
+                    </div>
+                    {user ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          logout();
+                          setMobileDrawerOpen(false);
+                        }}
+                        className="p-1 rounded text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0"
+                        title="Cerrar sesión"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileDrawerOpen(false);
+                          openAuthModal();
+                        }}
+                        className="px-2 py-0.5 rounded text-[9px] font-bold border shrink-0 shadow-xs"
+                        style={{
+                          backgroundColor: 'var(--color-primary-bg)',
+                          borderColor: 'var(--color-primary-border)',
+                          color: 'var(--color-primary)'
+                        }}
+                      >
+                        Conectar
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Selector de Paleta de Color Compacto */}
+                <div>
+                  <div className="text-[9px] uppercase font-mono font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center justify-between">
+                    <span>Paleta Cromática</span>
+                    <span className="text-[8px] font-normal text-slate-400 dark:text-slate-500">5 temas</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1">
+                    {(Object.keys(THEMES) as ThemeId[]).map(id => {
+                      const opt = THEMES[id];
+                      const isSelected = theme === id;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => setTheme(id)}
+                          title={opt.name}
+                          className={`h-7 rounded-lg border flex items-center justify-center gap-1 transition-all ${
+                            isSelected ? 'border-2 scale-102 shadow-md font-bold' : 'opacity-70 hover:opacity-100'
+                          }`}
+                          style={{
+                            backgroundColor: 'var(--bg-elevated)',
+                            borderColor: isSelected ? opt.primaryColor : 'var(--border-color)'
+                          }}
+                        >
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: opt.primaryColor }} />
+                          <span className="text-[8px] font-mono uppercase text-slate-600 dark:text-slate-400">{id.slice(0, 3)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Grilla de Acciones y Herramientas (2 Columnas x 4 Filas = 8 items) */}
+                <div className="grid grid-cols-2 gap-1.5 font-mono text-xs">
                   <button
                     type="button"
                     onClick={() => {
                       setMobileDrawerOpen(false);
-                      setProfileModalOpen(true);
+                      setCalendarOpen(true);
                     }}
-                    className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:text-[var(--text-body)] shrink-0 shadow-xs"
+                    className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px] shadow-xs"
                   >
-                    Editar
+                    <div className="flex items-center gap-2 min-w-0 text-left">
+                      <CalendarDays className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                      <span className="text-[11px] leading-tight truncate">Calendario</span>
+                    </div>
+                    {stats.metasCount > 0 && (
+                      <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 font-bold text-[9px] shrink-0 ml-1">
+                        {stats.metasCount}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      setElectivasOpen(true);
+                    }}
+                    className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px] shadow-xs"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 text-left">
+                      <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span className="text-[11px] leading-tight truncate">Electivas</span>
+                    </div>
+                    <span className="px-1 py-0.5 rounded bg-amber-500/20 text-amber-900 dark:text-amber-300 font-bold text-[8px] shrink-0 ml-1">
+                      {stats.horasElectivasAprobadas}/20h
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      onOpenTitles();
+                    }}
+                    className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px] shadow-xs"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 text-left">
+                      <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                      <span className="text-[11px] leading-tight truncate">Títulos</span>
+                    </div>
+                    <span className="text-[9px] font-bold shrink-0 ml-1" style={{ color: 'var(--color-primary)' }}>
+                      {stats.adusiProgreso}%
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      setReportOpen(true);
+                    }}
+                    className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px] shadow-xs"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 text-left">
+                      <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                      <span className="text-[11px] leading-tight truncate">Ficha PDF</span>
+                    </div>
+                    <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      setStatsModalOpen(true);
+                    }}
+                    className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px] shadow-xs"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 text-left">
+                      <BarChart3 className="w-4 h-4 text-pink-600 dark:text-pink-400 shrink-0" />
+                      <span className="text-[11px] leading-tight truncate">Estadísticas</span>
+                    </div>
+                    <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      setShareModalOpen(true);
+                    }}
+                    className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px] shadow-xs"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 text-left">
+                      <Share2 className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+                      <span className="text-[11px] leading-tight truncate">Compartir</span>
+                    </div>
+                    <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      onOpenHelp();
+                    }}
+                    className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px] shadow-xs"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 text-left">
+                      <HelpCircle className="w-4 h-4 text-slate-500 shrink-0" />
+                      <span className="text-[11px] leading-tight truncate">Guía</span>
+                    </div>
+                    <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+                  </button>
+
+                  {/* Botón de Reiniciar Progreso */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleReset();
+                      if (confirmReset) setMobileDrawerOpen(false);
+                    }}
+                    className={`flex items-center justify-between p-2 rounded-xl border text-xs font-mono transition-all min-h-[44px] shadow-xs ${
+                      confirmReset
+                        ? 'bg-rose-500/20 border-rose-500 text-rose-700 dark:text-rose-300 font-bold animate-pulse'
+                        : 'border-slate-300 dark:border-slate-800 bg-[var(--bg-elevated)] text-rose-600 dark:text-rose-400 hover:bg-rose-500/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0 text-left">
+                      <RotateCcw className="w-4 h-4 shrink-0" />
+                      <span className="text-[11px] leading-tight truncate">
+                        {confirmReset ? '¿Confirmar?' : 'Reiniciar'}
+                      </span>
+                    </div>
+                    <span className="text-[9px] font-bold text-rose-500 shrink-0 ml-1">
+                      {confirmReset ? 'SÍ' : 'Reset'}
+                    </span>
                   </button>
                 </div>
-
-                {/* Sincronización en la Nube */}
-                <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between gap-2 shadow-sm font-mono text-xs min-w-0">
-                  <div className="min-w-0">
-                    <div className="text-[10px] uppercase font-bold text-slate-500 truncate">Nube Firebase</div>
-                    {user ? (
-                      <span className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold truncate">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                        {user.email?.split('@')[0]}
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold truncate">Offline</span>
-                    )}
-                  </div>
-                  {user ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        logout();
-                        setMobileDrawerOpen(false);
-                      }}
-                      className="p-1.5 rounded text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0"
-                      title="Cerrar sesión"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMobileDrawerOpen(false);
-                        openAuthModal();
-                      }}
-                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold border shrink-0 shadow-xs"
-                      style={{
-                        backgroundColor: 'var(--color-primary-bg)',
-                        borderColor: 'var(--color-primary-border)',
-                        color: 'var(--color-primary)'
-                      }}
-                    >
-                      Conectar
-                    </button>
-                  )}
-                </div>
               </div>
-
-              {/* Selector de Paleta de Color */}
-              <div>
-                <div className="text-[10px] uppercase font-mono font-bold text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
-                  <span>Paleta Cromática</span>
-                  <span className="text-[9px] font-normal text-slate-400 dark:text-slate-500">5 temas disponibles</span>
-                </div>
-                <div className="grid grid-cols-5 gap-1.5">
-                  {(Object.keys(THEMES) as ThemeId[]).map(id => {
-                    const opt = THEMES[id];
-                    const isSelected = theme === id;
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setTheme(id)}
-                        title={opt.name}
-                        className={`h-9 rounded-xl border flex items-center justify-center gap-1.5 transition-all ${
-                          isSelected ? 'border-2 scale-102 shadow-md font-bold' : 'opacity-70 hover:opacity-100'
-                        }`}
-                        style={{
-                          backgroundColor: 'var(--bg-elevated)',
-                          borderColor: isSelected ? opt.primaryColor : 'var(--border-color)'
-                        }}
-                      >
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: opt.primaryColor }} />
-                        <span className="text-[9px] font-mono uppercase text-slate-600 dark:text-slate-400">{id.slice(0, 3)}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Grilla de Acciones y Herramientas (2 Columnas x 4 Filas = 8 items) */}
-              <div className="grid grid-cols-2 gap-2 font-mono text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setCalendarOpen(true);
-                  }}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 text-left">
-                    <CalendarDays className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
-                    <span className="text-xs leading-tight truncate">Calendario</span>
-                  </div>
-                  {stats.metasCount > 0 && (
-                    <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 font-bold text-[9px] shrink-0 ml-1">
-                      {stats.metasCount}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setElectivasOpen(true);
-                  }}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 text-left">
-                    <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span className="text-xs leading-tight truncate">Electivas</span>
-                  </div>
-                  <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-900 dark:text-amber-300 font-bold text-[9px] shrink-0 ml-1">
-                    {stats.horasElectivasAprobadas}/20hs
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    onOpenTitles();
-                  }}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 text-left">
-                    <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                    <span className="text-xs leading-tight truncate">Títulos</span>
-                  </div>
-                  <span className="text-[10px] font-bold shrink-0 ml-1" style={{ color: 'var(--color-primary)' }}>
-                    {stats.adusiProgreso}%
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setReportOpen(true);
-                  }}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 text-left">
-                    <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
-                    <span className="text-xs leading-tight truncate">Ficha PDF</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setStatsModalOpen(true);
-                  }}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 text-left">
-                    <BarChart3 className="w-4 h-4 text-pink-600 dark:text-pink-400 shrink-0" />
-                    <span className="text-xs leading-tight truncate">Estadísticas</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setShareModalOpen(true);
-                  }}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 text-left">
-                    <Share2 className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
-                    <span className="text-xs leading-tight truncate">Compartir</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    onOpenHelp();
-                  }}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 text-left">
-                    <HelpCircle className="w-4 h-4 text-slate-500 shrink-0" />
-                    <span className="text-xs leading-tight truncate">Guía</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                </button>
-
-                {/* Botón de Reiniciar Progreso integrado */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleReset();
-                    if (confirmReset) setMobileDrawerOpen(false);
-                  }}
-                  className={`flex items-center justify-between p-2.5 sm:p-3 rounded-xl border text-xs font-mono transition-all min-h-[46px] shadow-xs ${
-                    confirmReset
-                      ? 'bg-rose-500/20 border-rose-500 text-rose-700 dark:text-rose-300 font-bold animate-pulse'
-                      : 'border-slate-300 dark:border-slate-800 bg-[var(--bg-elevated)] text-rose-600 dark:text-rose-400 hover:bg-rose-500/10'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 min-w-0 text-left">
-                    <RotateCcw className="w-4 h-4 shrink-0" />
-                    <span className="text-xs leading-tight truncate">
-                      {confirmReset ? '¿Confirmar?' : 'Reiniciar'}
-                    </span>
-                  </div>
-                  <span className="text-[9px] font-bold text-rose-500 shrink-0 ml-1">
-                    {confirmReset ? 'SÍ' : 'Reset'}
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* Pestaña táctil inferior */}
-            <div 
-              className="py-2.5 flex items-center justify-center bg-[var(--bg-surface)] border-t border-[var(--border-color)] shrink-0 cursor-pointer"
-              onClick={() => setMobileDrawerOpen(false)}
-              title="Tocar para cerrar menú"
-            >
-              <div className="w-12 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
             </div>
           </div>
         </div>
