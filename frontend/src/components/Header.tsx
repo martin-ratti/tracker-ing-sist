@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTracker } from '../context/TrackerContext';
 import { useAuth } from '../context/AuthContext';
 import { ThemeSelector } from './ThemeSelector';
@@ -73,6 +73,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     setConfirmReset(false);
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
   };
+
+  // Bloquear el scroll de la página de fondo cuando el drawer móvil está abierto
+  useEffect(() => {
+    if (mobileDrawerOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [mobileDrawerOpen]);
 
   return (
     <header className="bg-[var(--bg-surface)]/95 backdrop-blur-md border-b border-[var(--border-color)] sticky top-0 z-30 px-4 sm:px-8 xl:px-12 py-3 w-full">
@@ -808,10 +819,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           />
 
           <div className="fixed inset-y-0 right-0 max-w-full flex">
-            <div className="w-screen max-w-xs sm:max-w-sm bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-2xl flex flex-col p-5 overflow-y-auto">
+            <div className="w-screen max-w-xs sm:max-w-sm bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-2xl flex flex-col h-full overflow-hidden animate-in slide-in-from-right duration-300">
               
-              {/* Header del Drawer */}
-              <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
+              {/* Header del Drawer (Fijo arriba) */}
+              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div 
                     className="w-8 h-8 rounded-xl flex items-center justify-center text-black font-extrabold font-syne text-sm shadow-md"
@@ -828,14 +839,16 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   type="button"
                   onClick={() => setMobileDrawerOpen(false)}
                   aria-label="Cerrar menú"
-                  className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+                  className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Tarjeta de Perfil de Alumno */}
-              <div className="my-4 p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between shadow-sm">
+              {/* Cuerpo del Drawer con scroll interno limpio (sin scrollbar tosca) */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 no-scrollbar overscroll-contain flex flex-col">
+                {/* Tarjeta de Perfil de Alumno */}
+                <div className="p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
                     <UserIcon className="w-4 h-4" />
@@ -1073,6 +1086,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   <RotateCcw className="w-4 h-4" />
                   <span>{confirmReset ? '¿Confirmar Reinicio?' : 'Reiniciar Todo'}</span>
                 </button>
+              </div>
               </div>
             </div>
           </div>
