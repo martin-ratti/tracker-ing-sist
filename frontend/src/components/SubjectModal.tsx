@@ -59,7 +59,14 @@ export const SubjectModal: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKey);
   }, [setSelectedSubjectId]);
 
-  useEffect(() => {
+  const [prevSubjectId, setPrevSubjectId] = useState(selectedSubjectId);
+  const [prevNotas, setPrevNotas] = useState(notas);
+  const [prevMetas, setPrevMetas] = useState(metasExamen);
+
+  if (selectedSubjectId !== prevSubjectId || notas !== prevNotas || metasExamen !== prevMetas) {
+    setPrevSubjectId(selectedSubjectId);
+    setPrevNotas(notas);
+    setPrevMetas(metasExamen);
     if (selectedSubjectId && notas[selectedSubjectId]) {
       const n = notas[selectedSubjectId];
       setNotaVal(n.nota !== undefined ? String(n.nota) : '');
@@ -86,7 +93,7 @@ export const SubjectModal: React.FC = () => {
       setMetaComentario('');
       setShowMetaForm(false);
     }
-  }, [selectedSubjectId, notas, metasExamen]);
+  }
 
   if (!materia) return null;
 

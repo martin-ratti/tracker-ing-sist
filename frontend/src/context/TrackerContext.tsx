@@ -843,7 +843,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       showToast('❌ Error al procesar el archivo JSON', 'error');
       return false;
     }
-  }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, persistProgress, showToast]);
+  }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, showToast]);
 
   return (
     <TrackerContext.Provider

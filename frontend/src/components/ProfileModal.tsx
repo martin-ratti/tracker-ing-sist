@@ -19,10 +19,15 @@ export const ProfileModal: React.FC = () => {
 
   const modalRef = useFocusTrap(profileModalOpen);
 
-  useEffect(() => {
+  const [prevPerfil, setPrevPerfil] = useState(perfil);
+  const [prevOpen, setPrevOpen] = useState(profileModalOpen);
+
+  if (profileModalOpen !== prevOpen || perfil !== prevPerfil) {
+    setPrevOpen(profileModalOpen);
+    setPrevPerfil(perfil);
     setNombre(perfil.nombre || '');
     setLegajo(perfil.legajo || '');
-  }, [perfil, profileModalOpen]);
+  }
 
   useEffect(() => {
     if (!profileModalOpen) return;

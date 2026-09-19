@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTracker } from '../context/TrackerContext';
 import { useAuth } from '../context/AuthContext';
@@ -77,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     });
   };
 
-  const closeDrawer = (callback?: () => void) => {
+  const closeDrawer = useCallback((callback?: () => void) => {
     setDrawerVisible(false);
     closeMobileDrawer();
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
@@ -87,12 +87,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
       closeTimeoutRef.current = null;
       if (callback) callback();
     }, 280);
-  };
+  }, [closeMobileDrawer]);
 
   // Sincronizar apertura del drawer disparada desde BottomNav o contexto global
   useEffect(() => {
     if (mobileDrawerOpen) {
-      openDrawer(mobileDrawerView);
+      const timer = setTimeout(() => {
+        openDrawer(mobileDrawerView);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [mobileDrawerOpen, mobileDrawerView]);
 
@@ -140,7 +143,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
         window.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [drawerMounted]);
+  }, [drawerMounted, closeDrawer]);
 
   useEffect(() => {
     return () => {
