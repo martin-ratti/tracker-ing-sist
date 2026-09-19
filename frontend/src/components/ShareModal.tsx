@@ -53,17 +53,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 my-auto"
+        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 my-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between shrink-0">
+        <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 shrink-0">
               <Share2 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold font-syne text-[var(--text-body)]">
+              <h2 className="text-sm sm:text-base font-bold font-syne text-(--text-body)">
                 Compartir Avance de Carrera
               </h2>
               <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono">
@@ -74,7 +74,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="p-2 rounded-xl min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors shrink-0"
+            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -82,10 +82,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
 
         {/* Content */}
         <div className="p-4 sm:p-6 space-y-4 overflow-y-auto no-scrollbar">
-          <div className="p-3.5 sm:p-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border-color)] space-y-2 text-xs font-mono">
-            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 pb-2 border-b border-[var(--border-color)]">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-(--bg-base) border border-(--border-color) space-y-2 text-xs font-mono">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 pb-2 border-b border-(--border-color)">
               <span>Resumen compartido:</span>
-              <span className="font-bold text-[var(--text-body)]">{perfil.nombre || 'Estudiante'}</span>
+              <span className="font-bold text-(--text-body)">{perfil.nombre || 'Estudiante'}</span>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
               <div>
@@ -114,7 +114,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
                 type="text"
                 readOnly
                 value={shareUrl}
-                className="flex-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-xs font-mono text-[var(--text-body)] focus:outline-none select-all"
+                className="flex-1 bg-(--bg-base) border border-(--border-color) rounded-lg px-3 py-2 text-xs font-mono text-(--text-body) focus:outline-none select-all"
               />
               <button
                 type="button"

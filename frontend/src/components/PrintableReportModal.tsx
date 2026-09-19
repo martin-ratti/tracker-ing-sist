@@ -106,7 +106,7 @@ export const PrintableReportModal: React.FC = () => {
               type="button"
               onClick={() => setReportOpen(false)}
               aria-label="Cerrar reporte"
-              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-w-9 min-h-9 flex items-center justify-center shrink-0"
             >
               <X className="w-5 h-5" />
             </button>

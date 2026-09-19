@@ -109,11 +109,11 @@ export const AuthModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto"
+        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Cabecera */}
-        <div className="p-4 sm:p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between shrink-0">
+        <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div 
               className="p-2 rounded-xl border shrink-0"
@@ -126,7 +126,7 @@ export const AuthModal: React.FC = () => {
               <Cloud className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="auth-modal-title" className="text-base sm:text-lg font-bold font-syne text-[var(--text-body)]">
+              <h2 id="auth-modal-title" className="text-base sm:text-lg font-bold font-syne text-(--text-body)">
                 {isRegister ? 'Crear Cuenta en la Nube' : 'Iniciar Sesión'}
               </h2>
               <p className="text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400">
@@ -139,7 +139,7 @@ export const AuthModal: React.FC = () => {
             type="button"
             onClick={handleClose}
             aria-label="Cerrar modal de autenticación"
-            className="p-2 rounded-xl min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors shrink-0"
+            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -159,7 +159,7 @@ export const AuthModal: React.FC = () => {
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full py-2.5 px-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] text-[var(--text-body)] font-mono text-xs font-semibold flex items-center justify-center gap-2.5 transition-all shadow-sm hover:border-slate-400 dark:hover:border-slate-600 disabled:opacity-50"
+              className="w-full py-2.5 px-4 rounded-xl border border-(--border-color) bg-(--bg-elevated) hover:bg-(--bg-surface) text-(--text-body) font-mono text-xs font-semibold flex items-center justify-center gap-2.5 transition-all shadow-sm hover:border-slate-400 dark:hover:border-slate-600 disabled:opacity-50"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -171,9 +171,9 @@ export const AuthModal: React.FC = () => {
             </button>
 
             <div className="flex items-center gap-3 my-2">
-              <div className="flex-1 h-px bg-[var(--border-color)]" />
+              <div className="flex-1 h-px bg-(--border-color)" />
               <span className="text-[10px] uppercase font-mono text-slate-500">o con correo</span>
-              <div className="flex-1 h-px bg-[var(--border-color)]" />
+              <div className="flex-1 h-px bg-(--border-color)" />
             </div>
 
             <div>
@@ -188,7 +188,7 @@ export const AuthModal: React.FC = () => {
                   placeholder="alumno@utn.edu.ar"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg pl-9 pr-3 py-2 text-xs font-mono text-[var(--text-body)] placeholder:text-slate-400 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg pl-9 pr-3 py-2 text-xs font-mono text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-cyan-500"
                 />
               </div>
             </div>
@@ -205,12 +205,12 @@ export const AuthModal: React.FC = () => {
                   placeholder="Mínimo 6 caracteres"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg pl-9 pr-9 py-2 text-xs font-mono text-[var(--text-body)] placeholder:text-slate-400 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg pl-9 pr-9 py-2 text-xs font-mono text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-cyan-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[var(--text-body)]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-(--text-body)"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>

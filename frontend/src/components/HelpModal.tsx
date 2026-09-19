@@ -31,10 +31,10 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="help-modal-title"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col my-auto"
+        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col my-auto"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-4 sm:p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between shrink-0">
+        <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div 
               className="p-2 rounded-xl border shrink-0"
@@ -47,7 +47,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="help-modal-title" className="text-base sm:text-lg font-bold font-syne text-[var(--text-body)]">
+              <h2 id="help-modal-title" className="text-base sm:text-lg font-bold font-syne text-(--text-body)">
                 Guía del Tracker Plan 2023
               </h2>
               <p className="text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400">
@@ -60,7 +60,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             type="button"
             onClick={onClose}
             aria-label="Cerrar guía de ayuda"
-            className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
+            className="p-2 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors min-w-9 min-h-9 flex items-center justify-center shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -76,8 +76,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               Hacé click en cualquier nodo del grafo o tarjeta de la malla curricular para avanzar en el ciclo:
             </p>
             <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
-              <div className="p-2.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)]">
-                <div className="text-[var(--text-body)] font-bold mb-1">⚪ Pendiente</div>
+              <div className="p-2.5 rounded-lg bg-(--bg-elevated) border border-(--border-color)">
+                <div className="text-(--text-body) font-bold mb-1">⚪ Pendiente</div>
                 <div className="text-slate-500 dark:text-slate-400">No cursada aún o bloqueada</div>
               </div>
               <div 
@@ -103,7 +103,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <div className="space-y-2 border-t border-[var(--border-color)] pt-4">
+          <div className="space-y-2 border-t border-(--border-color) pt-4">
             <h3 className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
               Efecto Pulso y Estado Cursable
             </h3>
@@ -112,7 +112,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-[var(--border-color)] pt-4">
+          <div className="space-y-2 border-t border-(--border-color) pt-4">
             <h3 className="text-sm font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               <span>Reseteo en Cascada Inteligente</span>
@@ -122,7 +122,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-[var(--border-color)] pt-4">
+          <div className="space-y-2 border-t border-(--border-color) pt-4">
             <h3 className="text-sm font-bold text-purple-700 dark:text-purple-300">
               Registro de Notas y Promedios
             </h3>
@@ -131,7 +131,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-[var(--border-color)] pt-4">
+          <div className="space-y-2 border-t border-(--border-color) pt-4">
             <h3 className="text-sm font-bold text-amber-700 dark:text-amber-300">
               Panel de Electivas
             </h3>
@@ -140,7 +140,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-[var(--border-color)] pt-4">
+          <div className="space-y-2 border-t border-(--border-color) pt-4">
             <h3 className="text-sm font-bold text-indigo-700 dark:text-indigo-300">
               Filtros de Correlativas en el Grafo
             </h3>
@@ -149,48 +149,48 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-[var(--border-color)] pt-4">
+          <div className="space-y-2 border-t border-(--border-color) pt-4">
             <h3 className="text-sm font-bold text-sky-700 dark:text-sky-300">
               Atajos de Teclado Globales
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-              <div className="p-1.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between">
+              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
                 <span>Grafo:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-color)] font-bold text-[var(--text-body)]">G</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">G</kbd>
               </div>
-              <div className="p-1.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between">
+              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
                 <span>Malla:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-color)] font-bold text-[var(--text-body)]">M</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">M</kbd>
               </div>
-              <div className="p-1.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between">
+              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
                 <span>Electivas:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-color)] font-bold text-[var(--text-body)]">E</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">E</kbd>
               </div>
-              <div className="p-1.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between">
+              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
                 <span>Calendario:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-color)] font-bold text-[var(--text-body)]">C</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">C</kbd>
               </div>
-              <div className="p-1.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between">
+              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
                 <span>Reporte PDF:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-color)] font-bold text-[var(--text-body)]">R</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">R</kbd>
               </div>
-              <div className="p-1.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between">
+              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
                 <span>Perfil:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-color)] font-bold text-[var(--text-body)]">P</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">P</kbd>
               </div>
-              <div className="p-1.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between">
+              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
                 <span>Compartir:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-color)] font-bold text-[var(--text-body)]">S</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">S</kbd>
               </div>
-              <div className="p-1.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between">
+              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
                 <span>Ayuda:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-color)] font-bold text-[var(--text-body)]">?</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">?</kbd>
               </div>
             </div>
           </div>
 
-          <div className="text-[11px] text-slate-500 border-t border-[var(--border-color)] pt-3">
-            Presioná <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)]">Esc</kbd> o hacé click fuera para cerrar cualquier panel.
+          <div className="text-[11px] text-slate-500 border-t border-(--border-color) pt-3">
+            Presioná <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body)">Esc</kbd> o hacé click fuera para cerrar cualquier panel.
           </div>
         </div>
       </div>

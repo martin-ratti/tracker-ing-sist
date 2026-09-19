@@ -34,7 +34,7 @@ export const ThemeSelector: React.FC = () => {
         aria-label="Cambiar tema visual"
         aria-expanded={open}
         aria-haspopup="true"
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] hover:border-slate-500 font-mono text-xs transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-(--text-body) hover:border-slate-500 font-mono text-xs transition-colors"
         title="Cambiar paleta cromática y modo claro/oscuro"
       >
         <Palette className="w-3.5 h-3.5" style={{ color: THEMES[theme].primaryColor }} />
@@ -44,14 +44,14 @@ export const ThemeSelector: React.FC = () => {
       {open && (
         <div 
           role="menu"
-          className="absolute right-0 mt-2 w-52 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-2xl p-2 z-50 font-mono text-xs animate-in fade-in zoom-in-95 duration-150"
+          className="absolute right-0 mt-2 w-52 rounded-xl bg-(--bg-surface) border border-(--border-color) shadow-2xl p-2 z-50 font-mono text-xs animate-in fade-in zoom-in-95 duration-150"
         >
           {/* Selector de Modo Global (Oscuro / Claro) */}
-          <div className="mb-2 pb-2 border-b border-[var(--border-color)]">
+          <div className="mb-2 pb-2 border-b border-(--border-color)">
             <div className="px-1 text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1.5">
               Modo Global
             </div>
-            <div className="grid grid-cols-2 gap-1 bg-[var(--bg-base)] p-1 rounded-lg border border-[var(--border-color)]">
+            <div className="grid grid-cols-2 gap-1 bg-(--bg-base) p-1 rounded-lg border border-(--border-color)">
               <button
                 type="button"
                 onClick={() => setColorMode('dark')}
@@ -61,7 +61,7 @@ export const ThemeSelector: React.FC = () => {
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
-                <Moon className="w-3 h-3 text-indigo-400" />
+                <Moon className="w-3.5 h-3.5 text-indigo-400" />
                 <span>Oscuro</span>
               </button>
               <button
@@ -73,7 +73,7 @@ export const ThemeSelector: React.FC = () => {
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
-                <Sun className="w-3 h-3 text-amber-500" />
+                <Sun className="w-3.5 h-3.5 text-amber-500" />
                 <span>Claro</span>
               </button>
             </div>
@@ -96,8 +96,8 @@ export const ThemeSelector: React.FC = () => {
                 }}
                 className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-all ${
                   isSelected
-                    ? 'bg-[var(--bg-elevated)] text-[var(--text-body)] font-bold border border-[var(--border-color)]'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)]'
+                    ? 'bg-(--bg-elevated) text-(--text-body) font-bold border border-(--border-color)'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated)'
                 }`}
               >
                 <div className="flex items-center gap-2">

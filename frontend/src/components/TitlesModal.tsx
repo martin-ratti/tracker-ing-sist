@@ -33,17 +33,17 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
         role="dialog"
         aria-modal="true"
         aria-labelledby="titles-modal-title"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col my-auto"
+        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col my-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 sm:p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between shrink-0">
+        <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 shrink-0">
               <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h2 id="titles-modal-title" className="text-base sm:text-xl font-bold font-syne text-[var(--text-body)] tracking-wide">
+              <h2 id="titles-modal-title" className="text-base sm:text-xl font-bold font-syne text-(--text-body) tracking-wide">
                 Titulación Universitaria
               </h2>
               <p className="text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400">
@@ -56,7 +56,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
             type="button"
             onClick={onClose}
             aria-label="Cerrar seguimiento de títulos"
-            className="p-2 rounded-xl min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors shrink-0"
+            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -66,13 +66,13 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
         <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1 no-scrollbar">
           
           {/* Tarjeta ADUSI (Título Intermedio) */}
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl p-4 sm:p-5 relative overflow-hidden">
+          <div className="bg-(--bg-elevated) border border-(--border-color) rounded-xl p-4 sm:p-5 relative overflow-hidden">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
                 <span className="text-[9px] sm:text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-pink-500/10 border border-pink-500/30 text-pink-700 dark:text-pink-300 font-bold">
                   Título Intermedio
                 </span>
-                <h3 className="font-syne font-bold text-sm sm:text-base text-[var(--text-body)] mt-1.5 leading-snug">
+                <h3 className="font-syne font-bold text-sm sm:text-base text-(--text-body) mt-1.5 leading-snug">
                   Analista Desarrollador Univ. en Sistemas de Información (ADUSI)
                 </h3>
               </div>
@@ -96,7 +96,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
 
             {/* Requisitos ADUSI */}
             <div className="space-y-2 font-mono text-[11px] sm:text-xs">
-              <div className="flex flex-wrap items-center justify-between gap-1 text-[var(--text-body)]">
+              <div className="flex flex-wrap items-center justify-between gap-1 text-(--text-body)">
                 <span>Materias 1º, 2º y 3º Nivel (23 materias):</span>
                 {stats.adusiFaltantes.some(f => f.includes('Materias')) ? (
                   <span className="text-slate-500 dark:text-slate-400">En progreso</span>
@@ -107,7 +107,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-1 text-[var(--text-body)]">
+              <div className="flex flex-wrap items-center justify-between gap-1 text-(--text-body)">
                 <span>Seminario Integrador (ADUSI):</span>
                 {stats.adusiFaltantes.includes('Seminario Integrador') ? (
                   <span className="text-slate-500 dark:text-slate-400">Pendiente</span>
@@ -118,7 +118,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-1 text-[var(--text-body)]">
+              <div className="flex flex-wrap items-center justify-between gap-1 text-(--text-body)">
                 <span>Cumplimiento de 4 hs de Electivas:</span>
                 {stats.horasElectivasAprobadas >= 4 ? (
                   <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-semibold">
@@ -141,13 +141,13 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
           </div>
 
           {/* Tarjeta Ingeniería (Título de Grado) */}
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl p-4 sm:p-5 relative overflow-hidden">
+          <div className="bg-(--bg-elevated) border border-(--border-color) rounded-xl p-4 sm:p-5 relative overflow-hidden">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
                 <span className="text-[9px] sm:text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 font-bold">
                   Título de Grado
                 </span>
-                <h3 className="font-syne font-bold text-sm sm:text-base text-[var(--text-body)] mt-1.5 leading-snug">
+                <h3 className="font-syne font-bold text-sm sm:text-base text-(--text-body) mt-1.5 leading-snug">
                   Ingeniero/a en Sistemas de Información
                 </h3>
               </div>
@@ -171,14 +171,14 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
 
             {/* Requisitos Ingeniería */}
             <div className="space-y-2.5 sm:space-y-3 font-mono text-[11px] sm:text-xs">
-              <div className="flex flex-wrap items-center justify-between gap-1 text-[var(--text-body)]">
+              <div className="flex flex-wrap items-center justify-between gap-1 text-(--text-body)">
                 <span>{stats.totalTroncales} Materias Troncales (90%):</span>
                 <span className={stats.aprobadasCount === stats.totalTroncales ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}>
                   {stats.aprobadasCount} / {stats.totalTroncales} aprobadas
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-1 text-[var(--text-body)]">
+              <div className="flex flex-wrap items-center justify-between gap-1 text-(--text-body)">
                 <span>Mínimo 20 hs de Electivas (5%):</span>
                 <span className={stats.horasElectivasAprobadas >= 20 ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-amber-700 dark:text-amber-400 font-semibold'}>
                   {stats.horasElectivasAprobadas} / 20 hs
@@ -186,8 +186,8 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
               </div>
 
               {/* Input interactivo de PPS (Prácticas Profesionales Supervisadas) */}
-              <div className="pt-2 border-t border-[var(--border-color)]">
-                <div className="flex flex-wrap items-center justify-between gap-1 mb-1.5 text-[var(--text-body)]">
+              <div className="pt-2 border-t border-(--border-color)">
+                <div className="flex flex-wrap items-center justify-between gap-1 mb-1.5 text-(--text-body)">
                   <span>Prácticas Profesionales Supervisadas (PPS - 200 hs, 5%):</span>
                   <span className={ppsHoras >= 200 ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}>
                     {ppsHoras} / 200 hs
@@ -210,7 +210,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
                     max="200"
                     value={ppsHoras}
                     onChange={e => setPpsHoras(Math.min(200, Math.max(0, parseInt(e.target.value) || 0)))}
-                    className="w-14 sm:w-16 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded px-1.5 sm:px-2 py-1 text-right text-xs font-mono focus:outline-none shrink-0"
+                    className="w-14 sm:w-16 bg-(--bg-surface) border border-(--border-color) rounded px-1.5 sm:px-2 py-1 text-right text-xs font-mono focus:outline-none shrink-0"
                     style={{ color: 'var(--color-primary)' }}
                   />
                 </div>

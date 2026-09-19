@@ -327,7 +327,7 @@ export const CalendarModal: React.FC = () => {
               type="button"
               onClick={() => setCalendarOpen(false)}
               aria-label="Cerrar calendario académico"
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-w-9 min-h-9 flex items-center justify-center shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
@@ -534,7 +534,7 @@ export const CalendarModal: React.FC = () => {
                             handleOpenMetaDialog(cell.dateStr, turno);
                           }
                         }}
-                        className={`min-h-[52px] sm:min-h-[108px] p-1 sm:p-2 flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
+                        className={`min-h-13 sm:min-h-27 p-1 sm:p-2 flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
                           !cell.isCurrentMonth
                             ? 'bg-[#03060c]/70 text-slate-700 opacity-25 border border-transparent'
                             : isPast

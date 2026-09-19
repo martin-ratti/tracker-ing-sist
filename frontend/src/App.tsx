@@ -68,7 +68,7 @@ const TrackerMain: React.FC = () => {
 
   return (
     <AuthProvider onUserChanged={reloadProgress}>
-      <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-body)] flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
+      <div className="min-h-screen bg-(--bg-base) text-(--text-body) flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
         {/* Banner de Modo Compartido (Solo Lectura) */}
         {isViewingShared && (
           <div className="bg-sky-600 text-white px-4 py-2 text-xs font-mono flex flex-wrap items-center justify-between gap-2 z-40 border-b border-sky-400/50 shadow-md">

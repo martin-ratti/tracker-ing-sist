@@ -540,11 +540,11 @@ export const NetworkGraph: React.FC = () => {
 
       {/* Banner flotante de Camino Crítico activo */}
       {focusedSubjectId && MATERIAS_MAP[focusedSubjectId] && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-[var(--bg-surface)]/95 backdrop-blur-md border border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.3)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.3)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-pulse" />
             <span className="text-slate-500 dark:text-slate-400">Camino Crítico:</span>
-            <span className="font-bold text-[var(--text-body)]">{MATERIAS_MAP[focusedSubjectId].nombreCompleto}</span>
+            <span className="font-bold text-(--text-body)">{MATERIAS_MAP[focusedSubjectId].nombreCompleto}</span>
           </div>
 
           <div className="flex items-center gap-2 text-[11px]">
@@ -559,13 +559,13 @@ export const NetworkGraph: React.FC = () => {
           <div className="flex items-center gap-1.5 ml-1">
             <button
               onClick={() => setSelectedSubjectId(focusedSubjectId)}
-              className="px-2 py-0.5 rounded bg-[var(--bg-elevated)] hover:bg-[var(--border-color)] text-cyan-700 dark:text-cyan-300 text-[11px] transition-colors border border-[var(--border-color)]"
+              className="px-2 py-0.5 rounded bg-(--bg-elevated) hover:bg-(--border-color) text-cyan-700 dark:text-cyan-300 text-[11px] transition-colors border border-(--border-color)"
             >
               Ficha
             </button>
             <button
               onClick={() => setFocusedSubjectId(null)}
-              className="p-1 rounded text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
+              className="p-1 rounded text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors"
               title="Restablecer vista completa"
             >
               <X className="w-4 h-4" />
@@ -576,16 +576,16 @@ export const NetworkGraph: React.FC = () => {
 
       {/* Banner flotante de Cadena Crítica hacia Graduación */}
       {criticalChainActive && !focusedSubjectId && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-[var(--bg-surface)]/95 backdrop-blur-md border border-amber-500/50 shadow-[0_0_25px_rgba(245,158,11,0.25)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-amber-500/50 shadow-[0_0_25px_rgba(245,158,11,0.25)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-            <span className="font-bold text-[var(--text-body)]">Columna Vertebral: Proyecto Final</span>
+            <span className="font-bold text-(--text-body)">Columna Vertebral: Proyecto Final</span>
             <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">(13 materias clave)</span>
           </div>
 
           <button
             onClick={() => setCriticalChainActive(false)}
-            className="p-1 rounded text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors ml-1"
+            className="p-1 rounded text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors ml-1"
             title="Desactivar filtro de cadena crítica"
           >
             <X className="w-4 h-4" />
@@ -596,14 +596,14 @@ export const NetworkGraph: React.FC = () => {
       {/* Controles flotantes superiores derechos */}
       <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10 flex flex-col items-end gap-2">
         {/* Selector de modo de interacción */}
-        <div className="flex items-center bg-[var(--bg-surface)]/90 backdrop-blur-md border border-[var(--border-color)] p-1 rounded-xl shadow-lg font-mono text-xs">
+        <div className="flex items-center bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) p-1 rounded-xl shadow-lg font-mono text-xs">
           <button
             type="button"
             onClick={() => setInteractionMode('estado')}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[36px] ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-9 ${
               interactionMode === 'estado'
-                ? 'bg-[var(--bg-elevated)] text-[var(--text-body)] font-bold border border-[var(--border-color)] shadow-sm'
-                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
+                ? 'bg-(--bg-elevated) text-(--text-body) font-bold border border-(--border-color) shadow-sm'
+                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
             }`}
             title="Al hacer clic en una materia, cambia entre Pendiente, Regular y Aprobada"
           >
@@ -614,10 +614,10 @@ export const NetworkGraph: React.FC = () => {
           <button
             type="button"
             onClick={() => setInteractionMode('camino')}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[36px] ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-9 ${
               interactionMode === 'camino'
                 ? 'bg-cyan-500/20 text-cyan-950 dark:text-cyan-300 font-bold border border-cyan-500/50 shadow-sm'
-                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
+                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
             }`}
             title="Al hacer clic en una materia, resalta toda su cadena de requisitos y materias desbloqueadas"
           >
@@ -627,14 +627,14 @@ export const NetworkGraph: React.FC = () => {
         </div>
 
         {/* Filtros visuales rápidos: Atenuar Aprobadas & Cadena Crítica */}
-        <div className="flex items-center gap-1.5 bg-[var(--bg-surface)]/90 backdrop-blur-md border border-[var(--border-color)] p-1 rounded-xl shadow-lg font-mono text-xs">
+        <div className="flex items-center gap-1.5 bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) p-1 rounded-xl shadow-lg font-mono text-xs">
           <button
             type="button"
             onClick={() => setDimApproved(prev => !prev)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[34px] ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 ${
               dimApproved
                 ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/40 shadow-sm'
-                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
+                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
             }`}
             title="Atenuar materias ya aprobadas para concentrarse en las materias pendientes y regulares"
           >
@@ -645,10 +645,10 @@ export const NetworkGraph: React.FC = () => {
           <button
             type="button"
             onClick={() => setCriticalChainActive(prev => !prev)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-[34px] ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 ${
               criticalChainActive
                 ? 'bg-amber-500/25 text-amber-900 dark:text-amber-200 font-bold border border-amber-500/50 shadow-sm'
-                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-[var(--text-body)]'
+                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
             }`}
             title="Destacar la cadena crítica indispensable hacia el Proyecto Final de carrera"
           >
@@ -659,12 +659,12 @@ export const NetworkGraph: React.FC = () => {
       </div>
 
       {/* Controles flotantes de Zoom con touch targets de 44px */}
-      <div className="absolute bottom-5 right-4 md:right-5 flex flex-col gap-1.5 bg-[var(--bg-surface)]/95 backdrop-blur-md p-1 rounded-xl border border-[var(--border-color)] shadow-xl z-10">
+      <div className="absolute bottom-5 right-4 md:right-5 flex flex-col gap-1.5 bg-(--bg-surface)/95 backdrop-blur-md p-1 rounded-xl border border-(--border-color) shadow-xl z-10">
         <button
           type="button"
           onClick={handleZoomIn}
           aria-label="Acercar vista del grafo"
-          className="p-2.5 rounded-lg text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center"
           title="Acercar (Zoom In)"
         >
           <ZoomIn className="w-4 h-4" />
@@ -673,7 +673,7 @@ export const NetworkGraph: React.FC = () => {
           type="button"
           onClick={handleZoomOut}
           aria-label="Alejar vista del grafo"
-          className="p-2.5 rounded-lg text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center"
           title="Alejar (Zoom Out)"
         >
           <ZoomOut className="w-4 h-4" />
@@ -682,7 +682,7 @@ export const NetworkGraph: React.FC = () => {
           type="button"
           onClick={handleFit}
           aria-label="Ajustar y centrar grafo"
-          className="p-2.5 rounded-lg text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center"
           title="Ajustar y Centrar"
         >
           <Maximize2 className="w-4 h-4" />
@@ -690,17 +690,17 @@ export const NetworkGraph: React.FC = () => {
       </div>
 
       {/* Guía rápida flotante */}
-      <div className="absolute bottom-5 left-5 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-xl bg-[var(--bg-surface)]/95 backdrop-blur-md border border-[var(--border-color)] text-[11px] font-mono text-slate-800 dark:text-slate-200 pointer-events-none shadow-md font-medium">
+      <div className="absolute bottom-5 left-5 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-xl bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) text-[11px] font-mono text-slate-800 dark:text-slate-200 pointer-events-none shadow-md font-medium">
         <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] font-bold">Click</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click</kbd>
           <span>{interactionMode === 'camino' ? 'Resaltar dependencias' : 'Cambiar estado'}</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] font-bold">Doble Click</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Doble Click</kbd>
           <span>Detalles y notas</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] font-bold">Fondo</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Fondo</kbd>
           <span>Desactivar foco</span>
         </span>
       </div>

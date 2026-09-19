@@ -80,17 +80,17 @@ export const ProfileModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-modal-title"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto flex flex-col"
+        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between shrink-0">
+        <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 shrink-0">
               <User className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="profile-modal-title" className="text-sm sm:text-base font-bold font-syne text-[var(--text-body)] tracking-wide">
+              <h2 id="profile-modal-title" className="text-sm sm:text-base font-bold font-syne text-(--text-body) tracking-wide">
                 Perfil y Copia de Seguridad
               </h2>
               <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
@@ -103,7 +103,7 @@ export const ProfileModal: React.FC = () => {
             type="button"
             onClick={() => setProfileModalOpen(false)}
             aria-label="Cerrar perfil"
-            className="p-2 rounded-xl min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors shrink-0"
+            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -122,7 +122,7 @@ export const ProfileModal: React.FC = () => {
                 value={nombre}
                 onChange={e => setNombre(e.target.value)}
                 placeholder="Ej: Martín Ratti"
-                className="w-full bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-[var(--text-body)] placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
                 autoFocus
               />
             </div>
@@ -136,14 +136,14 @@ export const ProfileModal: React.FC = () => {
                 value={legajo}
                 onChange={e => setLegajo(e.target.value)}
                 placeholder="Ej: 48210 o 51234"
-                className="w-full bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-[var(--text-body)] placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
               />
             </div>
 
-            <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[11px] text-slate-600 dark:text-slate-400 flex items-start gap-2">
+            <div className="p-3 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-[11px] text-slate-600 dark:text-slate-400 flex items-start gap-2">
               <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
               <p>
-                Estos datos se conservarán en tu sesión y aparecerán impresos en el encabezado oficial de tu <strong className="text-[var(--text-body)]">Ficha Analítica en PDF</strong>.
+                Estos datos se conservarán en tu sesión y aparecerán impresos en el encabezado oficial de tu <strong className="text-(--text-body)">Ficha Analítica en PDF</strong>.
               </p>
             </div>
 
@@ -159,16 +159,16 @@ export const ProfileModal: React.FC = () => {
           </form>
 
           {/* Sección de Respaldo y Migración JSON */}
-          <div className="pt-4 border-t border-[var(--border-color)] space-y-3">
+          <div className="pt-4 border-t border-(--border-color) space-y-3">
             <div className="flex items-center gap-2">
               <Database className="w-4 h-4 text-cyan-500" />
-              <h3 className="font-syne font-bold text-xs sm:text-sm text-[var(--text-body)]">
+              <h3 className="font-syne font-bold text-xs sm:text-sm text-(--text-body)">
                 Copia de Seguridad Local (.JSON)
               </h3>
             </div>
             
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              Exportá o restaurá un archivo <strong className="text-[var(--text-body)]">.json</strong> con todo tu progreso: estados de cursado, notas finales, fechas, metas de examen y electivas. Ideal para cambiar de dispositivo o resguardo offline.
+              Exportá o restaurá un archivo <strong className="text-(--text-body)">.json</strong> con todo tu progreso: estados de cursado, notas finales, fechas, metas de examen y electivas. Ideal para cambiar de dispositivo o resguardo offline.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">

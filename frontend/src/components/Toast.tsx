@@ -4,13 +4,13 @@ import type { ToastItem } from '../context/TrackerContext';
 
 const VARIANT_STYLES: Record<ToastItem['variant'], { border: string; dot: string; bg: string }> = {
   success: {
-    border: 'border-l-[var(--color-aprobada)]',
-    dot: 'bg-[var(--color-aprobada)]',
+    border: 'border-l-(--color-aprobada)',
+    dot: 'bg-(--color-aprobada)',
     bg: 'shadow-[0_8px_30px_rgba(0,0,0,0.7),0_0_12px_var(--color-aprobada-glow)]'
   },
   warning: {
-    border: 'border-l-[var(--color-regular)]',
-    dot: 'bg-[var(--color-regular)]',
+    border: 'border-l-(--color-regular)',
+    dot: 'bg-(--color-regular)',
     bg: 'shadow-[0_8px_30px_rgba(0,0,0,0.7),0_0_12px_var(--color-regular-glow)]'
   },
   error: {
@@ -19,8 +19,8 @@ const VARIANT_STYLES: Record<ToastItem['variant'], { border: string; dot: string
     bg: 'shadow-[0_8px_30px_rgba(0,0,0,0.7),0_0_12px_rgba(244,63,94,0.4)]'
   },
   info: {
-    border: 'border-l-[var(--color-primary)]',
-    dot: 'bg-[var(--color-primary)]',
+    border: 'border-l-(--color-primary)',
+    dot: 'bg-(--color-primary)',
     bg: 'shadow-[0_8px_30px_rgba(0,0,0,0.7),0_0_15px_var(--color-primary-glow)]'
   }
 };
@@ -42,7 +42,7 @@ const SingleToast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void 
   return (
     <div
       role="alert"
-      className={`relative bg-[#0f172a]/95 backdrop-blur-md border border-[var(--border-color)] border-l-4 ${style.border} text-slate-100 px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center gap-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${style.bg} animate-in fade-in slide-in-from-bottom-3`}
+      className={`relative bg-[#0f172a]/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-slate-100 px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center gap-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${style.bg} animate-in fade-in slide-in-from-bottom-3`}
       onClick={() => onDismiss(toast.id)}
     >
       <span className={`w-2 h-2 rounded-full shrink-0 animate-pulse ${style.dot}`} />

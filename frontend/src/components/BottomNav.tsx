@@ -20,7 +20,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
   return (
     <nav
       aria-label="Navegación principal móvil"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-elevated)]/95 backdrop-blur-md border-t border-[var(--border-color)] px-1.5 py-1.5 flex items-center justify-around sm:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.2)] safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-(--bg-elevated)/95 backdrop-blur-md border-t border-(--border-color) px-1.5 py-1.5 flex items-center justify-around sm:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.2)] safe-area-bottom"
     >
       {/* Botón Malla */}
       <button
@@ -28,11 +28,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
         onClick={() => setViewMode('malla')}
         className={`flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all ${
           viewMode === 'malla'
-            ? 'text-[var(--color-primary)] font-bold'
-            : 'text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)]'
+            ? 'text-(--color-primary) font-bold'
+            : 'text-slate-500 dark:text-slate-400 hover:text-(--text-body)'
         }`}
       >
-        <div className={`p-1 rounded-lg transition-colors ${viewMode === 'malla' ? 'bg-[var(--color-primary-bg)]' : ''}`}>
+        <div className={`p-1 rounded-lg transition-colors ${viewMode === 'malla' ? 'bg-(--color-primary-bg)' : ''}`}>
           <LayoutGrid className="w-5 h-5" />
         </div>
         <span className="text-[10px] font-syne tracking-wide">Malla</span>
@@ -44,11 +44,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
         onClick={() => setViewMode('grafo')}
         className={`flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all ${
           viewMode === 'grafo'
-            ? 'text-[var(--color-primary)] font-bold'
-            : 'text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)]'
+            ? 'text-(--color-primary) font-bold'
+            : 'text-slate-500 dark:text-slate-400 hover:text-(--text-body)'
         }`}
       >
-        <div className={`p-1 rounded-lg transition-colors ${viewMode === 'grafo' ? 'bg-[var(--color-primary-bg)]' : ''}`}>
+        <div className={`p-1 rounded-lg transition-colors ${viewMode === 'grafo' ? 'bg-(--color-primary-bg)' : ''}`}>
           <Network className="w-5 h-5" />
         </div>
         <span className="text-[10px] font-syne tracking-wide">Grafo</span>
@@ -58,7 +58,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={() => setCalendarOpen(true)}
-        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)] transition-all relative"
+        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-(--text-body) transition-all relative"
       >
         <div className="p-1 rounded-lg relative">
           <CalendarDays className="w-5 h-5" />
@@ -76,7 +76,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={onOpenElectivas}
-        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)] transition-all"
+        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-(--text-body) transition-all"
       >
         <div className="p-1 rounded-lg">
           <Sparkles className="w-5 h-5" />
@@ -88,7 +88,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={onOpenMenu}
-        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)] transition-all"
+        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-(--text-body) transition-all"
       >
         <div className="p-1 rounded-lg">
           <Menu className="w-5 h-5" />

@@ -149,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
   }, []);
 
   return (
-    <header className="bg-[var(--bg-surface)]/95 backdrop-blur-md border-b border-[var(--border-color)] sticky top-0 z-30 px-4 sm:px-8 xl:px-12 py-3 w-full">
+    <header className="bg-(--bg-surface)/95 backdrop-blur-md border-b border-(--border-color) sticky top-0 z-30 px-4 sm:px-8 xl:px-12 py-3 w-full">
       {/* Barra superior con título y controles */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
         
@@ -164,7 +164,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-syne font-extrabold text-base sm:text-lg text-[var(--text-body)] tracking-wider flex items-center gap-2">
+                <h1 className="font-syne font-extrabold text-base sm:text-lg text-(--text-body) tracking-wider flex items-center gap-2">
                   UTN SISTEMAS
                   <span 
                     className="text-[10px] uppercase font-mono px-2 py-0.5 rounded border transition-colors"
@@ -190,7 +190,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             <button
               type="button"
               onClick={toggleColorMode}
-              className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-xs hover:bg-[var(--bg-base)] transition-colors min-w-[38px] min-h-[38px] flex items-center justify-center"
+              className="p-2 rounded-xl bg-(--bg-elevated) border border-(--border-color) text-xs hover:bg-(--bg-base) transition-colors min-w-9.5 min-h-9.5 flex items-center justify-center"
               title={colorMode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
               aria-label={colorMode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
             >
@@ -206,11 +206,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               <button
                 type="button"
                 onClick={() => openDrawer()}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-xs font-mono min-h-[38px]"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-(--bg-elevated) border border-(--border-color) text-xs font-mono min-h-9.5"
                 title={`Sesión iniciada como ${user.email}`}
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" />
-                <span className="text-[11px] font-bold truncate max-w-[70px]">
+                <span className="text-[11px] font-bold truncate max-w-17.5">
                   {perfil.nombre?.split(' ')[0] || user.email?.split('@')[0]}
                 </span>
               </button>
@@ -218,7 +218,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               <button
                 type="button"
                 onClick={openAuthModal}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all min-h-[38px]"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all min-h-9.5"
                 style={{ 
                   backgroundColor: 'var(--color-primary-bg)', 
                   borderColor: 'var(--color-primary-border)', 
@@ -337,7 +337,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <div className="font-bold text-xs sm:text-sm leading-none flex items-center gap-1">
                   <span>{stats.proximaMeta.diasFaltantes === 0 ? '¡Rinde Hoy!' : `${stats.proximaMeta.diasFaltantes}d`}</span>
                 </div>
-                <div className="text-[10px] truncate max-w-[85px] leading-tight font-medium opacity-85">
+                <div className="text-[10px] truncate max-w-21.25 leading-tight font-medium opacity-85">
                   {stats.proximaMeta.materiaNombreCorto}
                 </div>
               </div>
@@ -350,11 +350,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           {/* Perfil del Alumno */}
           <button
             onClick={() => setProfileModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] hover:border-slate-400 dark:hover:border-slate-700 text-[var(--text-body)] font-mono text-xs transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-(--bg-elevated) border border-(--border-color) hover:border-slate-400 dark:hover:border-slate-700 text-(--text-body) font-mono text-xs transition-colors shadow-sm"
             title="Configurar nombre y legajo universitario del alumno"
           >
             <UserIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span className="max-w-[120px] truncate">
+            <span className="max-w-30 truncate">
               {perfil.nombre || 'Perfil'}
             </span>
           </button>
@@ -365,7 +365,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           <button
             type="button"
             onClick={toggleColorMode}
-            className="p-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] hover:border-slate-500 transition-colors"
+            className="p-1.5 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-(--text-body) hover:border-slate-500 transition-colors"
             title={colorMode === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
             aria-label={colorMode === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
           >
@@ -377,10 +377,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </button>
 
           {user ? (
-            <div className="flex items-center gap-1 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg py-1 px-2.5 font-mono text-xs shadow-sm">
-              <div className="flex items-center gap-1.5 text-[var(--text-body)] text-[11px]" title={`Sesión activa: ${user.email}`}>
+            <div className="flex items-center gap-1 bg-(--bg-elevated) border border-(--border-color) rounded-lg py-1 px-2.5 font-mono text-xs shadow-sm">
+              <div className="flex items-center gap-1.5 text-(--text-body) text-[11px]" title={`Sesión activa: ${user.email}`}>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]" />
-                <span className="max-w-[110px] truncate font-medium">{user.email.split('@')[0]}</span>
+                <span className="max-w-27.5 truncate font-medium">{user.email.split('@')[0]}</span>
               </div>
               <button
                 onClick={logout}
@@ -409,16 +409,16 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
       </div>
 
       {/* Sub-barra exclusiva para móviles */}
-      <div className="flex md:hidden flex-col gap-2 mt-2 pt-2 border-t border-[var(--border-color)] w-full">
+      <div className="flex md:hidden flex-col gap-2 mt-2 pt-2 border-t border-(--border-color) w-full">
 
         {/* Si está en modo Grafo en móvil, selector de correlativas */}
         {viewMode === 'grafo' && (
-          <div className="flex items-center justify-between bg-[var(--bg-elevated)] p-1 rounded-xl border border-[var(--border-color)] text-xs font-mono">
+          <div className="flex items-center justify-between bg-(--bg-elevated) p-1 rounded-xl border border-(--border-color) text-xs font-mono">
             <button
               type="button"
               onClick={() => setEdgeMode('ambos')}
               className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
-                edgeMode === 'ambos' ? 'bg-[var(--bg-surface)] font-bold shadow-sm border border-[var(--border-color)]' : 'text-slate-600 dark:text-slate-400'
+                edgeMode === 'ambos' ? 'bg-(--bg-surface) font-bold shadow-sm border border-(--border-color)' : 'text-slate-600 dark:text-slate-400'
               }`}
               style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
             >
@@ -428,7 +428,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               type="button"
               onClick={() => setEdgeMode('regular')}
               className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
-                edgeMode === 'regular' ? 'font-bold shadow-sm border border-[var(--color-cursable-border)]' : 'text-slate-600 dark:text-slate-400'
+                edgeMode === 'regular' ? 'font-bold shadow-sm border border-(--color-cursable-border)' : 'text-slate-600 dark:text-slate-400'
               }`}
               style={edgeMode === 'regular' ? {
                 backgroundColor: 'var(--color-cursable-bg)',
@@ -441,7 +441,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               type="button"
               onClick={() => setEdgeMode('aprobada')}
               className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
-                edgeMode === 'aprobada' ? 'font-bold shadow-sm border border-[var(--color-regular-border)]' : 'text-slate-600 dark:text-slate-400'
+                edgeMode === 'aprobada' ? 'font-bold shadow-sm border border-(--color-regular-border)' : 'text-slate-600 dark:text-slate-400'
               }`}
               style={edgeMode === 'aprobada' ? {
                 backgroundColor: 'var(--color-regular-bg)',
@@ -461,7 +461,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               {stats.aprobadasCount}/{stats.totalTroncales} ({stats.porcentajeCarrera}%)
             </span>
           </div>
-          <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-900 border border-[var(--border-color)] overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-900 border border-(--border-color) overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
@@ -526,7 +526,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           <button
             type="button"
             onClick={() => setCalendarOpen(true)}
-            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-mono transition-all min-h-[36px] ${
+            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-mono transition-all min-h-9 ${
               stats.proximaMeta.urgencia === 'urgente'
                 ? 'bg-rose-500/15 border-rose-500/50 text-rose-800 dark:text-rose-300 animate-pulse font-bold'
                 : stats.proximaMeta.urgencia === 'proxima'
@@ -546,15 +546,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
       </div>
 
       {/* Sub-barra Desktop: Selector de Vistas, Filtros de Correlativas, % de Avance y Botones de Acción */}
-      <div className="hidden md:flex w-full mt-3 pt-2.5 border-t border-[var(--border-color)] flex-wrap items-center justify-between gap-3 text-xs font-mono">
+      <div className="hidden md:flex w-full mt-3 pt-2.5 border-t border-(--border-color) flex-wrap items-center justify-between gap-3 text-xs font-mono">
         {/* Bloque Izquierdo: Vistas, Filtro de Correlativas y % de Carrera */}
         <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
           {/* Selector de vistas: Grafo vs Malla */}
-          <div className="flex items-center gap-1 bg-[var(--bg-elevated)] p-1 rounded-lg border border-[var(--border-color)]">
+          <div className="flex items-center gap-1 bg-(--bg-elevated) p-1 rounded-lg border border-(--border-color)">
             <button
               onClick={() => setViewMode('grafo')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-                viewMode === 'grafo' ? 'border font-semibold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)]'
+                viewMode === 'grafo' ? 'border font-semibold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-(--text-body)'
               }`}
               style={viewMode === 'grafo' ? {
                 backgroundColor: 'var(--color-primary-bg)',
@@ -568,7 +568,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             <button
               onClick={() => setViewMode('malla')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
-                viewMode === 'malla' ? 'border font-semibold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)]'
+                viewMode === 'malla' ? 'border font-semibold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-(--text-body)'
               }`}
               style={viewMode === 'malla' ? {
                 backgroundColor: 'var(--color-primary-bg)',
@@ -585,11 +585,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           {viewMode === 'grafo' && (
             <div className="flex items-center gap-1.5">
               <span className="text-slate-700 dark:text-slate-300 text-[11px] hidden sm:inline font-semibold">Correlativas:</span>
-              <div className="flex items-center bg-[var(--bg-elevated)] p-1 rounded-lg border border-[var(--border-color)]">
+              <div className="flex items-center bg-(--bg-elevated) p-1 rounded-lg border border-(--border-color)">
                 <button
                   onClick={() => setEdgeMode('ambos')}
                   className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                    edgeMode === 'ambos' ? 'bg-[var(--bg-surface)] font-extrabold shadow-sm border border-[var(--border-color)]' : 'text-slate-700 dark:text-slate-300 hover:text-[var(--text-body)] font-medium'
+                    edgeMode === 'ambos' ? 'bg-(--bg-surface) font-extrabold shadow-sm border border-(--border-color)' : 'text-slate-700 dark:text-slate-300 hover:text-(--text-body) font-medium'
                   }`}
                   style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
                 >
@@ -598,7 +598,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <button
                   onClick={() => setEdgeMode('regular')}
                   className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                    edgeMode === 'regular' ? 'font-extrabold shadow-sm border border-[var(--color-cursable-border)]' : 'text-slate-700 dark:text-slate-300 hover:text-[var(--text-body)] font-medium'
+                    edgeMode === 'regular' ? 'font-extrabold shadow-sm border border-(--color-cursable-border)' : 'text-slate-700 dark:text-slate-300 hover:text-(--text-body) font-medium'
                   }`}
                   style={edgeMode === 'regular' ? {
                     backgroundColor: 'var(--color-cursable-bg)',
@@ -610,7 +610,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <button
                   onClick={() => setEdgeMode('aprobada')}
                   className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                    edgeMode === 'aprobada' ? 'font-extrabold shadow-sm border border-[var(--color-regular-border)]' : 'text-slate-700 dark:text-slate-300 hover:text-[var(--text-body)] font-medium'
+                    edgeMode === 'aprobada' ? 'font-extrabold shadow-sm border border-(--color-regular-border)' : 'text-slate-700 dark:text-slate-300 hover:text-(--text-body) font-medium'
                   }`}
                   style={edgeMode === 'aprobada' ? {
                     backgroundColor: 'var(--color-regular-bg)',
@@ -624,27 +624,27 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           )}
 
           {/* Porcentaje y barra de avance de la carrera larga y satisfactoria */}
-          <div className="flex items-center gap-3 px-3.5 py-1.5 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-color)] shadow-inner">
+          <div className="flex items-center gap-3 px-3.5 py-1.5 bg-(--bg-elevated) rounded-xl border border-(--border-color) shadow-inner">
             <div className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">
               <span>Avance:</span>
-              <span className="text-[var(--text-body)] font-bold">
+              <span className="text-(--text-body) font-bold">
                 {stats.aprobadasCount} / {stats.totalTroncales} materias
               </span>
             </div>
-            <div className="w-36 sm:w-56 md:w-72 lg:w-[340px] xl:w-[460px] 2xl:w-[560px] h-2.5 sm:h-3 rounded-full bg-slate-200 dark:bg-slate-950/90 overflow-hidden border border-slate-300 dark:border-slate-700/60 p-0.5 relative shadow-inner">
+            <div className="w-36 sm:w-56 md:w-72 lg:w-85 xl:w-115 2xl:w-140 h-2.5 sm:h-3 rounded-full bg-slate-200 dark:bg-slate-950/90 overflow-hidden border border-slate-300 dark:border-slate-700/60 p-0.5 relative shadow-inner">
               <div 
                 className="h-full rounded-full transition-all duration-700 ease-out relative"
                 style={{ 
-                  width: `${stats.porcentajeCarrera}%`,
-                  background: 'var(--gradient-primary)',
-                  boxShadow: '0 0 12px var(--color-primary-glow)'
+                  width: `${stats.porcentajeCarrera}%`, 
+                  background: 'var(--gradient-primary)', 
+                  boxShadow: '0 0 12px var(--color-primary-glow)' 
                 }}
               >
                 <span className="absolute right-0 top-0 bottom-0 w-2 bg-white/40 rounded-full blur-[1px]" />
               </div>
             </div>
             <span 
-              className="font-bold text-xs sm:text-sm min-w-[46px] text-right font-syne"
+              className="font-bold text-xs sm:text-sm min-w-11.5 text-right font-syne"
               style={{ color: 'var(--color-primary)' }}
             >
               {stats.porcentajeCarrera}%
@@ -662,7 +662,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all shadow-sm ${
                 stats.metasCount > 0
                   ? 'bg-cyan-500/20 border-cyan-400/60 text-cyan-900 dark:text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                  : 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)]'
+                  : 'bg-(--bg-elevated) border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body)'
               }`}
               title="Calendario Académico UTN 2026/2027 y Metas de Examen"
             >
@@ -703,7 +703,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Ficha Analítica / Reporte PDF */}
             <button
               onClick={() => setReportOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)] font-mono text-[11px] transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
               title="Descargar o imprimir ficha analítica oficial en PDF"
             >
               <FileText className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
@@ -716,7 +716,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all shadow-sm ${
                 electivasOpen
                   ? 'bg-amber-500/20 border-amber-400/60 text-amber-900 dark:text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
-                  : 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)]'
+                  : 'bg-(--bg-elevated) border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body)'
               }`}
               title="Panel de Materias Electivas y cálculo de horas"
             >
@@ -730,7 +730,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Títulos */}
             <button
               onClick={onOpenTitles}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)] font-mono text-[11px] transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
               title="Requisitos para Título Intermedio ADUSI e Ingeniería"
             >
               <GraduationCap className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-400" />
@@ -743,7 +743,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Estadísticas */}
             <button
               onClick={() => setStatsModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)] font-mono text-[11px] transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
               title="Dashboard de Estadísticas Avanzadas"
             >
               <BarChart3 className="w-3.5 h-3.5 text-pink-700 dark:text-pink-400" />
@@ -753,7 +753,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Compartir */}
             <button
               onClick={() => setShareModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-[var(--text-body)] font-mono text-[11px] transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
               title="Generar enlace compartible de tu progreso"
             >
               <Share2 className="w-3.5 h-3.5 text-sky-700 dark:text-sky-400" />
@@ -761,7 +761,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             </button>
           </div>
 
-          <div className="h-4 w-px bg-[var(--border-color)] hidden xl:block" />
+          <div className="h-4 w-px bg-(--border-color) hidden xl:block" />
 
           {/* Leyenda compacta */}
           <div className="hidden lg:flex items-center gap-3 text-[11px] text-slate-800 dark:text-slate-200 font-semibold">
@@ -792,7 +792,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           <div className="flex items-center gap-1">
             <button
               onClick={onOpenHelp}
-              className="text-slate-500 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] p-1 rounded transition-colors"
+              className="text-slate-500 dark:text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) p-1 rounded transition-colors"
               title="Ayuda y atajos"
             >
               <HelpCircle className="w-4 h-4" />
@@ -803,7 +803,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] transition-all ${
                 confirmReset 
                   ? 'bg-rose-500/30 border border-rose-500 text-rose-700 dark:text-rose-300 animate-pulse font-bold' 
-                  : 'text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-[var(--bg-elevated)]'
+                  : 'text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-(--bg-elevated)'
               }`}
               title="Reiniciar todos los estados a pendiente"
             >
@@ -813,7 +813,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {confirmReset && (
               <button
                 onClick={handleCancelReset}
-                className="p-1 rounded text-slate-500 hover:text-[var(--text-body)] transition-colors"
+                className="p-1 rounded text-slate-500 hover:text-(--text-body) transition-colors"
                 title="Cancelar reinicio"
               >
                 <X className="w-3.5 h-3.5" />
@@ -835,9 +835,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           />
 
           {/* Panel Lateral que entra y sale de derecha a izquierda por encima de la pantalla */}
-          <div className="fixed inset-y-0 right-0 h-full h-[100dvh] max-w-full flex pointer-events-none">
+          <div className="fixed inset-y-0 right-0 h-dvh max-w-full flex pointer-events-none">
             <div 
-              className={`w-[86vw] sm:w-[68vw] max-w-sm bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-[-20px_0_50px_rgba(0,0,0,0.65)] flex flex-col h-full h-[100dvh] overflow-hidden pointer-events-auto transform transition-transform duration-300 ease-out ${
+              className={`w-[86vw] sm:w-[68vw] max-w-sm bg-(--bg-surface) border-l border-(--border-color) shadow-[-20px_0_50px_rgba(0,0,0,0.65)] flex flex-col h-dvh overflow-hidden pointer-events-auto transform transition-transform duration-300 ease-out ${
                 drawerVisible ? 'translate-x-0' : 'translate-x-full'
               }`}
               onClick={e => e.stopPropagation()}
@@ -850,7 +850,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               ) : (
                 <>
                   {/* Header del Panel (Fijo) */}
-                  <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] shrink-0">
+                  <div className="flex items-center justify-between p-4 border-b border-(--border-color) bg-(--bg-elevated) shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div 
                     className="w-8 h-8 rounded-xl flex items-center justify-center text-black font-extrabold font-syne text-sm shadow-md"
@@ -859,7 +859,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                     ISI
                   </div>
                   <div>
-                    <h3 className="font-syne font-bold text-sm text-[var(--text-body)] leading-tight">Menú Académico</h3>
+                    <h3 className="font-syne font-bold text-sm text-(--text-body) leading-tight">Menú Académico</h3>
                     <p className="text-[10px] font-mono text-slate-500">Plan 2023 · UTN FRRo</p>
                   </div>
                 </div>
@@ -867,7 +867,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   type="button"
                   onClick={() => closeDrawer()}
                   aria-label="Cerrar menú"
-                  className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors min-w-[38px] min-h-[38px] flex items-center justify-center"
+                  className="p-2 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors min-w-9.5 min-h-9.5 flex items-center justify-center"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -878,13 +878,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 {/* 1. Tarjeta de Usuario & Nube Firebase */}
                 <div className="grid grid-cols-2 gap-2 font-mono text-xs">
                   {/* Tarjeta de Perfil */}
-                  <div className="p-2.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between gap-1.5 shadow-sm min-w-0">
+                  <div className="p-2.5 rounded-2xl bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between gap-1.5 shadow-sm min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 shrink-0">
                         <UserIcon className="w-3.5 h-3.5" />
                       </div>
                       <div className="min-w-0">
-                        <div className="font-syne font-bold text-[11px] text-[var(--text-body)] truncate">
+                        <div className="font-syne font-bold text-[11px] text-(--text-body) truncate">
                           {perfil.nombre || 'Estudiante'}
                         </div>
                         <div className="text-[9px] text-slate-500 truncate">
@@ -895,14 +895,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                     <button
                       type="button"
                       onClick={() => closeDrawer(() => setProfileModalOpen(true))}
-                      className="px-2 py-1 rounded-lg text-[9px] font-bold bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:text-[var(--text-body)] shrink-0 shadow-xs"
+                      className="px-2 py-1 rounded-lg text-[9px] font-bold bg-(--bg-surface) border border-(--border-color) text-slate-700 dark:text-slate-300 hover:text-(--text-body) shrink-0 shadow-xs"
                     >
                       Editar
                     </button>
                   </div>
 
                   {/* Sincronización Nube */}
-                  <div className="p-2.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between gap-1 shadow-sm min-w-0">
+                  <div className="p-2.5 rounded-2xl bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between gap-1 shadow-sm min-w-0">
                     <div className="min-w-0">
                       <div className="text-[9px] uppercase font-bold text-slate-500 truncate">Nube Firebase</div>
                       {user ? (
@@ -944,7 +944,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 </div>
 
                 {/* 2. Mini-Dashboard de Progreso Académico */}
-                <div className="p-3 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] shadow-sm">
+                <div className="p-3 rounded-2xl bg-(--bg-elevated) border border-(--border-color) shadow-sm">
                   <div className="flex items-center justify-between text-xs font-mono mb-2">
                     <span className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wide">
                       Progreso de Carrera
@@ -954,7 +954,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                     </span>
                   </div>
 
-                  <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-900 border border-[var(--border-color)] overflow-hidden mb-2.5">
+                  <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-900 border border-(--border-color) overflow-hidden mb-2.5">
                     <div 
                       className="h-full rounded-full transition-all duration-500"
                       style={{ 
@@ -1043,14 +1043,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   <button
                     type="button"
                     onClick={() => closeDrawer(() => onOpenTitles())}
-                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 hover:border-[var(--color-primary-border)] hover:bg-[var(--bg-base)] transition-all min-h-[50px] shadow-xs group"
+                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 hover:border-(--color-primary-border) hover:bg-(--bg-base) transition-all min-h-12.5 shadow-xs group"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 text-left">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 shrink-0 group-hover:scale-105 transition-transform">
                         <GraduationCap className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-bold font-syne text-[var(--text-body)] truncate">Títulos y Certificaciones</div>
+                        <div className="text-xs font-bold font-syne text-(--text-body) truncate">Títulos y Certificaciones</div>
                         <div className="text-[10px] font-mono text-slate-500 truncate">ADUSI y Analista Universitario</div>
                       </div>
                     </div>
@@ -1066,14 +1066,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   <button
                     type="button"
                     onClick={() => closeDrawer(() => setReportOpen(true))}
-                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 hover:border-[var(--color-primary-border)] hover:bg-[var(--bg-base)] transition-all min-h-[50px] shadow-xs group"
+                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 hover:border-(--color-primary-border) hover:bg-(--bg-base) transition-all min-h-12.5 shadow-xs group"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 text-left">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-purple-500/15 text-purple-600 dark:text-purple-400 shrink-0 group-hover:scale-105 transition-transform">
                         <FileText className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-bold font-syne text-[var(--text-body)] truncate">Ficha Académica PDF</div>
+                        <div className="text-xs font-bold font-syne text-(--text-body) truncate">Ficha Académica PDF</div>
                         <div className="text-[10px] font-mono text-slate-500 truncate">Reporte imprimible en formato A4</div>
                       </div>
                     </div>
@@ -1084,14 +1084,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   <button
                     type="button"
                     onClick={() => closeDrawer(() => setStatsModalOpen(true))}
-                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 hover:border-[var(--color-primary-border)] hover:bg-[var(--bg-base)] transition-all min-h-[50px] shadow-xs group"
+                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 hover:border-(--color-primary-border) hover:bg-(--bg-base) transition-all min-h-12.5 shadow-xs group"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 text-left">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-pink-500/15 text-pink-600 dark:text-pink-400 shrink-0 group-hover:scale-105 transition-transform">
                         <BarChart3 className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-bold font-syne text-[var(--text-body)] truncate">Estadísticas y Métricas</div>
+                        <div className="text-xs font-bold font-syne text-(--text-body) truncate">Estadísticas y Métricas</div>
                         <div className="text-[10px] font-mono text-slate-500 truncate">Rendimiento, curvas y promedios</div>
                       </div>
                     </div>
@@ -1102,14 +1102,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   <button
                     type="button"
                     onClick={() => closeDrawer(() => setShareModalOpen(true))}
-                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 hover:border-[var(--color-primary-border)] hover:bg-[var(--bg-base)] transition-all min-h-[50px] shadow-xs group"
+                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 hover:border-(--color-primary-border) hover:bg-(--bg-base) transition-all min-h-12.5 shadow-xs group"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 text-left">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-sky-500/15 text-sky-600 dark:text-sky-400 shrink-0 group-hover:scale-105 transition-transform">
                         <Share2 className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-bold font-syne text-[var(--text-body)] truncate">Compartir Progreso</div>
+                        <div className="text-xs font-bold font-syne text-(--text-body) truncate">Compartir Progreso</div>
                         <div className="text-[10px] font-mono text-slate-500 truncate">Exportar o respaldar tus datos</div>
                       </div>
                     </div>
@@ -1120,14 +1120,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   <button
                     type="button"
                     onClick={() => closeDrawer(() => onOpenHelp())}
-                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 hover:border-[var(--color-primary-border)] hover:bg-[var(--bg-base)] transition-all min-h-[50px] shadow-xs group"
+                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 hover:border-(--color-primary-border) hover:bg-(--bg-base) transition-all min-h-12.5 shadow-xs group"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 text-left">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-slate-500/15 text-slate-600 dark:text-slate-400 shrink-0 group-hover:scale-105 transition-transform">
                         <HelpCircle className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-bold font-syne text-[var(--text-body)] truncate">Guía del Plan 2023</div>
+                        <div className="text-xs font-bold font-syne text-(--text-body) truncate">Guía del Plan 2023</div>
                         <div className="text-[10px] font-mono text-slate-500 truncate">Reglamento, correlativas y ordenanza</div>
                       </div>
                     </div>
@@ -1143,10 +1143,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                       handleReset();
                       if (confirmReset) closeDrawer();
                     }}
-                    className={`w-full flex items-center justify-between p-3 rounded-2xl border text-xs font-mono transition-all min-h-[48px] shadow-xs ${
+                    className={`w-full flex items-center justify-between p-3 rounded-2xl border text-xs font-mono transition-all min-h-12 shadow-xs ${
                       confirmReset
                         ? 'bg-rose-500/20 border-rose-500 text-rose-700 dark:text-rose-300 font-bold animate-pulse'
-                        : 'border-slate-300 dark:border-slate-800 bg-[var(--bg-elevated)] text-rose-600 dark:text-rose-400 hover:bg-rose-500/10'
+                        : 'border-slate-300 dark:border-slate-800 bg-(--bg-elevated) text-rose-600 dark:text-rose-400 hover:bg-rose-500/10'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0 text-left">

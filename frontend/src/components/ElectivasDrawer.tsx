@@ -42,17 +42,17 @@ export const ElectivasDrawer: React.FC = () => {
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
-        <div className="w-full sm:w-screen max-w-xl bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-2xl flex flex-col">
+        <div className="w-full sm:w-screen max-w-xl bg-(--bg-surface) border-l border-(--border-color) shadow-2xl flex flex-col">
           
           {/* Header del Panel */}
-          <div className="p-4 sm:p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
+          <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated)">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="font-syne font-bold text-base sm:text-lg text-[var(--text-body)] tracking-wide">
+                  <h2 className="font-syne font-bold text-base sm:text-lg text-(--text-body) tracking-wide">
                     Materias Electivas
                   </h2>
                   <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
@@ -65,14 +65,14 @@ export const ElectivasDrawer: React.FC = () => {
                 type="button"
                 onClick={() => setElectivasOpen(false)}
                 aria-label="Cerrar panel de electivas"
-                className="p-2 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors"
+                className="p-2 rounded-lg text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Medidor de horas para Título */}
-            <div className="bg-[var(--bg-base)] rounded-xl p-3.5 border border-[var(--border-color)] space-y-3">
+            <div className="bg-(--bg-base) rounded-xl p-3.5 border border-(--border-color) space-y-3">
               <div>
                 <div className="flex justify-between text-xs font-mono mb-1">
                   <span className="text-slate-500 dark:text-slate-300 font-semibold">Meta de Ingeniería:</span>
@@ -82,13 +82,13 @@ export const ElectivasDrawer: React.FC = () => {
                 </div>
                 <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-500"
+                    className="h-full bg-linear-to-r from-amber-500 to-emerald-400 transition-all duration-500"
                     style={{ width: `${Math.min((stats.horasElectivasAprobadas / 20) * 100, 100)}%` }}
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)] text-[11px] font-mono text-slate-600 dark:text-slate-400">
+              <div className="flex items-center justify-between pt-2 border-t border-(--border-color) text-[11px] font-mono text-slate-600 dark:text-slate-400">
                 <span>Requisito ADUSI (4 hs):</span>
                 {stats.horasElectivasAprobadas >= 4 ? (
                   <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
@@ -101,7 +101,7 @@ export const ElectivasDrawer: React.FC = () => {
                 )}
               </div>
 
-              <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 italic bg-[var(--bg-base)] p-1.5 rounded border border-[var(--border-color)]">
+              <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 italic bg-(--bg-base) p-1.5 rounded border border-(--border-color)">
                 * Las horas que figuran en la grilla son las que suman directamente al total (Resolución Plan 2023).
               </div>
             </div>
@@ -116,7 +116,7 @@ export const ElectivasDrawer: React.FC = () => {
                   className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                     nivelFilter === nivel
                       ? 'bg-amber-500/20 border border-amber-500/50 text-amber-800 dark:text-amber-300 font-bold shadow-sm'
-                      : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-base)]'
+                      : 'bg-(--bg-surface) border border-(--border-color) text-slate-600 dark:text-slate-400 hover:text-(--text-body) hover:bg-(--bg-base)'
                   }`}
                 >
                   {nivel === 'todos' ? 'Todas' : `${nivel}º Año`}
@@ -142,7 +142,7 @@ export const ElectivasDrawer: React.FC = () => {
                 : true;
               const puedeCursar = estSem === 'pendiente' && reqRegOk && reqAprOk;
 
-              let cardStyle = 'bg-[var(--bg-elevated)] border-pink-500/30 text-slate-500 dark:text-slate-300';
+              let cardStyle = 'bg-(--bg-elevated) border-pink-500/30 text-slate-500 dark:text-slate-300';
               let statusBadge = (
                 <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono font-medium">
                   Pendiente
@@ -150,7 +150,7 @@ export const ElectivasDrawer: React.FC = () => {
               );
 
               if (estSem === 'aprobada') {
-                cardStyle = 'card-aprobada-theme text-[var(--text-body)]';
+                cardStyle = 'card-aprobada-theme text-(--text-body)';
                 statusBadge = (
                   <span 
                     className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -164,7 +164,7 @@ export const ElectivasDrawer: React.FC = () => {
                   </span>
                 );
               } else if (estSem === 'regular') {
-                cardStyle = 'card-regular-theme text-[var(--text-body)]';
+                cardStyle = 'card-regular-theme text-(--text-body)';
                 statusBadge = (
                   <span 
                     className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -178,7 +178,7 @@ export const ElectivasDrawer: React.FC = () => {
                   </span>
                 );
               } else if (puedeCursar) {
-                cardStyle = 'card-cursable-theme glow-cursable-theme text-[var(--text-body)]';
+                cardStyle = 'card-cursable-theme glow-cursable-theme text-(--text-body)';
                 statusBadge = (
                   <span 
                     className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -214,7 +214,7 @@ export const ElectivasDrawer: React.FC = () => {
                         <span className="text-[10px] font-mono text-pink-600 dark:text-pink-400 font-bold mr-2">
                           3er NIVEL · ADUSI
                         </span>
-                        <h3 className="font-semibold text-sm leading-snug font-mono text-[var(--text-body)] mt-0.5">
+                        <h3 className="font-semibold text-sm leading-snug font-mono text-(--text-body) mt-0.5">
                           {seminario.nombreCompleto}
                         </h3>
                         <p className="text-[10px] font-mono text-slate-600 dark:text-slate-400 mt-1">
@@ -226,7 +226,7 @@ export const ElectivasDrawer: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono">
+                    <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
                       <span className="text-slate-600 dark:text-slate-400">Cuatrimestral</span>
                       <span className="text-slate-400 dark:text-slate-600">•</span>
                       {statusBadge}
@@ -234,7 +234,7 @@ export const ElectivasDrawer: React.FC = () => {
 
                     {/* Correlativas del Seminario */}
                     {(seminario.reqRegular.length > 0 || (Array.isArray(seminario.reqAprobada) && seminario.reqAprobada.length > 0)) && (
-                      <div className="mt-2.5 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono space-y-1">
+                      <div className="mt-2.5 pt-2 border-t border-(--border-color) text-[10px] font-mono space-y-1">
                         {seminario.reqRegular.length > 0 && (
                           <div className="text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-1">
                             <span className="text-slate-600 dark:text-slate-500 font-medium">Regulares:</span>
@@ -263,7 +263,7 @@ export const ElectivasDrawer: React.FC = () => {
                           </div>
                         )}
                         {Array.isArray(seminario.reqRendirAprobada) && (
-                          <div className="text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-1 pt-1 border-t border-[var(--border-color)]">
+                          <div className="text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-1 pt-1 border-t border-(--border-color)">
                             <span className="text-slate-600 dark:text-slate-500 font-medium">Para Rendir Final:</span>
                             <span className={`px-1.5 py-0.5 rounded border font-bold ${
                               seminario.reqRendirAprobada.every(id => (estados[id] || 'pendiente') === 'aprobada')
@@ -298,7 +298,7 @@ export const ElectivasDrawer: React.FC = () => {
                 const est = estadosElectivas[e.id] || 'pendiente';
                 const cursable = esElectivaCursable(e);
 
-                let cardStyle = 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-600 dark:text-slate-300';
+                let cardStyle = 'bg-(--bg-elevated) border-(--border-color) text-slate-600 dark:text-slate-300';
                 let statusBadge = (
                   <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono border border-slate-300 dark:border-slate-700/60 font-medium">
                     Pendiente
@@ -306,7 +306,7 @@ export const ElectivasDrawer: React.FC = () => {
                 );
 
                 if (est === 'aprobada') {
-                  cardStyle = 'card-aprobada-theme text-[var(--text-body)]';
+                  cardStyle = 'card-aprobada-theme text-(--text-body)';
                   statusBadge = (
                     <span 
                       className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -320,7 +320,7 @@ export const ElectivasDrawer: React.FC = () => {
                     </span>
                   );
                 } else if (est === 'regular') {
-                  cardStyle = 'card-regular-theme text-[var(--text-body)]';
+                  cardStyle = 'card-regular-theme text-(--text-body)';
                   statusBadge = (
                     <span 
                       className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -334,7 +334,7 @@ export const ElectivasDrawer: React.FC = () => {
                     </span>
                   );
                 } else if (cursable) {
-                  cardStyle = 'card-cursable-theme glow-cursable-theme text-[var(--text-body)]';
+                  cardStyle = 'card-cursable-theme glow-cursable-theme text-(--text-body)';
                   statusBadge = (
                     <span 
                       className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -364,7 +364,7 @@ export const ElectivasDrawer: React.FC = () => {
                         <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold mr-2">
                           {e.nivel}º NIVEL
                         </span>
-                        <h3 className="font-semibold text-sm leading-snug font-mono text-[var(--text-body)] mt-0.5">
+                        <h3 className="font-semibold text-sm leading-snug font-mono text-(--text-body) mt-0.5">
                           {e.nombre}
                         </h3>
                       </div>
@@ -376,7 +376,7 @@ export const ElectivasDrawer: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono">
+                    <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
                       <span className="text-slate-500 dark:text-slate-400">{e.tipo} ({e.cuatrimestre})</span>
                       <span className="text-slate-400 dark:text-slate-600">•</span>
                       {statusBadge}
@@ -384,7 +384,7 @@ export const ElectivasDrawer: React.FC = () => {
 
                     {/* Correlatividades exigidas */}
                     {(e.reqRegular.length > 0 || e.reqAprobada.length > 0) && (
-                      <div className="mt-2.5 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono space-y-1">
+                      <div className="mt-2.5 pt-2 border-t border-(--border-color) text-[10px] font-mono space-y-1">
                         {e.reqRegular.length > 0 && (
                           <div className="text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-1">
                             <span className="font-semibold text-slate-600 dark:text-slate-400">Regulares:</span>

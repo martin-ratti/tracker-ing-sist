@@ -89,24 +89,24 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm no-scrollbar">
       <div 
         ref={modalRef}
-        className="relative w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200"
         role="dialog"
         aria-modal="true"
         aria-labelledby="stats-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-(--border-color) bg-(--bg-elevated) shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-pink-500/20 rounded-lg">
               <BarChart3 className="w-5 h-5 text-pink-500 dark:text-pink-400" />
             </div>
-            <h2 id="stats-title" className="font-syne font-bold text-base sm:text-lg text-[var(--text-body)]">
+            <h2 id="stats-title" className="font-syne font-bold text-base sm:text-lg text-(--text-body)">
               Dashboard de Estadísticas
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] rounded-xl transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+            className="p-2 text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) rounded-xl transition-colors min-w-9 min-h-9 flex items-center justify-center"
             aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
@@ -118,15 +118,15 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Gráfico de distribución */}
-            <div className="bg-[var(--bg-elevated)] p-5 rounded-xl border border-[var(--border-color)] flex flex-col items-center">
-              <h3 className="font-syne text-sm font-semibold text-[var(--text-body)] mb-6 w-full flex items-center gap-2">
+            <div className="bg-(--bg-elevated) p-5 rounded-xl border border-(--border-color) flex flex-col items-center">
+              <h3 className="font-syne text-sm font-semibold text-(--text-body) mb-6 w-full flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
                 Distribución por Estado
               </h3>
               
               <div className="relative w-48 h-48 rounded-full mb-6" style={{ background: conicGradient }}>
-                <div className="absolute inset-2 bg-[var(--bg-elevated)] rounded-full flex flex-col items-center justify-center">
-                  <span className="font-syne text-2xl font-bold text-[var(--text-body)]">
+                <div className="absolute inset-2 bg-(--bg-elevated) rounded-full flex flex-col items-center justify-center">
+                  <span className="font-syne text-2xl font-bold text-(--text-body)">
                     {Math.round(pApr)}%
                   </span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">Completado</span>
@@ -136,35 +136,35 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
               <div className="w-full grid grid-cols-2 gap-2 text-xs font-mono">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }}></span>
-                  <span className="text-[var(--text-body)]">Aprobadas ({aprobadasCount})</span>
+                  <span className="text-(--text-body)">Aprobadas ({aprobadasCount})</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }}></span>
-                  <span className="text-[var(--text-body)]">Regulares ({regularesCount})</span>
+                  <span className="text-(--text-body)">Regulares ({regularesCount})</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-cursable)' }}></span>
-                  <span className="text-[var(--text-body)]">Cursables ({cursablesCount})</span>
+                  <span className="text-(--text-body)">Cursables ({cursablesCount})</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)]"></span>
-                  <span className="text-[var(--text-body)]">Bloqueadas ({pendientesCount})</span>
+                  <span className="w-3 h-3 rounded-full bg-(--bg-surface) border border-(--border-color)"></span>
+                  <span className="text-(--text-body)">Bloqueadas ({pendientesCount})</span>
                 </div>
               </div>
             </div>
 
             {/* Promedios y Métricas */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[var(--bg-elevated)] p-4 rounded-xl border border-[var(--border-color)] flex flex-col justify-center">
+              <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
                 <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-2">
                   <Award className="w-4 h-4" />
                   <span className="text-xs font-mono uppercase">Promedio c/Aplazos</span>
                 </div>
-                <span className="font-syne text-2xl font-bold text-[var(--text-body)]">
+                <span className="font-syne text-2xl font-bold text-(--text-body)">
                   {promedioConAplazos !== null ? promedioConAplazos.toFixed(2) : '—'}
                 </span>
               </div>
-              <div className="bg-[var(--bg-elevated)] p-4 rounded-xl border border-[var(--border-color)] flex flex-col justify-center">
+              <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
                 <div className="flex items-center gap-2 text-slate-400 mb-2">
                   <Award className="w-4 h-4 text-purple-400" />
                   <span className="text-xs font-mono uppercase">Promedio s/Aplazos</span>
@@ -173,7 +173,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
                   {promedioSinAplazos !== null ? promedioSinAplazos.toFixed(2) : '—'}
                 </span>
               </div>
-              <div className="bg-[var(--bg-elevated)] p-4 rounded-xl border border-[var(--border-color)] flex flex-col justify-center">
+              <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
                 <div className="flex items-center gap-2 text-slate-400 mb-2">
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
                   <span className="text-xs font-mono uppercase">Avance Troncales</span>
@@ -182,7 +182,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
                   {aprobadasCount}<span className="text-sm text-slate-500">/{totalTroncales}</span>
                 </span>
               </div>
-              <div className="bg-[var(--bg-elevated)] p-4 rounded-xl border border-[var(--border-color)] flex flex-col justify-center">
+              <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
                 <div className="flex items-center gap-2 text-slate-400 mb-2">
                   <TrendingUp className="w-4 h-4 text-amber-400" />
                   <span className="text-xs font-mono uppercase">Horas Electivas</span>
@@ -195,8 +195,8 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Progreso por Nivel */}
-          <div className="bg-[var(--bg-elevated)] p-5 rounded-xl border border-[var(--border-color)]">
-            <h3 className="font-syne text-sm font-semibold text-[var(--text-body)] mb-4 flex items-center gap-2">
+          <div className="bg-(--bg-elevated) p-5 rounded-xl border border-(--border-color)">
+            <h3 className="font-syne text-sm font-semibold text-(--text-body) mb-4 flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Progreso por Nivel
             </h3>
@@ -204,10 +204,10 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
               {nivelesProgress.map(np => (
                 <div key={np.nivel} className="space-y-1">
                   <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-[var(--text-body)] font-bold">{np.nivel}º Año</span>
+                    <span className="text-(--text-body) font-bold">{np.nivel}º Año</span>
                     <span className="text-slate-500 dark:text-slate-400">{np.aprobadas} / {np.total} aprobadas</span>
                   </div>
-                  <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-[var(--border-color)]">
+                  <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-(--border-color)">
                     <div 
                       className="h-full transition-all duration-1000 ease-out"
                       style={{ 
@@ -222,28 +222,28 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Timeline de Aprobaciones */}
-          <div className="bg-[var(--bg-elevated)] p-5 rounded-xl border border-[var(--border-color)]">
-            <h3 className="font-syne text-sm font-semibold text-[var(--text-body)] mb-4 flex items-center gap-2">
+          <div className="bg-(--bg-elevated) p-5 rounded-xl border border-(--border-color)">
+            <h3 className="font-syne text-sm font-semibold text-(--text-body) mb-4 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               Timeline de Aprobaciones
             </h3>
             
             {timeline.length > 0 ? (
-              <div className="space-y-3 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-[var(--border-color)]">
+              <div className="space-y-3 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-(--border-color)">
                 {timeline.map((item, idx) => (
                   <div key={`${item.id}-${idx}`} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
                     {/* Icono / Marker */}
-                    <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-[var(--bg-elevated)] bg-emerald-500 text-white shrink-0 md:order-1 md:group-odd:-ml-2.5 md:group-even:-mr-2.5 shadow-sm z-10 absolute left-0 md:left-1/2 md:-translate-x-1/2">
+                    <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-(--bg-elevated) bg-emerald-500 text-white shrink-0 md:order-1 md:group-odd:-ml-2.5 md:group-even:-mr-2.5 shadow-sm z-10 absolute left-0 md:left-1/2 md:-translate-x-1/2">
                     </div>
                     
                     {/* Tarjeta */}
-                    <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] bg-[var(--bg-surface)] border border-[var(--border-color)] p-3 rounded-lg flex items-center justify-between ml-8 md:ml-0 shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition-colors">
+                    <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] bg-(--bg-surface) border border-(--border-color) p-3 rounded-lg flex items-center justify-between ml-8 md:ml-0 shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition-colors">
                       <div className="flex flex-col gap-0.5 overflow-hidden">
-                        <span className="font-mono text-xs font-bold text-[var(--text-body)] truncate" title={item.nombre}>{item.nombre}</span>
+                        <span className="font-mono text-xs font-bold text-(--text-body) truncate" title={item.nombre}>{item.nombre}</span>
                         <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400">{item.fechaStr}</span>
                       </div>
                       {item.nota !== undefined && (
-                        <div className="ml-3 shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-color)] font-syne font-bold text-xs text-[var(--text-body)]">
+                        <div className="ml-3 shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-(--bg-elevated) border border-(--border-color) font-syne font-bold text-xs text-(--text-body)">
                           {item.nota}
                         </div>
                       )}
@@ -252,7 +252,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 text-slate-500 font-mono text-sm border border-dashed border-[var(--border-color)] rounded-lg">
+              <div className="text-center py-6 text-slate-500 font-mono text-sm border border-dashed border-(--border-color) rounded-lg">
                 No hay registros con fecha asignada.
               </div>
             )}

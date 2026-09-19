@@ -27,14 +27,14 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
   return (
     <div className="flex flex-col h-full overflow-hidden animate-in fade-in duration-200">
       {/* Header del Panel de Electivas */}
-      <div className="p-3.5 sm:p-4 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] shrink-0">
+      <div className="p-3.5 sm:p-4 border-b border-(--border-color) bg-(--bg-elevated) shrink-0">
         <div className="flex items-center justify-between gap-2 mb-3">
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-color)] text-xs font-mono font-bold text-[var(--text-body)] hover:bg-[var(--bg-base)] transition-colors min-h-[36px]"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-(--bg-surface) border border-(--border-color) text-xs font-mono font-bold text-(--text-body) hover:bg-(--bg-base) transition-colors min-h-9"
           >
-            <ChevronLeft className="w-4 h-4 text-[var(--color-primary)]" />
+            <ChevronLeft className="w-4 h-4 text-(--color-primary)" />
             <span>Menú</span>
           </button>
 
@@ -43,7 +43,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
               <Sparkles className="w-4 h-4" />
             </div>
             <div className="min-w-0 text-left">
-              <h3 className="font-syne font-bold text-xs sm:text-sm text-[var(--text-body)] truncate">Materias Electivas</h3>
+              <h3 className="font-syne font-bold text-xs sm:text-sm text-(--text-body) truncate">Materias Electivas</h3>
               <p className="text-[10px] font-mono text-slate-500 truncate">Plan 2023 · UTN FRRo</p>
             </div>
           </div>
@@ -52,14 +52,14 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
             type="button"
             onClick={onClose}
             aria-label="Cerrar panel"
-            className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+            className="p-2 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors min-w-9 min-h-9 flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Medidor de horas para Título */}
-        <div className="bg-[var(--bg-surface)] rounded-xl p-3 border border-[var(--border-color)] space-y-2.5">
+        <div className="bg-(--bg-surface) rounded-xl p-3 border border-(--border-color) space-y-2.5">
           <div>
             <div className="flex justify-between text-xs font-mono mb-1">
               <span className="text-slate-500 dark:text-slate-300 font-semibold text-[11px]">Meta Ingeniería (20 hs):</span>
@@ -67,15 +67,15 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                 {stats.horasElectivasAprobadas} / 20 hs ({Math.min(Math.round((stats.horasElectivasAprobadas / 20) * 100), 100)}%)
               </span>
             </div>
-            <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-900 border border-[var(--border-color)] overflow-hidden">
+            <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-900 border border-(--border-color) overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-500"
+                className="h-full bg-linear-to-r from-amber-500 to-emerald-400 transition-all duration-500"
                 style={{ width: `${Math.min((stats.horasElectivasAprobadas / 20) * 100, 100)}%` }}
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)] text-[11px] font-mono text-slate-600 dark:text-slate-400">
+          <div className="flex items-center justify-between pt-2 border-t border-(--border-color) text-[11px] font-mono text-slate-600 dark:text-slate-400">
             <span>Requisito ADUSI (4 hs):</span>
             {stats.horasElectivasAprobadas >= 4 ? (
               <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
@@ -100,7 +100,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
               className={`px-2 py-1 rounded-lg text-[10px] font-medium transition-colors shrink-0 ${
                 nivelFilter === nivel
                   ? 'bg-amber-500/20 border border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold shadow-xs'
-                  : 'bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-600 dark:text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-base)]'
+                  : 'bg-(--bg-surface) border border-(--border-color) text-slate-600 dark:text-slate-400 hover:text-(--text-body) hover:bg-(--bg-base)'
               }`}
             >
               {nivel === 'todos' ? 'Todas' : `${nivel}º Año`}
@@ -125,7 +125,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
             : true;
           const puedeCursar = estSem === 'pendiente' && reqRegOk && reqAprOk;
 
-          let cardStyle = 'bg-[var(--bg-elevated)] border-pink-500/30 text-slate-600 dark:text-slate-300';
+          let cardStyle = 'bg-(--bg-elevated) border-pink-500/30 text-slate-600 dark:text-slate-300';
           let statusBadge = (
             <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono font-medium">
               Pendiente
@@ -133,7 +133,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
           );
 
           if (estSem === 'aprobada') {
-            cardStyle = 'card-aprobada-theme text-[var(--text-body)]';
+            cardStyle = 'card-aprobada-theme text-(--text-body)';
             statusBadge = (
               <span 
                 className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -147,7 +147,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
               </span>
             );
           } else if (estSem === 'regular') {
-            cardStyle = 'card-regular-theme text-[var(--text-body)]';
+            cardStyle = 'card-regular-theme text-(--text-body)';
             statusBadge = (
               <span 
                 className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -161,7 +161,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
               </span>
             );
           } else if (puedeCursar) {
-            cardStyle = 'card-cursable-theme glow-cursable-theme text-[var(--text-body)]';
+            cardStyle = 'card-cursable-theme glow-cursable-theme text-(--text-body)';
             statusBadge = (
               <span 
                 className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -197,7 +197,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                     <span className="text-[9px] font-mono text-pink-600 dark:text-pink-400 font-bold mr-1.5">
                       3er NIVEL · ADUSI
                     </span>
-                    <h4 className="font-semibold text-xs leading-snug font-syne text-[var(--text-body)] mt-0.5">
+                    <h4 className="font-semibold text-xs leading-snug font-syne text-(--text-body) mt-0.5">
                       {seminario.nombreCompleto}
                     </h4>
                     <p className="text-[9px] font-mono text-slate-500 mt-0.5">
@@ -209,7 +209,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono">
+                <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
                   <span className="text-slate-500">Cuatrimestral</span>
                   <span className="text-slate-400">•</span>
                   {statusBadge}
@@ -236,7 +236,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
             const est = estadosElectivas[e.id] || 'pendiente';
             const cursable = esElectivaCursable(e);
 
-            let cardStyle = 'bg-[var(--bg-elevated)] border-[var(--border-color)] text-slate-600 dark:text-slate-300';
+            let cardStyle = 'bg-(--bg-elevated) border-(--border-color) text-slate-600 dark:text-slate-300';
             let statusBadge = (
               <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono border border-slate-300 dark:border-slate-700/60 font-medium">
                 Pendiente
@@ -244,7 +244,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
             );
 
             if (est === 'aprobada') {
-              cardStyle = 'card-aprobada-theme text-[var(--text-body)]';
+              cardStyle = 'card-aprobada-theme text-(--text-body)';
               statusBadge = (
                 <span 
                   className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -258,7 +258,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                 </span>
               );
             } else if (est === 'regular') {
-              cardStyle = 'card-regular-theme text-[var(--text-body)]';
+              cardStyle = 'card-regular-theme text-(--text-body)';
               statusBadge = (
                 <span 
                   className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -272,7 +272,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                 </span>
               );
             } else if (cursable) {
-              cardStyle = 'card-cursable-theme glow-cursable-theme text-[var(--text-body)]';
+              cardStyle = 'card-cursable-theme glow-cursable-theme text-(--text-body)';
               statusBadge = (
                 <span 
                   className="text-[10px] px-2 py-0.5 rounded font-mono border flex items-center gap-1 font-medium"
@@ -302,7 +302,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                     <span className="text-[9px] font-mono text-amber-600 dark:text-amber-400 font-bold mr-1.5">
                       {e.nivel}º NIVEL
                     </span>
-                    <h4 className="font-semibold text-xs leading-snug font-syne text-[var(--text-body)] mt-0.5">
+                    <h4 className="font-semibold text-xs leading-snug font-syne text-(--text-body) mt-0.5">
                       {e.nombre}
                     </h4>
                   </div>
@@ -314,7 +314,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-[var(--border-color)] text-[10px] font-mono">
+                <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
                   <span className="text-slate-500">{e.tipo} ({e.cuatrimestre})</span>
                   <span className="text-slate-400">•</span>
                   {statusBadge}
@@ -322,7 +322,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
 
                 {/* Correlatividades exigidas */}
                 {(e.reqRegular.length > 0 || e.reqAprobada.length > 0) && (
-                  <div className="mt-2 pt-1.5 border-t border-[var(--border-color)] text-[9px] font-mono space-y-1">
+                  <div className="mt-2 pt-1.5 border-t border-(--border-color) text-[9px] font-mono space-y-1">
                     {e.reqRegular.length > 0 && (
                       <div className="text-slate-500 flex flex-wrap items-center gap-1">
                         <span className="font-semibold">Regulares:</span>
