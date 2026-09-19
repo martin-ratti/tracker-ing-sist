@@ -810,55 +810,54 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
         </div>
       </div>
 
-      {/* Drawer Móvil de Herramientas y Opciones */}
+      {/* Menú Móvil Completo con Fondo Difuminado (Todo visible sin scroll) */}
       {mobileDrawerOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden md:hidden animate-in fade-in duration-200">
+        <div 
+          className="fixed inset-0 z-50 overflow-y-auto md:hidden animate-in fade-in duration-200 bg-black/65 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 no-scrollbar"
+          onClick={() => setMobileDrawerOpen(false)}
+        >
           <div 
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setMobileDrawerOpen(false)}
-          />
-
-          <div className="fixed inset-y-0 right-0 max-w-full flex">
-            <div className="w-screen max-w-xs sm:max-w-sm bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-2xl flex flex-col h-full overflow-hidden animate-in slide-in-from-right duration-300">
-              
-              {/* Header del Drawer (Fijo arriba) */}
-              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div 
-                    className="w-8 h-8 rounded-xl flex items-center justify-center text-black font-extrabold font-syne text-sm shadow-md"
-                    style={{ backgroundColor: 'var(--color-primary)' }}
-                  >
-                    ISI
-                  </div>
-                  <div>
-                    <h3 className="font-syne font-bold text-sm text-[var(--text-body)]">Herramientas</h3>
-                    <p className="text-[10px] font-mono text-slate-500">Plan 2023 · UTN FRRo</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setMobileDrawerOpen(false)}
-                  aria-label="Cerrar menú"
-                  className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+            className="w-full max-w-sm sm:max-w-md bg-[var(--bg-surface)]/95 border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden flex flex-col p-4 sm:p-5 animate-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header del Menú */}
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
+              <div className="flex items-center gap-2.5">
+                <div 
+                  className="w-8 h-8 rounded-xl flex items-center justify-center text-black font-extrabold font-syne text-sm shadow-md"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
                 >
-                  <X className="w-5 h-5" />
-                </button>
+                  ISI
+                </div>
+                <div>
+                  <h3 className="font-syne font-bold text-sm text-[var(--text-body)]">Herramientas</h3>
+                  <p className="text-[10px] font-mono text-slate-500">Plan 2023 · UTN FRRo</p>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setMobileDrawerOpen(false)}
+                aria-label="Cerrar menú"
+                className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-elevated)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-              {/* Cuerpo del Drawer con scroll interno limpio (sin scrollbar tosca) */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 no-scrollbar overscroll-contain flex flex-col">
-                {/* Tarjeta de Perfil de Alumno */}
-                <div className="p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
-                    <UserIcon className="w-4 h-4" />
+            {/* Fila Superior: Perfil + Nube Firebase (2 Columnas) */}
+            <div className="grid grid-cols-2 gap-2 my-3">
+              {/* Tarjeta de Perfil */}
+              <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between gap-1.5 shadow-sm min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
+                    <UserIcon className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0">
-                    <div className="font-syne font-bold text-xs text-[var(--text-body)] truncate">
-                      {perfil.nombre || 'Estudiante UTN'}
+                    <div className="font-syne font-bold text-[11px] text-[var(--text-body)] truncate">
+                      {perfil.nombre || 'Estudiante'}
                     </div>
-                    <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate">
-                      Legajo: {perfil.legajo || 'Sin registrar'}
+                    <div className="text-[9px] font-mono text-slate-500 truncate">
+                      {perfil.legajo ? `Leg: ${perfil.legajo}` : 'Sin legajo'}
                     </div>
                   </div>
                 </div>
@@ -868,40 +867,37 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                     setMobileDrawerOpen(false);
                     setProfileModalOpen(true);
                   }}
-                  className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:text-[var(--text-body)] shrink-0 ml-2 shadow-xs"
+                  className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[var(--bg-surface)] border border-[var(--border-color)] text-slate-700 dark:text-slate-300 hover:text-[var(--text-body)] shrink-0 shadow-xs"
                 >
                   Editar
                 </button>
               </div>
 
               {/* Sincronización en la Nube */}
-              <div className="mb-4 p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] font-mono text-xs shadow-sm">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Nube Firebase</span>
+              <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] flex items-center justify-between gap-1.5 shadow-sm font-mono text-xs min-w-0">
+                <div className="min-w-0">
+                  <div className="text-[9px] uppercase font-bold text-slate-500 truncate">Nube Firebase</div>
                   {user ? (
-                    <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      Conectado
+                    <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold truncate">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      {user.email?.split('@')[0]}
                     </span>
                   ) : (
-                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">Desconectado</span>
+                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold truncate">Offline</span>
                   )}
                 </div>
                 {user ? (
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--border-color)]">
-                    <span className="text-[11px] truncate text-[var(--text-body)] font-medium">{user.email}</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        logout();
-                        setMobileDrawerOpen(false);
-                      }}
-                      className="p-1.5 rounded text-rose-500 hover:bg-rose-500/10 transition-colors"
-                      title="Cerrar sesión"
-                    >
-                      <LogOut className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                      setMobileDrawerOpen(false);
+                    }}
+                    className="p-1.5 rounded text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0"
+                    title="Cerrar sesión"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
                 ) : (
                   <button
                     type="button"
@@ -909,185 +905,189 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                       setMobileDrawerOpen(false);
                       openAuthModal();
                     }}
-                    className="w-full py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+                    className="px-2 py-1 rounded text-[9px] font-bold border shrink-0 shadow-xs"
                     style={{
                       backgroundColor: 'var(--color-primary-bg)',
                       borderColor: 'var(--color-primary-border)',
                       color: 'var(--color-primary)'
                     }}
                   >
-                    <Cloud className="w-4 h-4" />
-                    <span>Iniciar Sesión / Nube</span>
+                    Conectar
                   </button>
                 )}
               </div>
+            </div>
 
-              {/* Selector de Paleta de Color en Móvil */}
-              <div className="mb-4">
-                <div className="text-[10px] uppercase font-mono font-bold text-slate-500 dark:text-slate-400 mb-2">
-                  Paleta Cromática
+            {/* Selector de Paleta de Color Compacto */}
+            <div className="mb-3">
+              <div className="text-[9px] uppercase font-mono font-bold text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
+                <span>Paleta Cromática</span>
+                <span className="text-[8px] font-normal text-slate-400 dark:text-slate-500">5 temas disponibles</span>
+              </div>
+              <div className="grid grid-cols-5 gap-1">
+                {(Object.keys(THEMES) as ThemeId[]).map(id => {
+                  const opt = THEMES[id];
+                  const isSelected = theme === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setTheme(id)}
+                      title={opt.name}
+                      className={`h-8 rounded-lg border flex items-center justify-center gap-1 transition-all ${
+                        isSelected ? 'border-2 scale-102 shadow-md font-bold' : 'opacity-70 hover:opacity-100'
+                      }`}
+                      style={{
+                        backgroundColor: 'var(--bg-elevated)',
+                        borderColor: isSelected ? opt.primaryColor : 'var(--border-color)'
+                      }}
+                    >
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: opt.primaryColor }} />
+                      <span className="text-[8px] font-mono uppercase text-slate-600 dark:text-slate-400">{id.slice(0, 3)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Grilla de Acciones y Herramientas (2 Columnas x 4 Filas = 8 items) */}
+            <div className="grid grid-cols-2 gap-2 font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileDrawerOpen(false);
+                  setCalendarOpen(true);
+                }}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
+              >
+                <div className="flex items-center gap-2 min-w-0 text-left">
+                  <CalendarDays className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                  <span className="text-[11px] leading-tight truncate">Calendario</span>
                 </div>
-                <div className="grid grid-cols-5 gap-1.5">
-                  {(Object.keys(THEMES) as ThemeId[]).map(id => {
-                    const opt = THEMES[id];
-                    const isSelected = theme === id;
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setTheme(id)}
-                        title={opt.name}
-                        className={`h-10 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all ${
-                          isSelected ? 'border-2 scale-105 shadow-md font-bold' : 'opacity-75 hover:opacity-100'
-                        }`}
-                        style={{
-                          backgroundColor: 'var(--bg-elevated)',
-                          borderColor: isSelected ? opt.primaryColor : 'var(--border-color)'
-                        }}
-                      >
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: opt.primaryColor }} />
-                        <span className="text-[8px] font-mono uppercase text-slate-600 dark:text-slate-400">{id.slice(0, 3)}</span>
-                      </button>
-                    );
-                  })}
+                {stats.metasCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 font-bold text-[9px] shrink-0 ml-1">
+                    {stats.metasCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileDrawerOpen(false);
+                  setElectivasOpen(true);
+                }}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
+              >
+                <div className="flex items-center gap-2 min-w-0 text-left">
+                  <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span className="text-[11px] leading-tight truncate">Electivas</span>
                 </div>
-              </div>
+                <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-900 dark:text-amber-300 font-bold text-[9px] shrink-0 ml-1">
+                  {stats.horasElectivasAprobadas}/20h
+                </span>
+              </button>
 
-              {/* Lista de Acciones y Modales */}
-              <div className="space-y-2 flex-1 font-mono text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setCalendarOpen(true);
-                  }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <CalendarDays className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                    <span>Calendario y Metas</span>
-                  </div>
-                  {stats.metasCount > 0 && (
-                    <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 font-bold text-[10px]">
-                      {stats.metasCount}
-                    </span>
-                  )}
-                </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileDrawerOpen(false);
+                  onOpenTitles();
+                }}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
+              >
+                <div className="flex items-center gap-2 min-w-0 text-left">
+                  <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                  <span className="text-[11px] leading-tight truncate">Títulos</span>
+                </div>
+                <span className="text-[9px] font-bold shrink-0 ml-1" style={{ color: 'var(--color-primary)' }}>
+                  {stats.adusiProgreso}%
+                </span>
+              </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setElectivasOpen(true);
-                  }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>Materias Electivas</span>
-                  </div>
-                  <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-900 dark:text-amber-300 font-bold text-[10px]">
-                    {stats.horasElectivasAprobadas}/20hs
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileDrawerOpen(false);
+                  setReportOpen(true);
+                }}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
+              >
+                <div className="flex items-center gap-2 min-w-0 text-left">
+                  <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                  <span className="text-[11px] leading-tight truncate">Ficha PDF</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileDrawerOpen(false);
+                  setStatsModalOpen(true);
+                }}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
+              >
+                <div className="flex items-center gap-2 min-w-0 text-left">
+                  <BarChart3 className="w-4 h-4 text-pink-600 dark:text-pink-400 shrink-0" />
+                  <span className="text-[11px] leading-tight truncate">Estadísticas</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileDrawerOpen(false);
+                  setShareModalOpen(true);
+                }}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
+              >
+                <div className="flex items-center gap-2 min-w-0 text-left">
+                  <Share2 className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+                  <span className="text-[11px] leading-tight truncate">Compartir</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileDrawerOpen(false);
+                  onOpenHelp();
+                }}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[46px] shadow-xs"
+              >
+                <div className="flex items-center gap-2 min-w-0 text-left">
+                  <HelpCircle className="w-4 h-4 text-slate-500 shrink-0" />
+                  <span className="text-[11px] leading-tight truncate">Guía</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+              </button>
+
+              {/* Botón de Reiniciar Progreso integrado en la cuadrícula */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleReset();
+                  if (confirmReset) setMobileDrawerOpen(false);
+                }}
+                className={`flex items-center justify-between p-2.5 rounded-xl border text-xs font-mono transition-all min-h-[46px] shadow-xs ${
+                  confirmReset
+                    ? 'bg-rose-500/20 border-rose-500 text-rose-700 dark:text-rose-300 font-bold animate-pulse'
+                    : 'border-slate-300 dark:border-slate-800 bg-[var(--bg-elevated)] text-rose-600 dark:text-rose-400 hover:bg-rose-500/10'
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0 text-left">
+                  <RotateCcw className="w-4 h-4 shrink-0" />
+                  <span className="text-[11px] leading-tight truncate">
+                    {confirmReset ? '¿Confirmar?' : 'Reiniciar'}
                   </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    onOpenTitles();
-                  }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                    <span>Títulos (ADUSI / Ing.)</span>
-                  </div>
-                  <span className="text-[10px] font-bold" style={{ color: 'var(--color-primary)' }}>
-                    {stats.adusiProgreso}%
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setReportOpen(true);
-                  }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    <span>Ficha Curricular (PDF)</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setStatsModalOpen(true);
-                  }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <BarChart3 className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-                    <span>Estadísticas Avanzadas</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    setShareModalOpen(true);
-                  }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Share2 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                    <span>Compartir Progreso</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileDrawerOpen(false);
-                    onOpenHelp();
-                  }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 font-semibold hover:bg-[var(--bg-base)] transition-colors min-h-[44px]"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <HelpCircle className="w-4 h-4 text-slate-500" />
-                    <span>Guía y Atajos</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                </button>
-              </div>
-
-              {/* Botón de Reiniciar Progreso */}
-              <div className="pt-4 mt-4 border-t border-[var(--border-color)]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleReset();
-                    if (confirmReset) setMobileDrawerOpen(false);
-                  }}
-                  className={`w-full py-2.5 px-3 rounded-xl border text-xs font-mono flex items-center justify-center gap-2 transition-all min-h-[44px] ${
-                    confirmReset
-                      ? 'bg-rose-500/20 border-rose-500 text-rose-700 dark:text-rose-300 font-bold animate-pulse'
-                      : 'border-slate-300 dark:border-slate-800 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10'
-                  }`}
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>{confirmReset ? '¿Confirmar Reinicio?' : 'Reiniciar Todo'}</span>
-                </button>
-              </div>
-              </div>
+                </div>
+                <span className="text-[9px] font-bold text-rose-500 shrink-0 ml-1">
+                  {confirmReset ? 'SÍ' : 'Reset'}
+                </span>
+              </button>
             </div>
           </div>
         </div>
