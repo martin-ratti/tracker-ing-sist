@@ -249,7 +249,7 @@ export const CalendarModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 no-scrollbar"
       onClick={() => setCalendarOpen(false)}
     >
       <div
@@ -257,29 +257,29 @@ export const CalendarModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="calendar-modal-title"
-        className="bg-[#080d1a] border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[95vh] sm:max-h-[92vh]"
+        className="bg-[#080d1a] border border-slate-800 rounded-2xl sm:rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh] sm:max-h-[90vh] my-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Header institucional */}
-        <div className="p-4 sm:p-5 border-b border-slate-800/80 bg-[#0b1222] flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="p-3.5 sm:p-5 border-b border-slate-800/80 bg-[#0b1222] flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <div 
-              className="p-2.5 rounded-xl border shadow-lg transition-all"
+              className="p-2 sm:p-2.5 rounded-xl border shadow-lg transition-all shrink-0"
               style={{
                 backgroundColor: 'var(--color-primary-bg)',
                 borderColor: 'var(--color-primary-border)',
                 color: 'var(--color-primary)'
               }}
             >
-              <CalendarDays className="w-6 h-6" />
+              <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 id="calendar-modal-title" className="text-base sm:text-lg font-bold font-syne text-white tracking-wide">
-                  Calendario Académico Oficial
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h2 id="calendar-modal-title" className="text-sm sm:text-lg font-bold font-syne text-white tracking-wide">
+                  Calendario Académico
                 </h2>
                 <span 
-                  className="text-[10px] font-mono uppercase px-2 py-0.5 rounded border"
+                  className="text-[9px] sm:text-[10px] font-mono uppercase px-1.5 py-0.5 rounded border"
                   style={{
                     backgroundColor: 'var(--color-primary-bg)',
                     borderColor: 'var(--color-primary-border)',
@@ -289,8 +289,8 @@ export const CalendarModal: React.FC = () => {
                   UTN FRRo · ISI
                 </span>
               </div>
-              <p className="text-xs font-mono text-slate-400">
-                Plan 2023 · Turnos oficiales de examen, días de mesa y metas de final
+              <p className="text-[11px] sm:text-xs font-mono text-slate-400 line-clamp-1 sm:line-clamp-none">
+                Plan 2023 · Turnos oficiales de examen y metas de final
               </p>
             </div>
           </div>
@@ -299,53 +299,56 @@ export const CalendarModal: React.FC = () => {
             type="button"
             onClick={() => setCalendarOpen(false)}
             aria-label="Cerrar calendario académico"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Pestañas de navegación */}
-        <div className="flex border-b border-slate-800 bg-[#070b14] px-4 sm:px-6 pt-2 text-xs font-mono gap-2 overflow-x-auto">
+        <div className="flex border-b border-slate-800 bg-[#070b14] px-3 sm:px-6 pt-1.5 sm:pt-2 text-xs font-mono gap-1 sm:gap-2 overflow-x-auto no-scrollbar shrink-0">
           <button
             onClick={() => setActiveTab('calendario')}
-            className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2 border-b-2 transition-colors whitespace-nowrap text-xs ${
               activeTab === 'calendario'
                 ? 'border-cyan-400 text-cyan-300 font-bold bg-cyan-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <CalendarIcon className="w-3.5 h-3.5" />
-            <span>Calendario Mensual Interactivo</span>
+            <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
+            <span className="sm:hidden">Calendario</span>
+            <span className="hidden sm:inline">Calendario Mensual Interactivo</span>
           </button>
 
           <button
             onClick={() => setActiveTab('metas')}
-            className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2 border-b-2 transition-colors whitespace-nowrap text-xs ${
               activeTab === 'metas'
                 ? 'border-cyan-400 text-cyan-300 font-bold bg-cyan-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Target className="w-3.5 h-3.5" />
-            <span>Mis Metas de Final ({metasArray.length})</span>
+            <Target className="w-3.5 h-3.5 shrink-0" />
+            <span className="sm:hidden">Metas ({metasArray.length})</span>
+            <span className="hidden sm:inline">Mis Metas de Final ({metasArray.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('turnos')}
-            className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2 border-b-2 transition-colors whitespace-nowrap text-xs ${
               activeTab === 'turnos'
                 ? 'border-cyan-400 text-cyan-300 font-bold bg-cyan-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <List className="w-3.5 h-3.5" />
-            <span>Listado de Turnos & Sysacad</span>
+            <List className="w-3.5 h-3.5 shrink-0" />
+            <span className="sm:hidden">Turnos</span>
+            <span className="hidden sm:inline">Listado de Turnos & Sysacad</span>
           </button>
         </div>
 
         {/* Contenedor con Scroll */}
-        <div className="p-3 sm:p-5 overflow-y-auto flex-1 space-y-4">
+        <div className="p-3 sm:p-5 overflow-y-auto flex-1 space-y-4 no-scrollbar">
           
           {/* TAB 1: CALENDARIO MENSUAL "POSTA" */}
           {activeTab === 'calendario' && (
@@ -429,32 +432,33 @@ export const CalendarModal: React.FC = () => {
               </div>
 
               {/* Leyenda visual del calendario */}
-              <div className="flex items-center gap-4 text-[10px] text-slate-400 px-2 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded border border-cyan-400/80 bg-cyan-950/60 shadow-[0_0_8px_rgba(6,182,212,0.4)]" />
-                  <span>Mesa de Examen Activa (con Glow)</span>
+              <div className="flex items-center gap-2.5 sm:gap-4 text-[9px] sm:text-[10px] text-slate-400 px-1 sm:px-2 flex-wrap">
+                <div className="flex items-center gap-1">
+                  <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-cyan-400/80 bg-cyan-950/60 shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0" />
+                  <span>Mesa Activa</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded border border-emerald-500/80 bg-emerald-950/60 text-emerald-300" />
-                  <span>Meta de Final Agendada</span>
+                <div className="flex items-center gap-1">
+                  <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-emerald-500/80 bg-emerald-950/60 text-emerald-300 shrink-0" />
+                  <span>Meta Agendada</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded border border-purple-500/60 bg-purple-950/40 text-purple-300" />
-                  <span>Período / Hito Lectivo</span>
+                <div className="flex items-center gap-1">
+                  <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-purple-500/60 bg-purple-950/40 text-purple-300 shrink-0" />
+                  <span>Hito Lectivo</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded border border-slate-800 bg-slate-950/80 opacity-50" />
-                  <span>Día anterior / pasado (apagado)</span>
+                <div className="flex items-center gap-1 hidden sm:flex">
+                  <span className="w-2.5 h-2.5 rounded border border-slate-800 bg-slate-950/80 opacity-50 shrink-0" />
+                  <span>Día pasado</span>
                 </div>
               </div>
 
               {/* Cuadrícula de 7 columnas */}
               <div className="rounded-xl border border-slate-800 overflow-hidden bg-[#070b13]">
                 {/* Cabecera de días de la semana */}
-                <div className="grid grid-cols-7 border-b border-slate-800 bg-[#090f1d] text-center text-[11px] font-bold text-slate-400 py-2">
+                <div className="grid grid-cols-7 border-b border-slate-800 bg-[#090f1d] text-center text-[10px] sm:text-[11px] font-bold text-slate-400 py-1.5 sm:py-2">
                   {DIAS_SEMANA_HEADERS.map((dia, idx) => (
                     <div key={idx} className={idx >= 5 ? 'text-slate-500' : 'text-slate-300'}>
-                      {dia}
+                      <span className="sm:hidden">{dia.charAt(0)}</span>
+                      <span className="hidden sm:inline">{dia}</span>
                     </div>
                   ))}
                 </div>
@@ -496,13 +500,18 @@ export const CalendarModal: React.FC = () => {
                     return (
                       <div
                         key={idx}
-                        className={`min-h-[96px] sm:min-h-[108px] p-2 flex flex-col justify-between transition-all relative group rounded-lg m-0.5 ${
+                        onClick={() => {
+                          if (esDiaMesaActiva && metasEnEsteDia.length === 0) {
+                            handleOpenMetaDialog(cell.dateStr, turno);
+                          }
+                        }}
+                        className={`min-h-[52px] sm:min-h-[108px] p-1 sm:p-2 flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
                           !cell.isCurrentMonth
                             ? 'bg-[#03060c]/70 text-slate-700 opacity-25 border border-transparent'
                             : isPast
                               ? 'bg-[#050811]/40 text-slate-600 opacity-40 border border-slate-900/60'
                               : esDiaMesaActiva
-                                ? 'bg-gradient-to-b from-cyan-950/40 via-cyan-900/20 to-transparent border-cyan-400/80 text-cyan-100'
+                                ? 'bg-gradient-to-b from-cyan-950/40 via-cyan-900/20 to-transparent border-cyan-400/80 text-cyan-100 cursor-pointer sm:cursor-default'
                                 : 'bg-[#070b14] border border-slate-800/80 text-slate-300 hover:border-slate-700'
                         }`}
                         style={esDiaMesaActiva ? {
@@ -512,9 +521,9 @@ export const CalendarModal: React.FC = () => {
                       >
                         {/* Fila superior de la celda: Número de día y badges */}
                         <div className="flex items-center justify-between gap-1">
-                          <span className={`text-xs font-bold font-syne ${
+                          <span className={`text-[11px] sm:text-xs font-bold font-syne ${
                             isToday 
-                              ? 'w-5 h-5 rounded-full bg-cyan-500 text-slate-950 flex items-center justify-center font-extrabold shadow-[0_0_10px_rgba(6,182,212,0.9)]' 
+                              ? 'w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-cyan-500 text-slate-950 flex items-center justify-center font-extrabold shadow-[0_0_10px_rgba(6,182,212,0.9)]' 
                               : isPast 
                                 ? 'text-slate-500' 
                                 : esDiaMesaActiva 
@@ -524,10 +533,10 @@ export const CalendarModal: React.FC = () => {
                             {diaNum}
                           </span>
 
-                          {/* Nombre corto del turno si es día de examen */}
+                          {/* Nombre corto del turno si es día de examen (Desktop) */}
                           {turno && (
                             <span 
-                              className={`text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80px] font-mono ${
+                              className={`hidden sm:inline text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80px] font-mono ${
                                 isPast 
                                   ? 'bg-slate-800/80 text-slate-500 border border-slate-800' 
                                   : 'bg-cyan-500/25 text-cyan-200 border border-cyan-400/60 font-bold shadow-[0_0_8px_rgba(6,182,212,0.3)]'
@@ -539,8 +548,30 @@ export const CalendarModal: React.FC = () => {
                           )}
                         </div>
 
-                        {/* Contenido intermedio: Hito o materias */}
-                        <div className="space-y-1 my-1">
+                        {/* Indicadores en MOBILE (Micro dots) */}
+                        <div className="flex sm:hidden items-center justify-center gap-1 my-auto pt-0.5">
+                          {metasEnEsteDia.length > 0 && (
+                            <span 
+                              className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)]" 
+                              title="Meta agendada" 
+                            />
+                          )}
+                          {esDiaMesaActiva && metasEnEsteDia.length === 0 && (
+                            <span 
+                              className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" 
+                              title="Mesa activa" 
+                            />
+                          )}
+                          {hito && (
+                            <span 
+                              className="w-1.5 h-1.5 rounded-full bg-purple-400" 
+                              title={hito.titulo} 
+                            />
+                          )}
+                        </div>
+
+                        {/* Contenido intermedio en DESKTOP: Hito o materias */}
+                        <div className="hidden sm:block space-y-1 my-1">
                           {/* Hito académico */}
                           {hito && (
                             <div 
@@ -588,12 +619,15 @@ export const CalendarModal: React.FC = () => {
                           )}
                         </div>
 
-                        {/* Botón inferior: Anotar como Meta si es día de examen vigente */}
+                        {/* Botón inferior: Anotar como Meta si es día de examen vigente (Desktop) */}
                         {esDiaMesaActiva && metasEnEsteDia.length === 0 && (
                           <button
                             type="button"
-                            onClick={() => handleOpenMetaDialog(cell.dateStr, turno)}
-                            className="w-full py-1 rounded border border-cyan-500/40 hover:border-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 hover:text-white text-[10px] font-mono font-semibold flex items-center justify-center gap-1 transition-all shadow-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenMetaDialog(cell.dateStr, turno);
+                            }}
+                            className="hidden sm:flex w-full py-1 rounded border border-cyan-500/40 hover:border-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 hover:text-white text-[10px] font-mono font-semibold items-center justify-center gap-1 transition-all shadow-sm"
                             title={`Anotar meta para rendir en ${diaSemanaNombre} ${cell.dateStr}`}
                           >
                             <Plus className="w-3 h-3" />
@@ -810,11 +844,11 @@ export const CalendarModal: React.FC = () => {
       {/* DIÁLOGO POP-UP PARA ANOTAR META EN UN DÍA SELECCIONADO */}
       {metaDialog && (
         <div 
-          className="fixed inset-0 z-60 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-60 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150 no-scrollbar"
           onClick={() => setMetaDialog(null)}
         >
           <div 
-            className="bg-[#0c1324] border border-cyan-500/40 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl font-mono"
+            className="bg-[#0c1324] border border-cyan-500/40 rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-5 space-y-4 shadow-2xl font-mono my-auto"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">

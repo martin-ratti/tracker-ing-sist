@@ -23,7 +23,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 no-scrollbar"
       onClick={onClose}
     >
       <div
@@ -31,13 +31,13 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="help-modal-title"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl w-full max-w-xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col my-auto"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-4 sm:p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div 
-              className="p-2 rounded-xl border"
+              className="p-2 rounded-xl border shrink-0"
               style={{
                 backgroundColor: 'var(--color-primary-bg)',
                 borderColor: 'var(--color-primary-border)',
@@ -47,10 +47,10 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="help-modal-title" className="text-lg font-bold font-syne text-[var(--text-body)]">
+              <h2 id="help-modal-title" className="text-base sm:text-lg font-bold font-syne text-[var(--text-body)]">
                 Guía del Tracker Plan 2023
               </h2>
-              <p className="text-xs font-mono text-slate-500 dark:text-slate-400">
+              <p className="text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400">
                 Reglas de correlatividades y funcionamiento interactivo
               </p>
             </div>
@@ -60,13 +60,13 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             type="button"
             onClick={onClose}
             aria-label="Cerrar guía de ayuda"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-5 text-xs font-mono text-slate-600 dark:text-slate-300 max-h-[calc(95vh-100px)] sm:max-h-[calc(80vh-100px)] overflow-y-auto">
+        <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5 text-xs font-mono text-slate-600 dark:text-slate-300 overflow-y-auto flex-1 no-scrollbar">
           
           <div className="space-y-3">
             <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--color-primary)' }}>

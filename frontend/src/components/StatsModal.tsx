@@ -86,10 +86,10 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm no-scrollbar">
       <div 
         ref={modalRef}
-        className="relative w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200"
         role="dialog"
         aria-modal="true"
         aria-labelledby="stats-title"
@@ -100,13 +100,13 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
             <div className="p-2 bg-pink-500/20 rounded-lg">
               <BarChart3 className="w-5 h-5 text-pink-500 dark:text-pink-400" />
             </div>
-            <h2 id="stats-title" className="font-syne font-bold text-lg text-[var(--text-body)]">
+            <h2 id="stats-title" className="font-syne font-bold text-base sm:text-lg text-[var(--text-body)]">
               Dashboard de Estadísticas
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] rounded-lg transition-colors"
+            className="p-2 text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] rounded-xl transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
             aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
@@ -114,7 +114,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-6 sm:space-y-8 no-scrollbar">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Gráfico de distribución */}

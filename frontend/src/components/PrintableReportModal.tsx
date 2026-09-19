@@ -55,7 +55,7 @@ export const PrintableReportModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 print:p-0 print:bg-white print:static"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 no-scrollbar print:p-0 print:bg-white print:static"
       onClick={() => setReportOpen(false)}
     >
       <div
@@ -63,40 +63,40 @@ export const PrintableReportModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="report-modal-title"
-        className="bg-[#0b101c] border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-4xl max-h-[95vh] sm:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 print:border-none print:shadow-none print:max-w-none print:max-h-none print:rounded-none print:bg-white print:text-black"
+        className="bg-[#0b101c] border border-slate-800 rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto print:border-none print:shadow-none print:max-w-none print:max-h-none print:rounded-none print:bg-white print:text-black"
         onClick={e => e.stopPropagation()}
       >
         {/* Barra de Acciones (oculta al imprimir) */}
-        <div className="p-4 border-b border-slate-800 bg-[#0d1527] flex items-center justify-between gap-3 print:hidden">
+        <div className="p-3.5 sm:p-4 border-b border-slate-800 bg-[#0d1527] flex items-center justify-between gap-3 shrink-0 print:hidden">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
+            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 shrink-0">
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="report-modal-title" className="text-sm sm:text-base font-bold font-syne text-white">
-                Ficha Curricular y Analítico de Avance
+              <h2 id="report-modal-title" className="text-xs sm:text-base font-bold font-syne text-white">
+                Ficha Curricular y Analítico
               </h2>
-              <p className="text-[11px] font-mono text-slate-400">
+              <p className="text-[10px] sm:text-[11px] font-mono text-slate-400">
                 Plan 2023 · UTN Facultad Regional Rosario
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => setProfileModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-colors"
               title="Editar nombre y legajo"
             >
               <User className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Editar Perfil</span>
+              <span>Editar Alumno</span>
             </button>
 
             <button
               type="button"
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-mono text-xs transition-colors shadow-md"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono text-xs font-bold transition-colors shadow-lg"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Imprimir / PDF</span>
@@ -106,7 +106,7 @@ export const PrintableReportModal: React.FC = () => {
               type="button"
               onClick={() => setReportOpen(false)}
               aria-label="Cerrar reporte"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
@@ -114,7 +114,7 @@ export const PrintableReportModal: React.FC = () => {
         </div>
 
         {/* CONTENEDOR DE LA FICHA IMPRIMIBLE */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 text-slate-200 print:overflow-visible print:p-0 print:text-black bg-[#070b13] print:bg-white">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 text-slate-200 no-scrollbar print:overflow-visible print:p-0 print:text-black bg-[#070b13] print:bg-white">
           
           {/* Encabezado Institucional */}
           <div className="border-b-2 border-slate-800 print:border-black pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
