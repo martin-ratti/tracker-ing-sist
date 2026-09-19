@@ -24,7 +24,6 @@ import {
   Sun,
   Moon,
   Clock,
-  Menu,
   ChevronRight
 } from 'lucide-react';
 import { useTheme, THEMES, type ThemeId } from '../context/ThemeContext';
@@ -231,17 +230,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <span className="text-[11px]">Nube</span>
               </button>
             )}
-
-            {/* Botón Menú Hamburguesa */}
-            <button
-              type="button"
-              onClick={() => (drawerMounted ? closeDrawer() : openDrawer())}
-              className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-body)] hover:bg-[var(--bg-base)] transition-colors min-w-[38px] min-h-[38px] flex items-center justify-center"
-              aria-label="Abrir menú de herramientas"
-              title="Menú de herramientas académicas"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
