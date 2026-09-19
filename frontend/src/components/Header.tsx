@@ -819,10 +819,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             onClick={() => setMobileDrawerOpen(false)}
           />
 
-          {/* Panel Lateral que entra de derecha a izquierda por encima de la pantalla */}
-          <div className="fixed inset-y-0 right-0 max-w-full flex">
+          {/* Panel Lateral que entra de derecha a izquierda por encima de la pantalla (de arriba a abajo) */}
+          <div className="fixed inset-y-0 right-0 h-full h-[100dvh] max-w-full flex">
             <div 
-              className="w-[85vw] max-w-sm sm:max-w-md bg-[var(--bg-surface)]/98 border-l border-[var(--border-color)] shadow-[-15px_0_40px_rgba(0,0,0,0.6)] flex flex-col h-full overflow-hidden animate-in slide-in-from-right duration-300"
+              className="w-[85vw] max-w-sm sm:max-w-md bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-[-15px_0_40px_rgba(0,0,0,0.6)] flex flex-col h-full h-[100dvh] overflow-hidden animate-in slide-in-from-right duration-300"
               onClick={e => e.stopPropagation()}
             >
               {/* Header del Panel (Fijo) */}
@@ -850,7 +850,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               </div>
 
               {/* Cuerpo del Panel con scroll táctil sin scrollbar tosca */}
-              <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 no-scrollbar overscroll-contain flex flex-col">
+              <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 pb-8 space-y-3 no-scrollbar overscroll-contain flex flex-col safe-bottom">
                 {/* Fila Superior: Perfil + Nube Firebase (2 Columnas compactas) */}
                 <div className="grid grid-cols-2 gap-2">
                   {/* Tarjeta de Perfil */}
