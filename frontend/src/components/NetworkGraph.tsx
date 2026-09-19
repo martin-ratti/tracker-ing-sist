@@ -56,7 +56,6 @@ export const NetworkGraph: React.FC = () => {
   const {
     estados,
     edgeMode,
-    setViewMode,
     toggleMateriaEstado,
     esMateriaCursable,
     esMateriaRendible,
@@ -575,25 +574,6 @@ export const NetworkGraph: React.FC = () => {
         </div>
       )}
 
-      {/* Banner flotante de sugerencia para celulares */}
-      <div className="md:hidden absolute top-3 left-3 right-3 z-20 flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[var(--bg-surface)]/95 backdrop-blur-md border border-[var(--border-color)] shadow-lg text-[11px] font-mono">
-        <span className="text-slate-800 dark:text-slate-200 leading-tight font-medium">
-          📱 <strong>Grafo de Red</strong> · En celular se recomienda la Malla Curricular.
-        </span>
-        <button
-          type="button"
-          onClick={() => setViewMode('malla')}
-          className="px-2.5 py-1 rounded-lg border font-bold text-xs shrink-0 transition-colors shadow-sm"
-          style={{
-            backgroundColor: 'var(--color-primary-bg)',
-            borderColor: 'var(--color-primary-border)',
-            color: 'var(--color-primary)'
-          }}
-        >
-          Ver Malla
-        </button>
-      </div>
-
       {/* Banner flotante de Cadena Crítica hacia Graduación */}
       {criticalChainActive && !focusedSubjectId && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-[var(--bg-surface)]/95 backdrop-blur-md border border-amber-500/50 shadow-[0_0_25px_rgba(245,158,11,0.25)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3">
@@ -614,7 +594,7 @@ export const NetworkGraph: React.FC = () => {
       )}
 
       {/* Controles flotantes superiores derechos */}
-      <div className="absolute top-16 right-3 md:top-4 md:right-4 z-10 flex flex-col items-end gap-2">
+      <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10 flex flex-col items-end gap-2">
         {/* Selector de modo de interacción */}
         <div className="flex items-center bg-[var(--bg-surface)]/90 backdrop-blur-md border border-[var(--border-color)] p-1 rounded-xl shadow-lg font-mono text-xs">
           <button
