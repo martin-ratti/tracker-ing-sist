@@ -249,7 +249,7 @@ export const CalendarModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={() => setCalendarOpen(false)}
     >
       <div
@@ -257,7 +257,7 @@ export const CalendarModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="calendar-modal-title"
-        className="bg-[#080d1a] border border-slate-800 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]"
+        className="bg-[#080d1a] border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[95vh] sm:max-h-[92vh]"
         onClick={e => e.stopPropagation()}
       >
         {/* Header institucional */}

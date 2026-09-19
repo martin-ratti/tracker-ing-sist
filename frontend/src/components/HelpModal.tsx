@@ -23,7 +23,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={onClose}
     >
       <div
@@ -31,10 +31,10 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="help-modal-title"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl w-full max-w-xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div 
               className="p-2 rounded-xl border"
@@ -66,7 +66,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        <div className="p-6 space-y-5 text-xs font-mono text-slate-600 dark:text-slate-300 max-h-[calc(80vh-100px)] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-5 text-xs font-mono text-slate-600 dark:text-slate-300 max-h-[calc(95vh-100px)] sm:max-h-[calc(80vh-100px)] overflow-y-auto">
           
           <div className="space-y-3">
             <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--color-primary)' }}>

@@ -70,7 +70,7 @@ export const Toast: React.FC = () => {
           to { width: 0%; }
         }
       `}</style>
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col-reverse gap-2 pointer-events-auto max-w-md w-full px-4">
+      <div className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col-reverse gap-2 pointer-events-auto max-w-md w-full px-4 safe-bottom">
         {toasts.map(toast => (
           <SingleToast key={toast.id} toast={toast} onDismiss={dismissToast} />
         ))}

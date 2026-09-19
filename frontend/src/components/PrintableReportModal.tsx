@@ -55,7 +55,7 @@ export const PrintableReportModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 print:p-0 print:bg-white print:static"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 print:p-0 print:bg-white print:static"
       onClick={() => setReportOpen(false)}
     >
       <div
@@ -63,7 +63,7 @@ export const PrintableReportModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="report-modal-title"
-        className="bg-[#0b101c] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 print:border-none print:shadow-none print:max-w-none print:max-h-none print:rounded-none print:bg-white print:text-black"
+        className="bg-[#0b101c] border border-slate-800 rounded-t-2xl sm:rounded-2xl w-full max-w-4xl max-h-[95vh] sm:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 print:border-none print:shadow-none print:max-w-none print:max-h-none print:rounded-none print:bg-white print:text-black"
         onClick={e => e.stopPropagation()}
       >
         {/* Barra de Acciones (oculta al imprimir) */}

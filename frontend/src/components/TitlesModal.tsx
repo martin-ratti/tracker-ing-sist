@@ -25,7 +25,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={onClose}
     >
       <div 
@@ -33,17 +33,17 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
         role="dialog"
         aria-modal="true"
         aria-labelledby="titles-modal-title"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
               <GraduationCap className="w-6 h-6" />
             </div>
             <div>
-              <h2 id="titles-modal-title" className="text-xl font-bold font-syne text-[var(--text-body)] tracking-wide">
+              <h2 id="titles-modal-title" className="text-lg sm:text-xl font-bold font-syne text-[var(--text-body)] tracking-wide">
                 Titulación Universitaria
               </h2>
               <p className="text-xs font-mono text-slate-500 dark:text-slate-400">
@@ -56,14 +56,14 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
             type="button"
             onClick={onClose}
             aria-label="Cerrar seguimiento de títulos"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
+            className="p-2 rounded-xl min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Contenido */}
-        <div className="p-6 space-y-6 max-h-[calc(85vh-120px)] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-6 max-h-[calc(95vh-120px)] sm:max-h-[calc(85vh-120px)] overflow-y-auto">
           
           {/* Tarjeta ADUSI (Título Intermedio) */}
           <div className="bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl p-5 relative overflow-hidden">

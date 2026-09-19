@@ -38,7 +38,7 @@ export const ProfileModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={() => setProfileModalOpen(false)}
     >
       <div
@@ -46,11 +46,11 @@ export const ProfileModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-modal-title"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
               <User className="w-5 h-5" />
@@ -69,14 +69,14 @@ export const ProfileModal: React.FC = () => {
             type="button"
             onClick={() => setProfileModalOpen(false)}
             aria-label="Cerrar perfil"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
+            className="p-2 rounded-xl min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 font-mono text-xs">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 font-mono text-xs">
           <div>
             <label className="block text-slate-600 dark:text-slate-400 mb-1 font-semibold">
               Nombre y Apellido:

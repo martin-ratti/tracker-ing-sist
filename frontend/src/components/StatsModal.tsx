@@ -86,10 +86,10 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
       <div 
         ref={modalRef}
-        className="relative w-full max-w-3xl max-h-[90vh] bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="stats-title"

@@ -394,3 +394,33 @@
   }
 }
 
+/* Ocultar scrollbar nativa manteniendo scroll funcional (para chips/tabs horizontales y drawers en móvil) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Safe area para dispositivos con notch (iPhone X+) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Prevenir zoom automático en inputs en iOS (requiere font-size >= 16px) */
+@media screen and (max-width: 639px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

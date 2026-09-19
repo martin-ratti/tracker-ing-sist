@@ -46,18 +46,18 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200"
+        className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-400">
               <Share2 className="w-5 h-5" />
@@ -74,14 +74,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
+            className="p-2 rounded-xl min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-[var(--text-body)] hover:bg-[var(--bg-surface)] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           <div className="p-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border-color)] space-y-2 text-xs font-mono">
             <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 pb-2 border-b border-[var(--border-color)]">
               <span>Resumen compartido:</span>
