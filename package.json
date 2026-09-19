@@ -8,6 +8,7 @@
     "dev:frontend": "pnpm --filter frontend dev",
     "build": "pnpm --filter tracker-backend build && pnpm --filter frontend build",
     "lint": "oxlint frontend/src backend/src",
+    "deploy": "pnpm build && firebase deploy --only hosting",
     "install:all": "pnpm --filter tracker-backend install && pnpm --filter frontend install"
   },
   "devDependencies": {
