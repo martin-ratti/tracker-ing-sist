@@ -120,42 +120,36 @@ tracker-ing-sist/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Header.tsx              # Barra superior con estadísticas en vivo, metas, PDF y perfil
-│   │   │   ├── ThemeSelector.tsx       # Menú desplegable para los 5 temas visuales
-│   │   │   ├── NetworkGraph.tsx        # Grafo interactivo con modo Camino Crítico
-│   │   │   ├── GraphSkeleton.tsx       # Esqueleto de carga inicial del motor de red
-│   │   │   ├── GridView.tsx            # Vista de malla curricular con chips de filtro rápido
-│   │   │   ├── CalendarModal.tsx       # Modal de Calendario Académico 2026 y Metas de Finales
-│   │   │   ├── PrintableReportModal.tsx# Analítico formal imprimible (A4 / PDF)
-│   │   │   ├── ProfileModal.tsx        # Edición de Nombre y Legajo del estudiante
-│   │   │   ├── ElectivasDrawer.tsx     # Panel lateral de electivas y Seminario ADUSI
-│   │   │   ├── SubjectModal.tsx        # Modal de correlativas, destrabes, notas y meta de examen
-│   │   │   ├── TitlesModal.tsx         # Medidor de títulos ADUSI e Ingeniería + control PPS
-│   │   │   ├── AuthModal.tsx           # Modal de autenticación con Fusión Inteligente
-│   │   │   ├── HelpModal.tsx           # Guía interactiva de uso y correlatividades
-│   │   │   └── Toast.tsx               # Alertas contextuales flotantes
+│   │   │   ├── layout/                 # Navegación, Header, BottomNav, ThemeSelector, Toast
+│   │   │   ├── views/                  # Vistas principales: GridView, NetworkGraph, ElectivasDrawer
+│   │   │   ├── modals/                 # Diálogos modales: Subject, Calendar, Profile, Stats, etc.
+│   │   │   ├── ui/                     # Componentes base: Modal accesible, StatusBadge
+│   │   │   └── index.ts                # Barrel export centralizado
 │   │   ├── context/
 │   │   │   ├── TrackerContext.tsx      # Lógica de correlativas, filtros, metas y perfil
 │   │   │   ├── ThemeContext.tsx        # Gestión de los 5 temas visuales
 │   │   │   └── AuthContext.tsx         # Sesión de usuario y sincronización remota
 │   │   ├── hooks/
-│   │   │   └── useFocusTrap.ts         # Atrapado de foco accesible para modales (WCAG)
+│   │   │   ├── useFocusTrap.ts         # Atrapado de foco accesible para modales (WCAG)
+│   │   │   └── useKeyboardShortcuts.ts # Atajos rápidos de teclado (G, M, E, C, etc.)
 │   │   ├── data/
 │   │   │   ├── plan2023.ts             # Catálogo local de materias y electivas Plan 2023
 │   │   │   └── calendario2026.ts       # Calendario oficial 2026-2027 y fechas de exámenes UTN
-│   │   ├── services/                   # Cliente API y algoritmo de merge inteligente
+│   │   ├── services/                   # Cliente API, Firebase y algoritmo de merge inteligente
 │   │   ├── types/                      # Tipos de TypeScript compartidos
 │   │   ├── App.tsx
-│   │   └── index.css                   # Variables CSS semánticas y reglas @media print
+│   │   └── index.css                   # Variables CSS semánticas y Tailwind CSS v4
 │   ├── package.json
 │   └── vite.config.ts
 ├── docs/                               # Documentación y cartillas oficiales de UTN FRRo
 │   ├── isi-a4-plan-2023-gradiente-utn-frro.pdf
 │   ├── electivas-plan-2023.png
 │   └── calendario-2026-2027-gradiente.pdf
-├── ESTADO_DEL_PROYECTO.md              # Bitácora detallada de implementación y roadmap
+├── firebase.json                       # Configuración de hosting y headers de caché
+├── .oxlintrc.json                      # Reglas de linting de alto rendimiento
 ├── pnpm-workspace.yaml
 ├── package.json
+├── GEMINI.md                           # Guía de contexto, arquitectura y comandos del monorepo
 └── README.md
 ```
 
@@ -186,6 +180,9 @@ Para levantar el **Frontend** y el **Backend** en paralelo:
 
 ```bash
 # Opción 1: Levantar frontend y backend juntos
+pnpm dev
+
+# Opción 2: Levantarlos por separado
 pnpm dev:backend   # en una terminal (puerto 3001)
 pnpm dev:frontend  # en otra terminal (puerto 5173)
 ```
@@ -200,18 +197,17 @@ pnpm dev:frontend  # en otra terminal (puerto 5173)
 pnpm build
 
 # Compilar y desplegar automáticamente en Firebase Hosting
-pnpm deploy
+npm run deploy
 ```
 
 ---
 
-## 📚 Documentación Oficial y Arquitectura
+## 📚 Documentación Oficial Incluida
 
-En la carpeta [`docs/`](./docs) se encuentran los documentos del proyecto y normativas de referencia:
-- 📋 [**Estado del Proyecto y Roadmap**](./docs/ESTADO_DEL_PROYECTO.md): Relevamiento detallado de funcionalidades implementadas y pendientes.
-- 🎯 [**Plan de Acción**](./docs/PLAN_DE_ACCION.md): Tareas prioritarias y arquitectura.
+En la carpeta [`docs/`](./docs) se encuentran digitalizados los documentos oficiales de referencia:
 - 📄 [**Plan 2023 Gradiente UTN FRRo (PDF)**](./docs/isi-a4-plan-2023-gradiente-utn-frro.pdf): Cartilla A4 con las 36 materias troncales, Seminario Integrador ADUSI y correlatividades oficiales.
 - 🖼️ [**Grilla Oficial de Asignaturas Electivas Plan 2023**](./docs/electivas-plan-2023.png): Tabla de materias electivas organizadas por nivel, tipo de dictado y horas anuales.
+- 📅 [**Calendario Académico Oficial 2026-2027 (PDF)**](./docs/calendario-2026-2027-gradiente.pdf): Fechas de mesas de examen, recesos e inscripciones.
 
 ---
 
