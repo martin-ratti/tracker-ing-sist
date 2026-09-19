@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTracker } from '../context/TrackerContext';
 import { useAuth } from '../context/AuthContext';
 import { ThemeSelector } from './ThemeSelector';
@@ -810,8 +811,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
         </div>
       </div>
 
-      {/* Drawer Móvil Lateral Tipo Carrito (De derecha a izquierda, con fondo difuminado) */}
-      {mobileDrawerOpen && (
+      {/* Drawer Móvil Lateral Tipo Carrito (De derecha a izquierda, con fondo difuminado de pantalla completa) */}
+      {mobileDrawerOpen && createPortal(
         <div className="fixed inset-0 z-50 overflow-hidden md:hidden animate-in fade-in duration-200">
           {/* Fondo izquierdo difuminado sobre la pantalla actual (tocar aquí cierra el menú) */}
           <div 
@@ -822,7 +823,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           {/* Panel Lateral que entra de derecha a izquierda por encima de la pantalla (de arriba a abajo) */}
           <div className="fixed inset-y-0 right-0 h-full h-[100dvh] max-w-full flex">
             <div 
-              className="w-[85vw] max-w-sm sm:max-w-md bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-[-15px_0_40px_rgba(0,0,0,0.6)] flex flex-col h-full h-[100dvh] overflow-hidden animate-in slide-in-from-right duration-300"
+              className="w-[82vw] sm:w-[60vw] max-w-sm bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-[-15px_0_40px_rgba(0,0,0,0.6)] flex flex-col h-full h-[100dvh] overflow-hidden animate-in slide-in-from-right duration-300"
               onClick={e => e.stopPropagation()}
             >
               {/* Header del Panel (Fijo) */}
@@ -1099,7 +1100,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );
