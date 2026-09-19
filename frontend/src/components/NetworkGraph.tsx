@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Network } from 'vis-network/standalone';
 import { DataSet } from 'vis-data/standalone';
 import { useTracker } from '../context/TrackerContext';
@@ -66,34 +66,196 @@ export const NetworkGraph: React.FC = () => {
     setFocusedSubjectIdRef.current = setFocusedSubjectId;
   }, [setFocusedSubjectId]);
 
-  // Inicializar vis-network una sola vez
+  // Cálculo de dependencias (Camino Crítico: ancestros y descendientes)
+  const dependenciesTree = useMemo(() => {
+    if (!focusedSubjectId) return null;
+
+    const ancestors = new Set<number>();
+    const descendants = new Set<number>();
+
+    function findAncestors(currId: number) {
+      const m = MATERIAS_MAP[currId];
+      if (!m) return;
+      const reqs = [
+        ...m.reqRegular,
+        ...(Array.isArray(m.reqAprobada) ? m.reqAprobada : []),
+        ...(Array.isArray(m.reqRendirAprobada) ? m.reqRendirAprobada : [])
+      ];
+      reqs.forEach(r => {
+        if (!ancestors.has(r)) {
+          ancestors.add(r);
+          findAncestors(r);
+        }
+      });
+    }
+
+    function findDescendants(currId: number) {
+      MATERIAS_GRAFO.forEach(candidate => {
+        const depends =
+          candidate.reqRegular.includes(currId) ||
+          (Array.isArray(candidate.reqAprobada) && candidate.reqAprobada.includes(currId)) ||
+          (Array.isArray(candidate.reqRendirAprobada) && candidate.reqRendirAprobada.includes(currId));
+
+        if (depends && !descendants.has(candidate.id)) {
+          descendants.add(candidate.id);
+          findDescendants(candidate.id);
+        }
+      });
+    }
+
+    findAncestors(focusedSubjectId);
+    findDescendants(focusedSubjectId);
+
+    return { ancestors, descendants };
+  }, [focusedSubjectId]);
+
+  // Función pura para obtener configuración visual de un nodo según estado, tema y camino crítico
+  const getNodeVisualConfig = useCallback((m: (typeof MATERIAS_GRAFO)[0]) => {
+    const est = estados[m.id] || 'pendiente';
+    const cursable = esMateriaCursable(m);
+    const rendible = esMateriaRendible(m);
+
+    let bg = themeConfig.graph.pendiente.bg;
+    let border = themeConfig.graph.pendiente.border;
+    let fontColor = themeConfig.graph.pendiente.font;
+    let bw = 1.5;
+    let shadowColor = colorMode === 'light' ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.5)';
+    let shadowSize = 8;
+
+    if (dependenciesTree) {
+      const isSelf = m.id === focusedSubjectId;
+      const isAncestor = dependenciesTree.ancestors.has(m.id);
+      const isDescendant = dependenciesTree.descendants.has(m.id);
+      const inChain = isSelf || isAncestor || isDescendant;
+
+      if (!inChain) {
+        bg = colorMode === 'light' ? '#f8fafc' : '#080c16';
+        border = colorMode === 'light' ? '#cbd5e1' : '#141d2f';
+        fontColor = colorMode === 'light' ? '#94a3b8' : '#334155';
+        bw = 1;
+        shadowSize = 0;
+        shadowColor = 'transparent';
+      } else if (isSelf) {
+        bg = themeConfig.graph.cursable.bg;
+        border = colorMode === 'light' ? '#0f172a' : '#ffffff';
+        fontColor = colorMode === 'light' ? '#0f172a' : '#ffffff';
+        bw = 3.5;
+        shadowSize = 20;
+        shadowColor = colorMode === 'light' ? 'rgba(15,23,42,0.25)' : 'rgba(255,255,255,0.75)';
+      } else if (isAncestor) {
+        bg = colorMode === 'light' ? '#e0f2fe' : '#042232';
+        border = colorMode === 'light' ? '#0284c7' : '#38bdf8';
+        fontColor = colorMode === 'light' ? '#0369a1' : '#7dd3fc';
+        bw = 2.5;
+        shadowSize = 14;
+        shadowColor = colorMode === 'light' ? 'rgba(2,132,199,0.3)' : 'rgba(56,189,248,0.5)';
+      } else if (isDescendant) {
+        bg = colorMode === 'light' ? '#fef3c7' : '#331b04';
+        border = colorMode === 'light' ? '#d97706' : '#f59e0b';
+        fontColor = colorMode === 'light' ? '#b45309' : '#fbbf24';
+        bw = 2.5;
+        shadowSize = 14;
+        shadowColor = colorMode === 'light' ? 'rgba(217,119,6,0.3)' : 'rgba(245,158,11,0.5)';
+      }
+    } else {
+      if (est === 'aprobada') {
+        bg = themeConfig.graph.aprobada.bg;
+        border = themeConfig.graph.aprobada.border;
+        fontColor = themeConfig.graph.aprobada.font;
+        bw = 2.2;
+        shadowColor = themeConfig.graph.aprobada.shadow;
+        shadowSize = 10;
+      } else if (est === 'regular') {
+        bg = themeConfig.graph.regular.bg;
+        border = themeConfig.graph.regular.border;
+        fontColor = themeConfig.graph.regular.font;
+        bw = 2.2;
+        shadowColor = rendible ? themeConfig.graph.regular.shadow : (colorMode === 'light' ? 'rgba(217,119,6,0.15)' : 'rgba(245,158,11,0.25)');
+        shadowSize = rendible ? 14 : 8;
+      } else if (cursable) {
+        bg = themeConfig.graph.cursable.bg;
+        border = themeConfig.graph.cursable.border;
+        fontColor = themeConfig.graph.cursable.font;
+        bw = 2.2;
+        shadowColor = themeConfig.graph.cursable.shadow;
+        shadowSize = 14;
+      }
+    }
+
+    const sig = `${themeConfig.id}_${colorMode}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
+    return { bg, border, fontColor, bw, shadowColor, shadowSize, sig };
+  }, [estados, esMateriaCursable, esMateriaRendible, themeConfig, colorMode, dependenciesTree, focusedSubjectId]);
+
+  // Función pura para obtener configuración visual de una arista
+  const getEdgeVisualConfig = useCallback((fromId: number, toId: number, tipo: 'regular' | 'aprobada') => {
+    const estFrom = estados[fromId] || 'pendiente';
+    const hidden = edgeMode !== 'ambos' && tipo !== edgeMode;
+
+    let color = themeConfig.graph.edgeDefault || '#1e293b';
+    let width = tipo === 'aprobada' ? 2.2 : 1.4;
+
+    if (dependenciesTree) {
+      const fromInChain = fromId === focusedSubjectId || dependenciesTree.ancestors.has(fromId) || dependenciesTree.descendants.has(fromId);
+      const toInChain = toId === focusedSubjectId || dependenciesTree.ancestors.has(toId) || dependenciesTree.descendants.has(toId);
+
+      if (fromInChain && toInChain) {
+        color = colorMode === 'light' ? '#0284c7' : '#38bdf8';
+        width = 2.8;
+      } else {
+        color = themeConfig.graph.edgeMuted || 'rgba(15,23,42,0.06)';
+        width = 0.5;
+      }
+    } else if (!hidden) {
+      if (tipo === 'regular') {
+        if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
+        else if (estFrom === 'regular') color = themeConfig.graph.cursable.border;
+        else color = themeConfig.graph.edgeDefault;
+      } else {
+        if (estFrom === 'aprobada') color = themeConfig.graph.regular.border;
+        else color = themeConfig.graph.edgeDefault;
+      }
+    }
+
+    const finalColor = hidden && !dependenciesTree ? 'transparent' : color;
+    const sig = `${finalColor}_${width}`;
+    return { color: finalColor, width, sig };
+  }, [estados, edgeMode, dependenciesTree, focusedSubjectId, themeConfig, colorMode]);
+
+  // Inicializar vis-network una sola vez con los colores reales de entrada
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const initialNodes: VisNode[] = MATERIAS_GRAFO.map(m => ({
-      id: m.id,
-      label: m.nombre,
-      level: m.nivel,
-      shape: 'box',
-      borderRadius: 8,
-      margin: { top: 10, bottom: 10, left: 14, right: 14 },
-      color: { background: themeConfig.graph.pendiente.bg, border: themeConfig.graph.pendiente.border },
-      font: { color: themeConfig.graph.pendiente.font, size: 13, face: 'IBM Plex Mono' },
-      borderWidth: 1.5,
-      shadow: { enabled: true, color: colorMode === 'light' ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.5)', size: 8, x: 0, y: 3 }
-    }));
+    const initialNodes: VisNode[] = MATERIAS_GRAFO.map(m => {
+      const cfg = getNodeVisualConfig(m);
+      prevNodeSignaturesRef.current.set(m.id, cfg.sig);
+      return {
+        id: m.id,
+        label: m.nombre,
+        level: m.nivel,
+        shape: 'box',
+        borderRadius: 8,
+        margin: { top: 10, bottom: 10, left: 14, right: 14 },
+        color: { background: cfg.bg, border: cfg.border },
+        font: { color: cfg.fontColor, size: 13, face: 'IBM Plex Mono' },
+        borderWidth: cfg.bw,
+        shadow: { enabled: cfg.shadowSize > 0, color: cfg.shadowColor, size: cfg.shadowSize, x: 0, y: 3 }
+      };
+    });
 
     let edgeId = 1;
     const rawEdges: VisEdge[] = [];
     MATERIAS_GRAFO.forEach(m => {
       m.reqRegular.forEach(c => {
+        const id = edgeId++;
+        const cfg = getEdgeVisualConfig(c, m.id, 'regular');
+        prevEdgeSignaturesRef.current.set(id, cfg.sig);
         rawEdges.push({
-          id: edgeId++,
+          id,
           from: c,
           to: m.id,
           tipo: 'regular',
-          color: { color: themeConfig.graph.edgeDefault, opacity: 0.8 },
-          width: 1.4,
+          color: { color: cfg.color, opacity: 0.8 },
+          width: cfg.width,
           arrows: { to: { enabled: true, scaleFactor: 0.45, type: 'arrow' } },
           smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 }
         });
@@ -101,13 +263,16 @@ export const NetworkGraph: React.FC = () => {
 
       if (m.reqAprobada !== 'TODAS') {
         m.reqAprobada.forEach(c => {
+          const id = edgeId++;
+          const cfg = getEdgeVisualConfig(c, m.id, 'aprobada');
+          prevEdgeSignaturesRef.current.set(id, cfg.sig);
           rawEdges.push({
-            id: edgeId++,
+            id,
             from: c,
             to: m.id,
             tipo: 'aprobada',
-            color: { color: themeConfig.graph.edgeDefault, opacity: 0.8 },
-            width: 2.2,
+            color: { color: cfg.color, opacity: 0.8 },
+            width: cfg.width,
             arrows: { to: { enabled: true, scaleFactor: 0.5, type: 'arrow' } },
             smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 }
           });
@@ -175,60 +340,27 @@ export const NetworkGraph: React.FC = () => {
       }
     });
 
+    // Garantizar que vis-network redibuje después de que el layout esté listo
+    net.once('afterDrawing', () => {
+      net.redraw();
+    });
+
+    const initialRedrawTimer = setTimeout(() => {
+      net.redraw();
+    }, 80);
+
     const handleResize = () => {
       net.redraw();
     };
     window.addEventListener('resize', handleResize);
 
     return () => {
+      clearTimeout(initialRedrawTimer);
       window.removeEventListener('resize', handleResize);
       net.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Cálculo de dependencias (Camino Crítico: ancestros y descendientes)
-  const dependenciesTree = useMemo(() => {
-    if (!focusedSubjectId) return null;
-
-    const ancestors = new Set<number>();
-    const descendants = new Set<number>();
-
-    function findAncestors(currId: number) {
-      const m = MATERIAS_MAP[currId];
-      if (!m) return;
-      const reqs = [
-        ...m.reqRegular,
-        ...(Array.isArray(m.reqAprobada) ? m.reqAprobada : []),
-        ...(Array.isArray(m.reqRendirAprobada) ? m.reqRendirAprobada : [])
-      ];
-      reqs.forEach(r => {
-        if (!ancestors.has(r)) {
-          ancestors.add(r);
-          findAncestors(r);
-        }
-      });
-    }
-
-    function findDescendants(currId: number) {
-      MATERIAS_GRAFO.forEach(candidate => {
-        const depends =
-          candidate.reqRegular.includes(currId) ||
-          (Array.isArray(candidate.reqAprobada) && candidate.reqAprobada.includes(currId)) ||
-          (Array.isArray(candidate.reqRendirAprobada) && candidate.reqRendirAprobada.includes(currId));
-
-        if (depends && !descendants.has(candidate.id)) {
-          descendants.add(candidate.id);
-          findDescendants(candidate.id);
-        }
-      });
-    }
-
-    findAncestors(focusedSubjectId);
-    findDescendants(focusedSubjectId);
-
-    return { ancestors, descendants };
-  }, [focusedSubjectId]);
 
   // Actualizar nodos y aristas cuando cambian los estados, temas, filtros o camino crítico
   useEffect(() => {
@@ -238,87 +370,16 @@ export const NetworkGraph: React.FC = () => {
     const nextNodeSignatures = new Map<number, string>();
 
     MATERIAS_GRAFO.forEach(m => {
-      const est = estados[m.id] || 'pendiente';
-      const cursable = esMateriaCursable(m);
-      const rendible = esMateriaRendible(m);
+      const cfg = getNodeVisualConfig(m);
+      nextNodeSignatures.set(m.id, cfg.sig);
 
-      let bg = themeConfig.graph.pendiente.bg;
-      let border = themeConfig.graph.pendiente.border;
-      let fontColor = themeConfig.graph.pendiente.font;
-      let bw = 1.5;
-      let shadowColor = colorMode === 'light' ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.5)';
-      let shadowSize = 8;
-
-      if (dependenciesTree) {
-        const isSelf = m.id === focusedSubjectId;
-        const isAncestor = dependenciesTree.ancestors.has(m.id);
-        const isDescendant = dependenciesTree.descendants.has(m.id);
-        const inChain = isSelf || isAncestor || isDescendant;
-
-        if (!inChain) {
-          bg = colorMode === 'light' ? '#f8fafc' : '#080c16';
-          border = colorMode === 'light' ? '#cbd5e1' : '#141d2f';
-          fontColor = colorMode === 'light' ? '#94a3b8' : '#334155';
-          bw = 1;
-          shadowSize = 0;
-          shadowColor = 'transparent';
-        } else if (isSelf) {
-          bg = themeConfig.graph.cursable.bg;
-          border = colorMode === 'light' ? '#0f172a' : '#ffffff';
-          fontColor = colorMode === 'light' ? '#0f172a' : '#ffffff';
-          bw = 3.5;
-          shadowSize = 20;
-          shadowColor = colorMode === 'light' ? 'rgba(15,23,42,0.25)' : 'rgba(255,255,255,0.75)';
-        } else if (isAncestor) {
-          bg = colorMode === 'light' ? '#e0f2fe' : '#042232';
-          border = colorMode === 'light' ? '#0284c7' : '#38bdf8';
-          fontColor = colorMode === 'light' ? '#0369a1' : '#7dd3fc';
-          bw = 2.5;
-          shadowSize = 14;
-          shadowColor = colorMode === 'light' ? 'rgba(2,132,199,0.3)' : 'rgba(56,189,248,0.5)';
-        } else if (isDescendant) {
-          bg = colorMode === 'light' ? '#fef3c7' : '#331b04';
-          border = colorMode === 'light' ? '#d97706' : '#f59e0b';
-          fontColor = colorMode === 'light' ? '#b45309' : '#fbbf24';
-          bw = 2.5;
-          shadowSize = 14;
-          shadowColor = colorMode === 'light' ? 'rgba(217,119,6,0.3)' : 'rgba(245,158,11,0.5)';
-        }
-      } else {
-        if (est === 'aprobada') {
-          bg = themeConfig.graph.aprobada.bg;
-          border = themeConfig.graph.aprobada.border;
-          fontColor = themeConfig.graph.aprobada.font;
-          bw = 2.2;
-          shadowColor = themeConfig.graph.aprobada.shadow;
-          shadowSize = 10;
-        } else if (est === 'regular') {
-          bg = themeConfig.graph.regular.bg;
-          border = themeConfig.graph.regular.border;
-          fontColor = themeConfig.graph.regular.font;
-          bw = 2.2;
-          shadowColor = rendible ? themeConfig.graph.regular.shadow : (colorMode === 'light' ? 'rgba(217,119,6,0.15)' : 'rgba(245,158,11,0.25)');
-          shadowSize = rendible ? 14 : 8;
-        } else if (cursable) {
-          bg = themeConfig.graph.cursable.bg;
-          border = themeConfig.graph.cursable.border;
-          fontColor = themeConfig.graph.cursable.font;
-          bw = 2.2;
-          shadowColor = themeConfig.graph.cursable.shadow;
-          shadowSize = 14;
-        }
-      }
-
-      const sig = `${themeConfig.id}_${colorMode}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
-      nextNodeSignatures.set(m.id, sig);
-
-      if (prevNodeSignaturesRef.current.get(m.id) !== sig) {
+      if (prevNodeSignaturesRef.current.get(m.id) !== cfg.sig) {
         nodeUpdates.push({
           id: m.id,
-          color: { background: bg, border },
-          font: { color: fontColor, size: 13, face: 'IBM Plex Mono' },
-          borderWidth: bw,
-          shadow: { enabled: shadowSize > 0, color: shadowColor, size: shadowSize, x: 0, y: 3 }
+          color: { background: cfg.bg, border: cfg.border },
+          font: { color: cfg.fontColor, size: 13, face: 'IBM Plex Mono' },
+          borderWidth: cfg.bw,
+          shadow: { enabled: cfg.shadowSize > 0, color: cfg.shadowColor, size: cfg.shadowSize, x: 0, y: 3 }
         });
       }
     });
@@ -335,43 +396,14 @@ export const NetworkGraph: React.FC = () => {
     edgesDatasetRef.current.forEach(edge => {
       const fromId = Number(edge.from);
       const toId = Number(edge.to);
-      const estFrom = estados[fromId] || 'pendiente';
-      const hidden = edgeMode !== 'ambos' && edge.tipo !== edgeMode;
+      const cfg = getEdgeVisualConfig(fromId, toId, edge.tipo);
+      nextEdgeSignatures.set(edge.id, cfg.sig);
 
-      let color = themeConfig.graph.edgeDefault || '#1e293b';
-      let width = edge.tipo === 'aprobada' ? 2.2 : 1.4;
-
-      if (dependenciesTree) {
-        const fromInChain = fromId === focusedSubjectId || dependenciesTree.ancestors.has(fromId) || dependenciesTree.descendants.has(fromId);
-        const toInChain = toId === focusedSubjectId || dependenciesTree.ancestors.has(toId) || dependenciesTree.descendants.has(toId);
-
-        if (fromInChain && toInChain) {
-          color = colorMode === 'light' ? '#0284c7' : '#38bdf8';
-          width = 2.8;
-        } else {
-          color = themeConfig.graph.edgeMuted || 'rgba(15,23,42,0.06)';
-          width = 0.5;
-        }
-      } else if (!hidden) {
-        if (edge.tipo === 'regular') {
-          if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
-          else if (estFrom === 'regular') color = themeConfig.graph.cursable.border;
-          else color = themeConfig.graph.edgeDefault;
-        } else {
-          if (estFrom === 'aprobada') color = themeConfig.graph.regular.border;
-          else color = themeConfig.graph.edgeDefault;
-        }
-      }
-
-      const finalColor = hidden && !dependenciesTree ? 'transparent' : color;
-      const sig = `${finalColor}_${width}`;
-      nextEdgeSignatures.set(edge.id, sig);
-
-      if (prevEdgeSignaturesRef.current.get(edge.id) !== sig) {
+      if (prevEdgeSignaturesRef.current.get(edge.id) !== cfg.sig) {
         edgeUpdates.push({
           id: edge.id,
-          color: { color: finalColor },
-          width
+          color: { color: cfg.color },
+          width: cfg.width
         });
       }
     });
@@ -380,7 +412,10 @@ export const NetworkGraph: React.FC = () => {
       edgesDatasetRef.current.update(edgeUpdates as VisEdge[]);
     }
     prevEdgeSignaturesRef.current = nextEdgeSignatures;
-  }, [estados, edgeMode, esMateriaCursable, esMateriaRendible, themeConfig, colorMode, dependenciesTree, focusedSubjectId]);
+
+    // Redibujar explícitamente el canvas de vis-network cuando hay cambios
+    networkRef.current?.redraw();
+  }, [getNodeVisualConfig, getEdgeVisualConfig]);
 
   const handleZoomIn = () => {
     if (!networkRef.current) return;

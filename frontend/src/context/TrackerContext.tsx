@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen } from '../types/plan';
 import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
 import { TURNOS_EXAMEN_2026, getFechaExactaMesa } from '../data/calendario2026';
-import { fetchProgress, persistProgress, clearProgress } from '../services/api';
+import { fetchProgress, getLocalProgress, persistProgress, clearProgress } from '../services/api';
 import { decodeProgress } from '../utils/share';
 import { subscribeToUserProgress, onFirebaseAuthStateChanged, isFirebaseConfigured } from '../services/firebase';
 
@@ -103,12 +103,42 @@ interface TrackerContextType {
 const TrackerContext = createContext<TrackerContextType | undefined>(undefined);
 
 export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [estados, setEstados] = useState<Record<number, EstadoMateria>>({});
-  const [estadosElectivas, setEstadosElectivas] = useState<Record<number, EstadoMateria>>({});
-  const [notas, setNotas] = useState<Record<number, NotaMateria>>({});
-  const [ppsHoras, setPpsHorasState] = useState<number>(0);
-  const [perfil, setPerfilState] = useState<PerfilAlumno>({ nombre: '', legajo: '' });
-  const [metasExamen, setMetasExamenState] = useState<Record<number, MetaExamen>>({});
+  const [estados, setEstados] = useState<Record<number, EstadoMateria>>(() => {
+    if (typeof window !== 'undefined') {
+      return getLocalProgress().estados || {};
+    }
+    return {};
+  });
+  const [estadosElectivas, setEstadosElectivas] = useState<Record<number, EstadoMateria>>(() => {
+    if (typeof window !== 'undefined') {
+      return getLocalProgress().estadosElectivas || {};
+    }
+    return {};
+  });
+  const [notas, setNotas] = useState<Record<number, NotaMateria>>(() => {
+    if (typeof window !== 'undefined') {
+      return getLocalProgress().notas || {};
+    }
+    return {};
+  });
+  const [ppsHoras, setPpsHorasState] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      return getLocalProgress().ppsHoras || 0;
+    }
+    return 0;
+  });
+  const [perfil, setPerfilState] = useState<PerfilAlumno>(() => {
+    if (typeof window !== 'undefined') {
+      return getLocalProgress().perfil || { nombre: '', legajo: '' };
+    }
+    return { nombre: '', legajo: '' };
+  });
+  const [metasExamen, setMetasExamenState] = useState<Record<number, MetaExamen>>(() => {
+    if (typeof window !== 'undefined') {
+      return getLocalProgress().metasExamen || {};
+    }
+    return {};
+  });
   const [gridFilter, setGridFilter] = useState<GridFilterOption>('todas');
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
