@@ -34,7 +34,7 @@ export const ElectivasDrawer: React.FC = () => {
   );
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="hidden md:block fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"

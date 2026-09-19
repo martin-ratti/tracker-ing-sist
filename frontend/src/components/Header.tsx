@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTracker } from '../context/TrackerContext';
 import { useAuth } from '../context/AuthContext';
 import { ThemeSelector } from './ThemeSelector';
+import { MobileElectivasView } from './MobileElectivasView';
 import { 
   Network, 
   LayoutGrid, 
@@ -57,13 +58,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
 
   const [drawerMounted, setDrawerMounted] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [drawerView, setDrawerView] = useState<'menu' | 'electivas'>('menu');
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const openDrawer = () => {
+  const openDrawer = (view: 'menu' | 'electivas' = 'menu') => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
     }
+    setDrawerView(view);
     setDrawerMounted(true);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -77,10 +80,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     closeTimeoutRef.current = setTimeout(() => {
       setDrawerMounted(false);
+      setDrawerView('menu');
       closeTimeoutRef.current = null;
       if (callback) callback();
     }, 280);
   };
+
+  // En móvil, si se intenta abrir electivas desde otro lugar, abrir directamente en el drawer
+  useEffect(() => {
+    if (electivasOpen && typeof window !== 'undefined' && window.innerWidth < 768) {
+      const timer = setTimeout(() => {
+        openDrawer('electivas');
+        setElectivasOpen(false);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [electivasOpen, setElectivasOpen]);
 
   const [confirmReset, setConfirmReset] = useState(false);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -180,7 +195,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {user ? (
               <button
                 type="button"
-                onClick={openDrawer}
+                onClick={() => openDrawer()}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-xs font-mono min-h-[38px]"
                 title={`Sesión iniciada como ${user.email}`}
               >
@@ -867,8 +882,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               }`}
               onClick={e => e.stopPropagation()}
             >
-              {/* Header del Panel (Fijo) */}
-              <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] shrink-0">
+              {drawerView === 'electivas' ? (
+                <MobileElectivasView
+                  onBack={() => setDrawerView('menu')}
+                  onClose={() => closeDrawer()}
+                />
+              ) : (
+                <>
+                  {/* Header del Panel (Fijo) */}
+                  <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] bg-[var(--bg-elevated)] shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div 
                     className="w-8 h-8 rounded-xl flex items-center justify-center text-black font-extrabold font-syne text-sm shadow-md"
@@ -1084,7 +1106,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   {/* Electivas */}
                   <button
                     type="button"
-                    onClick={() => closeDrawer(() => setElectivasOpen(true))}
+                    onClick={() => setDrawerView('electivas')}
                     className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-slate-800 dark:text-slate-200 hover:border-[var(--color-primary-border)] hover:bg-[var(--bg-base)] transition-all min-h-[50px] shadow-xs group"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 text-left">
@@ -1233,7 +1255,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   </p>
                 </div>
               </div>
-            </div>
+            </>
+          )}
+        </div>
           </div>
         </div>,
         document.body
