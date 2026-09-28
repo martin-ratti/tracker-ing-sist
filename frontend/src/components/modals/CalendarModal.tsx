@@ -488,12 +488,12 @@ export const CalendarModal: React.FC = () => {
                   <span>Meta Agendada</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-rose-500/80 bg-rose-950/60 text-rose-300 shrink-0" />
+                  <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-rose-500/80 bg-rose-950/60 text-rose-300 shadow-[0_0_6px_rgba(244,63,94,0.4)] shrink-0" />
                   <span>Feriado</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-purple-500/60 bg-purple-950/40 text-purple-300 shrink-0" />
-                  <span>Hito / Receso</span>
+                  <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-amber-400/80 bg-amber-950/60 text-amber-300 shadow-[0_0_6px_rgba(245,158,11,0.4)] shrink-0" />
+                  <span>Hito Académico</span>
                 </div>
                 <div className="flex items-center gap-1 hidden sm:flex">
                   <span className="w-2.5 h-2.5 rounded border border-slate-800 bg-slate-950/80 opacity-50 shrink-0" />
@@ -576,13 +576,21 @@ export const CalendarModal: React.FC = () => {
                                 ? turno.esEspecial
                                   ? 'bg-gradient-to-b from-purple-950/40 via-purple-900/20 to-transparent border-purple-400/80 text-purple-100 cursor-pointer sm:cursor-default'
                                   : 'bg-gradient-to-b from-cyan-950/40 via-cyan-900/20 to-transparent border-cyan-400/80 text-cyan-100 cursor-pointer sm:cursor-default'
-                                : 'bg-[#070b14] border border-slate-800/80 text-slate-300 hover:border-slate-700'
+                                : hito?.tipo === 'feriado'
+                                  ? 'bg-gradient-to-b from-rose-950/30 via-rose-950/10 to-[#070b14] border-rose-500/40 text-rose-100 hover:border-rose-400/70 cursor-pointer'
+                                  : hito
+                                    ? 'bg-gradient-to-b from-amber-950/30 via-amber-950/10 to-[#070b14] border-amber-500/40 text-amber-100 hover:border-amber-400/70 cursor-pointer'
+                                    : 'bg-[#070b14] border border-slate-800/80 text-slate-300 hover:border-slate-700'
                         }`}
                         style={esDiaMesaActiva ? {
                           boxShadow: turno.esEspecial
                             ? '0 0 16px rgba(168, 85, 247, 0.35), inset 0 0 12px rgba(168, 85, 247, 0.12)'
                             : '0 0 16px rgba(6, 182, 212, 0.35), inset 0 0 12px rgba(6, 182, 212, 0.12)',
                           borderColor: turno.esEspecial ? 'rgba(168, 85, 247, 0.75)' : 'rgba(6, 182, 212, 0.75)'
+                        } : hito?.tipo === 'feriado' ? {
+                          boxShadow: 'inset 0 0 12px rgba(244, 63, 94, 0.10)'
+                        } : hito ? {
+                          boxShadow: 'inset 0 0 12px rgba(245, 158, 11, 0.10)'
                         } : {}}
                       >
                         {/* Fila superior de la celda: Número de día y badges */}
@@ -596,7 +604,11 @@ export const CalendarModal: React.FC = () => {
                                   ? turno.esEspecial
                                     ? 'text-purple-300 font-extrabold drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]'
                                     : 'text-cyan-300 font-extrabold drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]' 
-                                  : 'text-slate-300'
+                                  : hito?.tipo === 'feriado'
+                                    ? 'text-rose-300 font-extrabold'
+                                    : hito
+                                      ? 'text-amber-300 font-extrabold'
+                                      : 'text-slate-300'
                           }`}>
                             {diaNum}
                           </span>
@@ -643,15 +655,15 @@ export const CalendarModal: React.FC = () => {
                                 e.stopPropagation();
                                 setSelectedHito(hito);
                               }}
-                              aria-label={`Ver hito: ${hito.titulo}`}
+                              aria-label={`Ver: ${hito.titulo}`}
                               className={`w-2.5 h-2.5 rounded-full transition-all flex items-center justify-center p-0 ${
                                 selectedHito?.id === hito.id
                                   ? hito.tipo === 'feriado'
-                                    ? 'bg-rose-300 ring-2 ring-rose-400 scale-125'
-                                    : 'bg-purple-300 ring-2 ring-purple-400 scale-125'
+                                    ? 'bg-rose-300 ring-2 ring-rose-400 scale-125 shadow-[0_0_8px_rgba(244,63,94,0.9)]'
+                                    : 'bg-amber-300 ring-2 ring-amber-400 scale-125 shadow-[0_0_8px_rgba(245,158,11,0.9)]'
                                   : hito.tipo === 'feriado'
-                                    ? 'bg-rose-400 hover:scale-110'
-                                    : 'bg-purple-400 hover:scale-110'
+                                    ? 'bg-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.8)] hover:scale-110'
+                                    : 'bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.8)] hover:scale-110'
                               }`}
                             />
                           )}
@@ -666,14 +678,15 @@ export const CalendarModal: React.FC = () => {
                                 e.stopPropagation();
                                 setSelectedHito(hito);
                               }}
-                              className={`text-[9px] px-1 py-0.5 rounded truncate cursor-pointer transition-colors ${
+                              className={`text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors font-medium flex items-center gap-1 ${
                                 hito.tipo === 'feriado'
-                                  ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/30'
-                                  : 'bg-purple-500/15 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
+                                  ? 'bg-rose-500/20 border border-rose-500/40 text-rose-300 hover:bg-rose-500/35'
+                                  : 'bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/35'
                               }`}
                               title={`Clic para ver detalle: ${hito.titulo}`}
                             >
-                              {cell.dateStr === hito.fechaFin && hito.tipo === 'inscripcion' ? `Cierre: ${hito.titulo}` : hito.titulo}
+                              <span className="shrink-0 text-[8px]">{hito.tipo === 'feriado' ? '🚫' : '📌'}</span>
+                              <span className="truncate">{cell.dateStr === hito.fechaFin && hito.tipo === 'inscripcion' ? `Cierre: ${hito.titulo}` : hito.titulo}</span>
                             </div>
                           )}
 
@@ -750,7 +763,11 @@ export const CalendarModal: React.FC = () => {
                   onClick={() => setSelectedHito(null)}
                 >
                   <div 
-                    className="bg-[#0c1324] border border-purple-500/40 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl font-mono text-left animate-in slide-in-from-bottom-4 duration-200"
+                    className={`bg-[#0c1324] border rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl font-mono text-left animate-in slide-in-from-bottom-4 duration-200 ${
+                      selectedHito.tipo === 'feriado'
+                        ? 'border-rose-500/50 shadow-[0_0_24px_rgba(244,63,94,0.2)]'
+                        : 'border-amber-500/50 shadow-[0_0_24px_rgba(245,158,11,0.2)]'
+                    }`}
                     onClick={e => e.stopPropagation()}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -762,9 +779,9 @@ export const CalendarModal: React.FC = () => {
                               ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                               : selectedHito.tipo === 'receso'
                                 ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                                : 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                                : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                         }`}>
-                          {selectedHito.tipo === 'feriado' ? '🚫 Feriado' : selectedHito.tipo === 'inscripcion' ? '📝 Inscripción Sysacad' : selectedHito.tipo === 'receso' ? '🏖️ Receso Invernal' : '🎓 Ciclo Lectivo'}
+                          {selectedHito.tipo === 'feriado' ? '🚫 Feriado / Asueto' : selectedHito.tipo === 'inscripcion' ? '📝 Inscripción Sysacad' : selectedHito.tipo === 'receso' ? '🏖️ Receso Invernal' : '🎓 Ciclo Lectivo'}
                         </span>
                       </div>
                       <button
@@ -786,9 +803,9 @@ export const CalendarModal: React.FC = () => {
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-purple-300/80">
-                      <div className="flex items-center gap-1.5">
-                        <CalendarIcon className="w-3.5 h-3.5 text-purple-400" />
+                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
+                      <div className={`flex items-center gap-1.5 ${selectedHito.tipo === 'feriado' ? 'text-rose-300/90' : 'text-amber-300/90'}`}>
+                        <CalendarIcon className={`w-3.5 h-3.5 ${selectedHito.tipo === 'feriado' ? 'text-rose-400' : 'text-amber-400'}`} />
                         <span>
                           {selectedHito.fechaInicio}{selectedHito.fechaFin ? ` al ${selectedHito.fechaFin}` : ''}
                         </span>
@@ -796,7 +813,11 @@ export const CalendarModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setSelectedHito(null)}
-                        className="px-3 py-1 rounded-lg text-xs bg-purple-500/20 border border-purple-500/40 text-purple-200 hover:bg-purple-500/30 transition-colors"
+                        className={`px-3 py-1 rounded-lg text-xs border transition-colors ${
+                          selectedHito.tipo === 'feriado'
+                            ? 'bg-rose-500/20 border-rose-500/40 text-rose-200 hover:bg-rose-500/30'
+                            : 'bg-amber-500/20 border-amber-500/40 text-amber-200 hover:bg-amber-500/30'
+                        }`}
                       >
                         Entendido
                       </button>
