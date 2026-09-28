@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { 
-  TURNOS_EXAMEN_2026, 
-  HITOS_ACADEMICOS_2026, 
+  TURNOS_EXAMEN, 
+  HITOS_ACADEMICOS, 
   REGLA_SYSACAD_EXAMEN,
   isPastDate,
   isFechaEnTurno,
@@ -11,7 +11,7 @@ import {
   DIAS_MESA_POR_MATERIA,
   type TurnoExamenOficial,
   type HitoAcademico
-} from '../../data/calendario2026';
+} from '../../data/calendario';
 import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { 
   X, 
@@ -124,6 +124,32 @@ export const CalendarModal: React.FC = () => {
   const materiasRegularesSinMeta = useMemo(() => {
     return MATERIAS_TRONCALES.filter(m => estados[m.id] === 'regular' && !metasExamen[m.id]);
   }, [estados, metasExamen]);
+
+  // Lista dinámica de accesos rápidos calculada a partir de los turnos oficiales registrados
+  const mesesConTurnos = useMemo(() => {
+    const list: Array<{ label: string; y: number; m: number }> = [];
+    const vistos = new Set<string>();
+
+    for (const t of TURNOS_EXAMEN) {
+      const d = new Date(t.fechaInicio + 'T00:00:00');
+      const mesNum = d.getMonth();
+      const sufijo = t.esEspecial ? ' (Esp)' : '';
+      const mesCorto = t.mes.slice(0, 3);
+      const anioCorto = String(t.anio).slice(-2);
+      const label = `${mesCorto} '${anioCorto}${sufijo}`;
+      const key = `${t.anio}-${mesNum}-${t.esEspecial ? 'esp' : 'comun'}`;
+
+      if (!vistos.has(key)) {
+        vistos.add(key);
+        list.push({
+          label,
+          y: t.anio,
+          m: mesNum
+        });
+      }
+    }
+    return list;
+  }, []);
 
   // Funciones de navegación de meses
   const handlePrevMonth = () => {
@@ -425,23 +451,10 @@ export const CalendarModal: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Accesos directos a meses con mesas de examen */}
+                {/* Accesos directos a meses con mesas de examen (generado dinámicamente) */}
                 <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center text-[11px]">
                   <span className="text-slate-400 text-[10px] hidden md:inline">Ir a Turno:</span>
-                  {[
-                    { label: "Feb '26", y: 2026, m: 1 },
-                    { label: "Mar '26", y: 2026, m: 2 },
-                    { label: "Abr '26", y: 2026, m: 3 },
-                    { label: "May '26", y: 2026, m: 4 },
-                    { label: "Jun '26 (Esp)", y: 2026, m: 5 },
-                    { label: "Ago '26", y: 2026, m: 7 },
-                    { label: "Sep '26", y: 2026, m: 8 },
-                    { label: "Oct '26 (Esp)", y: 2026, m: 9 },
-                    { label: "Nov '26", y: 2026, m: 10 },
-                    { label: "Dic '26", y: 2026, m: 11 },
-                    { label: "Feb '27", y: 2027, m: 1 },
-                    { label: "Mar '27", y: 2027, m: 2 }
-                  ].map(btn => (
+                  {mesesConTurnos.map(btn => (
                     <button
                       key={btn.label}
                       type="button"
@@ -506,10 +519,10 @@ export const CalendarModal: React.FC = () => {
                     const isToday = cell.dateStr === todayStr;
 
                     // Buscar si hay turno de examen oficial en esta fecha
-                    const turno = TURNOS_EXAMEN_2026.find(t => isFechaEnTurno(cell.dateStr, t));
+                    const turno = TURNOS_EXAMEN.find(t => isFechaEnTurno(cell.dateStr, t));
                     
                     // Buscar si hay hitos de calendario que apliquen a esta fecha
-                    const hito = HITOS_ACADEMICOS_2026.find(h => {
+                    const hito = HITOS_ACADEMICOS.find(h => {
                       // Los recesos y feriados abarcan todo su periodo
                       if (h.tipo === 'receso' || h.tipo === 'feriado') {
                         if (h.fechaFin) return cell.dateStr >= h.fechaInicio && cell.dateStr <= h.fechaFin;
@@ -831,7 +844,7 @@ export const CalendarModal: React.FC = () => {
                     {metasArray.map(meta => {
                       const materia = MATERIAS_MAP[meta.materiaId];
                       const countdown = meta.fechaEstimada ? getDaysRemaining(meta.fechaEstimada) : null;
-                      const turno = TURNOS_EXAMEN_2026.find(t => t.id === meta.turnoId);
+                      const turno = TURNOS_EXAMEN.find(t => t.id === meta.turnoId);
                       const fechaExacta = turno ? getFechaExactaMesa(meta.materiaId, turno) : null;
 
                       return (
@@ -932,10 +945,10 @@ export const CalendarModal: React.FC = () => {
               {/* Lista de Turnos */}
               <div className="space-y-2">
                 <h4 className="font-syne font-bold text-xs text-white uppercase tracking-wider text-slate-400">
-                  Turnos Oficiales de Examen (Ciclo 2026 - 2027)
+                  Turnos Oficiales de Examen
                 </h4>
 
-                {TURNOS_EXAMEN_2026.map(turno => {
+                {TURNOS_EXAMEN.map(turno => {
                   const materiasEnEsteTurno = metasArray.filter(m => m.turnoId === turno.id);
                   const countdown = getDaysRemaining(turno.fechaInicio);
                   const yaPaso = isPastDate(turno.fechaFin);

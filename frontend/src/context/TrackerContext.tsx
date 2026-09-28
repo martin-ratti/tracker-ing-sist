@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen } from '../types/plan';
 import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
-import { TURNOS_EXAMEN_2026, getFechaExactaMesa } from '../data/calendario2026';
+import { TURNOS_EXAMEN, getFechaExactaMesa } from '../data/calendario';
 import { fetchProgress, getLocalProgress, persistProgress, clearProgress } from '../services/api';
 import { decodeProgress } from '../utils/share';
 import { subscribeToUserProgress, onFirebaseAuthStateChanged, isFirebaseConfigured } from '../services/firebase';
@@ -727,7 +727,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         let fechaStr = meta.fechaEstimada;
 
         if (!fechaStr) {
-          const turno = TURNOS_EXAMEN_2026.find(t => t.id === meta.turnoId);
+          const turno = TURNOS_EXAMEN.find(t => t.id === meta.turnoId);
           if (turno) {
             const fechaExacta = getFechaExactaMesa(meta.materiaId, turno);
             fechaStr = fechaExacta ? fechaExacta.fechaExactaStr : turno.fechaInicio;

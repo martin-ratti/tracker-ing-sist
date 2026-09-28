@@ -13,11 +13,11 @@ import {
   Trash2
 } from 'lucide-react';
 import { 
-  TURNOS_EXAMEN_2026, 
+  TURNOS_EXAMEN, 
   isPastDate, 
   getFechaExactaMesa,
   DIAS_MESA_POR_MATERIA
-} from '../../data/calendario2026';
+} from '../../data/calendario';
 
 
 
@@ -43,7 +43,7 @@ export const SubjectModal: React.FC = () => {
   const [comentarioVal, setComentarioVal] = useState<string>('');
 
   // Estados para Meta de Examen
-  const [selectedTurnoId, setSelectedTurnoId] = useState<string>(TURNOS_EXAMEN_2026[0]?.id || 'feb-2026-l1');
+  const [selectedTurnoId, setSelectedTurnoId] = useState<string>(TURNOS_EXAMEN[0]?.id || 'feb-2026-l1');
   const [metaComentario, setMetaComentario] = useState<string>('');
   const [showMetaForm, setShowMetaForm] = useState<boolean>(false);
 
@@ -88,8 +88,8 @@ export const SubjectModal: React.FC = () => {
       setMetaComentario(m.comentario || '');
       setShowMetaForm(false);
     } else {
-      const turnosFuturos = TURNOS_EXAMEN_2026.filter(t => !isPastDate(t.fechaFin));
-      setSelectedTurnoId(turnosFuturos[0]?.id || TURNOS_EXAMEN_2026[0]?.id || 'nov-2026-l1');
+      const turnosFuturos = TURNOS_EXAMEN.filter(t => !isPastDate(t.fechaFin));
+      setSelectedTurnoId(turnosFuturos[0]?.id || TURNOS_EXAMEN[0]?.id || 'nov-2026-l1');
       setMetaComentario('');
       setShowMetaForm(false);
     }
@@ -123,7 +123,7 @@ export const SubjectModal: React.FC = () => {
   const handleSaveMeta = (e: React.FormEvent) => {
     e.preventDefault();
     if (!materia) return;
-    const turno = TURNOS_EXAMEN_2026.find(t => t.id === selectedTurnoId);
+    const turno = TURNOS_EXAMEN.find(t => t.id === selectedTurnoId);
     if (!turno) return;
 
     const fechaExacta = getFechaExactaMesa(materia.id, turno);
@@ -475,7 +475,7 @@ export const SubjectModal: React.FC = () => {
                   </div>
 
                   {(() => {
-                    const turno = TURNOS_EXAMEN_2026.find(t => t.id === currentMeta.turnoId);
+                    const turno = TURNOS_EXAMEN.find(t => t.id === currentMeta.turnoId);
                     const exacta = turno ? getFechaExactaMesa(materia.id, turno) : null;
                     if (!exacta) return null;
                     return (
@@ -512,8 +512,8 @@ export const SubjectModal: React.FC = () => {
                       className="w-full bg-(--bg-surface) border border-(--border-color) rounded-lg px-3 py-2 text-xs font-mono text-(--text-body) focus:outline-none focus:border-cyan-500"
                     >
                       {(() => {
-                        const turnosFuturos = TURNOS_EXAMEN_2026.filter(t => !isPastDate(t.fechaFin));
-                        const opciones = turnosFuturos.length > 0 ? turnosFuturos : TURNOS_EXAMEN_2026;
+                        const turnosFuturos = TURNOS_EXAMEN.filter(t => !isPastDate(t.fechaFin));
+                        const opciones = turnosFuturos.length > 0 ? turnosFuturos : TURNOS_EXAMEN;
                         return opciones.map(t => {
                           const exacta = getFechaExactaMesa(materia.id, t);
                           return (

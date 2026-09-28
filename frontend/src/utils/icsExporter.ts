@@ -1,5 +1,5 @@
 import { MATERIAS_MAP } from '../data/plan2023';
-import { TURNOS_EXAMEN_2026, getFechaExactaMesa } from '../data/calendario2026';
+import { TURNOS_EXAMEN, getFechaExactaMesa } from '../data/calendario';
 import type { MetaExamen } from '../types/plan';
 
 /**
@@ -58,7 +58,7 @@ export function generateICSContent(metas: MetaExamen[]): string {
     let fechaStr = meta.fechaEstimada;
     let diaNombre = '';
 
-    const turno = TURNOS_EXAMEN_2026.find(t => t.id === meta.turnoId);
+    const turno = TURNOS_EXAMEN.find(t => t.id === meta.turnoId);
     if (turno) {
       const fechaExacta = getFechaExactaMesa(meta.materiaId, turno);
       if (fechaExacta) {
