@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { StatusBadge } from '../components/ui/StatusBadge';
-import { Modal } from '../components/ui/Modal';
+import { StatusBadge } from '../../../components/ui/StatusBadge';
+import { Modal } from '../../../components/ui/Modal';
 
 describe('UI Primitives (StatusBadge y Modal)', () => {
   describe('StatusBadge', () => {

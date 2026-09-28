@@ -2,8 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 const FocusTrapComponent: React.FC<{ isActive: boolean }> = ({ isActive }) => {
   const ref = useFocusTrap(isActive);

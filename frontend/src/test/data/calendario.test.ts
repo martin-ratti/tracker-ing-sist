@@ -8,7 +8,7 @@ import {
   isFechaEnTurno,
   isPastDate,
   generarFeriadosFijos,
-} from '../data/calendario';
+} from '../../data/calendario';
 
 describe('Calendario Académico y Mesas de Examen', () => {
   describe('Turnos de Examen', () => {

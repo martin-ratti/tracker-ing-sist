@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { generateICSContent, exportMetasToICS } from '../utils/icsExporter';
-import { encodeProgress, decodeProgress, type SharedData } from '../utils/share';
-import type { MetaExamen } from '../types/plan';
+import { generateICSContent, exportMetasToICS } from '../../utils/icsExporter';
+import { encodeProgress, decodeProgress, type SharedData } from '../../utils/share';
+import type { MetaExamen } from '../../types/plan';
 
 describe('Utilidades del Sistema', () => {
   describe('Exportador de Calendario .ics (RFC 5545)', () => {

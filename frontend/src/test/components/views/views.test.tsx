@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { TrackerProvider, useTracker } from '../context/TrackerContext';
-import { GridView } from '../components/views/GridView';
-import { ElectivasDrawer } from '../components/views/ElectivasDrawer';
-import { MobileElectivasView } from '../components/views/MobileElectivasView';
-import { GraphSkeleton } from '../components/views/GraphSkeleton';
+import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
+import { GridView } from '../../../components/views/GridView';
+import { ElectivasDrawer } from '../../../components/views/ElectivasDrawer';
+import { MobileElectivasView } from '../../../components/views/MobileElectivasView';
+import { GraphSkeleton } from '../../../components/views/GraphSkeleton';
 
 const ElectivasWrapper: React.FC = () => {
   const { setElectivasOpen } = useTracker();

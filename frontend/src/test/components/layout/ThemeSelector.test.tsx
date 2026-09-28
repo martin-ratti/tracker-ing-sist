@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider } from '../context/ThemeContext';
-import { ThemeSelector } from '../components/layout/ThemeSelector';
+import { ThemeProvider } from '../../../context/ThemeContext';
+import { ThemeSelector } from '../../../components/layout/ThemeSelector';
 
 describe('ThemeSelector - Selector de Temas y Modo Claro/Oscuro', () => {
   it('debe renderizar el botón selector de tema cerrado por defecto', () => {

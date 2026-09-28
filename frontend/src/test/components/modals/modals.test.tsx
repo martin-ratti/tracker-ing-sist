@@ -2,15 +2,15 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { TrackerProvider, useTracker } from '../context/TrackerContext';
-import { AuthProvider, useAuth } from '../context/AuthContext';
-import { HelpModal } from '../components/modals/HelpModal';
-import { TitlesModal } from '../components/modals/TitlesModal';
-import { ProfileModal } from '../components/modals/ProfileModal';
-import { ShareModal } from '../components/modals/ShareModal';
-import { StatsModal } from '../components/modals/StatsModal';
-import { PrintableReportModal } from '../components/modals/PrintableReportModal';
-import { AuthModal } from '../components/modals/AuthModal';
+import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
+import { AuthProvider, useAuth } from '../../../context/AuthContext';
+import { HelpModal } from '../../../components/modals/HelpModal';
+import { TitlesModal } from '../../../components/modals/TitlesModal';
+import { ProfileModal } from '../../../components/modals/ProfileModal';
+import { ShareModal } from '../../../components/modals/ShareModal';
+import { StatsModal } from '../../../components/modals/StatsModal';
+import { PrintableReportModal } from '../../../components/modals/PrintableReportModal';
+import { AuthModal } from '../../../components/modals/AuthModal';
 
 const ProfileModalWrapper: React.FC = () => {
   const { setProfileModalOpen } = useTracker();

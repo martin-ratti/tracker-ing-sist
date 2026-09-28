@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { TrackerProvider, useTracker } from '../context/TrackerContext';
-import { MATERIAS_MAP } from '../data/plan2023';
+import { TrackerProvider, useTracker } from '../../context/TrackerContext';
+import { MATERIAS_MAP } from '../../data/plan2023';
 
-vi.mock('../services/api', () => ({
+vi.mock('../../services/api', () => ({
   fetchProgress: vi.fn().mockResolvedValue({
     estados: {},
     estadosElectivas: {},

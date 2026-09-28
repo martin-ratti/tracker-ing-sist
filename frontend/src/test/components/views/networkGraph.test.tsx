@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { TrackerProvider } from '../context/TrackerContext';
-import { ThemeProvider } from '../context/ThemeContext';
-import { NetworkGraph } from '../components/views/NetworkGraph';
+import { TrackerProvider } from '../../../context/TrackerContext';
+import { ThemeProvider } from '../../../context/ThemeContext';
+import { NetworkGraph } from '../../../components/views/NetworkGraph';
 
 vi.mock('vis-network/standalone', () => {
   return {

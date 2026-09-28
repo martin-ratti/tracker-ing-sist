@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
+import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP, ELECTIVAS_MAP } from '../../data/plan2023';
 
 describe('Plan 2023 - Estructura de Datos y Correlatividades', () => {
   it('debe tener las 37 materias oficiales en el catálogo troncal (36 asignaturas + Seminario ADUSI)', () => {

@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TrackerProvider } from '../context/TrackerContext';
-import { AuthProvider } from '../context/AuthContext';
-import { ThemeProvider } from '../context/ThemeContext';
-import { Header } from '../components/layout/Header';
+import { TrackerProvider } from '../../../context/TrackerContext';
+import { AuthProvider } from '../../../context/AuthContext';
+import { ThemeProvider } from '../../../context/ThemeContext';
+import { Header } from '../../../components/layout/Header';
 
 describe('Header Component', () => {
   it('debe renderizar el título del Tracker y las métricas de estado', () => {

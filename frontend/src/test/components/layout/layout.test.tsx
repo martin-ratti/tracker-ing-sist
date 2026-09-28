@@ -2,10 +2,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
-import { TrackerProvider, useTracker } from '../context/TrackerContext';
-import { BottomNav } from '../components/layout/BottomNav';
-import { Toast } from '../components/layout/Toast';
-import { ErrorBoundary } from '../components/layout/ErrorBoundary';
+import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
+import { BottomNav } from '../../../components/layout/BottomNav';
+import { Toast } from '../../../components/layout/Toast';
+import { ErrorBoundary } from '../../../components/layout/ErrorBoundary';
 
 const ToastTrigger: React.FC = () => {
   const { showToast } = useTracker();

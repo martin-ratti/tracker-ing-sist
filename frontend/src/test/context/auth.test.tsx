@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { AuthProvider, useAuth } from '../context/AuthContext';
+import { AuthProvider, useAuth } from '../../context/AuthContext';
 import {
   getStoredToken,
   getStoredUser,
@@ -13,7 +13,7 @@ import {
   loginApi,
   registerApi,
   checkAuthMe,
-} from '../services/api';
+} from '../../services/api';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <AuthProvider>{children}</AuthProvider>

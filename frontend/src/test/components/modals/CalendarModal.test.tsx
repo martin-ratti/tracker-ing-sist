@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useEffect } from 'react';
-import { TrackerProvider, useTracker } from '../context/TrackerContext';
-import { CalendarModal } from '../components/modals/CalendarModal';
+import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
+import { CalendarModal } from '../../../components/modals/CalendarModal';
 
 const TestApp: React.FC<{ initialOpen?: boolean }> = ({ initialOpen = false }) => {
   const { calendarOpen, setCalendarOpen } = useTracker();
