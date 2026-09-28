@@ -222,8 +222,10 @@ export const CalendarModal: React.FC = () => {
       });
     }
 
-    // Días posteriores para completar a múltiplos de 7
-    const remaining = (7 - (cells.length % 7)) % 7;
+    // Completar siempre exactamente a 42 celdas (6 filas fijas x 7 columnas)
+    // para que absolutamente TODOS los meses mantengan dimensiones y altura idénticas en móvil y desktop
+    const TOTAL_CELDAS = 42;
+    const remaining = TOTAL_CELDAS - cells.length;
     for (let i = 1; i <= remaining; i++) {
       const d = new Date(navYear, navMonth + 1, i);
       const y = d.getFullYear();
@@ -565,7 +567,7 @@ export const CalendarModal: React.FC = () => {
                             handleOpenMetaDialog(cell.dateStr, turno);
                           }
                         }}
-                        className={`min-h-13 sm:min-h-27 p-1 sm:p-2 flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
+                        className={`h-13 sm:h-auto sm:min-h-25 p-1 sm:p-2 flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
                           !cell.isCurrentMonth
                             ? 'bg-[#03060c]/70 text-slate-700 opacity-25 border border-transparent'
                             : isPast
