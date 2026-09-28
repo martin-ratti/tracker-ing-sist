@@ -6,9 +6,11 @@ import {
   HITOS_ACADEMICOS_2026, 
   REGLA_SYSACAD_EXAMEN,
   isPastDate,
+  isFechaEnTurno,
   getFechaExactaMesa,
   DIAS_MESA_POR_MATERIA,
-  type TurnoExamenOficial
+  type TurnoExamenOficial,
+  type HitoAcademico
 } from '../../data/calendario2026';
 import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { 
@@ -57,6 +59,7 @@ export const CalendarModal: React.FC = () => {
   } = useTracker();
 
   const [activeTab, setActiveTab] = useState<'calendario' | 'metas' | 'turnos'>('calendario');
+  const [selectedHito, setSelectedHito] = useState<HitoAcademico | null>(null);
 
   const handleExportICS = () => {
     const metas = Object.values(metasExamen);
@@ -124,6 +127,7 @@ export const CalendarModal: React.FC = () => {
 
   // Funciones de navegación de meses
   const handlePrevMonth = () => {
+    setSelectedHito(null);
     if (navMonth === 0) {
       setNavMonth(11);
       setNavYear(prev => prev - 1);
@@ -133,6 +137,7 @@ export const CalendarModal: React.FC = () => {
   };
 
   const handleNextMonth = () => {
+    setSelectedHito(null);
     if (navMonth === 11) {
       setNavMonth(0);
       setNavYear(prev => prev + 1);
@@ -142,6 +147,7 @@ export const CalendarModal: React.FC = () => {
   };
 
   const handleIrAHoy = () => {
+    setSelectedHito(null);
     setNavYear(today.getFullYear());
     setNavMonth(today.getMonth());
   };
@@ -420,43 +426,35 @@ export const CalendarModal: React.FC = () => {
                 </div>
 
                 {/* Accesos directos a meses con mesas de examen */}
-                <div className="flex items-center gap-1.5 flex-wrap justify-center text-[11px]">
+                <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center text-[11px]">
                   <span className="text-slate-400 text-[10px] hidden md:inline">Ir a Turno:</span>
-                  <button
-                    type="button"
-                    onClick={() => { setNavYear(2026); setNavMonth(8); }} // Sep 2026
-                    className={`px-2 py-0.5 rounded border transition-colors ${navYear === 2026 && navMonth === 8 ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}
-                  >
-                    Sep '26
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setNavYear(2026); setNavMonth(10); }} // Nov 2026
-                    className={`px-2 py-0.5 rounded border transition-colors ${navYear === 2026 && navMonth === 10 ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}
-                  >
-                    Nov '26
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setNavYear(2026); setNavMonth(11); }} // Dic 2026
-                    className={`px-2 py-0.5 rounded border transition-colors ${navYear === 2026 && navMonth === 11 ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}
-                  >
-                    Dic '26
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setNavYear(2027); setNavMonth(1); }} // Feb 2027
-                    className={`px-2 py-0.5 rounded border transition-colors ${navYear === 2027 && navMonth === 1 ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}
-                  >
-                    Feb '27
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setNavYear(2027); setNavMonth(2); }} // Mar 2027
-                    className={`px-2 py-0.5 rounded border transition-colors ${navYear === 2027 && navMonth === 2 ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}
-                  >
-                    Mar '27
-                  </button>
+                  {[
+                    { label: "Feb '26", y: 2026, m: 1 },
+                    { label: "Mar '26", y: 2026, m: 2 },
+                    { label: "Abr '26", y: 2026, m: 3 },
+                    { label: "May '26", y: 2026, m: 4 },
+                    { label: "Jun '26 (Esp)", y: 2026, m: 5 },
+                    { label: "Ago '26", y: 2026, m: 7 },
+                    { label: "Sep '26", y: 2026, m: 8 },
+                    { label: "Oct '26 (Esp)", y: 2026, m: 9 },
+                    { label: "Nov '26", y: 2026, m: 10 },
+                    { label: "Dic '26", y: 2026, m: 11 },
+                    { label: "Feb '27", y: 2027, m: 1 },
+                    { label: "Mar '27", y: 2027, m: 2 }
+                  ].map(btn => (
+                    <button
+                      key={btn.label}
+                      type="button"
+                      onClick={() => { setNavYear(btn.y); setNavMonth(btn.m); setSelectedHito(null); }}
+                      className={`px-1.5 sm:px-2 py-0.5 rounded border transition-colors text-[10px] sm:text-[11px] ${
+                        navYear === btn.y && navMonth === btn.m
+                          ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-bold'
+                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {btn.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -464,7 +462,11 @@ export const CalendarModal: React.FC = () => {
               <div className="flex items-center gap-2.5 sm:gap-4 text-[9px] sm:text-[10px] text-slate-400 px-1 sm:px-2 flex-wrap">
                 <div className="flex items-center gap-1">
                   <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-cyan-400/80 bg-cyan-950/60 shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0" />
-                  <span>Mesa Activa</span>
+                  <span>Mesa Común</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-purple-400/80 bg-purple-950/60 shadow-[0_0_8px_rgba(168,85,247,0.4)] shrink-0" />
+                  <span>Mesa Especial</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-emerald-500/80 bg-emerald-950/60 text-emerald-300 shrink-0" />
@@ -472,7 +474,7 @@ export const CalendarModal: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-purple-500/60 bg-purple-950/40 text-purple-300 shrink-0" />
-                  <span>Hito Lectivo</span>
+                  <span>Hito / Receso</span>
                 </div>
                 <div className="flex items-center gap-1 hidden sm:flex">
                   <span className="w-2.5 h-2.5 rounded border border-slate-800 bg-slate-950/80 opacity-50 shrink-0" />
@@ -500,7 +502,7 @@ export const CalendarModal: React.FC = () => {
                     const isToday = cell.dateStr === todayStr;
 
                     // Buscar si hay turno de examen oficial en esta fecha
-                    const turno = TURNOS_EXAMEN_2026.find(t => cell.dateStr >= t.fechaInicio && cell.dateStr <= t.fechaFin);
+                    const turno = TURNOS_EXAMEN_2026.find(t => isFechaEnTurno(cell.dateStr, t));
                     
                     // Buscar si hay hitos de calendario
                     const hito = HITOS_ACADEMICOS_2026.find(h => {
@@ -511,7 +513,10 @@ export const CalendarModal: React.FC = () => {
                     // Buscar metas agendadas en esta fecha
                     const metasEnEsteDia = metasArray.filter(m => {
                       if (m.fechaEstimada) return m.fechaEstimada === cell.dateStr;
-                      if (turno && m.turnoId === turno.id) return true;
+                      if (turno && m.turnoId === turno.id) {
+                        const fe = getFechaExactaMesa(m.materiaId, turno);
+                        return fe ? fe.fechaExactaStr === cell.dateStr : false;
+                      }
                       return false;
                     });
 
@@ -532,6 +537,8 @@ export const CalendarModal: React.FC = () => {
                         onClick={() => {
                           if (esDiaMesaActiva && metasEnEsteDia.length === 0) {
                             handleOpenMetaDialog(cell.dateStr, turno);
+                          } else if (hito) {
+                            setSelectedHito(prev => prev?.id === hito.id ? null : hito);
                           }
                         }}
                         className={`min-h-13 sm:min-h-27 p-1 sm:p-2 flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
@@ -540,12 +547,16 @@ export const CalendarModal: React.FC = () => {
                             : isPast
                               ? 'bg-[#050811]/40 text-slate-600 opacity-40 border border-slate-900/60'
                               : esDiaMesaActiva
-                                ? 'bg-gradient-to-b from-cyan-950/40 via-cyan-900/20 to-transparent border-cyan-400/80 text-cyan-100 cursor-pointer sm:cursor-default'
+                                ? turno.esEspecial
+                                  ? 'bg-gradient-to-b from-purple-950/40 via-purple-900/20 to-transparent border-purple-400/80 text-purple-100 cursor-pointer sm:cursor-default'
+                                  : 'bg-gradient-to-b from-cyan-950/40 via-cyan-900/20 to-transparent border-cyan-400/80 text-cyan-100 cursor-pointer sm:cursor-default'
                                 : 'bg-[#070b14] border border-slate-800/80 text-slate-300 hover:border-slate-700'
                         }`}
                         style={esDiaMesaActiva ? {
-                          boxShadow: '0 0 16px rgba(6, 182, 212, 0.35), inset 0 0 12px rgba(6, 182, 212, 0.12)',
-                          borderColor: 'rgba(6, 182, 212, 0.75)'
+                          boxShadow: turno.esEspecial
+                            ? '0 0 16px rgba(168, 85, 247, 0.35), inset 0 0 12px rgba(168, 85, 247, 0.12)'
+                            : '0 0 16px rgba(6, 182, 212, 0.35), inset 0 0 12px rgba(6, 182, 212, 0.12)',
+                          borderColor: turno.esEspecial ? 'rgba(168, 85, 247, 0.75)' : 'rgba(6, 182, 212, 0.75)'
                         } : {}}
                       >
                         {/* Fila superior de la celda: Número de día y badges */}
@@ -556,7 +567,9 @@ export const CalendarModal: React.FC = () => {
                               : isPast 
                                 ? 'text-slate-500' 
                                 : esDiaMesaActiva 
-                                  ? 'text-cyan-300 font-extrabold drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]' 
+                                  ? turno.esEspecial
+                                    ? 'text-purple-300 font-extrabold drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]'
+                                    : 'text-cyan-300 font-extrabold drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]' 
                                   : 'text-slate-300'
                           }`}>
                             {diaNum}
@@ -568,7 +581,9 @@ export const CalendarModal: React.FC = () => {
                               className={`hidden sm:inline text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80px] font-mono ${
                                 isPast 
                                   ? 'bg-slate-800/80 text-slate-500 border border-slate-800' 
-                                  : 'bg-cyan-500/25 text-cyan-200 border border-cyan-400/60 font-bold shadow-[0_0_8px_rgba(6,182,212,0.3)]'
+                                  : turno.esEspecial
+                                    ? 'bg-purple-500/25 text-purple-200 border border-purple-400/60 font-bold shadow-[0_0_8px_rgba(168,85,247,0.3)]'
+                                    : 'bg-cyan-500/25 text-cyan-200 border border-cyan-400/60 font-bold shadow-[0_0_8px_rgba(6,182,212,0.3)]'
                               }`}
                               title={`${turno.nombre} (${turno.fechaInicio} al ${turno.fechaFin})`}
                             >
@@ -587,14 +602,21 @@ export const CalendarModal: React.FC = () => {
                           )}
                           {esDiaMesaActiva && metasEnEsteDia.length === 0 && (
                             <span 
-                              className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" 
-                              title="Mesa activa" 
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                turno.esEspecial
+                                  ? 'bg-purple-400 shadow-[0_0_6px_rgba(168,85,247,0.8)]'
+                                  : 'bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]'
+                              }`} 
+                              title={turno.nombre} 
                             />
                           )}
                           {hito && (
                             <span 
-                              className="w-1.5 h-1.5 rounded-full bg-purple-400" 
-                              title={hito.titulo} 
+                              className={`w-2 h-2 rounded-full transition-all ${
+                                selectedHito?.id === hito.id
+                                  ? 'bg-purple-300 ring-2 ring-purple-400/60 scale-110'
+                                  : 'bg-purple-400'
+                              }`}
                             />
                           )}
                         </div>
@@ -639,7 +661,11 @@ export const CalendarModal: React.FC = () => {
                           {/* Sugerencia de materias regulares que rinden este día */}
                           {esDiaMesaActiva && metasEnEsteDia.length === 0 && regularesQueRindenHoy.length > 0 && (
                             <div 
-                              className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-200 border border-cyan-400/40 truncate font-semibold cursor-pointer hover:bg-cyan-500/30 transition-colors"
+                              className={`text-[9px] px-1.5 py-0.5 rounded border truncate font-semibold cursor-pointer transition-colors ${
+                                turno.esEspecial
+                                  ? 'bg-purple-500/20 text-purple-200 border-purple-400/40 hover:bg-purple-500/30'
+                                  : 'bg-cyan-500/20 text-cyan-200 border-cyan-400/40 hover:bg-cyan-500/30'
+                              }`}
                               title={`¡Podés rendir hoy (${regularesQueRindenHoy.length}): ${regularesQueRindenHoy.map(m => m.nombre).join(', ')}`}
                               onClick={() => handleOpenMetaDialog(cell.dateStr, turno)}
                             >
@@ -656,7 +682,11 @@ export const CalendarModal: React.FC = () => {
                               e.stopPropagation();
                               handleOpenMetaDialog(cell.dateStr, turno);
                             }}
-                            className="hidden sm:flex w-full py-1 rounded border border-cyan-500/40 hover:border-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 hover:text-white text-[10px] font-mono font-semibold items-center justify-center gap-1 transition-all shadow-sm"
+                            className={`hidden sm:flex w-full py-1 rounded border text-[10px] font-mono font-semibold items-center justify-center gap-1 transition-all shadow-sm ${
+                              turno.esEspecial
+                                ? 'border-purple-500/40 hover:border-purple-300 bg-purple-500/10 hover:bg-purple-500/25 text-purple-300 hover:text-white'
+                                : 'border-cyan-500/40 hover:border-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 hover:text-white'
+                            }`}
                             title={`Anotar meta para rendir en ${diaSemanaNombre} ${cell.dateStr}`}
                           >
                             <Plus className="w-3 h-3" />
@@ -668,6 +698,42 @@ export const CalendarModal: React.FC = () => {
                   })}
                 </div>
               </div>
+
+              {/* Tooltip de hito seleccionado (Mobile) */}
+              {selectedHito && (
+                <div className="sm:hidden animate-in fade-in slide-in-from-top-2 duration-200 p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 backdrop-blur-sm">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${
+                          selectedHito.tipo === 'feriado'
+                            ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                            : selectedHito.tipo === 'inscripcion'
+                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              : selectedHito.tipo === 'receso'
+                                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                                : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                        }`}>
+                          {selectedHito.tipo === 'feriado' ? '🚫 Feriado' : selectedHito.tipo === 'inscripcion' ? '📝 Inscripción' : selectedHito.tipo === 'receso' ? '🏖️ Receso' : '🎓 Cuatrimestre'}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-bold text-purple-200 font-syne">{selectedHito.titulo}</h4>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">{selectedHito.detalle}</p>
+                      <span className="text-[10px] text-purple-400/60 font-mono">
+                        📅 {selectedHito.fechaInicio}{selectedHito.fechaFin ? ` al ${selectedHito.fechaFin}` : ''}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedHito(null)}
+                      className="p-1 rounded-lg text-purple-400 hover:text-white hover:bg-purple-500/20 transition-colors shrink-0"
+                      aria-label="Cerrar detalle de hito"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
 
             </div>
           )}
@@ -826,13 +892,15 @@ export const CalendarModal: React.FC = () => {
                         yaPaso 
                           ? 'opacity-50 bg-[#060910] border-slate-800/60'
                           : materiasEnEsteTurno.length > 0
-                            ? 'bg-cyan-950/20 border-cyan-500/40 shadow-sm'
+                            ? turno.esEspecial
+                              ? 'bg-purple-950/20 border-purple-500/40 shadow-sm'
+                              : 'bg-cyan-950/20 border-cyan-500/40 shadow-sm'
                             : 'bg-[#070b13] border-slate-800'
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${yaPaso ? 'bg-slate-600' : 'bg-cyan-400'}`} />
+                          <span className={`w-2 h-2 rounded-full ${yaPaso ? 'bg-slate-600' : turno.esEspecial ? 'bg-purple-400' : 'bg-cyan-400'}`} />
                           <span className={`font-bold text-xs ${yaPaso ? 'text-slate-400 line-through' : 'text-white'}`}>
                             {turno.nombre}
                           </span>
@@ -845,7 +913,9 @@ export const CalendarModal: React.FC = () => {
 
                         <div className="flex items-center gap-2">
                           <span className="text-slate-400 text-[11px]">
-                            {turno.fechaInicio} al {turno.fechaFin}
+                            {turno.diasEspecificos 
+                              ? `Días: ${turno.diasEspecificos.map(d => parseInt(d.split('-')[2], 10)).join(', ')} de ${turno.mes}`
+                              : `${turno.fechaInicio} al ${turno.fechaFin}`}
                           </span>
                           <span className={`px-2 py-0.5 rounded text-[10px] border ${countdown.badgeColor}`}>
                             {countdown.text}
