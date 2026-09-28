@@ -306,7 +306,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </div>
 
           {stats.promedioConAplazos !== null && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-[#190c2e]/80 border border-purple-500/30 shadow-sm">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-950/40 border border-purple-500/30 shadow-sm">
               <Award className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
               <div className="text-left font-mono">
                 <div className="text-purple-900 dark:text-purple-300 font-extrabold text-xs sm:text-sm leading-none">

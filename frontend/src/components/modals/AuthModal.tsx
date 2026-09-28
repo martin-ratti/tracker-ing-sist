@@ -237,8 +237,8 @@ export const AuthModal: React.FC = () => {
             </button>
 
             {/* Alternador Registro / Login */}
-            <div className="pt-3 border-t border-slate-800/80 text-center font-mono text-xs">
-              <span className="text-slate-400">
+            <div className="pt-3 border-t border-(--border-color) text-center font-mono text-xs">
+              <span className="text-slate-500 dark:text-slate-400">
                 {isRegister ? '¿Ya tenés una cuenta?' : '¿Aún no tenés cuenta?'}
               </span>
               {' '}

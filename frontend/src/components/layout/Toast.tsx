@@ -42,13 +42,13 @@ const SingleToast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void 
   return (
     <div
       role="alert"
-      className={`relative bg-[#0f172a]/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-slate-100 px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center gap-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${style.bg} animate-in fade-in slide-in-from-bottom-3`}
+      className={`relative bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-(--text-body) px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center gap-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${style.bg} animate-in fade-in slide-in-from-bottom-3`}
       onClick={() => onDismiss(toast.id)}
     >
       <span className={`w-2 h-2 rounded-full shrink-0 animate-pulse ${style.dot}`} />
       <span className="flex-1">{toast.message}</span>
       <div
-        className="absolute bottom-0 left-0 h-0.5 rounded-full bg-white/30"
+        className="absolute bottom-0 left-0 h-0.5 rounded-full bg-(--text-body)/30"
         style={{
           animation: `shrinkBar ${toast.duration}ms linear forwards`
         }}

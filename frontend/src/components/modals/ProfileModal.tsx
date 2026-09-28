@@ -180,7 +180,7 @@ export const ProfileModal: React.FC = () => {
               <button
                 type="button"
                 onClick={exportBackupJson}
-                className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30 font-semibold transition-all shadow-sm"
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-(--color-primary-bg) hover:opacity-90 text-(--color-primary) border border-(--color-primary-border) font-semibold transition-opacity shadow-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Descargar Copia (.json)</span>
@@ -189,9 +189,9 @@ export const ProfileModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700 font-semibold transition-all shadow-sm"
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-(--bg-surface) hover:bg-(--bg-elevated) text-(--text-body) border border-(--border-color) font-semibold transition-colors shadow-sm"
               >
-                <Upload className="w-4 h-4 text-amber-400" />
+                <Upload className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                 <span>Restaurar Copia (.json)</span>
               </button>
 
