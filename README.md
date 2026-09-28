@@ -134,7 +134,7 @@ tracker-ing-sist/
 │   │   │   └── useKeyboardShortcuts.ts # Atajos rápidos de teclado (G, M, E, C, etc.)
 │   │   ├── data/
 │   │   │   ├── plan2023.ts             # Catálogo local de materias y electivas Plan 2023
-│   │   │   └── calendario2026.ts       # Calendario oficial 2026-2027 y fechas de exámenes UTN
+│   │   │   └── calendario/             # Módulo modular anual (turnos oficiales, feriados fijos/móviles e hitos)
 │   │   ├── services/                   # Cliente API, Firebase y algoritmo de merge inteligente
 │   │   ├── types/                      # Tipos de TypeScript compartidos
 │   │   ├── App.tsx

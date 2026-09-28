@@ -47,7 +47,7 @@ src/
 │   └── AuthContext.tsx         # Gestión de sesión, autenticación y persistencia
 ├── data/                       # Datos estáticos oficiales de la facultad
 │   ├── plan2023.ts             # 36 materias troncales + electivas oficiales Plan 2023
-│   └── calendario2026.ts       # 16 turnos de examen oficiales UTN FRRo 2026-2027
+│   └── calendario/             # Sistema modular anual (turnos oficiales, feriados fijos/móviles e hitos)
 ├── hooks/                      # Custom hooks
 │   ├── useFocusTrap.ts         # Atrapado accesible de foco para modales (WCAG)
 │   └── useKeyboardShortcuts.ts # Atajos rápidos de teclado (G, M, E, C, P, etc.)

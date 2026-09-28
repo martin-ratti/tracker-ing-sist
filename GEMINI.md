@@ -62,7 +62,7 @@ tracker-ing-sist/
     │   │   ├── ui/                 # Primitivas accesibles (Modal, StatusBadge)
     │   │   └── index.ts            # Barrel export unificado
     │   ├── context/                # TrackerContext (académico), ThemeContext (temas), AuthContext (sesión)
-    │   ├── data/                   # plan2023.ts (materias troncales/electivas), calendario/ (módulo anual) y puente calendario2026.ts
+    │   ├── data/                   # plan2023.ts (materias troncales/electivas), calendario/ (módulo anual)
     │   ├── hooks/                  # useFocusTrap.ts, useKeyboardShortcuts.ts
     │   ├── services/               # api.ts (backend/localStorage), firebase.ts (Cloud Firestore)
     │   ├── types/                  # plan.ts (EstadoMateria, ProgresoUsuario, etc.)
