@@ -226,19 +226,19 @@ export const HITOS_ACADEMICOS_2026: HitoAcademico[] = [
     detalle: 'Comienzo formal del dictado de clases del ciclo lectivo 2026.'
   },
   {
+    id: 'fin-1c-2026',
+    titulo: 'Fin del 1º Cuatrimestre',
+    fechaInicio: '2026-07-03',
+    tipo: 'cuatrimestre',
+    detalle: 'Cierre del cursado de materias del primer cuatrimestre.'
+  },
+  {
     id: 'receso-invernal-2026',
     titulo: 'Vacaciones de Invierno (Receso Invernal)',
     fechaInicio: '2026-07-06',
     fechaFin: '2026-07-19',
     tipo: 'receso',
     detalle: 'Sin actividad académica presencial.'
-  },
-  {
-    id: 'fin-1c-2026',
-    titulo: 'Fin del 1º Cuatrimestre',
-    fechaInicio: '2026-07-20',
-    tipo: 'cuatrimestre',
-    detalle: 'Cierre del cursado de materias del primer cuatrimestre.'
   },
   {
     id: 'insc-2c-2026',
@@ -269,100 +269,127 @@ export const HITOS_ACADEMICOS_2026: HitoAcademico[] = [
     tipo: 'cuatrimestre',
     detalle: 'Comienzo de clases del ciclo lectivo 2027.'
   },
-  {
-    id: 'insc-equiv-2026',
-    titulo: 'Inscripción por Equivalencias',
-    fechaInicio: '2026-05-04',
-    fechaFin: '2026-09-11',
-    tipo: 'inscripcion',
-    detalle: 'Del 4 de mayo al 11 de septiembre de 2026.'
-  },
 
-  // Feriados nacionales 2026
+  // Feriados y días sin actividad 2026
   {
     id: 'carnaval-2026',
     titulo: 'Carnaval',
     fechaInicio: '2026-02-16',
     fechaFin: '2026-02-17',
     tipo: 'feriado',
-    detalle: 'Feriado nacional de Carnaval (lunes y martes).'
+    detalle: 'Feriado nacional de Carnaval (lunes y martes). Sin actividad académica ni administrativa.'
   },
   {
     id: 'feriado-turistico-mar-2026',
     titulo: 'Feriado Turístico',
     fechaInicio: '2026-03-23',
     tipo: 'feriado',
-    detalle: 'Feriado puente turístico.'
+    detalle: 'Feriado puente turístico. Sin actividad.'
   },
   {
     id: 'memoria-2026',
-    titulo: 'Día de la Memoria por la Verdad y la Justicia',
+    titulo: 'Día Nacional de la Memoria por la Verdad y la Justicia',
     fechaInicio: '2026-03-24',
     tipo: 'feriado',
-    detalle: 'Feriado nacional.'
+    detalle: 'Feriado nacional en conmemoración del Día Nacional de la Memoria por la Verdad y la Justicia.'
   },
   {
     id: 'malvinas-2026',
-    titulo: 'Día del Veterano y los Caídos (Malvinas)',
+    titulo: 'Día del Veterano y los Caídos en la Guerra de Malvinas',
     fechaInicio: '2026-04-02',
     tipo: 'feriado',
-    detalle: 'Feriado nacional.'
+    detalle: 'Feriado nacional en homenaje a los veteranos y caídos en Malvinas.'
   },
   {
     id: 'viernes-santo-2026',
     titulo: 'Viernes Santo',
     fechaInicio: '2026-04-03',
     tipo: 'feriado',
-    detalle: 'Feriado nacional.'
+    detalle: 'Feriado nacional por festividad religiosa.'
   },
   {
     id: 'trabajador-2026',
     titulo: 'Día del Trabajador',
     fechaInicio: '2026-05-01',
     tipo: 'feriado',
-    detalle: 'Feriado nacional.'
+    detalle: 'Feriado nacional por el Día Internacional de los Trabajadores.'
+  },
+  {
+    id: 'docente-tecnologico-2026',
+    titulo: 'Día del Docente Tecnológico',
+    fechaInicio: '2026-05-02',
+    tipo: 'feriado',
+    detalle: 'Día del Docente de la Universidad Tecnológica Nacional. Sin actividad académica.'
   },
   {
     id: 'rev-mayo-2026',
-    titulo: 'Revolución de Mayo',
+    titulo: 'Aniversario de la Revolución de Mayo',
     fechaInicio: '2026-05-25',
     tipo: 'feriado',
-    detalle: 'Feriado nacional.'
+    detalle: 'Feriado nacional en conmemoración del aniversario de la Revolución de Mayo.'
   },
   {
     id: 'guemes-2026',
-    titulo: 'Paso a la Inmortalidad del Gral. Güemes',
+    titulo: 'Paso a la Inmortalidad del General Güemes',
     fechaInicio: '2026-06-15',
     tipo: 'feriado',
-    detalle: 'Feriado nacional.'
+    detalle: 'Feriado nacional trasladado.'
   },
   {
     id: 'belgrano-2026',
-    titulo: 'Día de la Bandera',
+    titulo: 'Paso a la Inmortalidad del General Manuel Belgrano',
     fechaInicio: '2026-06-20',
     tipo: 'feriado',
-    detalle: 'Paso a la Inmortalidad del Gral. Belgrano.'
+    detalle: 'Feriado nacional y Día de la Bandera.'
+  },
+  {
+    id: 'trabajador-estado-2026',
+    titulo: 'Día del Trabajador del Estado',
+    fechaInicio: '2026-06-27',
+    tipo: 'feriado',
+    detalle: 'Día del Trabajador del Estado. Sin actividad.'
   },
   {
     id: 'independencia-2026',
     titulo: 'Día de la Independencia',
     fechaInicio: '2026-07-09',
     tipo: 'feriado',
-    detalle: 'Feriado nacional.'
+    detalle: 'Feriado nacional por el Día de la Independencia.'
   },
   {
     id: 'feriado-turistico-jul-2026',
     titulo: 'Feriado Turístico',
     fechaInicio: '2026-07-10',
     tipo: 'feriado',
-    detalle: 'Feriado puente turístico.'
+    detalle: 'Feriado puente turístico. Sin actividad.'
   },
   {
     id: 'san-martin-2026',
-    titulo: 'Paso a la Inmortalidad del Gral. San Martín',
+    titulo: 'Paso a la Inmortalidad del General San Martín',
     fechaInicio: '2026-08-17',
     tipo: 'feriado',
-    detalle: 'Feriado nacional.'
+    detalle: 'Feriado nacional trasladado.'
+  },
+  {
+    id: 'fundacion-uon-2026',
+    titulo: 'Aniversario de la Fundación de la UON',
+    fechaInicio: '2026-08-19',
+    tipo: 'feriado',
+    detalle: 'Aniversario de la creación de la Universidad Obrera Nacional (actual UTN). Sin actividad en el ámbito universitario.'
+  },
+  {
+    id: 'estudiante-2026',
+    titulo: 'Día del Estudiante',
+    fechaInicio: '2026-09-21',
+    tipo: 'feriado',
+    detalle: 'Día del Estudiante. Sin actividad académica.'
+  },
+  {
+    id: 'virgen-rosario-2026',
+    titulo: 'Día de la Virgen de Rosario',
+    fechaInicio: '2026-10-07',
+    tipo: 'feriado',
+    detalle: 'Festividad de la Virgen del Rosario, patrona de la ciudad de Rosario. Sin actividad académica ni administrativa en UTN FRRo.'
   },
   {
     id: 'diversidad-2026',
@@ -376,14 +403,21 @@ export const HITOS_ACADEMICOS_2026: HitoAcademico[] = [
     titulo: 'Día de la Soberanía Nacional',
     fechaInicio: '2026-11-23',
     tipo: 'feriado',
-    detalle: 'Feriado nacional. Trasladado del 20/11.'
+    detalle: 'Feriado nacional trasladado del 20 de noviembre.'
+  },
+  {
+    id: 'no-docente-2026',
+    titulo: 'Día del No Docente',
+    fechaInicio: '2026-11-26',
+    tipo: 'feriado',
+    detalle: 'Día de los trabajadores no docentes de las Universidades Nacionales. Sin actividad en la facultad.'
   },
   {
     id: 'feriado-turistico-dic-2026',
     titulo: 'Feriado Turístico',
     fechaInicio: '2026-12-07',
     tipo: 'feriado',
-    detalle: 'Feriado puente turístico.'
+    detalle: 'Feriado puente turístico. Sin actividad.'
   },
   {
     id: 'inmaculada-2026',
@@ -397,7 +431,24 @@ export const HITOS_ACADEMICOS_2026: HitoAcademico[] = [
     titulo: 'Navidad',
     fechaInicio: '2026-12-25',
     tipo: 'feriado',
-    detalle: 'Feriado nacional.'
+    detalle: 'Feriado nacional de Navidad.'
+  },
+
+  // Feriados 2027
+  {
+    id: 'carnaval-2027',
+    titulo: 'Carnaval',
+    fechaInicio: '2027-02-08',
+    fechaFin: '2027-02-09',
+    tipo: 'feriado',
+    detalle: 'Feriado nacional de Carnaval (lunes 8 y martes 9 de febrero de 2027). Sin actividad.'
+  },
+  {
+    id: 'memoria-2027',
+    titulo: 'Día Nacional de la Memoria por la Verdad y la Justicia',
+    fechaInicio: '2027-03-24',
+    tipo: 'feriado',
+    detalle: 'Feriado nacional (24 de marzo de 2027).'
   }
 ];
 

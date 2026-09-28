@@ -473,6 +473,10 @@ export const CalendarModal: React.FC = () => {
                   <span>Meta Agendada</span>
                 </div>
                 <div className="flex items-center gap-1">
+                  <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-rose-500/80 bg-rose-950/60 text-rose-300 shrink-0" />
+                  <span>Feriado</span>
+                </div>
+                <div className="flex items-center gap-1">
                   <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-purple-500/60 bg-purple-950/40 text-purple-300 shrink-0" />
                   <span>Hito / Receso</span>
                 </div>
@@ -627,8 +631,12 @@ export const CalendarModal: React.FC = () => {
                               aria-label={`Ver hito: ${hito.titulo}`}
                               className={`w-2.5 h-2.5 rounded-full transition-all flex items-center justify-center p-0 ${
                                 selectedHito?.id === hito.id
-                                  ? 'bg-purple-300 ring-2 ring-purple-400 scale-125'
-                                  : 'bg-purple-400 hover:scale-110'
+                                  ? hito.tipo === 'feriado'
+                                    ? 'bg-rose-300 ring-2 ring-rose-400 scale-125'
+                                    : 'bg-purple-300 ring-2 ring-purple-400 scale-125'
+                                  : hito.tipo === 'feriado'
+                                    ? 'bg-rose-400 hover:scale-110'
+                                    : 'bg-purple-400 hover:scale-110'
                               }`}
                             />
                           )}
@@ -636,14 +644,18 @@ export const CalendarModal: React.FC = () => {
 
                         {/* Contenido intermedio en DESKTOP: Hito o materias */}
                         <div className="hidden sm:block space-y-1 my-1">
-                          {/* Hito académico */}
+                          {/* Hito académico o feriado */}
                           {hito && (
                             <div 
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedHito(hito);
                               }}
-                              className="text-[9px] px-1 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-purple-300 truncate cursor-pointer hover:bg-purple-500/30 transition-colors"
+                              className={`text-[9px] px-1 py-0.5 rounded truncate cursor-pointer transition-colors ${
+                                hito.tipo === 'feriado'
+                                  ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/30'
+                                  : 'bg-purple-500/15 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
+                              }`}
                               title={`Clic para ver detalle: ${hito.titulo}`}
                             >
                               {cell.dateStr === hito.fechaFin && hito.tipo === 'inscripcion' ? `Cierre: ${hito.titulo}` : hito.titulo}
