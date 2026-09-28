@@ -504,10 +504,17 @@ export const CalendarModal: React.FC = () => {
                     // Buscar si hay turno de examen oficial en esta fecha
                     const turno = TURNOS_EXAMEN_2026.find(t => isFechaEnTurno(cell.dateStr, t));
                     
-                    // Buscar si hay hitos de calendario
+                    // Buscar si hay hitos de calendario que apliquen a esta fecha
                     const hito = HITOS_ACADEMICOS_2026.find(h => {
-                      if (h.fechaFin) return cell.dateStr >= h.fechaInicio && cell.dateStr <= h.fechaFin;
-                      return cell.dateStr === h.fechaInicio;
+                      // Los recesos y feriados abarcan todo su periodo
+                      if (h.tipo === 'receso' || h.tipo === 'feriado') {
+                        if (h.fechaFin) return cell.dateStr >= h.fechaInicio && cell.dateStr <= h.fechaFin;
+                        return cell.dateStr === h.fechaInicio;
+                      }
+                      // Para cuatrimestre e inscripciones, solo marcar el día de inicio y el día de cierre puntual
+                      if (cell.dateStr === h.fechaInicio) return true;
+                      if (h.fechaFin && cell.dateStr === h.fechaFin) return true;
+                      return false;
                     });
 
                     // Buscar metas agendadas en esta fecha
@@ -535,10 +542,10 @@ export const CalendarModal: React.FC = () => {
                       <div
                         key={idx}
                         onClick={() => {
-                          if (esDiaMesaActiva && metasEnEsteDia.length === 0) {
+                          if (hito) {
+                            setSelectedHito(hito);
+                          } else if (esDiaMesaActiva && metasEnEsteDia.length === 0) {
                             handleOpenMetaDialog(cell.dateStr, turno);
-                          } else if (hito) {
-                            setSelectedHito(prev => prev?.id === hito.id ? null : hito);
                           }
                         }}
                         className={`min-h-13 sm:min-h-27 p-1 sm:p-2 flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
@@ -593,7 +600,7 @@ export const CalendarModal: React.FC = () => {
                         </div>
 
                         {/* Indicadores en MOBILE (Micro dots) */}
-                        <div className="flex sm:hidden items-center justify-center gap-1 my-auto pt-0.5">
+                        <div className="flex sm:hidden items-center justify-center gap-1.5 my-auto pt-0.5">
                           {metasEnEsteDia.length > 0 && (
                             <span 
                               className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)]" 
@@ -611,11 +618,17 @@ export const CalendarModal: React.FC = () => {
                             />
                           )}
                           {hito && (
-                            <span 
-                              className={`w-2 h-2 rounded-full transition-all ${
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedHito(hito);
+                              }}
+                              aria-label={`Ver hito: ${hito.titulo}`}
+                              className={`w-2.5 h-2.5 rounded-full transition-all flex items-center justify-center p-0 ${
                                 selectedHito?.id === hito.id
-                                  ? 'bg-purple-300 ring-2 ring-purple-400/60 scale-110'
-                                  : 'bg-purple-400'
+                                  ? 'bg-purple-300 ring-2 ring-purple-400 scale-125'
+                                  : 'bg-purple-400 hover:scale-110'
                               }`}
                             />
                           )}
@@ -626,10 +639,14 @@ export const CalendarModal: React.FC = () => {
                           {/* Hito académico */}
                           {hito && (
                             <div 
-                              className="text-[9px] px-1 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-purple-300 truncate"
-                              title={hito.titulo}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedHito(hito);
+                              }}
+                              className="text-[9px] px-1 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-purple-300 truncate cursor-pointer hover:bg-purple-500/30 transition-colors"
+                              title={`Clic para ver detalle: ${hito.titulo}`}
                             >
-                              {hito.titulo}
+                              {cell.dateStr === hito.fechaFin && hito.tipo === 'inscripcion' ? `Cierre: ${hito.titulo}` : hito.titulo}
                             </div>
                           )}
 
@@ -699,38 +716,64 @@ export const CalendarModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tooltip de hito seleccionado (Mobile) */}
+              {/* Modal flotante de información de Hito Académico (Accesible en Mobile y Desktop) */}
               {selectedHito && (
-                <div className="sm:hidden animate-in fade-in slide-in-from-top-2 duration-200 p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 backdrop-blur-sm">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${
+                <div 
+                  className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150"
+                  onClick={() => setSelectedHito(null)}
+                >
+                  <div 
+                    className="bg-[#0c1324] border border-purple-500/40 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl font-mono text-left animate-in slide-in-from-bottom-4 duration-200"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
                           selectedHito.tipo === 'feriado'
-                            ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
                             : selectedHito.tipo === 'inscripcion'
-                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                               : selectedHito.tipo === 'receso'
-                                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                                : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                                : 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
                         }`}>
-                          {selectedHito.tipo === 'feriado' ? '🚫 Feriado' : selectedHito.tipo === 'inscripcion' ? '📝 Inscripción' : selectedHito.tipo === 'receso' ? '🏖️ Receso' : '🎓 Cuatrimestre'}
+                          {selectedHito.tipo === 'feriado' ? '🚫 Feriado' : selectedHito.tipo === 'inscripcion' ? '📝 Inscripción Sysacad' : selectedHito.tipo === 'receso' ? '🏖️ Receso Invernal' : '🎓 Ciclo Lectivo'}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-purple-200 font-syne">{selectedHito.titulo}</h4>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">{selectedHito.detalle}</p>
-                      <span className="text-[10px] text-purple-400/60 font-mono">
-                        📅 {selectedHito.fechaInicio}{selectedHito.fechaFin ? ` al ${selectedHito.fechaFin}` : ''}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedHito(null)}
+                        className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                        aria-label="Cerrar detalle"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedHito(null)}
-                      className="p-1 rounded-lg text-purple-400 hover:text-white hover:bg-purple-500/20 transition-colors shrink-0"
-                      aria-label="Cerrar detalle de hito"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+
+                    <div>
+                      <h4 className="font-syne font-bold text-sm sm:text-base text-white">
+                        {selectedHito.titulo}
+                      </h4>
+                      <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                        {selectedHito.detalle}
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-purple-300/80">
+                      <div className="flex items-center gap-1.5">
+                        <CalendarIcon className="w-3.5 h-3.5 text-purple-400" />
+                        <span>
+                          {selectedHito.fechaInicio}{selectedHito.fechaFin ? ` al ${selectedHito.fechaFin}` : ''}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedHito(null)}
+                        className="px-3 py-1 rounded-lg text-xs bg-purple-500/20 border border-purple-500/40 text-purple-200 hover:bg-purple-500/30 transition-colors"
+                      >
+                        Entendido
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
