@@ -12,3 +12,7 @@ build/
 .idea/
 backend/data/*.json
 backend/data/progress/
+coverage/
+playwright-report/
+test-results/
+blob-report/

@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -8,6 +9,26 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+    css: false,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/test/**',
+        'src/main.tsx',
+        'src/**/*.d.ts',
+        'src/types/**',
+        'src/**/index.ts',
+        'src/services/firebase.ts',
+        'src/data/calendario/types.ts'
+      ]
+    }
+  },
   server: {
     port: 5173,
     proxy: {

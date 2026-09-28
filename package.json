@@ -9,9 +9,13 @@
     "build": "pnpm --filter tracker-backend build && pnpm --filter frontend build",
     "lint": "oxlint frontend/src backend/src",
     "deploy": "pnpm build && firebase deploy --only hosting",
+    "test": "pnpm --filter frontend test",
+    "test:coverage": "pnpm --filter frontend test:coverage",
+    "test:e2e": "playwright test",
     "install:all": "pnpm --filter tracker-backend install && pnpm --filter frontend install"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "concurrently": "^10.0.5",
     "oxlint": "^1.83.0"
   }
