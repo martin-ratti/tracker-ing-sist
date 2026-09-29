@@ -188,9 +188,10 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   Título Intermedio ADUSI
                 </span>
               </div>
-              <div
+              <button
+                type="button"
                 onClick={() => toggleMateriaEstado(seminario.id)}
-                className={`p-3 rounded-2xl border transition-all duration-200 cursor-pointer select-none hover:border-pink-500/50 shadow-xs ${cardStyle}`}
+                className={`w-full text-left p-3 rounded-2xl border transition-all duration-200 cursor-pointer select-none hover:border-pink-500/50 shadow-xs ${cardStyle}`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <div>
@@ -214,7 +215,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   <span className="text-slate-400">•</span>
                   {statusBadge}
                 </div>
-              </div>
+              </button>
             </div>
           );
         })()}
@@ -294,7 +295,15 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
             return (
               <div
                 key={e.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => toggleElectivaEstado(e.id)}
+                onKeyDown={(ev) => {
+                  if (ev.key === 'Enter' || ev.key === ' ') {
+                    ev.preventDefault();
+                    toggleElectivaEstado(e.id);
+                  }
+                }}
                 className={`p-3 rounded-2xl border transition-all duration-200 cursor-pointer select-none hover:border-slate-400 dark:hover:border-slate-600 shadow-xs ${cardStyle}`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1">

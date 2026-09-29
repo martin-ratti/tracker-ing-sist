@@ -209,7 +209,15 @@ export const ElectivasDrawer: React.FC = () => {
                     </span>
                   </div>
                   <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() => toggleMateriaEstado(seminario.id)}
+                    onKeyDown={(ev) => {
+                      if (ev.key === 'Enter' || ev.key === ' ') {
+                        ev.preventDefault();
+                        toggleMateriaEstado(seminario.id);
+                      }
+                    }}
                     className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer select-none hover:border-pink-500/40 ${cardStyle}`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -359,7 +367,15 @@ export const ElectivasDrawer: React.FC = () => {
                 return (
                   <div
                     key={e.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => toggleElectivaEstado(e.id)}
+                    onKeyDown={(ev) => {
+                      if (ev.key === 'Enter' || ev.key === ' ') {
+                        ev.preventDefault();
+                        toggleElectivaEstado(e.id);
+                      }
+                    }}
                     className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer select-none hover:border-slate-500/50 ${cardStyle}`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">

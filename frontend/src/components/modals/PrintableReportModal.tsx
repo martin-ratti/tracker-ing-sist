@@ -54,17 +54,18 @@ export const PrintableReportModal: React.FC = () => {
   const metasArray = Object.values(metasExamen);
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 no-scrollbar print:p-0 print:bg-white print:static"
-      onClick={() => setReportOpen(false)}
-    >
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 no-scrollbar print:p-0 print:static">
+      <div
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm print:hidden"
+        aria-hidden="true"
+        onClick={() => setReportOpen(false)}
+      />
       <div
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="report-modal-title"
-        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto print:border-none print:shadow-none print:max-w-none print:max-h-none print:rounded-none print:bg-white print:text-black"
-        onClick={e => e.stopPropagation()}
+        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto print:border-none print:shadow-none print:max-w-none print:max-h-none print:rounded-none print:bg-white print:text-black"
       >
         {/* Barra de Acciones (oculta al imprimir) */}
         <div className="p-3.5 sm:p-4 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between gap-3 shrink-0 print:hidden">

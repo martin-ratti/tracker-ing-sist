@@ -75,17 +75,18 @@ export const ProfileModal: React.FC = () => {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 no-scrollbar"
-      onClick={() => setProfileModalOpen(false)}
-    >
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
+      <div
+        className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+        aria-hidden="true"
+        onClick={() => setProfileModalOpen(false)}
+      />
       <div
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-modal-title"
-        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto flex flex-col"
-        onClick={e => e.stopPropagation()}
+        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto flex flex-col"
       >
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
@@ -118,10 +119,11 @@ export const ProfileModal: React.FC = () => {
           {/* Formulario de perfil */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-semibold">
+              <label htmlFor="profile-nombre-input" className="block text-slate-600 dark:text-slate-400 mb-1 font-semibold">
                 Nombre y Apellido:
               </label>
               <input
+                id="profile-nombre-input"
                 type="text"
                 value={nombre}
                 onChange={e => setNombre(e.target.value)}
@@ -132,10 +134,11 @@ export const ProfileModal: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-semibold">
+              <label htmlFor="profile-legajo-input" className="block text-slate-600 dark:text-slate-400 mb-1 font-semibold">
                 Legajo Universitario UTN:
               </label>
               <input
+                id="profile-legajo-input"
                 type="text"
                 value={legajo}
                 onChange={e => setLegajo(e.target.value)}

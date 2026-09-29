@@ -838,6 +838,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             className={`absolute inset-0 bg-black/65 backdrop-blur-sm transition-opacity duration-300 ease-out ${
               drawerVisible ? 'opacity-100' : 'opacity-0'
             }`}
+            aria-hidden="true"
             onClick={() => closeDrawer()}
           />
 
@@ -847,7 +848,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               className={`w-[86vw] sm:w-[68vw] max-w-sm bg-(--bg-surface) border-l border-(--border-color) shadow-[-20px_0_50px_rgba(0,0,0,0.65)] flex flex-col h-dvh overflow-hidden pointer-events-auto transform transition-transform duration-300 ease-out ${
                 drawerVisible ? 'translate-x-0' : 'translate-x-full'
               }`}
-              onClick={e => e.stopPropagation()}
             >
               {drawerView === 'electivas' ? (
                 <MobileElectivasView

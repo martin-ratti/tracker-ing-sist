@@ -192,7 +192,9 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const showToast = useCallback((msg: string, variant: 'success' | 'warning' | 'error' | 'info' = 'info') => {
     if (!msg) return;
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const id = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' 
+      ? crypto.randomUUID() 
+      : `${Date.now()}`;
     const duration = 3500;
     setToasts(prev => {
       const next = [...prev, { id, message: msg, variant, duration }];

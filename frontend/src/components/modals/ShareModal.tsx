@@ -45,16 +45,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200 no-scrollbar"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200 no-scrollbar">
+      <div
+        className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+        aria-hidden="true"
+        onClick={onClose}
+      />
       <div
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 my-auto"
-        onClick={e => e.stopPropagation()}
+        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 my-auto"
       >
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
@@ -108,9 +109,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="space-y-1.5 font-mono text-xs">
-            <label className="text-slate-600 dark:text-slate-400 block font-medium">Enlace de lectura:</label>
+            <label htmlFor="share-url-input" className="text-slate-600 dark:text-slate-400 block font-medium">Enlace de lectura:</label>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <input
+                id="share-url-input"
                 type="text"
                 readOnly
                 value={shareUrl}

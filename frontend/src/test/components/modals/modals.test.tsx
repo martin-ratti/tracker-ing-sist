@@ -315,7 +315,9 @@ describe('Componentes Modales', () => {
       await user.type(inputPass, '123456');
 
       const botonSubmit = screen.getByRole('button', { name: /Iniciar Sesión/i });
+      expect(botonSubmit).toBeInTheDocument();
       await user.click(botonSubmit);
+      expect(screen.queryByRole('heading', { name: /Iniciar Sesión/i })).not.toBeInTheDocument();
     });
 
     it('debe validar email inválido y contraseña corta', async () => {

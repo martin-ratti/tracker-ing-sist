@@ -530,10 +530,9 @@ export const NetworkGraph: React.FC = () => {
       className="relative w-full h-[calc(100vh-125px)] overflow-hidden transition-colors duration-300"
       style={{ backgroundColor: themeConfig.graph.bgBase }}
     >
-      <div 
+      <section 
         ref={containerRef} 
         tabIndex={0}
-        role="region"
         aria-label="Grafo interactivo de correlatividades"
         className="w-full h-full cursor-grab active:cursor-grabbing outline-none focus-visible:ring-1 focus-visible:ring-slate-500" 
       />

@@ -88,12 +88,15 @@ describe('Header Component', () => {
 
     const botonFicha = screen.getByRole('button', { name: /Ficha PDF/i });
     await user.click(botonFicha);
+    expect(botonFicha).toBeInTheDocument();
 
     const botonCalendario = screen.getByRole('button', { name: /Calendario/i });
     await user.click(botonCalendario);
+    expect(botonCalendario).toBeInTheDocument();
 
     const botonCompartir = screen.getByRole('button', { name: /Compartir/i });
     await user.click(botonCompartir);
+    expect(botonCompartir).toBeInTheDocument();
   });
 
   it('debe permitir interactuar con el botón de perfil, electivas y toggle de color', async () => {
@@ -110,12 +113,15 @@ describe('Header Component', () => {
 
     const botonPerfil = screen.getByRole('button', { name: /Perfil/i });
     await user.click(botonPerfil);
+    expect(botonPerfil).toBeInTheDocument();
 
     const botonElectivas = screen.getByRole('button', { name: /Electivas/i });
     await user.click(botonElectivas);
+    expect(botonElectivas).toBeInTheDocument();
 
     const botonColor = screen.getByRole('button', { name: /Cambiar a Modo Claro|Cambiar a Modo Oscuro/i });
     await user.click(botonColor);
+    expect(botonColor).toBeInTheDocument();
   });
 
   it('debe permitir cambiar filtros de correlativas en modo Grafo', async () => {
@@ -134,12 +140,15 @@ describe('Header Component', () => {
 
     const botonesCursar = screen.getAllByRole('button', { name: /Para Cursar/i });
     await user.click(botonesCursar[0]);
+    expect(botonesCursar[0]).toBeInTheDocument();
 
     const botonesRendir = screen.getAllByRole('button', { name: /Para Rendir/i });
     await user.click(botonesRendir[0]);
+    expect(botonesRendir[0]).toBeInTheDocument();
 
     const botonesTodas = screen.getAllByRole('button', { name: /Todas/i });
     await user.click(botonesTodas[0]);
+    expect(botonesTodas[0]).toBeInTheDocument();
   });
 
   it('debe permitir resetear el progreso con confirmación de dos pasos', async () => {

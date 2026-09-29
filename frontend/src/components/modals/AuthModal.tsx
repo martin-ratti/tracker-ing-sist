@@ -100,17 +100,18 @@ export const AuthModal: React.FC = () => {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 no-scrollbar"
-      onClick={handleClose}
-    >
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
+      <div
+        className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+        aria-hidden="true"
+        onClick={handleClose}
+      />
       <div
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto"
-        onClick={e => e.stopPropagation()}
+        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto"
       >
         {/* Cabecera */}
         <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
@@ -177,12 +178,13 @@ export const AuthModal: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-slate-600 dark:text-slate-400 mb-1.5 font-semibold">
+              <label htmlFor="auth-email-input" className="block text-xs font-mono text-slate-600 dark:text-slate-400 mb-1.5 font-semibold">
                 Correo Electrónico:
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
+                  id="auth-email-input"
                   type="email"
                   required
                   placeholder="alumno@utn.edu.ar"
@@ -194,12 +196,13 @@ export const AuthModal: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-slate-600 dark:text-slate-400 mb-1.5 font-semibold">
+              <label htmlFor="auth-password-input" className="block text-xs font-mono text-slate-600 dark:text-slate-400 mb-1.5 font-semibold">
                 Contraseña:
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
+                  id="auth-password-input"
                   type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="Mínimo 6 caracteres"

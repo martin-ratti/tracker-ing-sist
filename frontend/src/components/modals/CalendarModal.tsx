@@ -297,17 +297,18 @@ export const CalendarModal: React.FC = () => {
   if (!calendarOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 no-scrollbar"
-      onClick={() => setCalendarOpen(false)}
-    >
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 no-scrollbar">
+      <div
+        className="fixed inset-0 bg-black/80 backdrop-blur-md"
+        aria-hidden="true"
+        onClick={() => setCalendarOpen(false)}
+      />
       <div
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="calendar-modal-title"
-        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh] sm:max-h-[90vh] my-auto"
-        onClick={e => e.stopPropagation()}
+        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh] sm:max-h-[90vh] my-auto"
       >
         {/* Header institucional */}
         <div className="p-3.5 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
@@ -563,17 +564,28 @@ export const CalendarModal: React.FC = () => {
                     // Materias del plan que rinden este día y cuáles tiene regular el usuario SIN meta asignada aún
                     const materiasQueRindenHoy = MATERIAS_TRONCALES.filter(m => DIAS_MESA_POR_MATERIA[m.id] === diaSemanaNombre);
                     const regularesQueRindenHoy = materiasQueRindenHoy.filter(m => estados[m.id] === 'regular' && !metasExamen[m.id]);
+                    const esClickeable = Boolean(hito || (esDiaMesaActiva && metasEnEsteDia.length === 0));
+
+                    const handleDiaClick = () => {
+                      if (hito) {
+                        setSelectedHito(hito);
+                      } else if (esDiaMesaActiva && metasEnEsteDia.length === 0) {
+                        handleOpenMetaDialog(cell.dateStr, turno);
+                      }
+                    };
 
                     return (
                       <div
                         key={idx}
-                        onClick={() => {
-                          if (hito) {
-                            setSelectedHito(hito);
-                          } else if (esDiaMesaActiva && metasEnEsteDia.length === 0) {
-                            handleOpenMetaDialog(cell.dateStr, turno);
+                        role={esClickeable ? "button" : undefined}
+                        tabIndex={esClickeable ? 0 : undefined}
+                        onClick={esClickeable ? handleDiaClick : undefined}
+                        onKeyDown={esClickeable ? (e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleDiaClick();
                           }
-                        }}
+                        } : undefined}
                         className={`h-13 sm:h-auto sm:min-h-25 p-1 sm:p-2 flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
                           !cell.isCurrentMonth
                             ? 'bg-slate-100/70 dark:bg-(--bg-base)/70 text-slate-400 dark:text-slate-600 opacity-30 border border-transparent'
@@ -680,12 +692,13 @@ export const CalendarModal: React.FC = () => {
                         <div className="hidden sm:block space-y-1 my-1">
                           {/* Hito académico o feriado */}
                           {hito && (
-                            <div 
+                            <button
+                              type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedHito(hito);
                               }}
-                              className={`text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors font-medium flex items-center gap-1 ${
+                              className={`w-full text-left text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors font-medium flex items-center gap-1 ${
                                 hito.tipo === 'feriado'
                                   ? 'bg-rose-500/15 dark:bg-rose-500/20 border border-rose-500/40 text-rose-700 dark:text-rose-300 hover:bg-rose-500/25'
                                   : 'bg-amber-500/15 dark:bg-amber-500/20 border border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25'
@@ -694,7 +707,7 @@ export const CalendarModal: React.FC = () => {
                             >
                               <span className="shrink-0 text-[8px]">{hito.tipo === 'feriado' ? '🚫' : '📌'}</span>
                               <span className="truncate">{cell.dateStr === hito.fechaFin && hito.tipo === 'inscripcion' ? `Cierre: ${hito.titulo}` : hito.titulo}</span>
-                            </div>
+                            </button>
                           )}
 
                           {/* Metas agendadas por el usuario para esta fecha */}
@@ -724,17 +737,21 @@ export const CalendarModal: React.FC = () => {
 
                           {/* Sugerencia de materias regulares que rinden este día */}
                           {esDiaMesaActiva && metasEnEsteDia.length === 0 && regularesQueRindenHoy.length > 0 && (
-                            <div 
-                              className={`text-[9px] px-1.5 py-0.5 rounded border truncate font-semibold cursor-pointer transition-colors ${
+                            <button
+                              type="button"
+                              className={`w-full text-left text-[9px] px-1.5 py-0.5 rounded border truncate font-semibold cursor-pointer transition-colors ${
                                 turno.esEspecial
                                   ? 'bg-purple-500/15 dark:bg-purple-500/20 text-purple-700 dark:text-purple-200 border-purple-400/40 hover:bg-purple-500/30'
                                   : 'bg-(--color-primary-bg) text-(--color-primary) border border-(--color-primary-border) hover:opacity-90'
                               }`}
                               title={`¡Podés rendir hoy (${regularesQueRindenHoy.length}): ${regularesQueRindenHoy.map(m => m.nombre).join(', ')}`}
-                              onClick={() => handleOpenMetaDialog(cell.dateStr, turno)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenMetaDialog(cell.dateStr, turno);
+                              }}
                             >
                               ⭐ Rinde: {regularesQueRindenHoy.map(m => m.nombre).join(', ')}
-                            </div>
+                            </button>
                           )}
                         </div>
 
@@ -765,17 +782,18 @@ export const CalendarModal: React.FC = () => {
 
               {/* Modal flotante de información de Hito Académico (Accesible en Mobile y Desktop) */}
               {selectedHito && (
-                <div 
-                  className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150"
-                  onClick={() => setSelectedHito(null)}
-                >
+                <div className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
+                  <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+                    aria-hidden="true"
+                    onClick={() => setSelectedHito(null)}
+                  />
                   <div 
-                    className={`bg-(--bg-surface) border rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl font-mono text-left animate-in slide-in-from-bottom-4 duration-200 ${
+                    className={`relative z-10 bg-(--bg-surface) border rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl font-mono text-left animate-in slide-in-from-bottom-4 duration-200 ${
                       selectedHito.tipo === 'feriado'
                         ? 'border-rose-500/50 shadow-[0_0_24px_rgba(244,63,94,0.2)]'
                         : 'border-amber-500/50 shadow-[0_0_24px_rgba(245,158,11,0.2)]'
                     }`}
-                    onClick={e => e.stopPropagation()}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2">
@@ -1012,7 +1030,7 @@ export const CalendarModal: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <span className="text-slate-500 dark:text-slate-400 text-[11px]">
                             {turno.diasEspecificos 
-                              ? `Días: ${turno.diasEspecificos.map(d => parseInt(d.split('-')[2], 10)).join(', ')} de ${turno.mes}`
+                              ? `Días: ${turno.diasEspecificos.map(d => Number.parseInt(d.split('-')[2], 10)).join(', ')} de ${turno.mes}`
                               : `${turno.fechaInicio} al ${turno.fechaFin}`}
                           </span>
                           <span className={`px-2 py-0.5 rounded text-[10px] border ${countdown.badgeColor}`}>
@@ -1052,13 +1070,14 @@ export const CalendarModal: React.FC = () => {
 
       {/* DIÁLOGO POP-UP PARA ANOTAR META EN UN DÍA SELECCIONADO */}
       {metaDialog && (
-        <div 
-          className="fixed inset-0 z-60 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150 no-scrollbar"
-          onClick={() => setMetaDialog(null)}
-        >
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150 no-scrollbar">
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            aria-hidden="true"
+            onClick={() => setMetaDialog(null)}
+          />
           <div 
-            className="bg-(--bg-surface) border border-(--color-primary-border) rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-5 space-y-4 shadow-2xl font-mono my-auto"
-            onClick={e => e.stopPropagation()}
+            className="relative z-10 bg-(--bg-surface) border border-(--color-primary-border) rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-5 space-y-4 shadow-2xl font-mono my-auto"
           >
             <div className="flex items-center justify-between border-b border-(--border-color) pb-3">
               <div className="flex items-center gap-2">
@@ -1089,7 +1108,7 @@ export const CalendarModal: React.FC = () => {
 
             <form onSubmit={handleConfirmarMeta} className="space-y-3">
               <div>
-                <label className="block text-[11px] text-slate-600 dark:text-slate-300 mb-1">
+                <label htmlFor="materia-regular-select" className="block text-[11px] text-slate-600 dark:text-slate-300 mb-1">
                   Materia Regular a Rendir:
                 </label>
                 {materiasRegularesSinMeta.length === 0 ? (
@@ -1100,6 +1119,7 @@ export const CalendarModal: React.FC = () => {
                   </p>
                 ) : (
                   <select
+                    id="materia-regular-select"
                     value={materiaSeleccionadaId}
                     onChange={e => setMateriaSeleccionadaId(Number(e.target.value))}
                     className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg p-2 text-xs text-(--text-body) focus:outline-none focus:border-(--color-primary)"
@@ -1125,10 +1145,11 @@ export const CalendarModal: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] text-slate-600 dark:text-slate-300 mb-1">
+                <label htmlFor="meta-comentario-input" className="block text-[11px] text-slate-600 dark:text-slate-300 mb-1">
                   Recordatorio o notas de estudio (opcional):
                 </label>
                 <input
+                  id="meta-comentario-input"
                   type="text"
                   value={metaComentarioInput}
                   onChange={e => setMetaComentarioInput(e.target.value)}

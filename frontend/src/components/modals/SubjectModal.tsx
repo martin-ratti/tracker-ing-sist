@@ -167,17 +167,18 @@ export const SubjectModal: React.FC = () => {
   });
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 no-scrollbar"
-      onClick={() => setSelectedSubjectId(null)}
-    >
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
+      <div
+        className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+        aria-hidden="true"
+        onClick={() => setSelectedSubjectId(null)}
+      />
       <div 
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="subject-modal-title"
-        className="bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col my-auto"
-        onClick={e => e.stopPropagation()}
+        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col my-auto"
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) relative shrink-0">
@@ -502,10 +503,11 @@ export const SubjectModal: React.FC = () => {
               ) : (
                 <form onSubmit={handleSaveMeta} className="space-y-3 pt-1">
                   <div>
-                    <label className="block text-[11px] font-mono text-slate-600 dark:text-slate-400 mb-1">
+                    <label htmlFor="materia-turno-select" className="block text-[11px] font-mono text-slate-600 dark:text-slate-400 mb-1">
                       Seleccionar Turno Oficial UTN FRRo:
                     </label>
                     <select
+                      id="materia-turno-select"
                       value={selectedTurnoId}
                       onChange={e => setSelectedTurnoId(e.target.value)}
                       className="w-full bg-(--bg-surface) border border-(--border-color) rounded-lg px-3 py-2 text-xs font-mono text-(--text-body) focus:outline-none focus:border-(--color-primary)"
@@ -526,10 +528,11 @@ export const SubjectModal: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-mono text-slate-600 dark:text-slate-400 mb-1">
+                    <label htmlFor="materia-meta-comentario" className="block text-[11px] font-mono text-slate-600 dark:text-slate-400 mb-1">
                       Notas / Recordatorios de estudio (opcional):
                     </label>
                     <input
+                      id="materia-meta-comentario"
                       type="text"
                       value={metaComentario}
                       onChange={e => setMetaComentario(e.target.value)}

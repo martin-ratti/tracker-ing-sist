@@ -40,9 +40,10 @@ const SingleToast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void 
   const style = VARIANT_STYLES[toast.variant];
 
   return (
-    <div
+    <button
+      type="button"
       role="alert"
-      className={`relative bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-(--text-body) px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center gap-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${style.bg} animate-in fade-in slide-in-from-bottom-3`}
+      className={`relative w-full text-left bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-(--text-body) px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center gap-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${style.bg} animate-in fade-in slide-in-from-bottom-3`}
       onClick={() => onDismiss(toast.id)}
     >
       <span className={`w-2 h-2 rounded-full shrink-0 animate-pulse ${style.dot}`} />
@@ -53,7 +54,7 @@ const SingleToast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void 
           animation: `shrinkBar ${toast.duration}ms linear forwards`
         }}
       />
-    </div>
+    </button>
   );
 };
 

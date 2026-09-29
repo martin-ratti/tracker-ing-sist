@@ -1,4 +1,4 @@
-import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
@@ -7,18 +7,16 @@ import {
   GoogleAuthProvider, 
   signOut, 
   onAuthStateChanged,
-  type User,
-  type Auth
+  type User
 } from 'firebase/auth';
 import { 
   getFirestore, 
   doc, 
   getDoc, 
   setDoc, 
-  onSnapshot, 
-  type Firestore 
+  onSnapshot
 } from 'firebase/firestore';
-import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
+import type { Analytics } from 'firebase/analytics';
 import type { ProgresoUsuario } from '../types/plan';
 
 // Configuración leída de variables de entorno Vite
@@ -39,33 +37,25 @@ export const isFirebaseConfigured = Boolean(
   firebaseConfig.projectId
 );
 
-let app: FirebaseApp | null = null;
-let auth: Auth | null = null;
-let db: Firestore | null = null;
-let analytics: Analytics | null = null;
-let googleProvider: GoogleAuthProvider | null = null;
-
-if (isFirebaseConfigured) {
+const { auth, db, googleProvider } = (() => {
+  if (!isFirebaseConfigured) {
+    console.info('ℹ️ Firebase no configurado: la aplicación funcionará en modo Local/Offline. Para habilitar la nube, crea un archivo .env con tus credenciales de Firebase.');
+    return { auth: null, db: null, googleProvider: null };
+  }
   try {
-    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-    auth = getAuth(app);
-    db = getFirestore(app);
-    googleProvider = new GoogleAuthProvider();
-    googleProvider.setCustomParameters({ prompt: 'select_account' });
-
-    if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
-      isSupported().then((supported) => {
-        if (supported && app) {
-          analytics = getAnalytics(app);
-        }
-      }).catch(() => {});
-    }
+    const appInst = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    const authInst = getAuth(appInst);
+    const dbInst = getFirestore(appInst);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    return { auth: authInst, db: dbInst, googleProvider: provider };
   } catch (err) {
     console.warn('⚠️ Error al inicializar Firebase SDK:', err);
+    return { auth: null, db: null, googleProvider: null };
   }
-} else {
-  console.info('ℹ️ Firebase no configurado: la aplicación funcionará en modo Local/Offline. Para habilitar la nube, crea un archivo .env con tus credenciales de Firebase.');
-}
+})();
+
+const analytics: Analytics | null = null;
 
 export { auth, db, analytics, googleProvider };
 

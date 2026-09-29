@@ -7,6 +7,23 @@ export interface SharedData {
   ppsHoras: number;
 }
 
+function bytesToBase64(bytes: Uint8Array): string {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) {
+    bin += String.fromCharCode(bytes[i]);
+  }
+  return btoa(bin);
+}
+
+function base64ToBytes(base64: string): Uint8Array {
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    bytes[i] = bin.charCodeAt(i);
+  }
+  return bytes;
+}
+
 export function encodeProgress(data: SharedData): string {
   const stMap: Record<string, number> = { regular: 1, aprobada: 2 };
   const troncales: [number, number][] = [];
@@ -27,19 +44,24 @@ export function encodeProgress(data: SharedData): string {
   };
 
   const jsonStr = JSON.stringify(compact);
-  return btoa(unescape(encodeURIComponent(jsonStr)))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  const bytes = new TextEncoder().encode(jsonStr);
+  let base64 = bytesToBase64(bytes)
+    .replaceAll('+', '-')
+    .replaceAll('/', '_');
+  while (base64.endsWith('=')) {
+    base64 = base64.slice(0, -1);
+  }
+  return base64;
 }
 
 export function decodeProgress(hashStr: string): SharedData | null {
   try {
-    let base64 = hashStr.replace(/-/g, '+').replace(/_/g, '/');
-    while (base64.length % 4) {
+    let base64 = hashStr.replaceAll('-', '+').replaceAll('_', '/');
+    while (base64.length % 4 !== 0) {
       base64 += '=';
     }
-    const jsonStr = decodeURIComponent(escape(atob(base64)));
+    const bytes = base64ToBytes(base64);
+    const jsonStr = new TextDecoder().decode(bytes);
     const parsed = JSON.parse(jsonStr);
 
     const estados: Record<number, EstadoMateria> = {};

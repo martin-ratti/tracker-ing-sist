@@ -43,9 +43,15 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock de ResizeObserver
 class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe() {
+    // mock noop
+  }
+  unobserve() {
+    // mock noop
+  }
+  disconnect() {
+    // mock noop
+  }
 }
 window.ResizeObserver = ResizeObserverMock;
 

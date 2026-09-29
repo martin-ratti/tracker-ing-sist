@@ -6,7 +6,7 @@ import type { MetaExamen } from '../types/plan';
  * Formatea una fecha YYYY-MM-DD a formato iCalendar YYYYMMDD
  */
 function formatDateToICS(dateStr: string): string {
-  return dateStr.replace(/-/g, '');
+  return dateStr.replaceAll('-', '');
 }
 
 /**
@@ -127,7 +127,7 @@ export function exportMetasToICS(metas: MetaExamen[]): boolean {
   a.download = `finales-utn-frro-${new Date().getFullYear()}.ics`;
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
+  a.remove();
   URL.revokeObjectURL(url);
 
   return true;

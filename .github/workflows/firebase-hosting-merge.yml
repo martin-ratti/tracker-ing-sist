@@ -33,7 +33,7 @@ jobs:
         run: pnpm test
 
       - name: Instalar navegador Chromium para Playwright
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Ejecutar pruebas End-to-End (Playwright)
         run: pnpm test:e2e
