@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { MATERIAS_ELECTIVAS, MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { X, Sparkles, CheckCircle2, Clock, BookOpen } from 'lucide-react';
+import { useHistoryBack } from '../../hooks/useHistoryBack';
 
 export const ElectivasDrawer: React.FC = () => {
   const {
@@ -16,6 +17,8 @@ export const ElectivasDrawer: React.FC = () => {
   } = useTracker();
 
   const [nivelFilter, setNivelFilter] = useState<number | 'todos'>('todos');
+
+  useHistoryBack(electivasOpen, () => setElectivasOpen(false));
 
   // Soporte teclado Escape
   useEffect(() => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useHistoryBack } from '../../hooks/useHistoryBack';
 import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { 
   X, 
@@ -49,6 +50,7 @@ export const SubjectModal: React.FC = () => {
 
   const materia = selectedSubjectId ? MATERIAS_MAP[selectedSubjectId] : null;
   const modalRef = useFocusTrap(Boolean(materia));
+  useHistoryBack(Boolean(selectedSubjectId), () => setSelectedSubjectId(null));
 
   // Cerrar con Escape
   useEffect(() => {

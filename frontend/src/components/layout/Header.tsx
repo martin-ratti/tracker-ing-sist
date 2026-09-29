@@ -4,6 +4,7 @@ import { useTracker } from '../../context/TrackerContext';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeSelector } from './ThemeSelector';
 import { MobileElectivasView } from '../views/MobileElectivasView';
+import { useHistoryBack } from '../../hooks/useHistoryBack';
 import { 
   Network, 
   LayoutGrid, 
@@ -109,6 +110,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
       return () => clearTimeout(timer);
     }
   }, [electivasOpen, setElectivasOpen]);
+
+  // Botón "Atrás" del celular: cierra el drawer móvil si está abierto
+  useHistoryBack(drawerMounted, () => closeDrawer());
 
   const [confirmReset, setConfirmReset] = useState(false);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useHistoryBack } from '../../hooks/useHistoryBack';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -22,6 +23,7 @@ export const Modal: React.FC<ModalProps> = ({
   children
 }) => {
   const modalRef = useFocusTrap(isOpen);
+  useHistoryBack(isOpen, onClose);
 
   useEffect(() => {
     if (!isOpen) return;
