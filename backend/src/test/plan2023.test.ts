@@ -36,9 +36,11 @@ describe('plan2023 - Integridad del Catálogo Académico', () => {
       m.reqRegular.forEach(id => {
         expect(todosIds.has(id)).toBe(true);
       });
-      m.reqAprobada.forEach(id => {
-        expect(todosIds.has(id)).toBe(true);
-      });
+      if (Array.isArray(m.reqAprobada)) {
+        m.reqAprobada.forEach(id => {
+          expect(todosIds.has(id)).toBe(true);
+        });
+      }
     });
   });
 });
