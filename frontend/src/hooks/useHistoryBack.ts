@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Hook para interceptar el botón "Atrás" del navegador/celular en overlays.
@@ -12,6 +12,12 @@ import { useEffect } from 'react';
  * a `history.back()` para mantener el historial limpio (sin entradas fantasma).
  */
 export function useHistoryBack(isOpen: boolean, onClose: () => void): void {
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -25,7 +31,7 @@ export function useHistoryBack(isOpen: boolean, onClose: () => void): void {
       // El usuario presionó "Atrás" — el historial ya retrocedió,
       // simplemente cerramos el overlay.
       if (event.state?.[STATE_KEY]) return;
-      onClose();
+      onCloseRef.current();
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -40,5 +46,5 @@ export function useHistoryBack(isOpen: boolean, onClose: () => void): void {
         history.back();
       }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 }

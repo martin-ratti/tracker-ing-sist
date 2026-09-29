@@ -1,12 +1,16 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TrackerProvider } from '../../../context/TrackerContext';
+import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
 import { AuthProvider } from '../../../context/AuthContext';
 import { ThemeProvider } from '../../../context/ThemeContext';
 import { Header } from '../../../components/layout/Header';
 
 describe('Header Component', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('debe renderizar el título del Tracker y las métricas de estado', () => {
     const handleOpenTitles = vi.fn();
     const handleOpenHelp = vi.fn();
@@ -104,15 +108,12 @@ describe('Header Component', () => {
       </ThemeProvider>
     );
 
-    // Botón perfil
     const botonPerfil = screen.getByRole('button', { name: /Perfil/i });
     await user.click(botonPerfil);
 
-    // Botón electivas
     const botonElectivas = screen.getByRole('button', { name: /Electivas/i });
     await user.click(botonElectivas);
 
-    // Toggle modo claro / oscuro
     const botonColor = screen.getByRole('button', { name: /Cambiar a Modo Claro|Cambiar a Modo Oscuro/i });
     await user.click(botonColor);
   });
@@ -129,18 +130,14 @@ describe('Header Component', () => {
       </ThemeProvider>
     );
 
-    // Cambiar a modo Grafo
     await user.click(screen.getByRole('button', { name: /Grafo Red/i }));
 
-    // Clic en Para Cursar
     const botonesCursar = screen.getAllByRole('button', { name: /Para Cursar/i });
     await user.click(botonesCursar[0]);
 
-    // Clic en Para Rendir
     const botonesRendir = screen.getAllByRole('button', { name: /Para Rendir/i });
     await user.click(botonesRendir[0]);
 
-    // Clic en Todas
     const botonesTodas = screen.getAllByRole('button', { name: /Todas/i });
     await user.click(botonesTodas[0]);
   });
@@ -161,9 +158,101 @@ describe('Header Component', () => {
     const botonReset = screen.getByRole('button', { name: /Reiniciar/i });
     await user.click(botonReset);
 
-    // Debe cambiar a ¿Confirmar?
     const botonConfirmar = screen.getByRole('button', { name: /¿Confirmar\?/i });
     expect(botonConfirmar).toBeInTheDocument();
     await user.click(botonConfirmar);
+  });
+
+  it('debe abrir y operar completamente el Menú Drawer Móvil con todas sus opciones', async () => {
+    const user = userEvent.setup();
+    const handleOpenTitles = vi.fn();
+    const handleOpenHelp = vi.fn();
+
+    const MenuTester: React.FC = () => {
+      const { openMobileDrawer } = useTracker();
+      return (
+        <div>
+          <button type="button" onClick={() => openMobileDrawer('menu')}>
+            Abrir Menú Móvil
+          </button>
+          <Header onOpenTitles={handleOpenTitles} onOpenHelp={handleOpenHelp} />
+        </div>
+      );
+    };
+
+    render(
+      <ThemeProvider>
+        <AuthProvider>
+          <TrackerProvider>
+            <MenuTester />
+          </TrackerProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    );
+
+    // Abrir menú móvil
+    const botonMenu = screen.getByRole('button', { name: /Abrir Menú Móvil/i });
+    await user.click(botonMenu);
+
+    expect(await screen.findByText(/Menú Académico/i)).toBeInTheDocument();
+    expect(screen.getByText(/Progreso de Carrera/i)).toBeInTheDocument();
+
+    // Click en tema visual dentro del drawer
+    const botonTema = screen.getByTitle(/Emerald Matrix/i);
+    await user.click(botonTema);
+
+    // Click en Títulos desde el drawer
+    const botonDrawerTitulos = screen.getByRole('button', { name: /Títulos y Certificaciones/i });
+    await user.click(botonDrawerTitulos);
+    await waitFor(() => expect(handleOpenTitles).toHaveBeenCalled());
+
+    // Reabrir menú
+    await user.click(botonMenu);
+    expect(await screen.findByText(/Menú Académico/i)).toBeInTheDocument();
+
+    // Click en Guía desde el drawer
+    const botonDrawerGuia = screen.getByRole('button', { name: /Guía del Plan 2023/i });
+    await user.click(botonDrawerGuia);
+    await waitFor(() => expect(handleOpenHelp).toHaveBeenCalled());
+
+    // Reabrir menú y probar reinicio en drawer
+    await user.click(botonMenu);
+    const botonResetDrawer = screen.getByRole('button', { name: /Reiniciar Progreso/i });
+    await user.click(botonResetDrawer);
+    expect(screen.getByText(/¿Confirmar reinicio total\?/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /¿Confirmar reinicio total\?/i }));
+
+    // Cerrar con Escape
+    await user.click(botonMenu);
+    expect(await screen.findByText(/Menú Académico/i)).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: 'Escape' });
+  });
+
+  it('debe renderizar el drawer en vista de electivas cuando mobileDrawerView es electivas', async () => {
+    const DrawerTester: React.FC = () => {
+      const { openMobileDrawer } = useTracker();
+      return (
+        <div>
+          <button type="button" onClick={() => openMobileDrawer('electivas')}>
+            Abrir Electivas Móvil
+          </button>
+          <Header onOpenTitles={vi.fn()} onOpenHelp={vi.fn()} />
+        </div>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(
+      <ThemeProvider>
+        <AuthProvider>
+          <TrackerProvider>
+            <DrawerTester />
+          </TrackerProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    );
+
+    await user.click(screen.getByRole('button', { name: /Abrir Electivas Móvil/i }));
+    expect(await screen.findByText(/Materias Electivas/i)).toBeInTheDocument();
   });
 });

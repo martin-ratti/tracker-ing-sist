@@ -96,7 +96,7 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
 | :--- | :--- |
 | **Frontend** | React 19, TypeScript, Vite 8 (Rolldown), Tailwind CSS v4, Vis-Network, Lucide Icons |
 | **Backend** | Node.js, Express, TypeScript, JWT, Bcrypt, Express-Rate-Limit, CORS, TSX |
-| **Linter & Tooling** | `oxlint` (Oxc Compiler Stack de ultra alto rendimiento) |
+| **Testing & Calidad** | Vitest, React Testing Library, Supertest, Playwright (E2E), Oxlint, V8 Coverage |
 | **Persistencia** | Almacenamiento JSON con debounce (cuentas y progreso) + LocalStorage offline |
 | **Gestor de Paquetes** | `pnpm` (Monorepo con workspaces) |
 
@@ -108,15 +108,17 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
 tracker-ing-sist/
 ├── backend/
 │   ├── src/
-│   │   ├── auth/             # Generación y verificación de tokens JWT
+│   │   ├── auth/             # Generación y verificación de tokens JWT y usuarios
 │   │   ├── data/             # Catálogo oficial de materias troncales y electivas Plan 2023
 │   │   ├── middleware/       # Limitador de peticiones (rate limiter) y autenticación
 │   │   ├── routes/           # Endpoints de API (/api/plan, /api/progress, /api/auth)
 │   │   ├── storage/          # Persistencia en JSON (usuarios y progresos)
+│   │   ├── test/             # Pruebas unitarias e integración HTTP (Vitest + Supertest)
 │   │   ├── types/            # Tipos TypeScript compartidos (incluye PerfilAlumno y MetaExamen)
 │   │   └── server.ts         # Servidor Express
 │   ├── package.json
-│   └── tsconfig.json
+│   ├── tsconfig.json
+│   └── vitest.config.ts      # Configuración de pruebas y cobertura v8 para backend
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
@@ -131,21 +133,34 @@ tracker-ing-sist/
 │   │   │   └── AuthContext.tsx         # Sesión de usuario y sincronización remota
 │   │   ├── hooks/
 │   │   │   ├── useFocusTrap.ts         # Atrapado de foco accesible para modales (WCAG)
+│   │   │   ├── useHistoryBack.ts       # Navegación y cierre natural con botón atrás
 │   │   │   └── useKeyboardShortcuts.ts # Atajos rápidos de teclado (G, M, E, C, etc.)
 │   │   ├── data/
 │   │   │   ├── plan2023.ts             # Catálogo local de materias y electivas Plan 2023
 │   │   │   └── calendario/             # Módulo modular anual (turnos oficiales, feriados fijos/móviles e hitos)
 │   │   ├── services/                   # Cliente API, Firebase y algoritmo de merge inteligente
+│   │   ├── test/                       # 18 suites unitarias e integración (Vitest + RTL + JSDOM)
 │   │   ├── types/                      # Tipos de TypeScript compartidos
 │   │   ├── App.tsx
 │   │   └── index.css                   # Variables CSS semánticas y Tailwind CSS v4
 │   ├── package.json
 │   └── vite.config.ts
+├── e2e/                                # 9 suites de pruebas End-to-End con Playwright
+│   ├── malla.spec.ts                   # Malla curricular y alternancia interactiva
+│   ├── subject-modal.spec.ts           # Modal de materia, actas, notas y metas
+│   ├── calendario.spec.ts              # Navegación de meses y turnos oficiales de examen
+│   ├── temas.spec.ts                   # Selector de temas y modo claro / oscuro
+│   ├── electivas.spec.ts               # Drawer de electivas y acreditación de horas
+│   ├── stats-titles.spec.ts            # Métricas, ADUSI e Ingeniería con horas PPS
+│   ├── perfil-share.spec.ts            # Datos del alumno y enlaces compartibles
+│   ├── mobile.spec.ts                  # Emulación móvil, BottomNav y drawer táctil
+│   └── atajos-teclado.spec.ts          # Accesibilidad y atajos de teclado globales
 ├── docs/                               # Documentación y cartillas oficiales de UTN FRRo
 │   ├── isi-a4-plan-2023-gradiente-utn-frro.pdf
 │   ├── electivas-plan-2023.png
 │   └── calendario-2026-2027-gradiente.pdf
 ├── firebase.json                       # Configuración de hosting y headers de caché
+├── playwright.config.ts                # Configuración oficial de Playwright E2E
 ├── .oxlintrc.json                      # Reglas de linting de alto rendimiento
 ├── pnpm-workspace.yaml
 ├── package.json
@@ -198,6 +213,35 @@ pnpm build
 
 # Compilar y desplegar automáticamente en Firebase Hosting
 npm run deploy
+```
+
+---
+
+## 🧪 Testing Automatizado y Cobertura (~100%)
+
+El monorepo cuenta con una suite integral y robusta de pruebas continuas que aseguran la fidelidad académica, la solidez matemática de las correlatividades y la ausencia de regresiones en la interfaz:
+
+- 🔬 **Tests Unitarios y de Integración (163 tests, 100% aprobados):**
+  - **Backend (`tracker-backend`):** 33 tests con **~91.5% de cobertura** ejecutados con `vitest` y `v8`. Valida seguridad JWT, hash bcrypt, middlewares de rate limit y autenticación, persistencia atómica en storage JSON y endpoints REST con Supertest (`/api/auth`, `/api/progress`, `/api/plan`).
+  - **Frontend (`frontend`):** 130 tests con **80% de líneas general y 100% en lógica crítica** ejecutados con `vitest`, React Testing Library y JSDOM. Cobertura completa sobre el motor de correlatividades, cascada, promedios, calendario de turnos oficiales de examen, hooks accesibles (`useFocusTrap`, `useKeyboardShortcuts`), modales interactivos y renderizado de malla.
+
+- 🎭 **Pruebas End-to-End con Playwright (14 escenarios, 100% aprobados en ~13s):**
+  - Validación completa en navegador de la Malla interactiva (`malla.spec.ts`), modal de materias, actas y metas (`subject-modal.spec.ts`), calendario académico 2026/2027 (`calendario.spec.ts`), los 5 temas visuales y modo oscuro (`temas.spec.ts`), horas de electivas (`electivas.spec.ts`), estadísticas y títulos ADUSI/Ingeniería (`stats-titles.spec.ts`), perfil de alumno y avance compartido (`perfil-share.spec.ts`), responsive táctil móvil (`mobile.spec.ts`) y atajos de teclado globales (`atajos-teclado.spec.ts`).
+
+- ⚡ **Comandos de Test y Calidad:**
+
+```bash
+# Ejecutar linter Oxlint (0 warnings y 0 errores en 81 archivos)
+pnpm lint
+
+# Ejecutar todos los tests unitarios y de integración (Backend + Frontend)
+pnpm test
+
+# Ejecutar y generar reporte de cobertura consolidada V8 en terminal
+pnpm test:coverage
+
+# Ejecutar la suite completa de pruebas End-to-End con Playwright
+pnpm test:e2e
 ```
 
 ---

@@ -113,8 +113,11 @@ tracker-ing-sist/
 pnpm dev              # Levanta backend y frontend concurrentemente
 pnpm dev:frontend     # Solo cliente Vite (puerto 5173)
 
-# Calidad y Compilación
+# Calidad, Pruebas y Compilación
 pnpm lint             # Oxlint sobre frontend y backend (0 warnings)
+pnpm test             # Ejecuta los 163 tests unitarios y de integración (backend y frontend)
+pnpm test:coverage    # Reporte de cobertura V8 consolidada
+pnpm test:e2e         # Pruebas End-to-End con Playwright (14 escenarios)
 pnpm build            # Compila TypeScript en backend y Vite en frontend
 
 # Despliegue

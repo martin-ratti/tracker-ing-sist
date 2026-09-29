@@ -18,15 +18,14 @@ export const ProfileModal: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const modalRef = useFocusTrap(profileModalOpen);
-
-  const [prevPerfil, setPrevPerfil] = useState(perfil);
   const [prevOpen, setPrevOpen] = useState(profileModalOpen);
 
-  if (profileModalOpen !== prevOpen || perfil !== prevPerfil) {
+  if (profileModalOpen !== prevOpen) {
     setPrevOpen(profileModalOpen);
-    setPrevPerfil(perfil);
-    setNombre(perfil.nombre || '');
-    setLegajo(perfil.legajo || '');
+    if (profileModalOpen) {
+      setNombre(perfil.nombre || '');
+      setLegajo(perfil.legajo || '');
+    }
   }
 
   useEffect(() => {

@@ -52,6 +52,14 @@ window.ResizeObserver = ResizeObserverMock;
 // Mock de window.scrollTo
 window.scrollTo = () => {};
 
+// Mock de requestAnimationFrame para JSDOM
+window.requestAnimationFrame = (cb: FrameRequestCallback) => setTimeout(cb, 0) as unknown as number;
+window.cancelAnimationFrame = (id: number) => clearTimeout(id);
+
+// Mock global de URL.createObjectURL y revokeObjectURL
+globalThis.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url');
+globalThis.URL.revokeObjectURL = vi.fn();
+
 // Mock de servicios de Firebase para tests unitarios y de integración
 vi.mock('../services/firebase', () => ({
   isFirebaseConfigured: true,

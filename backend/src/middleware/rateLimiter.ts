@@ -8,7 +8,7 @@ interface RateLimitRecord {
 const rateLimitStore = new Map<string, RateLimitRecord>();
 
 // Limpieza cada 5 minutos de registros expirados
-setInterval(() => {
+const cleanupInterval = setInterval(() => {
   const now = Date.now();
   for (const [key, record] of rateLimitStore.entries()) {
     if (now > record.resetTime) {
@@ -16,6 +16,7 @@ setInterval(() => {
     }
   }
 }, 5 * 60 * 1000);
+cleanupInterval.unref?.();
 
 export interface RateLimiterOptions {
   windowMs: number; // Duración de la ventana en ms (ej. 60000 = 1 minuto)

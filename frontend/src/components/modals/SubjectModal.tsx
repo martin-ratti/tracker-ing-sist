@@ -50,7 +50,8 @@ export const SubjectModal: React.FC = () => {
 
   const materia = selectedSubjectId ? MATERIAS_MAP[selectedSubjectId] : null;
   const modalRef = useFocusTrap(Boolean(materia));
-  useHistoryBack(Boolean(selectedSubjectId), () => setSelectedSubjectId(null));
+  const handleClose = React.useCallback(() => setSelectedSubjectId(null), [setSelectedSubjectId]);
+  useHistoryBack(Boolean(selectedSubjectId), handleClose);
 
   // Cerrar con Escape
   useEffect(() => {
@@ -62,13 +63,9 @@ export const SubjectModal: React.FC = () => {
   }, [setSelectedSubjectId]);
 
   const [prevSubjectId, setPrevSubjectId] = useState(selectedSubjectId);
-  const [prevNotas, setPrevNotas] = useState(notas);
-  const [prevMetas, setPrevMetas] = useState(metasExamen);
 
-  if (selectedSubjectId !== prevSubjectId || notas !== prevNotas || metasExamen !== prevMetas) {
+  if (selectedSubjectId !== prevSubjectId) {
     setPrevSubjectId(selectedSubjectId);
-    setPrevNotas(notas);
-    setPrevMetas(metasExamen);
     if (selectedSubjectId && notas[selectedSubjectId]) {
       const n = notas[selectedSubjectId];
       setNotaVal(n.nota !== undefined ? String(n.nota) : '');

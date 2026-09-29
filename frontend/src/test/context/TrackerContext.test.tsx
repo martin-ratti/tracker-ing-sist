@@ -40,6 +40,12 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     localStorage.clear();
   });
 
+  it('useTracker debe lanzar error si se utiliza fuera del TrackerProvider', () => {
+    expect(() => renderHook(() => useTracker())).toThrow(
+      'useTracker debe usarse dentro de un TrackerProvider'
+    );
+  });
+
   it('debe inicializar con estadísticas en cero y materias pendientes', () => {
     const { result } = renderHook(() => useTracker(), { wrapper });
 
@@ -53,17 +59,14 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
   it('debe alternar estados con toggleMateriaEstado (pendiente -> regular -> aprobada -> pendiente)', () => {
     const { result } = renderHook(() => useTracker(), { wrapper });
 
-    // Inicialmente pendiente
     expect(result.current.estados[1] || 'pendiente').toBe('pendiente');
 
-    // 1er click -> regular
     act(() => {
       result.current.toggleMateriaEstado(1);
     });
     expect(result.current.estados[1]).toBe('regular');
     expect(result.current.stats.regularesCount).toBe(1);
 
-    // 2do click -> aprobada
     act(() => {
       result.current.toggleMateriaEstado(1);
     });
@@ -71,7 +74,6 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     expect(result.current.stats.aprobadasCount).toBe(1);
     expect(result.current.stats.regularesCount).toBe(0);
 
-    // 3er click -> pendiente
     act(() => {
       result.current.toggleMateriaEstado(1);
     });
@@ -95,49 +97,30 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
 
   it('debe validar correlatividades para cursar materias de 2do nivel', () => {
     const { result } = renderHook(() => useTracker(), { wrapper });
-    const fisica2 = MATERIAS_MAP[10]; // Requiere Análisis I (1) y Física I (3) regulares
+    const fisica2 = MATERIAS_MAP[10];
 
-    // Inicialmente Física II no es cursable
     expect(result.current.esMateriaCursable(fisica2)).toBe(false);
 
-    // Regularizamos Análisis I y luego Física I
     act(() => {
-      result.current.toggleMateriaEstado(1); // AM I -> regular
+      result.current.setEstadoDirecto(1, 'regular');
     });
     act(() => {
-      result.current.toggleMateriaEstado(3); // Física I -> regular
+      result.current.setEstadoDirecto(3, 'regular');
     });
 
-    // Ahora Física II debe ser cursable
     expect(result.current.esMateriaCursable(fisica2)).toBe(true);
   });
 
   it('debe calcular promedios con y sin aplazos correctamente', () => {
     const { result } = renderHook(() => useTracker(), { wrapper });
 
-    // Aprobamos materia 1 con nota 8
-    act(() => {
-      result.current.toggleMateriaEstado(1); // regular
-    });
-    act(() => {
-      result.current.toggleMateriaEstado(1); // aprobada
-    });
     act(() => {
       result.current.setNotaMateria(1, { nota: 8 });
-    });
-
-    // Aprobamos materia 2 con nota 6
-    act(() => {
-      result.current.toggleMateriaEstado(2); // regular
-    });
-    act(() => {
-      result.current.toggleMateriaEstado(2); // aprobada
     });
     act(() => {
       result.current.setNotaMateria(2, { nota: 6 });
     });
 
-    // Promedio de 8 y 6 = 7.00
     expect(result.current.stats.promedioSinAplazos).toBe(7);
     expect(result.current.stats.promedioConAplazos).toBe(7);
   });
@@ -147,7 +130,6 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
 
     expect(result.current.stats.metasCount).toBe(0);
 
-    // Dar de alta una meta
     act(() => {
       result.current.setMetaExamen(1, {
         materiaId: 1,
@@ -161,7 +143,6 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     expect(result.current.metasExamen[1]).toBeDefined();
     expect(result.current.metasExamen[1].turnoId).toBe('feb-2026-l1');
 
-    // Remover la meta
     act(() => {
       result.current.removeMetaExamen(1);
     });
@@ -174,17 +155,14 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     const { result } = renderHook(() => useTracker(), { wrapper });
 
     act(() => {
-      result.current.toggleMateriaEstado(1); // regular
-    });
-    act(() => {
-      result.current.toggleMateriaEstado(1); // aprobada
+      result.current.setEstadoDirecto(1, 'regular');
     });
     act(() => {
       result.current.setNotaMateria(1, { nota: 9 });
       result.current.setPpsHoras(50);
     });
 
-    expect(result.current.stats.aprobadasCount).toBe(1);
+    expect(result.current.stats.regularesCount).toBe(1);
     expect(result.current.ppsHoras).toBe(50);
 
     act(() => {
@@ -192,7 +170,79 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     });
 
     expect(result.current.stats.aprobadasCount).toBe(0);
+    expect(result.current.stats.regularesCount).toBe(0);
     expect(result.current.ppsHoras).toBe(0);
     expect(result.current.estados).toEqual({});
+  });
+
+  it('debe importar y exportar backup JSON correctamente', () => {
+    const { result } = renderHook(() => useTracker(), { wrapper });
+
+    globalThis.URL.createObjectURL = vi.fn().mockReturnValue('blob:test');
+    globalThis.URL.revokeObjectURL = vi.fn();
+
+    act(() => {
+      result.current.exportBackupJson();
+    });
+
+    const validJson = JSON.stringify({
+      estados: { 1: 'aprobada', 2: 'regular' },
+      estadosElectivas: { 201: 'aprobada' },
+      notas: { 1: { nota: 10 } },
+      ppsHoras: 100,
+      perfil: { nombre: 'Martín', legajo: '48210' },
+      metasExamen: {}
+    });
+
+    let success = false;
+    act(() => {
+      success = result.current.importBackupJson(validJson);
+    });
+    expect(success).toBe(true);
+    expect(result.current.estados[1]).toBe('aprobada');
+    expect(result.current.perfil.nombre).toBe('Martín');
+
+    act(() => {
+      success = result.current.importBackupJson('no es json');
+    });
+    expect(success).toBe(false);
+
+    act(() => {
+      success = result.current.importBackupJson('null');
+    });
+    expect(success).toBe(false);
+  });
+
+  it('debe gestionar electivas, dimApproved y criticalChainActive', () => {
+    const { result } = renderHook(() => useTracker(), { wrapper });
+
+    // Habilitar correlativas de electiva 201: 5 regular, 6 y 8 aprobadas
+    act(() => {
+      result.current.setEstadoDirecto(5, 'regular');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(6, 'regular');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(6, 'aprobada');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(8, 'regular');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(8, 'aprobada');
+    });
+
+    act(() => {
+      result.current.toggleElectivaEstado(201);
+    });
+    expect(result.current.estadosElectivas[201]).toBe('regular');
+
+    act(() => {
+      result.current.setDimApproved(true);
+      result.current.setCriticalChainActive(true);
+    });
+    expect(result.current.dimApproved).toBe(true);
+    expect(result.current.criticalChainActive).toBe(true);
   });
 });

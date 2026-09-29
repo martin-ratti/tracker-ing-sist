@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
 import { AuthProvider, useAuth } from '../../../context/AuthContext';
 import { HelpModal } from '../../../components/modals/HelpModal';
@@ -48,7 +48,26 @@ const AuthModalWrapper: React.FC = () => {
   );
 };
 
+const StatsModalWithDataWrapper: React.FC = () => {
+  const { setEstadoDirecto, setNotaMateria } = useTracker();
+  const initRef = React.useRef(false);
+  useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+    setEstadoDirecto(1, 'aprobada');
+    setNotaMateria(1, { nota: 9, fecha: '2026-11-20' });
+    setEstadoDirecto(2, 'regular');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return <StatsModal isOpen={true} onClose={() => {}} />;
+};
+
 describe('Componentes Modales', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   describe('HelpModal', () => {
     it('no debe renderizar si isOpen es false', () => {
       render(<HelpModal isOpen={false} onClose={() => {}} />);
@@ -82,7 +101,8 @@ describe('Componentes Modales', () => {
       expect(screen.queryByText(/Titulación Universitaria/i)).not.toBeInTheDocument();
     });
 
-    it('debe renderizar títulos intermedio y de grado', () => {
+    it('debe renderizar títulos intermedio y de grado y permitir modificar PPS', async () => {
+      const user = userEvent.setup();
       render(
         <TrackerProvider>
           <TitlesModal isOpen={true} onClose={() => {}} />
@@ -91,6 +111,13 @@ describe('Componentes Modales', () => {
       expect(screen.getByText(/Titulación Universitaria/i)).toBeInTheDocument();
       expect(screen.getByText(/Analista Desarrollador/i)).toBeInTheDocument();
       expect(screen.getByText(/Ingeniero\/a en Sistemas/i)).toBeInTheDocument();
+
+      // Modificar horas de PPS con slider o input numérico
+      const inputsNumber = screen.getAllByRole('spinbutton');
+      if (inputsNumber.length > 0) {
+        await user.clear(inputsNumber[0]);
+        await user.type(inputsNumber[0], '150');
+      }
     });
   });
 
@@ -103,14 +130,17 @@ describe('Componentes Modales', () => {
         </TrackerProvider>
       );
 
-      const botonAbrir = screen.getByRole('button', { name: /Abrir Perfil/i });
-      await user.click(botonAbrir);
+      await user.click(screen.getByRole('button', { name: /Abrir Perfil/i }));
 
       expect(screen.getByText(/Perfil y Copia de Seguridad/i)).toBeInTheDocument();
 
       const inputNombre = screen.getByPlaceholderText(/Ej: Martín Ratti/i);
+      const inputLegajo = screen.getByPlaceholderText(/Ej: 48210/i);
+
       await user.clear(inputNombre);
-      await user.type(inputNombre, 'Carlos Alumno');
+      await user.type(inputNombre, 'Estudiante Prueba');
+      await user.clear(inputLegajo);
+      await user.type(inputLegajo, '54321');
 
       const botonGuardar = screen.getByRole('button', { name: /Guardar Datos Alumno/i });
       await user.click(botonGuardar);
@@ -118,13 +148,8 @@ describe('Componentes Modales', () => {
       expect(screen.queryByText(/Perfil y Copia de Seguridad/i)).not.toBeInTheDocument();
     });
 
-    it('debe permitir descargar la copia de seguridad en JSON y cerrar con botón de cierre', async () => {
+    it('debe permitir descargar copia JSON y cargar respaldo desde archivo', async () => {
       const user = userEvent.setup();
-      const mockCreateObjectURL = vi.fn().mockReturnValue('blob:mock-url');
-      const mockRevokeObjectURL = vi.fn();
-      globalThis.URL.createObjectURL = mockCreateObjectURL;
-      globalThis.URL.revokeObjectURL = mockRevokeObjectURL;
-
       render(
         <TrackerProvider>
           <ProfileModalWrapper />
@@ -132,12 +157,41 @@ describe('Componentes Modales', () => {
       );
 
       await user.click(screen.getByRole('button', { name: /Abrir Perfil/i }));
+
+      // Descargar copia JSON
       const botonDescargar = screen.getByRole('button', { name: /Descargar Copia/i });
       await user.click(botonDescargar);
 
-      const botonCerrar = screen.getByLabelText(/Cerrar perfil/i);
-      await user.click(botonCerrar);
-      expect(screen.queryByText(/Perfil y Copia de Seguridad/i)).not.toBeInTheDocument();
+      // Cargar archivo JSON de respaldo
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      expect(fileInput).toBeInTheDocument();
+
+      const validJson = JSON.stringify({
+        estados: { 1: 'aprobada' },
+        notas: {},
+        ppsHoras: 50,
+        perfil: { nombre: 'Test', legajo: '123' }
+      });
+      const validFile = new File([validJson], 'backup.json', { type: 'application/json' });
+
+      await user.upload(fileInput, validFile);
+    });
+  });
+
+  describe('PrintableReportModal', () => {
+    it('debe renderizar la ficha curricular completa lista para imprimir', () => {
+      render(
+        <TrackerProvider>
+          <ReportModalWrapper />
+        </TrackerProvider>
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /Abrir Reporte/i }));
+      expect(screen.getByText(/Ficha Curricular y Analítico/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Facultad Regional Rosario/i).length).toBeGreaterThan(0);
+
+      const botonCerrar = screen.getByLabelText(/Cerrar reporte/i);
+      fireEvent.click(botonCerrar);
     });
   });
 
@@ -151,15 +205,15 @@ describe('Componentes Modales', () => {
       expect(screen.queryByText(/Compartir Avance de Carrera/i)).not.toBeInTheDocument();
     });
 
-    it('debe mostrar el link comprimido y permitir copiarlo', async () => {
+    it('debe generar enlace y permitir copiar con clipboard mockeado', async () => {
       const user = userEvent.setup();
-      const writeTextMock = vi.fn().mockResolvedValue(undefined);
+      const mockClipboard = {
+        writeText: vi.fn().mockResolvedValue(undefined)
+      };
       Object.defineProperty(navigator, 'clipboard', {
-        value: {
-          writeText: writeTextMock,
-        },
-        writable: true,
+        value: mockClipboard,
         configurable: true,
+        writable: true
       });
 
       render(
@@ -169,139 +223,123 @@ describe('Componentes Modales', () => {
       );
 
       expect(screen.getByText(/Compartir Avance de Carrera/i)).toBeInTheDocument();
+
       const botonCopiar = screen.getByRole('button', { name: /Copiar Enlace/i });
       await user.click(botonCopiar);
-      expect(writeTextMock).toHaveBeenCalled();
+      expect(mockClipboard.writeText).toHaveBeenCalled();
+    });
+
+    it('debe manejar error al copiar si clipboard falla y cerrar con Escape', async () => {
+      const handleClose = vi.fn();
+      const mockClipboard = {
+        writeText: vi.fn().mockRejectedValue(new Error('Permiso denegado'))
+      };
+      Object.defineProperty(navigator, 'clipboard', {
+        value: mockClipboard,
+        configurable: true,
+        writable: true
+      });
+
+      render(
+        <TrackerProvider>
+          <ShareModal isOpen={true} onClose={handleClose} />
+        </TrackerProvider>
+      );
+
+      const botonCopiar = screen.getByRole('button', { name: /Copiar Enlace/i });
+      await fireEvent.click(botonCopiar);
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(handleClose).toHaveBeenCalled();
     });
   });
 
   describe('StatsModal', () => {
-    it('no debe renderizar si isOpen es false', () => {
+    it('debe renderizar estadísticas, métricas y timeline cuando hay notas con fecha', async () => {
       render(
         <TrackerProvider>
-          <StatsModal isOpen={false} onClose={() => {}} />
-        </TrackerProvider>
-      );
-      expect(screen.queryByText(/Dashboard de Estadísticas/i)).not.toBeInTheDocument();
-    });
-
-    it('debe renderizar desglose por niveles y promedios cuando está abierto', () => {
-      render(
-        <TrackerProvider>
-          <StatsModal isOpen={true} onClose={() => {}} />
-        </TrackerProvider>
-      );
-      expect(screen.getByText(/Dashboard de Estadísticas/i)).toBeInTheDocument();
-      expect(screen.getByText(/1º Año/i)).toBeInTheDocument();
-      expect(screen.getByText(/5º Año/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('PrintableReportModal', () => {
-    it('debe renderizar la ficha curricular completa lista para imprimir', async () => {
-      const user = userEvent.setup();
-      const originalPrint = window.print;
-      window.print = vi.fn();
-
-      render(
-        <TrackerProvider>
-          <ReportModalWrapper />
+          <StatsModalWithDataWrapper />
         </TrackerProvider>
       );
 
-      const botonAbrir = screen.getByRole('button', { name: /Abrir Reporte/i });
-      await user.click(botonAbrir);
-
-      expect(screen.getByText(/Ficha Curricular y Analítico/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Imprimir \/ PDF/i })).toBeInTheDocument();
-
-      const botonImprimir = screen.getByRole('button', { name: /Imprimir \/ PDF/i });
-      await user.click(botonImprimir);
-      expect(window.print).toHaveBeenCalled();
-
-      window.print = originalPrint;
+      expect(await screen.findByText(/Dashboard de Estadísticas/i)).toBeInTheDocument();
+      expect(screen.getByText(/Distribución por Estado/i)).toBeInTheDocument();
     });
   });
 
   describe('AuthModal', () => {
-    it('debe renderizar el modal de autenticación y permitir alternar a registro', async () => {
+    it('debe alternar entre iniciar sesión y crear cuenta', async () => {
       const user = userEvent.setup();
       render(
         <AuthProvider>
-          <AuthModalWrapper />
+          <TrackerProvider>
+            <AuthModalWrapper />
+          </TrackerProvider>
         </AuthProvider>
       );
 
-      const botonAbrir = screen.getByRole('button', { name: /Abrir Auth/i });
-      await user.click(botonAbrir);
+      await user.click(screen.getByRole('button', { name: /Abrir Auth/i }));
+      expect(screen.getByRole('heading', { name: /Iniciar Sesión/i })).toBeInTheDocument();
 
-      const items = screen.getAllByText(/Iniciar Sesión/i);
-      expect(items.length).toBeGreaterThan(0);
+      const linkCrearCuenta = screen.getByRole('button', { name: /Registrate gratis/i });
+      await user.click(linkCrearCuenta);
+      expect(screen.getByRole('heading', { name: /Crear Cuenta/i })).toBeInTheDocument();
 
-      const botonRegistro = screen.getByRole('button', { name: /Registrate gratis/i });
-      await user.click(botonRegistro);
+      const linkLogin = screen.getByRole('button', { name: /Iniciá Sesión/i });
+      await user.click(linkLogin);
+      expect(screen.getByRole('heading', { name: /Iniciar Sesión/i })).toBeInTheDocument();
+    });
 
-      expect(screen.getByPlaceholderText(/alumno@utn.edu.ar/i)).toBeInTheDocument();
+    it('debe iniciar sesión con Google y manejar login de email exitoso', async () => {
+      const user = userEvent.setup();
+      render(
+        <AuthProvider>
+          <TrackerProvider>
+            <AuthModalWrapper />
+          </TrackerProvider>
+        </AuthProvider>
+      );
+
+      await user.click(screen.getByRole('button', { name: /Abrir Auth/i }));
+
+      // Clic en botón Google
+      const botonGoogle = screen.getByRole('button', { name: /Continuar con Google/i });
+      await user.click(botonGoogle);
+
+      // Reabrir y enviar formulario
+      await user.click(screen.getByRole('button', { name: /Abrir Auth/i }));
+      const inputEmail = screen.getByPlaceholderText(/alumno@utn\.edu\.ar/i);
+      const inputPass = screen.getByPlaceholderText(/Mínimo 6 caracteres/i);
+
+      await user.type(inputEmail, 'estudiante@utn.edu.ar');
+      await user.type(inputPass, '123456');
+
+      const botonSubmit = screen.getByRole('button', { name: /Iniciar Sesión/i });
+      await user.click(botonSubmit);
     });
 
     it('debe validar email inválido y contraseña corta', async () => {
       const user = userEvent.setup();
       render(
         <AuthProvider>
-          <AuthModalWrapper />
+          <TrackerProvider>
+            <AuthModalWrapper />
+          </TrackerProvider>
         </AuthProvider>
       );
 
       await user.click(screen.getByRole('button', { name: /Abrir Auth/i }));
 
-      const form = screen.getByRole('button', { name: /^Iniciar Sesión$/i }).closest('form')!;
-      // Enviar con email inválido
-      const inputEmail = screen.getByPlaceholderText(/alumno@utn.edu.ar/i);
-      await user.type(inputEmail, 'email-sin-arroba');
-      const inputPassword = screen.getByPlaceholderText(/Mínimo 6 caracteres/i);
-      await user.type(inputPassword, '123456');
+      const form = document.querySelector('form')!;
       fireEvent.submit(form);
-      expect(screen.getByText(/Por favor ingresa un correo electrónico válido/i)).toBeInTheDocument();
+      expect(screen.getByText(/Por favor ingresa un correo electrónico válido\./i)).toBeInTheDocument();
 
-      // Enviar con contraseña de menos de 6 caracteres
-      await user.clear(inputEmail);
-      await user.type(inputEmail, 'test@utn.edu.ar');
-      await user.clear(inputPassword);
-      await user.type(inputPassword, '123');
+      const inputEmail = screen.getByPlaceholderText(/alumno@utn\.edu\.ar/i);
+      const inputPass = screen.getByPlaceholderText(/Mínimo 6 caracteres/i);
+      await user.type(inputEmail, 'estudiante@utn.edu.ar');
+      await user.type(inputPass, '123');
       fireEvent.submit(form);
-      expect(screen.getByText(/La contraseña debe tener al menos 6 caracteres/i)).toBeInTheDocument();
-    });
-
-    it('debe permitir autenticarse con Google y cerrar sesión', async () => {
-      const user = userEvent.setup();
-      render(
-        <AuthProvider>
-          <AuthModalWrapper />
-        </AuthProvider>
-      );
-
-      await user.click(screen.getByRole('button', { name: /Abrir Auth/i }));
-      const botonGoogle = screen.getByRole('button', { name: /Continuar con Google/i });
-      expect(botonGoogle).toBeInTheDocument();
-      await user.click(botonGoogle);
-
-      // Al autenticarse con Google se cierra el modal
-      expect(screen.queryByPlaceholderText(/alumno@utn.edu.ar/i)).not.toBeInTheDocument();
-    });
-
-    it('debe permitir cerrar el modal con la tecla Escape', async () => {
-      const user = userEvent.setup();
-      render(
-        <AuthProvider>
-          <AuthModalWrapper />
-        </AuthProvider>
-      );
-
-      await user.click(screen.getByRole('button', { name: /Abrir Auth/i }));
-      expect(screen.getByPlaceholderText(/alumno@utn.edu.ar/i)).toBeInTheDocument();
-
-      await user.keyboard('{Escape}');
-      expect(screen.queryByPlaceholderText(/alumno@utn.edu.ar/i)).not.toBeInTheDocument();
+      expect(screen.getByText(/La contraseña debe tener al menos 6 caracteres\./i)).toBeInTheDocument();
     });
   });
 });

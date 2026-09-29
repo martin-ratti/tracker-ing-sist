@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -42,7 +42,7 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
       expect(screen.getByText(/5º NIVEL/i)).toBeInTheDocument();
     });
 
-    it('debe permitir buscar materias por nombre o código mediante el input de búsqueda', async () => {
+    it('debe permitir buscar materias por nombre o código mediante el input de búsqueda y limpiar', async () => {
       const user = userEvent.setup();
       render(
         <TrackerProvider>
@@ -52,11 +52,15 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
 
       const input = screen.getByPlaceholderText(/Buscar materia o código/i);
       await user.type(input, 'Álgebra');
-
       expect(screen.getByText('Álgebra y Geometría Analítica')).toBeInTheDocument();
+
+      // Limpiar búsqueda
+      const botonLimpiar = screen.getByLabelText(/Limpiar búsqueda/i);
+      await user.click(botonLimpiar);
+      expect(input).toHaveValue('');
     });
 
-    it('debe filtrar materias por estado con los botones de filtro rápido', async () => {
+    it('debe filtrar materias por estado y por nivel con los botones de filtro rápido', async () => {
       const user = userEvent.setup();
       render(
         <TrackerProvider>
@@ -64,68 +68,30 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
         </TrackerProvider>
       );
 
+      // Filtros por estado
       const botonCursables = screen.getByRole('button', { name: /Cursables/i });
       await user.click(botonCursables);
-
-      // Verificamos que las materias de primer año estén presentes
       expect(screen.getByText('Análisis Matemático I')).toBeInTheDocument();
-    });
-  });
 
-  describe('ElectivasDrawer y MobileElectivasView', () => {
-    it('no debe renderizar el drawer si electivasOpen es false', () => {
-      render(
-        <TrackerProvider>
-          <ElectivasDrawer />
-        </TrackerProvider>
-      );
-      expect(screen.queryByText(/Materias Electivas/i)).not.toBeInTheDocument();
-    });
+      const botonRegulares = screen.getByRole('button', { name: /Regulares/i });
+      await user.click(botonRegulares);
 
-    it('debe abrir el drawer al invocar setElectivasOpen y listar electivas', async () => {
-      const user = userEvent.setup();
-      render(
-        <TrackerProvider>
-          <ElectivasWrapper />
-        </TrackerProvider>
-      );
+      const botonAprobadas = screen.getByRole('button', { name: /Aprobadas/i });
+      await user.click(botonAprobadas);
 
-      const boton = screen.getByRole('button', { name: /Abrir Electivas/i });
-      await user.click(boton);
+      const botonTodas = screen.getByRole('button', { name: /^Todas$/i });
+      await user.click(botonTodas);
 
-      expect(screen.getByText(/Materias Electivas/i)).toBeInTheDocument();
-      expect(screen.getByText(/Entornos Gráficos/i)).toBeInTheDocument();
+      // Filtros por nivel
+      const botonNivel1 = screen.getByRole('button', { name: /1º Año/i });
+      await user.click(botonNivel1);
+      expect(screen.getByText('Análisis Matemático I')).toBeInTheDocument();
+
+      const botonTodosNiveles = screen.getByRole('button', { name: /^Todos \(\d+\)$/i });
+      await user.click(botonTodosNiveles);
     });
 
-    it('MobileElectivasView debe renderizar correctamente para vista móvil', () => {
-      render(
-        <TrackerProvider>
-          <MobileElectivasView onBack={() => {}} />
-        </TrackerProvider>
-      );
-      expect(screen.getByText(/Materias Electivas/i)).toBeInTheDocument();
-    });
-
-    it('debe permitir seleccionar y alternar electivas en ElectivasDrawer', async () => {
-      const user = userEvent.setup();
-      render(
-        <TrackerProvider>
-          <ElectivasWrapper />
-        </TrackerProvider>
-      );
-
-      await user.click(screen.getByRole('button', { name: /Abrir Electivas/i }));
-      const materiaElectiva = screen.getByText(/Entornos Gráficos/i);
-      expect(materiaElectiva).toBeInTheDocument();
-      await user.click(materiaElectiva);
-
-      const botonCerrar = screen.getByLabelText(/Cerrar panel de electivas/i);
-      if (botonCerrar) {
-        await user.click(botonCerrar);
-      }
-    });
-
-    it('GridView debe permitir interactuar con una materia', async () => {
+    it('GridView debe permitir interactuar con una materia y su botón de info', async () => {
       const user = userEvent.setup();
       render(
         <TrackerProvider>
@@ -141,6 +107,65 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
       if (botonInfo) {
         await user.click(botonInfo);
       }
+    });
+  });
+
+  describe('ElectivasDrawer y MobileElectivasView', () => {
+    it('no debe renderizar el drawer si electivasOpen es false', () => {
+      render(
+        <TrackerProvider>
+          <ElectivasDrawer />
+        </TrackerProvider>
+      );
+      expect(screen.queryByText(/Materias Electivas/i)).not.toBeInTheDocument();
+    });
+
+    it('debe abrir el drawer al invocar setElectivasOpen y permitir filtrar por nivel', async () => {
+      const user = userEvent.setup();
+      render(
+        <TrackerProvider>
+          <ElectivasWrapper />
+        </TrackerProvider>
+      );
+
+      const boton = screen.getByRole('button', { name: /Abrir Electivas/i });
+      await user.click(boton);
+
+      expect(screen.getByText(/Materias Electivas/i)).toBeInTheDocument();
+
+      // Filtrar por 2º Año
+      const botonNivel2 = screen.getByRole('button', { name: /2º Año/i });
+      await user.click(botonNivel2);
+      expect(screen.getByText(/Entornos Gráficos/i)).toBeInTheDocument();
+
+      // Clic en la tarjeta de la electiva
+      await user.click(screen.getByText(/Entornos Gráficos/i));
+
+      // Cerrar drawer
+      const botonCerrar = screen.getByLabelText(/Cerrar panel de electivas/i);
+      await user.click(botonCerrar);
+    });
+
+    it('MobileElectivasView debe renderizar correctamente y responder a onBack y onClose', async () => {
+      const user = userEvent.setup();
+      const handleBack = vi.fn();
+      const handleClose = vi.fn();
+
+      render(
+        <TrackerProvider>
+          <MobileElectivasView onBack={handleBack} onClose={handleClose} />
+        </TrackerProvider>
+      );
+
+      expect(screen.getByText(/Materias Electivas/i)).toBeInTheDocument();
+
+      const botonMenu = screen.getByRole('button', { name: /Menú/i });
+      await user.click(botonMenu);
+      expect(handleBack).toHaveBeenCalledTimes(1);
+
+      const botonCerrar = screen.getByLabelText(/Cerrar panel/i);
+      await user.click(botonCerrar);
+      expect(handleClose).toHaveBeenCalledTimes(1);
     });
   });
 });
