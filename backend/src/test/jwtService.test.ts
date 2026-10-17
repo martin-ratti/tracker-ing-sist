@@ -17,4 +17,11 @@ describe('jwtService', () => {
   it('debe fallar al verificar un token alterado o inválido', () => {
     expect(() => verifyToken('token.invalido.falso')).toThrow();
   });
+
+  it('debe lanzar TOKEN_INVALID si el payload decodificado es un string primitivo', async () => {
+    const jwt = await import('jsonwebtoken');
+    const secret = 'tracker-utn-dev-secret-change-in-prod';
+    const stringToken = jwt.default.sign('payload-string-plano', secret);
+    expect(() => verifyToken(stringToken)).toThrow('TOKEN_INVALID');
+  });
 });

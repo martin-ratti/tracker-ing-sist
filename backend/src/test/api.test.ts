@@ -4,6 +4,10 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { app } from '../server.js';
+import { apiRouter } from '../routes/api.js';
+import { signToken } from '../auth/jwtService.js';
+import * as progressStore from '../storage/progressStore.js';
+import * as userService from '../auth/userService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,6 +81,15 @@ describe('API REST Integration Tests', () => {
         .send({ email: 'estudiante@frro.utn.edu.ar', password: 'claveSegura123' });
       expect(dupRes.status).toBe(409);
 
+      // Error inesperado en register -> 500
+      const regSpy = vi.spyOn(userService, 'registerUser').mockRejectedValueOnce(new Error('Fatal register error'));
+      const fatalRes = await request(app)
+        .post('/api/auth/register')
+        .send({ email: 'fatal@utn.edu.ar', password: 'claveSegura123' });
+      expect(fatalRes.status).toBe(500);
+      expect(fatalRes.body.error).toBe('Error al procesar el registro.');
+      regSpy.mockRestore();
+
       // Iniciar sesión
       const loginRes = await request(app)
         .post('/api/auth/login')
@@ -104,9 +117,40 @@ describe('API REST Integration Tests', () => {
       expect(invalid.status).toBe(401);
     });
 
+    it('debe responder 500 en /api/auth/login si ocurre un error inesperado', async () => {
+      const spy = vi.spyOn(userService, 'loginUser').mockRejectedValueOnce(new Error('DB failure'));
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'crash@utn.edu.ar', password: 'password123' });
+      expect(res.status).toBe(500);
+      expect(res.body.error).toBe('Error al iniciar sesión.');
+      spy.mockRestore();
+    });
+
     it('debe rechazar /api/auth/me sin token', async () => {
       const res = await request(app).get('/api/auth/me');
       expect(res.status).toBe(401);
+    });
+
+    it('debe responder 404 en /api/auth/me si el token pertenece a un usuario inexistente', async () => {
+      const fakeToken = signToken({ userId: 'usuario-inexistente-uuid', email: 'noexiste@utn.edu.ar' });
+      const res = await request(app)
+        .get('/api/auth/me')
+        .set('Authorization', `Bearer ${fakeToken}`);
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('Usuario no encontrado.');
+    });
+
+    it('el handler directo de /api/auth/me debe responder 401 si req.user es falsy', () => {
+      const meLayer = apiRouter.stack.find(s => s.route?.path === '/auth/me');
+      const meHandler = meLayer?.route?.stack?.[1]?.handle;
+      if (meHandler) {
+        const status = vi.fn().mockReturnThis();
+        const json = vi.fn();
+        meHandler({ user: undefined } as any, { status, json } as any, vi.fn());
+        expect(status).toHaveBeenCalledWith(401);
+        expect(json).toHaveBeenCalledWith(expect.objectContaining({ error: 'No autenticado.' }));
+      }
     });
   });
 
@@ -147,6 +191,18 @@ describe('API REST Integration Tests', () => {
         .post('/api/progress')
         .send({ metasExamen: 'invalido' });
       expect(badMetas.status).toBe(400);
+    });
+
+    it('debe responder 500 si saveProgress lanza un error no controlado', async () => {
+      const spy = vi.spyOn(progressStore, 'saveProgress').mockImplementation(() => {
+        throw new Error('Disk write error');
+      });
+      const res = await request(app)
+        .post('/api/progress')
+        .send({ ppsHoras: 50 });
+      expect(res.status).toBe(500);
+      expect(res.body.error).toBe('No se pudo guardar el progreso.');
+      spy.mockRestore();
     });
 
     it('debe permitir guardar progreso y luego resetearlo para usuario anónimo y autenticado', async () => {

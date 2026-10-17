@@ -24,8 +24,12 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: 'Error interno del servidor.' });
 });
 
-if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Servidor de Tracker UTN corriendo en http://localhost:${PORT}`);
+export function startServer(port = PORT) {
+  return app.listen(port, () => {
+    console.log(`🚀 Servidor de Tracker UTN corriendo en http://localhost:${port}`);
   });
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
 }

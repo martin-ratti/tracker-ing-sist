@@ -16,9 +16,9 @@ const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 describe('userService', () => {
   beforeEach(() => {
-    // Resetear archivo de usuarios para pruebas limpias
+    // Resetear archivo de usuarios para pruebas limpias (cubriendo rama donde no existe)
     if (fs.existsSync(USERS_FILE)) {
-      fs.writeFileSync(USERS_FILE, JSON.stringify({ users: [] }), 'utf-8');
+      fs.unlinkSync(USERS_FILE);
     }
   });
 
@@ -57,5 +57,21 @@ describe('userService', () => {
   it('debe generar la ruta correcta para el progreso del usuario', () => {
     const filePath = getUserProgressPath('user-xyz-123');
     expect(filePath).toContain('user-xyz-123.json');
+  });
+
+  it('debe recuperarse devolviendo lista vacía si users.json está corrupto', () => {
+    fs.writeFileSync(USERS_FILE, 'ESTO_NO_ES_JSON_VALIDO', 'utf-8');
+    const user = getUserById('inexistente');
+    expect(user).toBeNull();
+  });
+
+  it('debe crear directorios si no existen al llamar a getUserProgressPath', () => {
+    const progressDir = path.join(DATA_DIR, 'progress');
+    if (fs.existsSync(progressDir)) {
+      fs.rmSync(progressDir, { recursive: true, force: true });
+    }
+    const pathResult = getUserProgressPath('nuevo-progreso-user');
+    expect(fs.existsSync(progressDir)).toBe(true);
+    expect(pathResult).toContain('nuevo-progreso-user.json');
   });
 });

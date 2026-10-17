@@ -7,14 +7,17 @@ interface RateLimitRecord {
 
 const rateLimitStore = new Map<string, RateLimitRecord>();
 
-// Limpieza cada 5 minutos de registros expirados
-const cleanupInterval = setInterval(() => {
-  const now = Date.now();
+export function cleanupExpiredRecords(now = Date.now()): void {
   for (const [key, record] of rateLimitStore.entries()) {
     if (now > record.resetTime) {
       rateLimitStore.delete(key);
     }
   }
+}
+
+// Limpieza cada 5 minutos de registros expirados
+const cleanupInterval = setInterval(() => {
+  cleanupExpiredRecords();
 }, 5 * 60 * 1000);
 cleanupInterval.unref?.();
 

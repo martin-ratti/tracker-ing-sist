@@ -60,4 +60,13 @@ describe('progressStore', () => {
     expect(result.estados).toEqual({});
     expect(result.ppsHoras).toBe(0);
   });
+
+  it('debe crear el directorio de usuarios si no existe al solicitar la ruta del archivo', () => {
+    if (fs.existsSync(PROGRESS_USERS_DIR)) {
+      fs.rmSync(PROGRESS_USERS_DIR, { recursive: true, force: true });
+    }
+    const result = getProgress('usuario-directorio-nuevo');
+    expect(fs.existsSync(PROGRESS_USERS_DIR)).toBe(true);
+    expect(result.estados).toEqual({});
+  });
 });
