@@ -3,7 +3,7 @@ import { Network, Loader2 } from 'lucide-react';
 
 export const GraphSkeleton: React.FC = () => {
   return (
-    <div className="relative w-full h-[calc(100vh-125px)] bg-(--bg-base) flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative w-full h-full min-h-[300px] bg-(--bg-base) flex flex-col items-center justify-center overflow-hidden">
       {/* Patrón de fondo geométrico sutil */}
       <div 
         className="absolute inset-0 opacity-10 pointer-events-none"

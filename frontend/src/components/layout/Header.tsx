@@ -158,7 +158,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
   }, []);
 
   return (
-    <header className="bg-(--bg-surface)/95 backdrop-blur-md border-b border-(--border-color) sticky top-0 z-30 px-4 sm:px-8 xl:px-12 py-3 w-full">
+    <header className="bg-(--bg-surface)/95 backdrop-blur-md border-b border-(--border-color) sticky top-0 z-30 px-4 sm:px-8 xl:px-12 py-3 w-full shrink-0">
       {/* Barra superior con título y controles */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
         

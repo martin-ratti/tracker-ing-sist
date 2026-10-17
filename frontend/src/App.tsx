@@ -118,10 +118,12 @@ const TrackerMain: React.FC = () => {
 
   return (
     <AuthProvider onUserChanged={reloadProgress}>
-      <div className="min-h-screen bg-(--bg-base) text-(--text-body) flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
+      <div className={`bg-(--bg-base) text-(--text-body) flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200 ${
+        viewMode === 'grafo' ? 'h-dvh overflow-hidden' : 'min-h-screen'
+      }`}>
         {/* Banner de Modo Compartido (Solo Lectura) */}
         {isViewingShared && (
-          <div className="bg-sky-600 text-white px-4 py-2 text-xs font-mono flex flex-wrap items-center justify-between gap-2 z-40 border-b border-sky-400/50 shadow-md">
+          <div className="bg-sky-600 text-white px-4 py-2 text-xs font-mono flex flex-wrap items-center justify-between gap-2 z-40 border-b border-sky-400/50 shadow-md shrink-0">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-white animate-ping" />
               <span>
@@ -154,8 +156,8 @@ const TrackerMain: React.FC = () => {
         />
 
         {/* Contenido principal según vista seleccionada */}
-        <main className="flex-1 relative pb-16 sm:pb-0">
-          <div key={viewMode} className="view-transition-enter h-full">
+        <main className={`flex-1 relative ${viewMode === 'grafo' ? 'min-h-0 overflow-hidden pb-16 sm:pb-0' : 'pb-16 sm:pb-0'}`}>
+          <div key={viewMode} className="view-transition-enter h-full w-full">
             {viewMode === 'grafo' ? (
               <Suspense fallback={<GraphSkeleton />}>
                 <NetworkGraph />

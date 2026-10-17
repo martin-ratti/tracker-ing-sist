@@ -529,9 +529,18 @@ export const NetworkGraph: React.FC = () => {
     };
     window.addEventListener('resize', handleResize);
 
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        net.redraw();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
     return () => {
       clearTimeout(initialRedrawTimer);
       window.removeEventListener('resize', handleResize);
+      if (resizeObserver) resizeObserver.disconnect();
       net.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -611,7 +620,7 @@ export const NetworkGraph: React.FC = () => {
 
   return (
     <div 
-      className="relative w-full h-[calc(100vh-125px)] overflow-hidden transition-colors duration-300"
+      className="relative w-full h-full overflow-hidden transition-colors duration-300"
       style={{ backgroundColor: themeConfig.graph.bgBase }}
     >
       <section 
@@ -818,7 +827,7 @@ export const NetworkGraph: React.FC = () => {
       </div>
 
       {/* Controles flotantes de Zoom con touch targets de 44px */}
-      <div className="absolute bottom-5 right-4 md:right-5 flex flex-col gap-1.5 bg-(--bg-surface)/95 backdrop-blur-md p-1 rounded-xl border border-(--border-color) shadow-xl z-10">
+      <div className="absolute bottom-4 right-4 md:bottom-5 md:right-5 flex flex-col gap-1.5 bg-(--bg-surface)/95 backdrop-blur-md p-1 rounded-xl border border-(--border-color) shadow-xl z-10">
         <button
           type="button"
           onClick={handleZoomIn}
@@ -849,7 +858,7 @@ export const NetworkGraph: React.FC = () => {
       </div>
 
       {/* Guía rápida flotante */}
-      <div className="absolute bottom-5 left-5 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-xl bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) text-[11px] font-mono text-slate-800 dark:text-slate-200 pointer-events-none shadow-md font-medium">
+      <div className="absolute bottom-4 left-4 md:bottom-5 md:left-5 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-xl bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) text-[11px] font-mono text-slate-800 dark:text-slate-200 pointer-events-none shadow-md font-medium">
         <span className="flex items-center gap-1.5">
           <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click</kbd>
           <span>{interactionMode === 'camino' ? 'Resaltar dependencias' : 'Cambiar estado'}</span>
