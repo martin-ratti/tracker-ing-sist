@@ -57,4 +57,46 @@ describe('ThemeSelector - Selector de Temas y Modo Claro/Oscuro', () => {
 
     expect(document.documentElement.getAttribute('data-theme')).toBe('synthwave');
   });
+
+  it('debe cerrar el menú al presionar Escape o hacer click fuera del contenedor', async () => {
+    const user = userEvent.setup();
+    render(
+      <ThemeProvider>
+        <div>
+          <span data-testid="fuera">Elemento Fuera</span>
+          <ThemeSelector />
+        </div>
+      </ThemeProvider>
+    );
+
+    const boton = screen.getByRole('button', { name: /Cambiar tema visual/i });
+    await user.click(boton);
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+
+    // Click outside
+    await user.click(screen.getByTestId('fuera'));
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+
+    // Reabrir y presionar Escape
+    await user.click(boton);
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+
+  it('debe permitir seleccionar Modo Oscuro', async () => {
+    const user = userEvent.setup();
+    render(
+      <ThemeProvider>
+        <ThemeSelector />
+      </ThemeProvider>
+    );
+
+    const boton = screen.getByRole('button', { name: /Cambiar tema visual/i });
+    await user.click(boton);
+
+    const botonOscuro = screen.getByRole('button', { name: /Oscuro/i });
+    await user.click(botonOscuro);
+    expect(document.documentElement.getAttribute('data-mode')).toBe('dark');
+  });
 });

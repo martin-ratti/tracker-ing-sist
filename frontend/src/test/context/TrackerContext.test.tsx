@@ -238,11 +238,44 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     });
     expect(result.current.estadosElectivas[201]).toBe('regular');
 
+    // 2do toggle: regular -> aprobada
+    act(() => {
+      result.current.toggleElectivaEstado(201);
+    });
+    expect(result.current.estadosElectivas[201]).toBe('aprobada');
+
+    // 3er toggle: aprobada -> pendiente
+    act(() => {
+      result.current.toggleElectivaEstado(201);
+    });
+    expect(result.current.estadosElectivas[201]).toBe('pendiente');
+
     act(() => {
       result.current.setDimApproved(true);
       result.current.setCriticalChainActive(true);
     });
     expect(result.current.dimApproved).toBe(true);
     expect(result.current.criticalChainActive).toBe(true);
+  });
+
+  it('debe calcular countdown de meta derivando fecha desde el turno cuando fechaEstimada no está seteada', () => {
+    const { result } = renderHook(() => useTracker(), { wrapper });
+
+    act(() => {
+      result.current.setEstadoDirecto(1, 'regular');
+      result.current.setMetaExamen(1, {
+        materiaId: 1,
+        turnoId: 'feb-2026-l1',
+        turnoNombre: 'Febrero 1° Llamado'
+      });
+    });
+
+    expect(result.current.metasExamen[1]).toBeDefined();
+    expect(result.current.stats.proximaMeta).toBeDefined();
+
+    act(() => {
+      result.current.removeMetaExamen(1);
+    });
+    expect(result.current.metasExamen[1]).toBeUndefined();
   });
 });

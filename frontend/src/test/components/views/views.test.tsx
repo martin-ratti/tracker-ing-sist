@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
@@ -89,9 +89,13 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
 
       const botonTodosNiveles = screen.getByRole('button', { name: /^Todos \(\d+\)$/i });
       await user.click(botonTodosNiveles);
+
+      // Filtro Con Meta
+      const botonConMeta = screen.getByRole('button', { name: /Con Meta/i });
+      await user.click(botonConMeta);
     });
 
-    it('GridView debe permitir interactuar con una materia y su botón de info', async () => {
+    it('GridView debe permitir interactuar con una materia y su botón de info mediante click y teclado', async () => {
       const user = userEvent.setup();
       render(
         <TrackerProvider>
@@ -102,6 +106,11 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
       const am1 = screen.getByText('Análisis Matemático I');
       expect(am1).toBeInTheDocument();
       await user.click(am1);
+
+      // Teclado Enter y Espacio sobre la tarjeta
+      const card = am1.closest('[role="button"]') || am1;
+      fireEvent.keyDown(card, { key: 'Enter' });
+      fireEvent.keyDown(card, { key: ' ' });
 
       const botonInfo = screen.getAllByRole('button', { name: /Ver detalles/i })[0];
       if (botonInfo) {
@@ -139,14 +148,20 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
       expect(screen.getByText(/Entornos Gráficos/i)).toBeInTheDocument();
 
       // Clic en la tarjeta de la electiva
-      await user.click(screen.getByText(/Entornos Gráficos/i));
+      const cardElectiva = screen.getByText(/Entornos Gráficos/i);
+      await user.click(cardElectiva);
+
+      // Teclado Enter y Espacio en electiva
+      const cardContainer = cardElectiva.closest('[role="button"]') || cardElectiva;
+      fireEvent.keyDown(cardContainer, { key: 'Enter' });
+      fireEvent.keyDown(cardContainer, { key: ' ' });
 
       // Cerrar drawer
       const botonCerrar = screen.getByLabelText(/Cerrar panel de electivas/i);
       await user.click(botonCerrar);
     });
 
-    it('MobileElectivasView debe renderizar correctamente y responder a onBack y onClose', async () => {
+    it('MobileElectivasView debe renderizar correctamente y responder a onBack, onClose, filtros y teclado', async () => {
       const user = userEvent.setup();
       const handleBack = vi.fn();
       const handleClose = vi.fn();
@@ -158,6 +173,17 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
       );
 
       expect(screen.getByText(/Materias Electivas/i)).toBeInTheDocument();
+
+      // Filtro por nivel
+      const btnNivel3 = screen.getByRole('button', { name: /3º Año/i });
+      await user.click(btnNivel3);
+
+      // Clic y teclado en electiva en vista móvil
+      const cardMobile = screen.getByText(/Algoritmos Genéticos/i);
+      await user.click(cardMobile);
+      const cardMobileContainer = cardMobile.closest('[role="button"]') || cardMobile;
+      fireEvent.keyDown(cardMobileContainer, { key: 'Enter' });
+      fireEvent.keyDown(cardMobileContainer, { key: ' ' });
 
       const botonMenu = screen.getByRole('button', { name: /Menú/i });
       await user.click(botonMenu);

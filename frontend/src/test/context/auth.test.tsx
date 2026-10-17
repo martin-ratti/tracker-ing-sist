@@ -135,5 +135,30 @@ describe('Autenticación y Servicios API (AuthContext y api.ts)', () => {
       });
       expect(result.current.user).not.toBeNull();
     });
+
+    it('useAuth debe lanzar error si se utiliza fuera del AuthProvider', () => {
+      expect(() => renderHook(() => useAuth())).toThrow(
+        'useAuth debe usarse dentro de un AuthProvider'
+      );
+    });
+
+    it('debe invocar onUserChanged al iniciar sesión o cerrar sesión', () => {
+      const onUserChangedMock = vi.fn();
+      const customWrapper = ({ children }: { children: React.ReactNode }) => (
+        <AuthProvider onUserChanged={onUserChangedMock}>{children}</AuthProvider>
+      );
+
+      const { result } = renderHook(() => useAuth(), { wrapper: customWrapper });
+
+      act(() => {
+        result.current.completeAuth({ id: 'u3', email: 'test@utn.edu' });
+      });
+      expect(onUserChangedMock).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        result.current.logout();
+      });
+      expect(onUserChangedMock).toHaveBeenCalledTimes(2);
+    });
   });
 });

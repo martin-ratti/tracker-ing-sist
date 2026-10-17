@@ -36,6 +36,14 @@ const ReportModalWrapper: React.FC = () => {
   );
 };
 
+const ReportModalWithDataWrapper: React.FC = () => {
+  const { setReportOpen } = useTracker();
+  useEffect(() => {
+    setReportOpen(true);
+  }, [setReportOpen]);
+  return <PrintableReportModal />;
+};
+
 const AuthModalWrapper: React.FC = () => {
   const { openAuthModal } = useAuth();
   return (
@@ -112,6 +120,12 @@ describe('Componentes Modales', () => {
       expect(screen.getByText(/Analista Desarrollador/i)).toBeInTheDocument();
       expect(screen.getByText(/Ingeniero\/a en Sistemas/i)).toBeInTheDocument();
 
+      // Modificar horas de PPS con slider de rango
+      const rangeInput = document.querySelector('input[type="range"]');
+      if (rangeInput) {
+        fireEvent.change(rangeInput, { target: { value: '180' } });
+      }
+
       // Modificar horas de PPS con slider o input numérico
       const inputsNumber = screen.getAllByRole('spinbutton');
       if (inputsNumber.length > 0) {
@@ -150,7 +164,7 @@ describe('Componentes Modales', () => {
       });
     });
 
-    it('debe permitir descargar copia JSON y cargar respaldo desde archivo', async () => {
+    it('debe permitir descargar copia JSON y cargar respaldo desde archivo, manejando errores', async () => {
       const user = userEvent.setup();
       render(
         <TrackerProvider>
@@ -164,10 +178,19 @@ describe('Componentes Modales', () => {
       const botonDescargar = screen.getByRole('button', { name: /Descargar Copia/i });
       await user.click(botonDescargar);
 
-      // Cargar archivo JSON de respaldo
+      // Cargar archivo JSON de respaldo válido
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       expect(fileInput).toBeInTheDocument();
 
+      // Clic en botón "Restaurar Copia (.json)"
+      const botonRestaurar = screen.getByRole('button', { name: /Restaurar Copia/i });
+      await user.click(botonRestaurar);
+
+      // Subir archivo inválido para probar manejo de errores
+      const invalidFile = new File(['CORRUPT_NOT_JSON'], 'bad.json', { type: 'application/json' });
+      await user.upload(fileInput, invalidFile);
+
+      // Subir archivo válido
       const validJson = JSON.stringify({
         estados: { 1: 'aprobada' },
         notas: {},
@@ -175,7 +198,6 @@ describe('Componentes Modales', () => {
         perfil: { nombre: 'Test', legajo: '123' }
       });
       const validFile = new File([validJson], 'backup.json', { type: 'application/json' });
-
       await user.upload(fileInput, validFile);
     });
   });
@@ -194,6 +216,42 @@ describe('Componentes Modales', () => {
 
       const botonCerrar = screen.getByLabelText(/Cerrar reporte/i);
       fireEvent.click(botonCerrar);
+    });
+
+    it('debe renderizar materias aprobadas, regulares, electivas acreditadas y metas con opción de imprimir', async () => {
+      window.print = vi.fn();
+      localStorage.setItem('utn-sistemas-tracker-2023', JSON.stringify({
+        estados: { 1: 'aprobada', 2: 'regular' },
+        estadosElectivas: { 201: 'aprobada' },
+        notas: {},
+        ppsHoras: 0,
+        perfil: { nombre: 'Tester', legajo: '12345' },
+        metasExamen: {
+          2: {
+            materiaId: 2,
+            turnoId: 'feb-2026-l1',
+            turnoNombre: 'Febrero 1° Llamado',
+            fechaEstimada: '2026-02-16'
+          }
+        }
+      }));
+
+      render(
+        <TrackerProvider>
+          <ReportModalWithDataWrapper />
+        </TrackerProvider>
+      );
+
+      expect(await screen.findByText(/Ficha Curricular y Analítico/i)).toBeInTheDocument();
+      expect(await screen.findByText('APROBADA')).toBeInTheDocument();
+      expect(await screen.findByText('REGULAR')).toBeInTheDocument();
+      expect(screen.getByText(/Asignaturas Electivas Acreditadas/i)).toBeInTheDocument();
+      expect(screen.getByText(/Metas Tentativas de Examen Agendadas/i)).toBeInTheDocument();
+
+      // Clic en imprimir
+      const botonImprimir = screen.getByRole('button', { name: /Imprimir \/ PDF/i });
+      fireEvent.click(botonImprimir);
+      expect(window.print).toHaveBeenCalled();
     });
   });
 
@@ -231,7 +289,7 @@ describe('Componentes Modales', () => {
       expect(mockClipboard.writeText).toHaveBeenCalled();
     });
 
-    it('debe manejar error al copiar si clipboard falla y cerrar con Escape', async () => {
+    it('debe manejar error al copiar si clipboard falla y cerrar con Escape o click en backdrop', async () => {
       const handleClose = vi.fn();
       const mockClipboard = {
         writeText: vi.fn().mockRejectedValue(new Error('Permiso denegado'))
@@ -251,6 +309,13 @@ describe('Componentes Modales', () => {
       const botonCopiar = screen.getByRole('button', { name: /Copiar Enlace/i });
       await fireEvent.click(botonCopiar);
 
+      // Clic en backdrop
+      const backdrop = document.querySelector('div[aria-hidden="true"]');
+      if (backdrop) {
+        fireEvent.click(backdrop);
+        expect(handleClose).toHaveBeenCalled();
+      }
+
       fireEvent.keyDown(document, { key: 'Escape' });
       expect(handleClose).toHaveBeenCalled();
     });
@@ -266,6 +331,11 @@ describe('Componentes Modales', () => {
 
       expect(await screen.findByText(/Dashboard de Estadísticas/i)).toBeInTheDocument();
       expect(screen.getByText(/Distribución por Estado/i)).toBeInTheDocument();
+
+      // Cerrar modal
+      const closeBtn = screen.getByLabelText(/Cerrar modal/i);
+      expect(closeBtn).toBeInTheDocument();
+      fireEvent.click(closeBtn);
     });
   });
 
@@ -290,6 +360,56 @@ describe('Componentes Modales', () => {
       const linkLogin = screen.getByRole('button', { name: /Iniciá Sesión/i });
       await user.click(linkLogin);
       expect(screen.getByRole('heading', { name: /Iniciar Sesión/i })).toBeInTheDocument();
+    });
+
+    it('debe alternar la visibilidad de la contraseña al pulsar el botón del ojo', async () => {
+      const user = userEvent.setup();
+      render(
+        <AuthProvider>
+          <TrackerProvider>
+            <AuthModalWrapper />
+          </TrackerProvider>
+        </AuthProvider>
+      );
+
+      await user.click(screen.getByRole('button', { name: /Abrir Auth/i }));
+      const inputPass = screen.getByPlaceholderText(/Mínimo 6 caracteres/i);
+      expect(inputPass).toHaveAttribute('type', 'password');
+
+      // Botón ojo
+      const toggleEye = inputPass.parentElement?.querySelector('button');
+      if (toggleEye) {
+        await user.click(toggleEye);
+        expect(inputPass).toHaveAttribute('type', 'text');
+        await user.click(toggleEye);
+        expect(inputPass).toHaveAttribute('type', 'password');
+      }
+    });
+
+    it('debe permitir crear cuenta (registro) con progreso local previo', async () => {
+      const user = userEvent.setup();
+      render(
+        <AuthProvider>
+          <TrackerProvider>
+            <AuthModalWrapper />
+          </TrackerProvider>
+        </AuthProvider>
+      );
+
+      await user.click(screen.getByRole('button', { name: /Abrir Auth/i }));
+
+      // Cambiar a Crear Cuenta
+      const linkCrear = screen.getByRole('button', { name: /Registrate gratis/i });
+      await user.click(linkCrear);
+
+      const inputEmail = screen.getByPlaceholderText(/alumno@utn\.edu\.ar/i);
+      const inputPass = screen.getByPlaceholderText(/Mínimo 6 caracteres/i);
+
+      await user.type(inputEmail, 'nuevo.usuario@utn.edu.ar');
+      await user.type(inputPass, 'secreto123');
+
+      const botonSubmit = screen.getByRole('button', { name: /Crear Cuenta/i });
+      await user.click(botonSubmit);
     });
 
     it('debe iniciar sesión con Google y manejar login de email exitoso', async () => {

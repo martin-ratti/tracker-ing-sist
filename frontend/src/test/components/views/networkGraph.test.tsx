@@ -81,6 +81,11 @@ describe('NetworkGraph Component', () => {
     expect(screen.getAllByText(/Regularidad/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Aprobación/i).length).toBeGreaterThanOrEqual(1);
 
+    // Probar cierre de cadena crítica con su botón X
+    const botonCerrarCadena = screen.getByTitle(/Desactivar filtro de cadena crítica/i);
+    await user.click(botonCerrarCadena);
+    expect(screen.queryByTitle(/Desactivar filtro de cadena crítica/i)).not.toBeInTheDocument();
+
     // Cambiar a modo Camino Crítico y hacer clic en una materia (ej. #19 Base de Datos)
     await user.click(botonCamino);
     if (mockNetworkInstance?.clickHandler) {
@@ -93,6 +98,19 @@ describe('NetworkGraph Component', () => {
     expect(screen.getByText(/Base de Datos/i)).toBeInTheDocument();
     expect(screen.getByText(/Correlativas:/i)).toBeInTheDocument();
     expect(screen.getByText(/Posteriores:/i)).toBeInTheDocument();
+
+    // Clic en botón Ficha
+    const botonFicha = screen.getByRole('button', { name: /^Ficha$/i });
+    await user.click(botonFicha);
+
+    // Clic en botón Restablecer vista completa
+    const botonResetVista = screen.getByTitle(/Restablecer vista completa/i);
+    await user.click(botonResetVista);
+
+    // Probar redimensionamiento de ventana
+    act(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
 
     // Resetear foco de camino crítico
     if (mockNetworkInstance?.clickHandler) {

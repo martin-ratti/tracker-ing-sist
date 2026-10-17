@@ -13,6 +13,9 @@ const SubjectModalTester: React.FC<{ initialSubjectId?: number }> = ({ initialSu
       <button type="button" onClick={() => setSelectedSubjectId(initialSubjectId)}>
         Seleccionar Materia {initialSubjectId}
       </button>
+      <button type="button" onClick={() => setSelectedSubjectId(18)}>
+        Seleccionar Economía
+      </button>
       <button type="button" onClick={() => setSelectedSubjectId(9)}>
         Seleccionar AM II
       </button>
@@ -22,6 +25,7 @@ const SubjectModalTester: React.FC<{ initialSubjectId?: number }> = ({ initialSu
       <SubjectModal />
       <div data-testid="current-estado-1">{estados[1] || 'pendiente'}</div>
       <div data-testid="current-estado-9">{estados[9] || 'pendiente'}</div>
+      <div data-testid="current-estado-18">{estados[18] || 'pendiente'}</div>
     </div>
   );
 };
@@ -122,6 +126,13 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
     const botonProgramar = screen.getByRole('button', { name: /Programar mesa tentativa de final/i });
     await user.click(botonProgramar);
 
+    // Cambiar turno en el select
+    const turnoSelect = screen.getByLabelText(/Seleccionar Turno Oficial/i);
+    const options = (turnoSelect as HTMLSelectElement).options;
+    if (options.length > 1) {
+      fireEvent.change(turnoSelect, { target: { value: options[1].value } });
+    }
+
     // Ingresar comentario de meta
     const inputMetaComent = screen.getByPlaceholderText(/Repasar unidades/i);
     await user.type(inputMetaComent, 'Repasar integrales dobles');
@@ -166,6 +177,21 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
     expect(screen.getByText(/Análisis Num\. \(3º Año\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Simulación \(4º Año\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Automatización \(4º Año\)/i)).toBeInTheDocument();
+  });
+
+  it('debe mostrar requisitos de aprobación para cursar cuando la materia los exige (Economía)', async () => {
+    const user = userEvent.setup();
+    render(
+      <TrackerProvider>
+        <SubjectModalTester initialSubjectId={18} />
+      </TrackerProvider>
+    );
+
+    await user.click(screen.getByRole('button', { name: /Seleccionar Economía/i }));
+
+    expect(screen.getByText('Economía')).toBeInTheDocument();
+    expect(screen.getByText(/AM I \(Aprobada\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Álgebra \(Aprobada\)/i)).toBeInTheDocument();
   });
 
   it('debe cerrar el modal al hacer click en el botón de cerrar o presionar Escape', async () => {

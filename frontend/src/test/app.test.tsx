@@ -12,6 +12,7 @@ describe('App Root Component', () => {
   beforeEach(() => {
     localStorage.clear();
     window.location.hash = '';
+    window.history.pushState(null, '', '/');
   });
 
   it('debe montar la aplicación completa con todos sus providers y vista principal', async () => {
@@ -86,8 +87,14 @@ describe('App Root Component', () => {
     expect(bannerText).toBeInTheDocument();
     expect(screen.getAllByText('Carlos Alumno').length).toBeGreaterThan(0);
 
-    // Botón Volver a mi progreso
-    const botonSalir = screen.getByRole('button', { name: /Volver a mi progreso/i });
+    // Botón Importar como mi progreso
+    const botonImportar = screen.getByRole('button', { name: /Importar como mi progreso/i });
+    await user.click(botonImportar);
+
+    // Salir del modo compartido
+    window.location.hash = `#share=${encoded}`;
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    const botonSalir = await screen.findByRole('button', { name: /Volver a mi progreso/i });
     await user.click(botonSalir);
 
     expect(window.location.hash).toBe('');
@@ -114,5 +121,68 @@ describe('App Root Component', () => {
     const botonElectivas = within(bottomNav).getByRole('button', { name: /Electivas/i });
     await user.click(botonElectivas);
     expect(await screen.findByText(/Materias Electivas/i)).toBeInTheDocument();
+  });
+
+  it('debe abrir y cerrar los modales de Títulos, Estadísticas y Ayuda desde el Header', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Abrir Títulos
+    const btnTitulos = screen.getByRole('button', { name: /^Títulos$/i });
+    await user.click(btnTitulos);
+    expect(await screen.findByText(/Titulación Universitaria/i)).toBeInTheDocument();
+    const closeTitulos = screen.getByLabelText(/Cerrar seguimiento de títulos/i);
+    await user.click(closeTitulos);
+
+    // Abrir Estadísticas
+    const btnStats = screen.getByRole('button', { name: /^Estadísticas$/i });
+    await user.click(btnStats);
+    expect(await screen.findByText(/Dashboard de Estadísticas/i)).toBeInTheDocument();
+    const closeStats = screen.getByLabelText(/Cerrar modal/i);
+    await user.click(closeStats);
+
+    // Abrir Ayuda
+    const btnHelp = screen.getByRole('button', { name: /Ayuda y atajos/i });
+    await user.click(btnHelp);
+    expect(await screen.findByText(/Guía del Tracker Plan 2023/i)).toBeInTheDocument();
+    const closeHelp = screen.getByLabelText(/Cerrar guía de ayuda/i);
+    await user.click(closeHelp);
+  });
+
+  it('debe renderizar NotFoundView ante rutas desconocidas y responder a sus botones de acción', async () => {
+    const user = userEvent.setup();
+    window.history.pushState(null, '', '/ruta-inexistente-404');
+
+    render(<App />);
+
+    expect(await screen.findByText(/Error 404 · Ruta No Encontrada/i)).toBeInTheDocument();
+
+    // Navegar a Malla Curricular desde 404
+    const btnMalla404 = screen.getByRole('button', { name: /Ver Malla Curricular/i });
+    await user.click(btnMalla404);
+    expect(await screen.findByPlaceholderText(/Buscar materia o código/i)).toBeInTheDocument();
+
+    // Volver a ruta 404 para probar botón de Grafo
+    window.history.pushState(null, '', '/otra-ruta-404');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+
+    // Navegar a Grafo
+    const btnGrafo404 = await screen.findByRole('button', { name: /Explorar Grafo/i });
+    await user.click(btnGrafo404);
+    expect(await screen.findByTestId('mock-network-graph')).toBeInTheDocument();
+
+    // Volver a ruta 404 para probar Calendario
+    window.history.pushState(null, '', '/tercera-ruta-404');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    const btnCal404 = await screen.findByRole('button', { name: /Consultar Calendario de Exámenes/i });
+    await user.click(btnCal404);
+    expect(await screen.findByText(/Calendario Académico/i)).toBeInTheDocument();
+
+    // Volver a ruta 404 para probar Volver al inicio
+    window.history.pushState(null, '', '/cuarta-ruta-404');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    const btnHome404 = await screen.findByRole('button', { name: /Volver al Tracker Principal/i });
+    await user.click(btnHome404);
+    expect(window.location.pathname).toBe('/');
   });
 });

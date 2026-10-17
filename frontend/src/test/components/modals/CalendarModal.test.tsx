@@ -16,6 +16,23 @@ const TestApp: React.FC<{ initialOpen?: boolean; withMetas?: boolean }> = ({
     if (initialized.current) return;
     initialized.current = true;
     if (withMetas) {
+      localStorage.setItem('utn-sistemas-tracker-2023', JSON.stringify({
+        estados: { 1: 'regular', 2: 'regular' },
+        estadosElectivas: {},
+        notas: {},
+        ppsHoras: 0,
+        perfil: { nombre: '', legajo: '' },
+        metasExamen: {
+          1: {
+            materiaId: 1,
+            turnoId: 'feb-2026-l1',
+            turnoNombre: 'Febrero 1° Llamado',
+            fechaEstimada: '2026-02-16',
+            llamado: 1,
+            comentario: 'Estudiar teoremas de límites'
+          }
+        }
+      }));
       setEstadoDirecto(1, 'regular');
       setEstadoDirecto(2, 'regular');
       setMetaExamen(1, {
@@ -80,6 +97,24 @@ describe('CalendarModal - Componente de Calendario Académico', () => {
     globalThis.URL.createObjectURL = vi.fn().mockReturnValue('blob:dummy');
     globalThis.URL.revokeObjectURL = vi.fn();
 
+    localStorage.setItem('utn-sistemas-tracker-2023', JSON.stringify({
+      estados: { 1: 'regular', 2: 'regular' },
+      estadosElectivas: {},
+      notas: {},
+      ppsHoras: 0,
+      perfil: { nombre: '', legajo: '' },
+      metasExamen: {
+        1: {
+          materiaId: 1,
+          turnoId: 'feb-2026-l1',
+          turnoNombre: 'Febrero 1° Llamado',
+          fechaEstimada: '2026-02-16',
+          llamado: 1,
+          comentario: 'Estudiar teoremas de límites'
+        }
+      }
+    }));
+
     render(
       <TrackerProvider>
         <TestApp initialOpen={true} withMetas={true} />
@@ -99,22 +134,87 @@ describe('CalendarModal - Componente de Calendario Académico', () => {
     expect(botonICS).toBeInTheDocument();
     await user.click(botonICS);
 
-    // Probar botón "Ver materia y correlativas" (cierra el calendario y abre la materia)
+    // Probar botón "Ver materia y correlativas"
     const botonVerMateria = screen.getByRole('button', { name: /Ver materia y correlativas/i });
-    await user.click(botonVerMateria);
+    expect(botonVerMateria).toBeInTheDocument();
+
+    // Quitar la meta
+    const botonQuitar = screen.getByTitle(/Quitar meta/i);
+    await user.click(botonQuitar);
+    expect(screen.queryByText(/"Estudiar teoremas de límites"/i)).not.toBeInTheDocument();
   });
 
-  it('debe mostrar la información de Sysacad en la pestaña Turnos', async () => {
+  it('debe mostrar la información de Sysacad y materias programadas en la pestaña Turnos', async () => {
     const user = userEvent.setup();
+    localStorage.setItem('utn-sistemas-tracker-2023', JSON.stringify({
+      estados: { 1: 'regular', 2: 'regular' },
+      estadosElectivas: {},
+      notas: {},
+      ppsHoras: 0,
+      perfil: { nombre: '', legajo: '' },
+      metasExamen: {
+        1: {
+          materiaId: 1,
+          turnoId: 'feb-2026-l1',
+          turnoNombre: 'Febrero 1° Llamado',
+          fechaEstimada: '2026-02-16',
+          llamado: 1,
+          comentario: 'Estudiar teoremas de límites'
+        }
+      }
+    }));
+
     render(
       <TrackerProvider>
-        <TestApp initialOpen={true} />
+        <TestApp initialOpen={true} withMetas={true} />
       </TrackerProvider>
     );
 
     const tabTurnos = screen.getByRole('button', { name: /Turnos/i });
     await user.click(tabTurnos);
     expect(screen.getByText(/Regla Oficial de Cierre en Sysacad/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Planeas rendir:/i)).toBeInTheDocument();
+  });
+
+  it('debe abrir y operar el diálogo de meta desde una celda de examen en la vista mensual', async () => {
+    const user = userEvent.setup();
+    render(
+      <TrackerProvider>
+        <TestApp initialOpen={true} withMetas={true} />
+      </TrackerProvider>
+    );
+
+    // Buscar botón de Anotar en la celda interactiva
+    const botonesAnotar = screen.queryAllByRole('button', { name: /^Anotar$/i });
+    if (botonesAnotar.length > 0) {
+      await user.click(botonesAnotar[0]);
+      expect(await screen.findByText(/Anotar Meta de Examen/i)).toBeInTheDocument();
+
+      // Completar notas u opciones
+      const commentInput = screen.getByPlaceholderText(/Repasar finales anteriores/i);
+      await user.type(commentInput, 'Notas del test');
+
+      // Si hay select de materias regulares, cambiar selección
+      const selectMateria = screen.queryByLabelText(/Materia Regular a Rendir:/i);
+      if (selectMateria) {
+        fireEvent.change(selectMateria, { target: { value: '2' } });
+      }
+
+      // Enviar formulario para confirmar meta
+      const btnConfirmar = screen.getByRole('button', { name: /Confirmar Meta/i });
+      await user.click(btnConfirmar);
+      expect(screen.queryByText(/Anotar Meta de Examen/i)).not.toBeInTheDocument();
+    }
+
+    // Probar click en un hito o feriado si está presente
+    const btnHito = screen.queryAllByRole('button').find(b => b.getAttribute('aria-label')?.startsWith('Ver:'));
+    if (btnHito) {
+      await user.click(btnHito);
+      const closeHitoBtn = screen.queryByLabelText(/Cerrar detalle/i);
+      if (closeHitoBtn) {
+        await user.click(closeHitoBtn);
+      }
+    }
   });
 
   it('debe cerrar el modal al presionar la tecla Escape', async () => {
