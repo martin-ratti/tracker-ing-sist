@@ -235,12 +235,39 @@ export const GridView: React.FC = () => {
         </button>
       </div>
 
-      {/* Columnas por Nivel */}
-      <div className={`grid gap-4 ${
-        activeNivel === 'todos'
-          ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
-          : 'grid-cols-1 max-w-xl mx-auto'
-      }`}>
+      {filteredMaterias.length === 0 ? (
+        <div className="bg-(--bg-surface) border border-(--border-color) rounded-2xl p-8 sm:p-12 text-center max-w-lg mx-auto shadow-xl space-y-4 my-8">
+          <div className="w-14 h-14 rounded-2xl bg-(--bg-elevated) border border-(--border-color) flex items-center justify-center mx-auto">
+            <Search className="w-6 h-6 text-(--color-primary)" />
+          </div>
+          <div>
+            <h3 className="font-syne font-bold text-base sm:text-lg text-(--text-body)">
+              No se encontraron materias
+            </h3>
+            <p className="font-mono text-xs text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
+              No hay materias que coincidan con {search ? `"${search}"` : 'el filtro activo'}
+              {gridFilter !== 'todas' ? ` (${gridFilter})` : ''}
+              {activeNivel !== 'todos' ? ` en ${activeNivel}º Año` : ''}.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('');
+              setGridFilter('todas');
+              setActiveNivel('todos');
+            }}
+            className="px-4 py-2 rounded-xl font-mono text-xs font-semibold bg-(--bg-elevated) hover:bg-slate-800 border border-(--border-color) text-(--color-primary) hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-sm"
+          >
+            Restablecer búsqueda y filtros
+          </button>
+        </div>
+      ) : (
+        <div className={`grid gap-4 ${
+          activeNivel === 'todos'
+            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
+            : 'grid-cols-1 max-w-xl mx-auto'
+        }`}>
         {displayedNiveles.map(nivel => {
           const materiasNivel = filteredMaterias.filter(m => m.nivel === nivel);
           const totalNivel = MATERIAS_TRONCALES.filter(m => m.nivel === nivel && !m.esAdusiSolo).length;
@@ -352,7 +379,7 @@ export const GridView: React.FC = () => {
                         role="button"
                         tabIndex={0}
                         aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
-                        className={`group relative p-3 rounded-lg border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${cardStyle}`}
+                        className={`group relative p-3 rounded-lg border card-interactive cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${cardStyle}`}
                         onClick={() => handleToggleMateria(m.id)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
@@ -433,6 +460,7 @@ export const GridView: React.FC = () => {
           );
         })}
       </div>
+      )}
     </div>
   );
 };

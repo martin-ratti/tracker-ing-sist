@@ -19,7 +19,8 @@ import {
   PrintableReportModal,
   ProfileModal,
   StatsModal,
-  ShareModal
+  ShareModal,
+  NotFoundView
 } from './components';
 
 const NetworkGraph = lazy(() => import('./components/views/NetworkGraph').then(m => ({ default: m.NetworkGraph })));
@@ -47,6 +48,23 @@ const TrackerMain: React.FC = () => {
   const [titlesModalOpen, setTitlesModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
 
+  const [currentPath, setCurrentPath] = useState(() => {
+    if (typeof window === 'undefined') return '/';
+    return window.location.pathname;
+  });
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const isNotFound = useMemo(() => {
+    return currentPath !== '/' && currentPath !== '' && currentPath !== '/index.html';
+  }, [currentPath]);
+
   const electivasOpenRef = useRef(electivasOpen);
   useEffect(() => {
     electivasOpenRef.current = electivasOpen;
@@ -67,6 +85,36 @@ const TrackerMain: React.FC = () => {
   );
 
   useKeyboardShortcuts(shortcuts);
+
+  if (isNotFound) {
+    return (
+      <AuthProvider onUserChanged={reloadProgress}>
+        <NotFoundView 
+          onNavigateHome={() => {
+            if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
+            setCurrentPath('/');
+          }}
+          onNavigateMalla={() => {
+            if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
+            setCurrentPath('/');
+            setViewMode('malla');
+          }}
+          onNavigateGrafo={() => {
+            if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
+            setCurrentPath('/');
+            setViewMode('grafo');
+          }}
+          onOpenCalendar={() => {
+            if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
+            setCurrentPath('/');
+            setCalendarOpen(true);
+          }}
+        />
+        <CalendarModal />
+        <Toast />
+      </AuthProvider>
+    );
+  }
 
   return (
     <AuthProvider onUserChanged={reloadProgress}>
