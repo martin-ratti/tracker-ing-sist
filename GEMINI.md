@@ -8,7 +8,7 @@ Este documento proporciona las directrices, convenciones y mapa arquitectónico 
 
 - **Nombre:** Tracker UTN Sistemas (Plan 2023 · FRRo)
 - **Propósito:** Seguimiento interactivo del avance académico, correlatividades en tiempo real (cursado y finales), planificación de mesas de exámenes, cálculo de promedios y requerimientos de títulos para **Ingeniería en Sistemas de Información (UTN Facultad Regional Rosario)**.
-- **Producción:** Desplegado en Firebase Hosting: [https://tracker-isi-utn-6f213.web.app](https://tracker-isi-utn-6f213.web.app)
+- **Producción:** Desplegado en Firebase Hosting: [https://utn-sistemas-frro.web.app](https://utn-sistemas-frro.web.app) (Alternativo: [https://tracker-isi-frro.web.app](https://tracker-isi-frro.web.app))
 - **Arquitectura:** Monorepo gestionado con `pnpm workspaces`.
 
 ---
