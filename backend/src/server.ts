@@ -1,9 +1,11 @@
+import path from 'path';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { apiRouter } from './routes/api.js';
 
 dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 export const app = express();
 const PORT = Number(process.env.PORT) || 3001;

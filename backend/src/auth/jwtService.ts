@@ -1,9 +1,15 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || (() => {
-  console.warn('⚠️  JWT_SECRET no configurado en .env — usando secreto de desarrollo. NO usar en producción.');
+export function getJwtSecret(): string {
+  if (process.env.JWT_SECRET) {
+    return process.env.JWT_SECRET;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET debe estar configurado obligatoriamente en las variables de entorno en producción.');
+  }
   return 'tracker-utn-dev-secret-change-in-prod';
-})();
+}
+
 const JWT_EXPIRES_IN = '30d';
 
 export interface JwtPayload {
@@ -12,11 +18,11 @@ export interface JwtPayload {
 }
 
 export function signToken(payload: JwtPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: JWT_EXPIRES_IN });
 }
 
 export function verifyToken(token: string): JwtPayload {
-  const decoded = jwt.verify(token, JWT_SECRET);
+  const decoded = jwt.verify(token, getJwtSecret());
   if (typeof decoded === 'string') throw new Error('TOKEN_INVALID');
   return decoded as JwtPayload;
 }
