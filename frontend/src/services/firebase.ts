@@ -19,9 +19,9 @@ import {
 import type { Analytics } from 'firebase/analytics';
 import type { ProgresoUsuario } from '../types/plan';
 
-// Configuración leída de variables de entorno Vite con fallback al proyecto de producción
+// Configuración leída de variables de entorno Vite
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyD7Yh1b11OagYdYLHN8JtCnTjzo1I9Gp4E',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'tracker-isi-utn-6f213.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'tracker-isi-utn-6f213',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'tracker-isi-utn-6f213.firebasestorage.app',
