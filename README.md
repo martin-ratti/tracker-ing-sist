@@ -219,28 +219,28 @@ npm run deploy
 
 ## 🧪 Testing Automatizado y Cobertura (~100%)
 
-El monorepo cuenta con una suite integral y robusta de pruebas continuas que aseguran la fidelidad académica, la solidez matemática de las correlatividades y la ausencia de regresiones en la interfaz:
+El monorepo cuenta con una suite integral y robusta de **233 pruebas continuas automatizadas** (100% aprobadas) que aseguran la fidelidad académica, la solidez matemática de las correlatividades y la ausencia de regresiones en la interfaz:
 
-- 🔬 **Tests Unitarios y de Integración (163 tests, 100% aprobados):**
-  - **Backend (`tracker-backend`):** 33 tests con **~91.5% de cobertura** ejecutados con `vitest` y `v8`. Valida seguridad JWT, hash bcrypt, middlewares de rate limit y autenticación, persistencia atómica en storage JSON y endpoints REST con Supertest (`/api/auth`, `/api/progress`, `/api/plan`).
-  - **Frontend (`frontend`):** 130 tests con **80% de líneas general y 100% en lógica crítica** ejecutados con `vitest`, React Testing Library y JSDOM. Cobertura completa sobre el motor de correlatividades, cascada, promedios, calendario de turnos oficiales de examen, hooks accesibles (`useFocusTrap`, `useKeyboardShortcuts`), modales interactivos y renderizado de malla.
+- 🔬 **Tests Unitarios y de Integración (219 tests, 100% aprobados):**
+  - **Backend (`tracker-backend`):** 44 tests con **99.05% de cobertura de líneas** (100% en rutas `/api/auth`, `/api/progress`, `/api/plan` y middlewares) ejecutados con `vitest` y `v8`. Valida seguridad JWT, hash bcrypt, middlewares de rate limit y autenticación, persistencia atómica en storage JSON y endpoints REST con Supertest.
+  - **Frontend (`frontend`):** 175 tests con **87.3% de líneas general y 100% en componentes centrales** (`App.tsx`, `plan2023.ts`, módulo anual `calendario/`, primitivas UI, modales `TitlesModal`, `ShareModal`, `HelpModal`, `ThemeSelector`, utilitarios `icsExporter`, `share` y hooks de accesibilidad `useFocusTrap`, `useKeyboardShortcuts`, `useModalAnimation`). Ejecutados con `vitest`, React Testing Library y JSDOM. Cobertura completa sobre el motor de correlatividades, cascada, promedios, calendario de turnos oficiales de examen, diálogo interactivo de metas de examen, pantalla de error 404 y `ErrorBoundary` con respaldo de emergencia.
 
-- 🎭 **Pruebas End-to-End con Playwright (14 escenarios, 100% aprobados en ~13s):**
+- 🎭 **Pruebas End-to-End con Playwright (14 escenarios, 100% aprobados):**
   - Validación completa en navegador de la Malla interactiva (`malla.spec.ts`), modal de materias, actas y metas (`subject-modal.spec.ts`), calendario académico 2026/2027 (`calendario.spec.ts`), los 5 temas visuales y modo oscuro (`temas.spec.ts`), horas de electivas (`electivas.spec.ts`), estadísticas y títulos ADUSI/Ingeniería (`stats-titles.spec.ts`), perfil de alumno y avance compartido (`perfil-share.spec.ts`), responsive táctil móvil (`mobile.spec.ts`) y atajos de teclado globales (`atajos-teclado.spec.ts`).
 
 - ⚡ **Comandos de Test y Calidad:**
 
 ```bash
-# Ejecutar linter Oxlint (0 warnings y 0 errores en 81 archivos)
+# Ejecutar linter Oxlint (0 warnings y 0 errores en 89 archivos)
 pnpm lint
 
-# Ejecutar todos los tests unitarios y de integración (Backend + Frontend)
+# Ejecutar todos los tests unitarios y de integración (Backend + Frontend, 219 tests)
 pnpm test
 
 # Ejecutar y generar reporte de cobertura consolidada V8 en terminal
 pnpm test:coverage
 
-# Ejecutar la suite completa de pruebas End-to-End con Playwright
+# Ejecutar la suite completa de pruebas End-to-End con Playwright (14 tests)
 pnpm test:e2e
 ```
 
