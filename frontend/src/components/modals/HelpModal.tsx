@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useModalAnimation } from '../../hooks/useModalAnimation';
-import { X, HelpCircle, AlertTriangle } from 'lucide-react';
+import { X, HelpCircle, AlertTriangle, Heart, ExternalLink } from 'lucide-react';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -194,6 +194,26 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                 <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">?</kbd>
               </div>
             </div>
+          </div>
+
+          <div className="space-y-2 border-t border-(--border-color) pt-4">
+            <h3 className="text-sm font-bold text-(--text-body) flex items-center gap-1.5">
+              <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
+              <span>Agradecimientos e Inspiración</span>
+            </h3>
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-xs">
+              Inspirado en el diseño y concepto original de{' '}
+              <a
+                href="https://tracker-plan-de-estudio.vercel.app/index.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-(--color-primary) font-semibold hover:underline inline-flex items-center gap-1 transition-colors"
+              >
+                <span>Tracker Plan de Estudio de Lucas Alonso</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              . Adaptado, expandido y reescrito con arquitectura moderna para el Plan 2023 de Ingeniería en Sistemas de Información (UTN FRRo).
+            </p>
           </div>
 
           <div className="text-[11px] text-slate-500 border-t border-(--border-color) pt-3">

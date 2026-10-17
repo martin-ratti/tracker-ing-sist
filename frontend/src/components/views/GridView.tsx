@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { MATERIAS_TRONCALES } from '../../data/plan2023';
-import { Info, CheckCircle2, Clock, Search, Target, X } from 'lucide-react';
+import { Info, CheckCircle2, Clock, Search, Target, X, ExternalLink } from 'lucide-react';
 
 const NIVELES = [1, 2, 3, 4, 5];
 
@@ -461,6 +461,22 @@ export const GridView: React.FC = () => {
         })}
       </div>
       )}
+
+      {/* Footer de atribución y agradecimientos */}
+      <footer className="mt-8 pt-6 pb-4 border-t border-(--border-color) text-center text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 font-mono">
+        <span>Inspirado en el diseño original de</span>
+        <a
+          href="https://tracker-plan-de-estudio.vercel.app/index.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-(--color-primary) font-semibold hover:underline inline-flex items-center gap-1 transition-colors"
+        >
+          <span>Tracker Plan de Estudio (Lucas Alonso)</span>
+          <ExternalLink className="w-3 h-3" />
+        </a>
+        <span className="hidden sm:inline">·</span>
+        <span>UTN FRRo · Plan 2023</span>
+      </footer>
     </div>
   );
 };

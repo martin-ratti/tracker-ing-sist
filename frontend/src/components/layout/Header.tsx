@@ -25,7 +25,8 @@ import {
   Sun,
   Moon,
   Clock,
-  ChevronRight
+  ChevronRight,
+  ExternalLink
 } from 'lucide-react';
 import { useTheme, THEMES, type ThemeId } from '../../context/ThemeContext';
 import { formatPromedio } from '../../utils/formatters';
@@ -1169,10 +1170,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   </button>
                 </div>
 
-                {/* Pie Institucional */}
-                <div className="text-center pt-1 pb-2">
+                {/* Pie Institucional y Créditos */}
+                <div className="text-center pt-1 pb-2 space-y-1">
                   <p className="text-[9px] font-mono text-slate-400 dark:text-slate-500">
                     UTN FRRo · Ingeniería en Sistemas de Información
+                  </p>
+                  <p className="text-[9px] font-mono text-slate-400 dark:text-slate-500">
+                    Inspirado en{' '}
+                    <a
+                      href="https://tracker-plan-de-estudio.vercel.app/index.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-(--color-primary) hover:underline inline-flex items-center gap-0.5"
+                    >
+                      <span>Lucas Alonso</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
                   </p>
                 </div>
               </div>
