@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { 
   TURNOS_EXAMEN, 
   HITOS_ACADEMICOS, 
@@ -58,6 +59,8 @@ export const CalendarModal: React.FC = () => {
     setSelectedSubjectId,
     showToast
   } = useTracker();
+
+  const { isMounted, isVisible } = useModalAnimation(calendarOpen, 200);
 
   const [activeTab, setActiveTab] = useState<'calendario' | 'metas' | 'turnos'>('calendario');
   const [selectedHito, setSelectedHito] = useState<HitoAcademico | null>(null);
@@ -295,12 +298,14 @@ export const CalendarModal: React.FC = () => {
     setMetaDialog(null);
   };
 
-  if (!calendarOpen) return null;
+  if (!isMounted) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 no-scrollbar">
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-md"
+        className={`fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-200 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         aria-hidden="true"
         onClick={() => setCalendarOpen(false)}
       />
@@ -309,7 +314,9 @@ export const CalendarModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="calendar-modal-title"
-        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh] sm:max-h-[90vh] my-auto"
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[90vh] my-auto transform transition-all duration-200 ease-out ${
+          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+        }`}
       >
         {/* Header institucional */}
         <div className="p-3.5 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
@@ -351,7 +358,7 @@ export const CalendarModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleExportICS}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono bg-(--color-primary-bg) text-(--color-primary) border border-(--color-primary-border) hover:opacity-90 transition-opacity shadow-sm"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono bg-(--color-primary-bg) text-(--color-primary) border border-(--color-primary-border) hover:opacity-90 active:scale-95 transition-all shadow-sm"
                 title="Exportar mis metas a formato .ics para Google Calendar y Apple Calendar"
               >
                 <Download className="w-3.5 h-3.5 shrink-0" />
@@ -363,7 +370,7 @@ export const CalendarModal: React.FC = () => {
               type="button"
               onClick={() => setCalendarOpen(false)}
               aria-label="Cerrar calendario académico"
-              className="p-2 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--border-color)/50 transition-colors min-w-9 min-h-9 flex items-center justify-center shrink-0"
+              className="p-2 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--border-color)/50 active:scale-90 transition-all min-w-9 min-h-9 flex items-center justify-center shrink-0"
             >
               <X className="w-5 h-5" />
             </button>

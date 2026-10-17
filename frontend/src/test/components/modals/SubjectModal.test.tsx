@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
@@ -182,12 +182,16 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
     const botonCerrar = screen.getByLabelText(/Cerrar detalles de la materia/i);
     await user.click(botonCerrar);
 
-    expect(screen.queryByText('Análisis Matemático I')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Análisis Matemático I')).not.toBeInTheDocument();
+    });
 
     // Reabrir y cerrar con Escape
     await user.click(screen.getByRole('button', { name: /Seleccionar Materia 1/i }));
     expect(screen.getByText('Análisis Matemático I')).toBeInTheDocument();
     fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByText('Análisis Matemático I')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Análisis Matemático I')).not.toBeInTheDocument();
+    });
   });
 });

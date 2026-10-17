@@ -3,6 +3,7 @@ import { useTracker } from '../../context/TrackerContext';
 import { MATERIAS_ELECTIVAS, MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { X, Sparkles, CheckCircle2, Clock, BookOpen } from 'lucide-react';
 import { useHistoryBack } from '../../hooks/useHistoryBack';
+import { useModalAnimation } from '../../hooks/useModalAnimation';
 
 export const ElectivasDrawer: React.FC = () => {
   const {
@@ -17,6 +18,7 @@ export const ElectivasDrawer: React.FC = () => {
   } = useTracker();
 
   const [nivelFilter, setNivelFilter] = useState<number | 'todos'>('todos');
+  const { isMounted, isVisible } = useModalAnimation(electivasOpen, 300);
 
   useHistoryBack(electivasOpen, () => setElectivasOpen(false));
 
@@ -30,7 +32,7 @@ export const ElectivasDrawer: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKey);
   }, [electivasOpen, setElectivasOpen]);
 
-  if (!electivasOpen) return null;
+  if (!isMounted) return null;
 
   const filteredElectivas = MATERIAS_ELECTIVAS.filter(
     e => nivelFilter === 'todos' || e.nivel === nivelFilter
@@ -38,14 +40,21 @@ export const ElectivasDrawer: React.FC = () => {
 
   return (
     <div data-testid="electivas-drawer" className="hidden md:block fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
+      {/* Backdrop con fade-in y fade-out */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className={`absolute inset-0 bg-black/65 backdrop-blur-sm transition-opacity duration-300 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        aria-hidden="true"
         onClick={() => setElectivasOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
-        <div className="w-full sm:w-screen max-w-xl bg-(--bg-surface) border-l border-(--border-color) shadow-2xl flex flex-col">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10 pointer-events-none">
+        <div 
+          className={`w-full sm:w-screen max-w-xl bg-(--bg-surface) border-l border-(--border-color) shadow-2xl flex flex-col pointer-events-auto transform transition-transform duration-300 ease-out ${
+            isVisible ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
           
           {/* Header del Panel */}
           <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated)">
@@ -68,7 +77,7 @@ export const ElectivasDrawer: React.FC = () => {
                 type="button"
                 onClick={() => setElectivasOpen(false)}
                 aria-label="Cerrar panel de electivas"
-                className="p-2 rounded-lg text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 transition-all min-w-9 min-h-9 flex items-center justify-center shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>

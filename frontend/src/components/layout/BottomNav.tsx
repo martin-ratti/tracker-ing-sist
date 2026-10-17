@@ -26,7 +26,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={() => setViewMode('malla')}
-        className={`flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all ${
+        className={`flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl active:scale-90 transition-all ${
           viewMode === 'malla'
             ? 'text-(--color-primary) font-bold'
             : 'text-slate-500 dark:text-slate-400 hover:text-(--text-body)'
@@ -42,7 +42,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={() => setViewMode('grafo')}
-        className={`flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all ${
+        className={`flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl active:scale-90 transition-all ${
           viewMode === 'grafo'
             ? 'text-(--color-primary) font-bold'
             : 'text-slate-500 dark:text-slate-400 hover:text-(--text-body)'
@@ -58,7 +58,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={() => setCalendarOpen(true)}
-        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-(--text-body) transition-all relative"
+        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-(--text-body) active:scale-90 transition-all relative"
       >
         <div className="p-1 rounded-lg relative">
           <CalendarDays className="w-5 h-5" />
@@ -76,7 +76,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={onOpenElectivas}
-        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-(--text-body) transition-all"
+        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-(--text-body) active:scale-90 transition-all"
       >
         <div className="p-1 rounded-lg">
           <Sparkles className="w-5 h-5" />
@@ -88,7 +88,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={onOpenMenu}
-        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-(--text-body) transition-all"
+        className="flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-(--text-body) active:scale-90 transition-all"
       >
         <div className="p-1 rounded-lg">
           <Menu className="w-5 h-5" />

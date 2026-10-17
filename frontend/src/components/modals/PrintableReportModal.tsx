@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP } from '../../data/plan2023';
 import { 
   X, 
@@ -25,6 +26,7 @@ export const PrintableReportModal: React.FC = () => {
     metasExamen
   } = useTracker();
 
+  const { isMounted, isVisible } = useModalAnimation(reportOpen, 200);
   const modalRef = useFocusTrap(reportOpen);
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export const PrintableReportModal: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKey);
   }, [reportOpen, setReportOpen]);
 
-  if (!reportOpen) return null;
+  if (!isMounted) return null;
 
   const handlePrint = () => {
     window.print();
@@ -57,7 +59,9 @@ export const PrintableReportModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 no-scrollbar print:p-0 print:static">
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm print:hidden"
+        className={`fixed inset-0 bg-black/80 backdrop-blur-sm print:hidden transition-opacity duration-200 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         aria-hidden="true"
         onClick={() => setReportOpen(false)}
       />
@@ -66,7 +70,9 @@ export const PrintableReportModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="report-modal-title"
-        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto print:border-none print:shadow-none print:max-w-none print:max-h-none print:rounded-none print:bg-white print:text-black"
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl my-auto print:border-none print:shadow-none print:max-w-none print:max-h-none print:rounded-none print:bg-white print:text-black transform transition-all duration-200 ease-out ${
+          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+        }`}
       >
         {/* Barra de Acciones (oculta al imprimir) */}
         <div className="p-3.5 sm:p-4 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between gap-3 shrink-0 print:hidden">
@@ -95,7 +101,7 @@ export const PrintableReportModal: React.FC = () => {
             <button
               type="button"
               onClick={() => setProfileModalOpen(true)}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-(--bg-surface) hover:bg-(--border-color)/40 text-(--text-body) border border-(--border-color) font-mono text-xs transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-(--bg-surface) hover:bg-(--border-color)/40 active:scale-95 text-(--text-body) border border-(--border-color) font-mono text-xs transition-all"
               title="Editar nombre y legajo"
             >
               <User className="w-3.5 h-3.5" />
@@ -105,7 +111,7 @@ export const PrintableReportModal: React.FC = () => {
             <button
               type="button"
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg bg-(--color-primary) hover:opacity-90 text-slate-950 font-mono text-xs font-bold transition-opacity shadow-lg"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg bg-(--color-primary) hover:opacity-90 active:scale-95 text-slate-950 font-mono text-xs font-bold transition-all shadow-lg"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Imprimir / PDF</span>
@@ -115,7 +121,7 @@ export const PrintableReportModal: React.FC = () => {
               type="button"
               onClick={() => setReportOpen(false)}
               aria-label="Cerrar reporte"
-              className="p-1.5 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--border-color)/40 transition-colors min-w-9 min-h-9 flex items-center justify-center shrink-0"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--border-color)/40 active:scale-90 transition-all min-w-9 min-h-9 flex items-center justify-center shrink-0"
             >
               <X className="w-5 h-5" />
             </button>

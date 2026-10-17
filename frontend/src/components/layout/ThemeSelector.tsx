@@ -34,7 +34,7 @@ export const ThemeSelector: React.FC = () => {
         aria-label="Cambiar tema visual"
         aria-expanded={open}
         aria-haspopup="true"
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-(--text-body) hover:border-slate-500 font-mono text-xs transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-(--text-body) hover:border-slate-500 active:scale-95 font-mono text-xs transition-all"
         title="Cambiar paleta cromática y modo claro/oscuro"
       >
         <Palette className="w-3.5 h-3.5" style={{ color: THEMES[theme].primaryColor }} />
@@ -55,7 +55,7 @@ export const ThemeSelector: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setColorMode('dark')}
-                className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium transition-all ${
+                className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium active:scale-95 transition-all ${
                   colorMode === 'dark'
                     ? 'bg-slate-800 text-white font-bold shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -67,7 +67,7 @@ export const ThemeSelector: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setColorMode('light')}
-                className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium transition-all ${
+                className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium active:scale-95 transition-all ${
                   colorMode === 'light'
                     ? 'bg-white text-slate-900 font-bold shadow-sm border border-slate-200'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -94,7 +94,7 @@ export const ThemeSelector: React.FC = () => {
                   setTheme(id);
                   setOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-all ${
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left active:scale-98 transition-all ${
                   isSelected
                     ? 'bg-(--bg-elevated) text-(--text-body) font-bold border border-(--border-color)'
                     : 'text-slate-600 dark:text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated)'

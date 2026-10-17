@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { encodeProgress } from '../../utils/share';
 import { X, Share2, Copy, Check, Eye } from 'lucide-react';
 
@@ -11,6 +12,7 @@ interface ShareModalProps {
 
 export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
   const { estados, estadosElectivas, perfil, ppsHoras, stats, showToast } = useTracker();
+  const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
   const [copied, setCopied] = useState(false);
   const modalRef = useFocusTrap(isOpen);
 
@@ -23,7 +25,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isMounted) return null;
 
   const shareCode = encodeProgress({
     estados,
@@ -45,9 +47,11 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200 no-scrollbar">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
       <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         aria-hidden="true"
         onClick={onClose}
       />
@@ -55,7 +59,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 my-auto"
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl my-auto transform transition-all duration-200 ease-out ${
+          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+        }`}
       >
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
@@ -75,7 +81,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors shrink-0"
+            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 transition-all shrink-0"
           >
             <X className="w-5 h-5" />
           </button>

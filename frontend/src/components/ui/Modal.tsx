@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useHistoryBack } from '../../hooks/useHistoryBack';
+import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -22,6 +23,7 @@ export const Modal: React.FC<ModalProps> = ({
   maxWidth = 'max-w-2xl',
   children
 }) => {
+  const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
   const modalRef = useFocusTrap(isOpen);
   useHistoryBack(isOpen, onClose);
 
@@ -34,12 +36,14 @@ export const Modal: React.FC<ModalProps> = ({
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isMounted) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
       <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         aria-hidden="true"
         onClick={onClose}
       />
@@ -47,7 +51,9 @@ export const Modal: React.FC<ModalProps> = ({
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full ${maxWidth} max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl modal-pop-in flex flex-col my-auto`}
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full ${maxWidth} max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col my-auto transform transition-all duration-200 ease-out ${
+          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+        }`}
       >
         <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) relative shrink-0">
           <div className="flex items-start justify-between gap-4">
@@ -62,7 +68,7 @@ export const Modal: React.FC<ModalProps> = ({
               type="button"
               onClick={onClose}
               aria-label="Cerrar"
-              className="p-2 -mr-1 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors min-w-9 min-h-9 flex items-center justify-center shrink-0"
+              className="p-2 -mr-1 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 transition-all min-w-9 min-h-9 flex items-center justify-center shrink-0"
             >
               <X className="w-5 h-5" />
             </button>

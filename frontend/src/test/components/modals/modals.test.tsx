@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useEffect } from 'react';
 import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
@@ -145,7 +145,9 @@ describe('Componentes Modales', () => {
       const botonGuardar = screen.getByRole('button', { name: /Guardar Datos Alumno/i });
       await user.click(botonGuardar);
 
-      expect(screen.queryByText(/Perfil y Copia de Seguridad/i)).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText(/Perfil y Copia de Seguridad/i)).not.toBeInTheDocument();
+      });
     });
 
     it('debe permitir descargar copia JSON y cargar respaldo desde archivo', async () => {
@@ -317,7 +319,9 @@ describe('Componentes Modales', () => {
       const botonSubmit = screen.getByRole('button', { name: /Iniciar Sesión/i });
       expect(botonSubmit).toBeInTheDocument();
       await user.click(botonSubmit);
-      expect(screen.queryByRole('heading', { name: /Iniciar Sesión/i })).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByRole('heading', { name: /Iniciar Sesión/i })).not.toBeInTheDocument();
+      });
     });
 
     it('debe validar email inválido y contraseña corta', async () => {

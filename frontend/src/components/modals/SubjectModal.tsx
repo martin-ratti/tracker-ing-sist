@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useHistoryBack } from '../../hooks/useHistoryBack';
+import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { 
   X, 
@@ -49,19 +50,29 @@ export const SubjectModal: React.FC = () => {
   const [metaComentario, setMetaComentario] = useState<string>('');
   const [showMetaForm, setShowMetaForm] = useState<boolean>(false);
 
-  const materia = selectedSubjectId ? MATERIAS_MAP[selectedSubjectId] : null;
-  const modalRef = useFocusTrap(Boolean(materia));
+  const isOpen = Boolean(selectedSubjectId);
+  const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
+
+  const rawMateria = selectedSubjectId ? MATERIAS_MAP[selectedSubjectId] : null;
+  const [lastSubject, setLastSubject] = useState(rawMateria);
+  if (rawMateria && rawMateria !== lastSubject) {
+    setLastSubject(rawMateria);
+  }
+  const activeMateria = rawMateria || lastSubject;
+
+  const modalRef = useFocusTrap(isOpen);
   const handleClose = React.useCallback(() => setSelectedSubjectId(null), [setSelectedSubjectId]);
-  useHistoryBack(Boolean(selectedSubjectId), handleClose);
+  useHistoryBack(isOpen, handleClose);
 
   // Cerrar con Escape
   useEffect(() => {
+    if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSelectedSubjectId(null);
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
-  }, [setSelectedSubjectId]);
+  }, [isOpen, setSelectedSubjectId]);
 
   const [prevSubjectId, setPrevSubjectId] = useState(selectedSubjectId);
 
@@ -95,7 +106,8 @@ export const SubjectModal: React.FC = () => {
     }
   }
 
-  if (!materia) return null;
+  if (!isMounted || !activeMateria) return null;
+  const materia = activeMateria;
 
   const currentEstado = estados[materia.id] || 'pendiente';
   const currentMeta = metasExamen[materia.id];
@@ -181,7 +193,9 @@ export const SubjectModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
       <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         aria-hidden="true"
         onClick={() => setSelectedSubjectId(null)}
       />
@@ -190,7 +204,9 @@ export const SubjectModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="subject-modal-title"
-        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl modal-pop-in flex flex-col my-auto"
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col my-auto transform transition-all duration-200 ease-out ${
+          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+        }`}
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) relative shrink-0">
@@ -220,7 +236,7 @@ export const SubjectModal: React.FC = () => {
               type="button"
               onClick={() => setSelectedSubjectId(null)}
               aria-label="Cerrar detalles de la materia"
-              className="p-2 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors min-w-9 min-h-9 flex items-center justify-center shrink-0"
+              className="p-2 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 transition-all min-w-9 min-h-9 flex items-center justify-center shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
@@ -265,7 +281,7 @@ export const SubjectModal: React.FC = () => {
                 onClick={() => {
                   if (currentEstado !== 'pendiente') toggleMateriaEstado(materia.id);
                 }}
-                className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 transition-all min-h-11 ${
+                className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 active:scale-95 transition-all min-h-11 ${
                   currentEstado === 'pendiente'
                     ? 'bg-slate-200 dark:bg-slate-800 border-slate-400 dark:border-slate-600 text-(--text-body) font-bold shadow-md'
                     : 'bg-(--bg-elevated) border-(--border-color) text-slate-500 dark:text-slate-400 hover:border-slate-400'
@@ -280,7 +296,7 @@ export const SubjectModal: React.FC = () => {
                 onClick={() => {
                   if (currentEstado === 'pendiente') toggleMateriaEstado(materia.id);
                 }}
-                className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 transition-all min-h-11 ${
+                className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 active:scale-95 transition-all min-h-11 ${
                   currentEstado === 'regular'
                     ? 'font-bold shadow-md'
                     : 'bg-(--bg-elevated) border-(--border-color) text-slate-500 dark:text-slate-400 hover:border-slate-400'
@@ -305,7 +321,7 @@ export const SubjectModal: React.FC = () => {
                     showToast(`🟢 ${materia.nombre} marcada como APROBADA`, 'success');
                   }
                 }}
-                className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 transition-all min-h-11 ${
+                className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 active:scale-95 transition-all min-h-11 ${
                   currentEstado === 'aprobada'
                     ? 'font-bold shadow-md'
                     : 'bg-(--bg-elevated) border-(--border-color) text-slate-500 dark:text-slate-400 hover:border-slate-400'

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { 
   X, 
   Mail, 
@@ -18,6 +19,7 @@ import {
 
 export const AuthModal: React.FC = () => {
   const { isAuthModalOpen, closeAuthModal, login, register, loginWithGoogle } = useAuth();
+  const { isMounted, isVisible } = useModalAnimation(isAuthModalOpen, 200);
   const modalRef = useFocusTrap(isAuthModalOpen);
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
@@ -43,7 +45,7 @@ export const AuthModal: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKey);
   }, [isAuthModalOpen, handleClose]);
 
-  if (!isAuthModalOpen) return null;
+  if (!isMounted) return null;
 
   const handleGoogleSignIn = async () => {
     setError(null);
@@ -102,7 +104,9 @@ export const AuthModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
       <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         aria-hidden="true"
         onClick={handleClose}
       />
@@ -111,7 +115,9 @@ export const AuthModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto"
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl my-auto transform transition-all duration-200 ease-out ${
+          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+        }`}
       >
         {/* Cabecera */}
         <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
@@ -140,7 +146,7 @@ export const AuthModal: React.FC = () => {
             type="button"
             onClick={handleClose}
             aria-label="Cerrar modal de autenticación"
-            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) transition-colors shrink-0"
+            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 transition-all shrink-0"
           >
             <X className="w-5 h-5" />
           </button>

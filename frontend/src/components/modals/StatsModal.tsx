@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../../data/plan2023';
 import { 
   X, 
@@ -18,6 +19,7 @@ interface StatsModalProps {
 
 export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
   const { stats, estados, notas } = useTracker();
+  const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
   const modalRef = useFocusTrap(isOpen);
 
   React.useEffect(() => {
@@ -84,13 +86,22 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
     return entries.sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
   }, [notas]);
 
-  if (!isOpen) return null;
+  if (!isMounted) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm no-scrollbar">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
+      <div
+        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+        onClick={onClose}
+      />
       <div 
         ref={modalRef}
-        className="relative w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200"
+        className={`relative z-10 w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto transform transition-all duration-200 ease-out ${
+          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+        }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="stats-title"
@@ -107,7 +118,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) rounded-xl transition-colors min-w-9 min-h-9 flex items-center justify-center"
+            className="p-2 text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 rounded-xl transition-all min-w-9 min-h-9 flex items-center justify-center shrink-0"
             aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
