@@ -86,47 +86,115 @@ export const NetworkGraph: React.FC = () => {
     setFocusedSubjectIdRef.current = setFocusedSubjectId;
   }, [setFocusedSubjectId]);
 
-  // Cálculo de dependencias (Camino Crítico: ancestros y descendientes)
+  // Cálculo de dependencias (Camino Crítico: correlativas y posteriores clasificadas por regularidad y aprobación)
   const dependenciesTree = useMemo(() => {
     if (!focusedSubjectId) return null;
 
     const ancestors = new Set<number>();
-    const descendants = new Set<number>();
+    const ancestorsRegular = new Set<number>();
+    const ancestorsAprobada = new Set<number>();
 
-    function findAncestors(currId: number) {
+    const descendants = new Set<number>();
+    const descendantsRegular = new Set<number>();
+    const descendantsAprobada = new Set<number>();
+
+    // 1. Ancestros (Correlativas previas)
+    function traceAncestors(currId: number, isApprovalRequired: boolean) {
       const m = MATERIAS_MAP[currId];
       if (!m) return;
-      const reqs = [
-        ...m.reqRegular,
+
+      ancestors.add(currId);
+
+      if (isApprovalRequired) {
+        ancestorsAprobada.add(currId);
+        ancestorsRegular.delete(currId);
+      } else if (!ancestorsAprobada.has(currId)) {
+        ancestorsRegular.add(currId);
+      }
+
+      // Requisitos aprobados
+      const aprs = [
         ...(Array.isArray(m.reqAprobada) ? m.reqAprobada : []),
         ...(Array.isArray(m.reqRendirAprobada) ? m.reqRendirAprobada : [])
       ];
-      reqs.forEach(r => {
-        if (!ancestors.has(r)) {
-          ancestors.add(r);
-          findAncestors(r);
-        }
+      aprs.forEach(r => {
+        traceAncestors(r, true);
+      });
+
+      // Requisitos regulares
+      m.reqRegular.forEach(r => {
+        traceAncestors(r, isApprovalRequired);
       });
     }
 
-    function findDescendants(currId: number) {
+    const focusedMateria = MATERIAS_MAP[focusedSubjectId];
+    if (focusedMateria) {
+      // Directas de aprobación
+      const directApr = [
+        ...(Array.isArray(focusedMateria.reqAprobada) ? focusedMateria.reqAprobada : []),
+        ...(Array.isArray(focusedMateria.reqRendirAprobada) ? focusedMateria.reqRendirAprobada : [])
+      ];
+      directApr.forEach(r => traceAncestors(r, true));
+
+      // Directas de regularidad
+      focusedMateria.reqRegular.forEach(r => {
+        traceAncestors(r, false);
+      });
+    }
+
+    // 2. Descendientes (Materias posteriores que destraba)
+    MATERIAS_GRAFO.forEach(candidate => {
+      const reqApr = (Array.isArray(candidate.reqAprobada) && candidate.reqAprobada.includes(focusedSubjectId)) ||
+        (Array.isArray(candidate.reqRendirAprobada) && candidate.reqRendirAprobada.includes(focusedSubjectId));
+      const reqReg = candidate.reqRegular.includes(focusedSubjectId);
+
+      if (reqApr) {
+        descendants.add(candidate.id);
+        descendantsAprobada.add(candidate.id);
+      } else if (reqReg) {
+        descendants.add(candidate.id);
+        descendantsRegular.add(candidate.id);
+      }
+    });
+
+    // Expandir descendientes transitivos
+    function expandDescendants(currId: number, isApprovalChain: boolean) {
       MATERIAS_GRAFO.forEach(candidate => {
-        const depends =
-          candidate.reqRegular.includes(currId) ||
-          (Array.isArray(candidate.reqAprobada) && candidate.reqAprobada.includes(currId)) ||
+        const reqApr = (Array.isArray(candidate.reqAprobada) && candidate.reqAprobada.includes(currId)) ||
           (Array.isArray(candidate.reqRendirAprobada) && candidate.reqRendirAprobada.includes(currId));
+        const reqReg = candidate.reqRegular.includes(currId);
 
-        if (depends && !descendants.has(candidate.id)) {
+        if (reqApr || reqReg) {
+          const nextIsApproval = isApprovalChain || reqApr;
           descendants.add(candidate.id);
-          findDescendants(candidate.id);
+
+          if (nextIsApproval) {
+            if (!descendantsAprobada.has(candidate.id)) {
+              descendantsAprobada.add(candidate.id);
+              descendantsRegular.delete(candidate.id);
+              expandDescendants(candidate.id, true);
+            }
+          } else {
+            if (!descendantsAprobada.has(candidate.id) && !descendantsRegular.has(candidate.id)) {
+              descendantsRegular.add(candidate.id);
+              expandDescendants(candidate.id, false);
+            }
+          }
         }
       });
     }
 
-    findAncestors(focusedSubjectId);
-    findDescendants(focusedSubjectId);
+    Array.from(descendantsAprobada).forEach(id => expandDescendants(id, true));
+    Array.from(descendantsRegular).forEach(id => expandDescendants(id, false));
 
-    return { ancestors, descendants };
+    return {
+      ancestors,
+      ancestorsRegular,
+      ancestorsAprobada,
+      descendants,
+      descendantsRegular,
+      descendantsAprobada
+    };
   }, [focusedSubjectId]);
 
   // Función pura para obtener configuración visual de un nodo según estado, tema y camino crítico
@@ -144,9 +212,11 @@ export const NetworkGraph: React.FC = () => {
 
     if (dependenciesTree) {
       const isSelf = m.id === focusedSubjectId;
-      const isAncestor = dependenciesTree.ancestors.has(m.id);
-      const isDescendant = dependenciesTree.descendants.has(m.id);
-      const inChain = isSelf || isAncestor || isDescendant;
+      const isAncestorApr = dependenciesTree.ancestorsAprobada.has(m.id);
+      const isAncestorReg = dependenciesTree.ancestorsRegular.has(m.id);
+      const isDescendantApr = dependenciesTree.descendantsAprobada.has(m.id);
+      const isDescendantReg = dependenciesTree.descendantsRegular.has(m.id);
+      const inChain = isSelf || isAncestorApr || isAncestorReg || isDescendantApr || isDescendantReg;
 
       if (!inChain) {
         bg = colorMode === 'light' ? '#f8fafc' : '#080c16';
@@ -162,20 +232,22 @@ export const NetworkGraph: React.FC = () => {
         bw = 3.5;
         shadowSize = 20;
         shadowColor = colorMode === 'light' ? 'rgba(15,23,42,0.25)' : 'rgba(255,255,255,0.75)';
-      } else if (isAncestor) {
-        bg = colorMode === 'light' ? '#e0f2fe' : '#042232';
-        border = colorMode === 'light' ? '#0284c7' : '#38bdf8';
-        fontColor = colorMode === 'light' ? '#0369a1' : '#7dd3fc';
-        bw = 2.5;
+      } else if (isAncestorApr || isDescendantApr) {
+        // Correlativa o posterior con Aprobación (Verde / Aprobada)
+        bg = themeConfig.graph.aprobada.bg;
+        border = themeConfig.graph.aprobada.border;
+        fontColor = themeConfig.graph.aprobada.font;
+        bw = 2.6;
         shadowSize = 14;
-        shadowColor = colorMode === 'light' ? 'rgba(2,132,199,0.3)' : 'rgba(56,189,248,0.5)';
-      } else if (isDescendant) {
-        bg = colorMode === 'light' ? '#fef3c7' : '#331b04';
-        border = colorMode === 'light' ? '#d97706' : '#f59e0b';
-        fontColor = colorMode === 'light' ? '#b45309' : '#fbbf24';
-        bw = 2.5;
+        shadowColor = themeConfig.graph.aprobada.shadow;
+      } else if (isAncestorReg || isDescendantReg) {
+        // Correlativa o posterior con Regularidad (Ámbar / Regular)
+        bg = themeConfig.graph.regular.bg;
+        border = themeConfig.graph.regular.border;
+        fontColor = themeConfig.graph.regular.font;
+        bw = 2.6;
         shadowSize = 14;
-        shadowColor = colorMode === 'light' ? 'rgba(217,119,6,0.3)' : 'rgba(245,158,11,0.5)';
+        shadowColor = themeConfig.graph.regular.shadow;
       }
     } else if (criticalChainActive) {
       const inCritical = CADENA_CRITICA_IDS.has(m.id);
@@ -258,7 +330,7 @@ export const NetworkGraph: React.FC = () => {
       }
     }
 
-    const sig = `${themeConfig.id}_${colorMode}_${dimApproved}_${criticalChainActive}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
+    const sig = `${themeConfig.id}_${colorMode}_${dimApproved}_${criticalChainActive}_${focusedSubjectId}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
     return { bg, border, fontColor, bw, shadowColor, shadowSize, sig };
   }, [estados, esMateriaCursable, esMateriaRendible, themeConfig, colorMode, dependenciesTree, focusedSubjectId, dimApproved, criticalChainActive]);
 
@@ -276,8 +348,14 @@ export const NetworkGraph: React.FC = () => {
       const toInChain = toId === focusedSubjectId || dependenciesTree.ancestors.has(toId) || dependenciesTree.descendants.has(toId);
 
       if (fromInChain && toInChain) {
-        color = colorMode === 'light' ? '#0284c7' : '#38bdf8';
-        width = 2.8;
+        // En camino crítico, mostrar aristas según correspondan a regularidad o aprobación
+        if (tipo === 'aprobada') {
+          color = themeConfig.graph.aprobada.border;
+          width = 3.0;
+        } else {
+          color = themeConfig.graph.regular.border;
+          width = 2.6;
+        }
       } else {
         color = themeConfig.graph.edgeMuted || 'rgba(15,23,42,0.06)';
         width = 0.5;
@@ -287,8 +365,14 @@ export const NetworkGraph: React.FC = () => {
       const toInCritical = CADENA_CRITICA_IDS.has(toId);
 
       if (fromInCritical && toInCritical) {
-        color = colorMode === 'light' ? '#0891b2' : '#22d3ee';
-        width = 3.0;
+        // En cadena crítica, mostrar aristas según correspondan a regularidad o aprobación
+        if (tipo === 'aprobada') {
+          color = themeConfig.graph.aprobada.border;
+          width = 3.2;
+        } else {
+          color = themeConfig.graph.regular.border;
+          width = 2.8;
+        }
       } else {
         color = colorMode === 'light' ? 'rgba(15,23,42,0.05)' : 'rgba(255,255,255,0.04)';
         width = 0.5;
@@ -299,16 +383,16 @@ export const NetworkGraph: React.FC = () => {
         width = 0.8;
       } else if (tipo === 'regular') {
         if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
-        else if (estFrom === 'regular') color = themeConfig.graph.cursable.border;
+        else if (estFrom === 'regular') color = themeConfig.graph.regular.border;
         else color = themeConfig.graph.edgeDefault;
       } else {
-        if (estFrom === 'aprobada') color = themeConfig.graph.regular.border;
+        if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
         else color = themeConfig.graph.edgeDefault;
       }
     }
 
     const finalColor = hidden && !dependenciesTree && !criticalChainActive ? 'transparent' : color;
-    const sig = `${finalColor}_${width}_${dimApproved}_${criticalChainActive}`;
+    const sig = `${finalColor}_${width}_${dimApproved}_${criticalChainActive}_${focusedSubjectId}_${tipo}`;
     return { color: finalColor, width, sig };
   }, [estados, edgeMode, dependenciesTree, focusedSubjectId, themeConfig, colorMode, criticalChainActive, dimApproved]);
 
@@ -539,23 +623,72 @@ export const NetworkGraph: React.FC = () => {
 
       {/* Banner flotante de Camino Crítico activo */}
       {focusedSubjectId && MATERIAS_MAP[focusedSubjectId] && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.3)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.3)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3 max-w-[95vw]">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-pulse shrink-0" />
             <span className="text-slate-500 dark:text-slate-400">Camino Crítico:</span>
-            <span className="font-bold text-(--text-body)">{MATERIAS_MAP[focusedSubjectId].nombreCompleto}</span>
+            <span className="font-bold text-(--text-body) truncate max-w-[200px] sm:max-w-none">{MATERIAS_MAP[focusedSubjectId].nombreCompleto}</span>
           </div>
 
-          <div className="flex items-center gap-2 text-[11px]">
-            <span className="px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/40 text-cyan-700 dark:text-cyan-300 font-semibold">
-              {dependenciesTree?.ancestors.size || 0} requisitos
-            </span>
-            <span className="px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/40 text-amber-700 dark:text-amber-300 font-semibold">
-              {dependenciesTree?.descendants.size || 0} desbloquea
-            </span>
+          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            {/* Correlativas previas */}
+            <div className="flex items-center gap-1">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Correlativas:</span>
+              <span 
+                className="px-2 py-0.5 rounded font-semibold border"
+                style={{
+                  backgroundColor: 'var(--color-regular-bg)',
+                  borderColor: 'var(--color-regular-border)',
+                  color: 'var(--color-regular)'
+                }}
+                title="Correlativas previas requeridas con regularidad"
+              >
+                {dependenciesTree?.ancestorsRegular.size || 0} regular
+              </span>
+              <span 
+                className="px-2 py-0.5 rounded font-semibold border"
+                style={{
+                  backgroundColor: 'var(--color-aprobada-bg)',
+                  borderColor: 'var(--color-aprobada-border)',
+                  color: 'var(--color-aprobada)'
+                }}
+                title="Correlativas previas requeridas con examen final aprobado"
+              >
+                {dependenciesTree?.ancestorsAprobada.size || 0} aprobada
+              </span>
+            </div>
+
+            <span className="text-slate-400 dark:text-slate-600 hidden sm:inline">|</span>
+
+            {/* Materias posteriores */}
+            <div className="flex items-center gap-1">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Posteriores:</span>
+              <span 
+                className="px-2 py-0.5 rounded font-semibold border"
+                style={{
+                  backgroundColor: 'var(--color-regular-bg)',
+                  borderColor: 'var(--color-regular-border)',
+                  color: 'var(--color-regular)'
+                }}
+                title="Materias posteriores que destraba con regularidad"
+              >
+                {dependenciesTree?.descendantsRegular.size || 0} regular
+              </span>
+              <span 
+                className="px-2 py-0.5 rounded font-semibold border"
+                style={{
+                  backgroundColor: 'var(--color-aprobada-bg)',
+                  borderColor: 'var(--color-aprobada-border)',
+                  color: 'var(--color-aprobada)'
+                }}
+                title="Materias posteriores que destraba con examen final aprobado"
+              >
+                {dependenciesTree?.descendantsAprobada.size || 0} aprobada
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5 ml-1">
+          <div className="flex items-center gap-1.5 ml-1 shrink-0">
             <button
               onClick={() => setSelectedSubjectId(focusedSubjectId)}
               className="px-2 py-0.5 rounded bg-(--bg-elevated) hover:bg-(--border-color) text-cyan-700 dark:text-cyan-300 text-[11px] transition-colors border border-(--border-color)"
@@ -575,11 +708,38 @@ export const NetworkGraph: React.FC = () => {
 
       {/* Banner flotante de Cadena Crítica hacia Graduación */}
       {criticalChainActive && !focusedSubjectId && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-amber-500/50 shadow-[0_0_25px_rgba(245,158,11,0.25)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-amber-500/50 shadow-[0_0_25px_rgba(245,158,11,0.25)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3 max-w-[95vw]">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-            <span className="font-bold text-(--text-body)">Columna Vertebral: Proyecto Final</span>
+            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse shrink-0" />
+            <span className="font-bold text-(--text-body)">Cadena Crítica: Proyecto Final</span>
             <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">(13 materias clave)</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-[11px] border-l border-(--border-color) pl-2.5">
+            <span 
+              className="px-2 py-0.5 rounded font-semibold border flex items-center gap-1.5"
+              style={{
+                backgroundColor: 'var(--color-regular-bg)',
+                borderColor: 'var(--color-regular-border)',
+                color: 'var(--color-regular)'
+              }}
+              title="Correlatividades de regularidad para cursar"
+            >
+              <span className="w-2 h-0.5 rounded" style={{ backgroundColor: 'var(--color-regular)' }} />
+              Regularidad
+            </span>
+            <span 
+              className="px-2 py-0.5 rounded font-semibold border flex items-center gap-1.5"
+              style={{
+                backgroundColor: 'var(--color-aprobada-bg)',
+                borderColor: 'var(--color-aprobada-border)',
+                color: 'var(--color-aprobada)'
+              }}
+              title="Correlatividades de examen final para rendir o cursar"
+            >
+              <span className="w-2 h-0.5 rounded" style={{ backgroundColor: 'var(--color-aprobada)' }} />
+              Aprobación
+            </span>
           </div>
 
           <button
@@ -702,6 +862,16 @@ export const NetworkGraph: React.FC = () => {
           <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Fondo</kbd>
           <span>Desactivar foco</span>
         </span>
+        <div className="flex items-center gap-2.5 border-l border-(--border-color) pl-3">
+          <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-regular)' }}>
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }} />
+            <span>Regularidad</span>
+          </span>
+          <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-aprobada)' }}>
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }} />
+            <span>Aprobación</span>
+          </span>
+        </div>
       </div>
     </div>
   );

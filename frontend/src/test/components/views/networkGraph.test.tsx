@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TrackerProvider } from '../../../context/TrackerContext';
 import { ThemeProvider } from '../../../context/ThemeContext';
@@ -76,13 +76,34 @@ describe('NetworkGraph Component', () => {
     const botonCadena = screen.getByRole('button', { name: /Cadena Crítica/i });
     await user.click(botonCadena);
 
-    // Simular eventos de click y doubleClick en vis-network
+    // Debe mostrar banner de Cadena Crítica con leyenda de regularidad y aprobación
+    expect(screen.getByText(/Cadena Crítica: Proyecto Final/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Regularidad/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Aprobación/i).length).toBeGreaterThanOrEqual(1);
+
+    // Cambiar a modo Camino Crítico y hacer clic en una materia (ej. #19 Base de Datos)
+    await user.click(botonCamino);
     if (mockNetworkInstance?.clickHandler) {
-      mockNetworkInstance.clickHandler({ nodes: ['1'] });
-      mockNetworkInstance.clickHandler({ nodes: [] });
+      act(() => {
+        mockNetworkInstance.clickHandler({ nodes: ['19'] });
+      });
+    }
+
+    // Debe mostrar banner de Camino Crítico con desglose de regularidad y aprobación
+    expect(screen.getByText(/Base de Datos/i)).toBeInTheDocument();
+    expect(screen.getByText(/Correlativas:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Posteriores:/i)).toBeInTheDocument();
+
+    // Resetear foco de camino crítico
+    if (mockNetworkInstance?.clickHandler) {
+      act(() => {
+        mockNetworkInstance.clickHandler({ nodes: [] });
+      });
     }
     if (mockNetworkInstance?.doubleClickHandler) {
-      mockNetworkInstance.doubleClickHandler({ nodes: ['1'] });
+      act(() => {
+        mockNetworkInstance.doubleClickHandler({ nodes: ['1'] });
+      });
     }
   });
 });
