@@ -63,7 +63,7 @@ const StatsModalWithDataWrapper: React.FC = () => {
     if (initRef.current) return;
     initRef.current = true;
     setEstadoDirecto(1, 'aprobada');
-    setNotaMateria(1, { nota: 9, fecha: '2026-11-20' });
+    setNotaMateria(1, { nota: 9 });
     setEstadoDirecto(2, 'regular');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -322,7 +322,7 @@ describe('Componentes Modales', () => {
   });
 
   describe('StatsModal', () => {
-    it('debe renderizar estadísticas, métricas y timeline cuando hay notas con fecha', async () => {
+    it('debe renderizar estadísticas, métricas y calificaciones de materias aprobadas', async () => {
       render(
         <TrackerProvider>
           <StatsModalWithDataWrapper />
@@ -331,6 +331,7 @@ describe('Componentes Modales', () => {
 
       expect(await screen.findByText(/Dashboard de Estadísticas/i)).toBeInTheDocument();
       expect(screen.getByText(/Distribución por Estado/i)).toBeInTheDocument();
+      expect(screen.getByText(/Calificaciones de Materias Aprobadas/i)).toBeInTheDocument();
 
       // Cerrar modal
       const closeBtn = screen.getByLabelText(/Cerrar modal/i);

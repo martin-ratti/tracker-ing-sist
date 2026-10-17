@@ -267,16 +267,14 @@ export async function persistProgress(progress: Partial<ProgresoUsuario>): Promi
   const token = getStoredToken();
   if (token) {
     if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(async () => {
-      try {
-        await fetch('/api/progress', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(updated)
-        });
-      } catch {
+    saveTimeout = setTimeout(() => {
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(updated)
+      }).catch(() => {
         // Ignorar fallo de backend tradicional cuando está en modo serverless
-      }
+      });
     }, 400);
   }
 }

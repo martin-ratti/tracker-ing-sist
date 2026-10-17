@@ -174,8 +174,8 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                 <span 
                   className="w-1.5 h-1.5 rounded-full animate-ping" 
                   style={{ backgroundColor: 'var(--color-cursable)' }}
-                /> 
-                Cursable
+                />
+                {' '}Cursable
               </span>
             );
           }
@@ -286,8 +286,8 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   <span 
                     className="w-1.5 h-1.5 rounded-full animate-ping" 
                     style={{ backgroundColor: 'var(--color-cursable)' }}
-                  /> 
-                  Cursable
+                  />
+                  {' '}Cursable
                 </span>
               );
             }

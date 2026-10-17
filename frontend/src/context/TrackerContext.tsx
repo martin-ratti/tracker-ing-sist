@@ -25,6 +25,7 @@ interface Stats {
   totalTroncales: number;
   porcentajeCarrera: number;
   horasElectivasAprobadas: number;
+  promedio: number | null;
   promedioConAplazos: number | null;
   promedioSinAplazos: number | null;
   adusiCumplido: boolean;
@@ -283,7 +284,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const importSharedProgress = useCallback(() => {
-    persistProgress({
+    void persistProgress({
       estados,
       estadosElectivas,
       perfil,
@@ -519,7 +520,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     setEstados(nextEstados);
     setEstadosElectivas(nextElectivas);
-    persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas });
+    void persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas });
   }, [estados, estadosElectivas, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, applyCascade, isViewingShared]);
 
   // Establecer un estado concreto sin pasar por el ciclo de toggle
@@ -564,7 +565,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     setEstados(nextEstados);
     setEstadosElectivas(nextElectivas);
-    persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas, notas, ppsHoras });
+    void persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas, notas, ppsHoras });
   }, [estados, estadosElectivas, notas, ppsHoras, applyCascade, puedeRegularMateria, puedeAprobarMateria, cumpleReqsCursada, showToast, isViewingShared]);
 
   // Alternar estado de una electiva
@@ -609,31 +610,31 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     setEstadosElectivas(nextElectivas);
-    persistProgress({ estadosElectivas: nextElectivas });
+    void persistProgress({ estadosElectivas: nextElectivas });
   }, [estadosElectivas, getEstadoElectiva, puedeRegularElectiva, getEstado, showToast, isViewingShared]);
 
   const setNotaMateria = useCallback((id: number, notaData: NotaMateria) => {
     setNotas(prev => {
       const next = { ...prev, [id]: notaData };
-      persistProgress({ notas: next });
+      void persistProgress({ notas: next });
       return next;
     });
   }, []);
 
   const setPpsHoras = useCallback((hs: number) => {
     setPpsHorasState(hs);
-    persistProgress({ ppsHoras: hs });
+    void persistProgress({ ppsHoras: hs });
   }, []);
 
   const setPerfil = useCallback((p: PerfilAlumno) => {
     setPerfilState(p);
-    persistProgress({ perfil: p });
+    void persistProgress({ perfil: p });
   }, []);
 
   const setMetaExamen = useCallback((materiaId: number, meta: MetaExamen) => {
     setMetasExamenState(prev => {
       const next = { ...prev, [materiaId]: meta };
-      persistProgress({ metasExamen: next });
+      void persistProgress({ metasExamen: next });
       return next;
     });
     showToast(`🎯 Meta agendada: ${meta.turnoNombre}`);
@@ -643,7 +644,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setMetasExamenState(prev => {
       const next = { ...prev };
       delete next[materiaId];
-      persistProgress({ metasExamen: next });
+      void persistProgress({ metasExamen: next });
       return next;
     });
     showToast('Meta de examen eliminada');
@@ -656,7 +657,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setPpsHorasState(0);
     setPerfilState({ nombre: '', legajo: '' });
     setMetasExamenState({});
-    clearProgress();
+    void clearProgress();
     showToast('Plan reseteado por completo.');
   }, [showToast]);
 
@@ -673,25 +674,18 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const electivasAprobadas = MATERIAS_ELECTIVAS.filter(e => getEstadoElectiva(e.id) === 'aprobada');
     const horasElectivasAprobadas = electivasAprobadas.reduce((acc, curr) => acc + curr.horas, 0);
 
-    // Promedios
+    // Promedio de materias aprobadas
     let notasSuma = 0;
     let notasCount = 0;
-    let notasSinAplazoSuma = 0;
-    let notasSinAplazoCount = 0;
 
     Object.values(notas).forEach(n => {
       if (n && typeof n.nota === 'number' && !isNaN(n.nota)) {
         notasSuma += n.nota;
         notasCount += 1;
-        if (n.nota >= 6) {
-          notasSinAplazoSuma += n.nota;
-          notasSinAplazoCount += 1;
-        }
       }
     });
 
-    const promedioConAplazos = notasCount > 0 ? Number((notasSuma / notasCount).toFixed(2)) : null;
-    const promedioSinAplazos = notasSinAplazoCount > 0 ? Number((notasSinAplazoSuma / notasSinAplazoCount).toFixed(2)) : null;
+    const promedio = notasCount > 0 ? Number((notasSuma / notasCount).toFixed(2)) : null;
 
     // ADUSI: 1º, 2º y 3º año completos (id 1 a 23) + Seminario Integrador (id 99) + >= 4hs electivas
     const materiasAdusi = MATERIAS_TRONCALES.filter(m => m.nivel <= 3 && !m.esAdusiSolo);
@@ -792,8 +786,9 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       totalTroncales,
       porcentajeCarrera,
       horasElectivasAprobadas,
-      promedioConAplazos,
-      promedioSinAplazos,
+      promedio,
+      promedioConAplazos: promedio,
+      promedioSinAplazos: promedio,
       adusiCumplido,
       adusiProgreso,
       adusiFaltantes,
@@ -825,7 +820,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    a.remove();
     URL.revokeObjectURL(url);
     showToast('💾 Copia de seguridad exportada con éxito', 'success');
   }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, showToast]);
@@ -851,7 +846,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setPerfilState(newPerfil);
       setMetasExamenState(newMetas);
 
-      persistProgress({
+      void persistProgress({
         estados: newEstados,
         estadosElectivas: newElectivas,
         notas: newNotas,

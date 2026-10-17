@@ -258,43 +258,41 @@ export const NetworkGraph: React.FC = () => {
         bw = 1;
         shadowSize = 0;
         shadowColor = 'transparent';
+      } else if (m.id === 36) {
+        bg = colorMode === 'light' ? '#fef9c3' : '#382502';
+        border = '#eab308';
+        fontColor = colorMode === 'light' ? '#854d0e' : '#fef08a';
+        bw = 3.5;
+        shadowColor = 'rgba(234,179,8,0.6)';
+        shadowSize = 20;
+      } else if (est === 'aprobada') {
+        bg = themeConfig.graph.aprobada.bg;
+        border = '#10b981';
+        fontColor = themeConfig.graph.aprobada.font;
+        bw = 2.8;
+        shadowColor = 'rgba(16,185,129,0.4)';
+        shadowSize = 14;
+      } else if (est === 'regular') {
+        bg = themeConfig.graph.regular.bg;
+        border = '#f59e0b';
+        fontColor = themeConfig.graph.regular.font;
+        bw = 2.8;
+        shadowColor = 'rgba(245,158,11,0.45)';
+        shadowSize = 14;
+      } else if (cursable) {
+        bg = themeConfig.graph.cursable.bg;
+        border = '#06b6d4';
+        fontColor = themeConfig.graph.cursable.font;
+        bw = 3;
+        shadowColor = 'rgba(6,182,212,0.6)';
+        shadowSize = 18;
       } else {
-        if (m.id === 36) {
-          bg = colorMode === 'light' ? '#fef9c3' : '#382502';
-          border = '#eab308';
-          fontColor = colorMode === 'light' ? '#854d0e' : '#fef08a';
-          bw = 3.5;
-          shadowColor = 'rgba(234,179,8,0.6)';
-          shadowSize = 20;
-        } else if (est === 'aprobada') {
-          bg = themeConfig.graph.aprobada.bg;
-          border = '#10b981';
-          fontColor = themeConfig.graph.aprobada.font;
-          bw = 2.8;
-          shadowColor = 'rgba(16,185,129,0.4)';
-          shadowSize = 14;
-        } else if (est === 'regular') {
-          bg = themeConfig.graph.regular.bg;
-          border = '#f59e0b';
-          fontColor = themeConfig.graph.regular.font;
-          bw = 2.8;
-          shadowColor = 'rgba(245,158,11,0.45)';
-          shadowSize = 14;
-        } else if (cursable) {
-          bg = themeConfig.graph.cursable.bg;
-          border = '#06b6d4';
-          fontColor = themeConfig.graph.cursable.font;
-          bw = 3;
-          shadowColor = 'rgba(6,182,212,0.6)';
-          shadowSize = 18;
-        } else {
-          bg = colorMode === 'light' ? '#e0f2fe' : '#071f30';
-          border = '#0284c7';
-          fontColor = colorMode === 'light' ? '#0369a1' : '#7dd3fc';
-          bw = 2.2;
-          shadowColor = 'rgba(2,132,199,0.3)';
-          shadowSize = 10;
-        }
+        bg = colorMode === 'light' ? '#e0f2fe' : '#071f30';
+        border = '#0284c7';
+        fontColor = colorMode === 'light' ? '#0369a1' : '#7dd3fc';
+        bw = 2.2;
+        shadowColor = 'rgba(2,132,199,0.3)';
+        shadowSize = 10;
       }
     } else {
       if (est === 'aprobada') {

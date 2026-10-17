@@ -70,7 +70,7 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
     expect(screen.getByTestId('current-estado-1').textContent).toBe('pendiente');
   });
 
-  it('debe permitir guardar calificación completa (nota, fecha, libro, folio, comentario)', async () => {
+  it('debe permitir guardar calificación cuando la materia está aprobada y no mostrarla en otros estados', async () => {
     const user = userEvent.setup();
     render(
       <TrackerProvider>
@@ -79,36 +79,28 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
     );
 
     await user.click(screen.getByRole('button', { name: /Seleccionar Materia 1/i }));
+
+    // En estado pendiente no debe mostrar sección de calificación
+    expect(screen.queryByText(/Calificación de la Materia/i)).not.toBeInTheDocument();
+
+    // Cambiar a regular: tampoco debe mostrarla
+    await user.click(screen.getByRole('button', { name: /Regular/i }));
+    expect(screen.queryByText(/Calificación de la Materia/i)).not.toBeInTheDocument();
+
+    // Cambiar a aprobada: debe aparecer la sección de calificación
     await user.click(screen.getByRole('button', { name: /Aprobada/i }));
+    expect(screen.getByText(/Calificación de la Materia/i)).toBeInTheDocument();
 
     // Input Nota
     const inputNota = screen.getByPlaceholderText(/Ej: 8/i);
     await user.clear(inputNota);
     await user.type(inputNota, '8.5');
 
-    // Input Fecha
-    const inputFecha = document.querySelector('input[type="date"]') as HTMLInputElement | null;
-    if (inputFecha) {
-      fireEvent.change(inputFecha, { target: { value: '2026-12-18' } });
-    }
-
-    // Input Libro
-    const inputLibro = screen.getByPlaceholderText(/Libro/i);
-    await user.type(inputLibro, '12');
-
-    // Input Folio
-    const inputFolio = screen.getByPlaceholderText(/Folio/i);
-    await user.type(inputFolio, '45');
-
-    // Input Comentario
-    const inputComentario = screen.getByPlaceholderText(/Ej: Aprobado con el Ing/i);
-    await user.type(inputComentario, 'Aprobada con final oral muy completo');
-
-    // Submit del formulario de notas (botón "Guardar Datos")
-    const botonGuardar = screen.getByRole('button', { name: /Guardar Datos/i });
+    // Submit del formulario de nota (botón "Guardar Nota")
+    const botonGuardar = screen.getByRole('button', { name: /Guardar Nota/i });
     await user.click(botonGuardar);
 
-    expect(screen.getByText(/Calificación: 8.5/i)).toBeInTheDocument();
+    expect(screen.getByText(/Nota: 8.5/i)).toBeInTheDocument();
   });
 
   it('debe permitir programar y gestionar metas de examen cuando la materia está regular', async () => {

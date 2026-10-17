@@ -61,9 +61,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
       });
       return () => unsubscribe();
     } else {
-      checkAuthMe().then(currentUser => {
-        setUser(currentUser);
-      });
+      checkAuthMe()
+        .then(currentUser => {
+          setUser(currentUser);
+        })
+        .catch(() => {
+          setUser(null);
+        });
     }
   }, []);
 

@@ -10,7 +10,7 @@ import {
   User, 
   Sparkles
 } from 'lucide-react';
-import { formatFechaLocal, formatPromedio } from '../../utils/formatters';
+import { formatPromedio } from '../../utils/formatters';
 
 export const PrintableReportModal: React.FC = () => {
   const { 
@@ -189,11 +189,11 @@ export const PrintableReportModal: React.FC = () => {
             </div>
 
             <div className="bg-(--bg-surface) print:bg-neutral-50 border border-(--border-color) print:border-neutral-300 rounded-xl p-3">
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600 uppercase">Promedio s/ Aplazos</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600 uppercase">Promedio Académico</div>
               <div className="text-lg font-bold text-purple-600 dark:text-purple-400 print:text-black">
-                {formatPromedio(stats.promedioSinAplazos)}
+                {formatPromedio(stats.promedio)}
               </div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600">c/ aplazos: {formatPromedio(stats.promedioConAplazos)}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600">Materias aprobadas</div>
             </div>
 
             <div className="bg-(--bg-surface) print:bg-neutral-50 border border-(--border-color) print:border-neutral-300 rounded-xl p-3">
@@ -239,9 +239,7 @@ export const PrintableReportModal: React.FC = () => {
                           <th className="py-1.5 px-2 w-16 text-center">Régimen</th>
                           <th className="py-1.5 px-2 w-12 text-center">Hs</th>
                           <th className="py-1.5 px-2 w-24 text-center">Estado</th>
-                          <th className="py-1.5 px-2 w-14 text-center">Nota</th>
-                          <th className="py-1.5 px-2 w-24 text-center">Fecha</th>
-                          <th className="py-1.5 px-2 w-20 text-center">Libro/Folio</th>
+                          <th className="py-1.5 px-2 w-16 text-center">Nota</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -270,12 +268,6 @@ export const PrintableReportModal: React.FC = () => {
                               <td className="py-1 px-2 text-center text-[10px]">{estadoBadge}</td>
                               <td className="py-1 px-2 text-center font-bold text-purple-600 dark:text-purple-300 print:text-black">
                                 {n?.nota !== undefined ? n.nota : '—'}
-                              </td>
-                              <td className="py-1 px-2 text-center text-slate-500 dark:text-slate-400 print:text-neutral-700 text-[10px] whitespace-nowrap">
-                                {formatFechaLocal(n?.fecha)}
-                              </td>
-                              <td className="py-1 px-2 text-center text-slate-500 dark:text-slate-400 print:text-neutral-700 text-[10px]">
-                                {n?.libro && n?.folio ? `${n.libro}/${n.folio}` : '—'}
                               </td>
                             </tr>
                           );

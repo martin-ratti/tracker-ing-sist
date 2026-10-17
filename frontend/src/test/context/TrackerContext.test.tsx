@@ -111,7 +111,7 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     expect(result.current.esMateriaCursable(fisica2)).toBe(true);
   });
 
-  it('debe calcular promedios con y sin aplazos correctamente', () => {
+  it('debe calcular promedio académico de materias aprobadas correctamente', () => {
     const { result } = renderHook(() => useTracker(), { wrapper });
 
     act(() => {
@@ -121,8 +121,8 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
       result.current.setNotaMateria(2, { nota: 6 });
     });
 
+    expect(result.current.stats.promedio).toBe(7);
     expect(result.current.stats.promedioSinAplazos).toBe(7);
-    expect(result.current.stats.promedioConAplazos).toBe(7);
   });
 
   it('debe gestionar metas de examen (alta, consulta y baja)', () => {

@@ -19,15 +19,15 @@ import {
 import type { Analytics } from 'firebase/analytics';
 import type { ProgresoUsuario } from '../types/plan';
 
-// Configuración leída de variables de entorno Vite
+// Configuración leída de variables de entorno Vite con fallback al proyecto de producción
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ''
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyD7Yh1b11OagYdYLHN8JtCnTjzo1I9Gp4E',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'tracker-isi-utn-6f213.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'tracker-isi-utn-6f213',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'tracker-isi-utn-6f213.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '155271149492',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:155271149492:web:7a547c34e36dc81e7824e1',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-N85G9T5JNH'
 };
 
 // Verifica si las credenciales mínimas de Firebase están presentes

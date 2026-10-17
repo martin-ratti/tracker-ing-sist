@@ -7,10 +7,9 @@ import {
   X, 
   BarChart3, 
   TrendingUp, 
-  Award, 
-  Calendar 
+  Award
 } from 'lucide-react';
-import { formatFechaLocal, formatPromedio } from '../../utils/formatters';
+import { formatPromedio } from '../../utils/formatters';
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -37,8 +36,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
     regularesCount,
     cursablesCount,
     totalTroncales,
-    promedioConAplazos,
-    promedioSinAplazos,
+    promedio,
     horasElectivasAprobadas
   } = stats;
 
@@ -66,10 +64,10 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
     });
   }, [estados]);
 
-  const timeline = useMemo(() => {
+  const calificacionesList = useMemo(() => {
     const entries = [];
     for (const [idStr, notaData] of Object.entries(notas)) {
-      if (notaData && notaData.fecha) {
+      if (notaData && typeof notaData.nota === 'number') {
         const id = Number(idStr);
         const materia = MATERIAS_MAP[id];
         if (materia) {
@@ -77,13 +75,12 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
             id,
             nombre: materia.nombre,
             nota: notaData.nota,
-            fechaStr: notaData.fecha,
-            dateObj: new Date(notaData.fecha)
+            nivel: materia.nivel
           });
         }
       }
     }
-    return entries.sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
+    return entries.sort((a, b) => a.id - b.id);
   }, [notas]);
 
   if (!isMounted) return null;
@@ -166,25 +163,18 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
             </div>
 
             {/* Promedios y Métricas */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
-                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-2">
-                  <Award className="w-4 h-4" />
-                  <span className="text-xs font-mono uppercase">Promedio c/Aplazos</span>
-                </div>
-                <span className="font-syne text-2xl font-bold text-(--text-body)">
-                  {formatPromedio(promedioConAplazos)}
-                </span>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
                 <div className="flex items-center gap-2 text-slate-400 mb-2">
                   <Award className="w-4 h-4 text-purple-400" />
-                  <span className="text-xs font-mono uppercase">Promedio s/Aplazos</span>
+                  <span className="text-xs font-mono uppercase">Promedio Académico</span>
                 </div>
                 <span className="font-syne text-2xl font-bold text-purple-400">
-                  {formatPromedio(promedioSinAplazos)}
+                  {formatPromedio(promedio)}
                 </span>
+                <span className="text-[10px] text-slate-500 font-mono mt-1">Materias aprobadas</span>
               </div>
+
               <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
                 <div className="flex items-center gap-2 text-slate-400 mb-2">
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -193,7 +183,9 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
                 <span className="font-syne text-2xl font-bold text-emerald-400">
                   {aprobadasCount}<span className="text-sm text-slate-500">/{totalTroncales}</span>
                 </span>
+                <span className="text-[10px] text-slate-500 font-mono mt-1">{stats.porcentajeCarrera}% de la carrera</span>
               </div>
+
               <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
                 <div className="flex items-center gap-2 text-slate-400 mb-2">
                   <TrendingUp className="w-4 h-4 text-amber-400" />
@@ -202,6 +194,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
                 <span className="font-syne text-2xl font-bold text-amber-400 whitespace-nowrap">
                   {horasElectivasAprobadas}<span className="text-sm text-slate-500"> hs</span>
                 </span>
+                <span className="text-[10px] text-slate-500 font-mono mt-1">Total acumulado</span>
               </div>
             </div>
           </div>
@@ -233,39 +226,37 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Timeline de Aprobaciones */}
+          {/* Calificaciones de Materias Aprobadas */}
           <div className="bg-(--bg-elevated) p-5 rounded-xl border border-(--border-color)">
             <h3 className="font-syne text-sm font-semibold text-(--text-body) mb-4 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Timeline de Aprobaciones
+              <Award className="w-4 h-4 text-purple-400" />
+              Calificaciones de Materias Aprobadas
             </h3>
             
-            {timeline.length > 0 ? (
-              <div className="space-y-3 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-(--border-color)">
-                {timeline.map((item, idx) => (
-                  <div key={`${item.id}-${idx}`} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                    {/* Icono / Marker */}
-                    <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-(--bg-elevated) bg-emerald-500 text-white shrink-0 md:order-1 md:group-odd:-ml-2.5 md:group-even:-mr-2.5 shadow-sm z-10 absolute left-0 md:left-1/2 md:-translate-x-1/2">
+            {calificacionesList.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 font-mono text-xs">
+                {calificacionesList.map((item) => (
+                  <div 
+                    key={item.id} 
+                    className="bg-(--bg-surface) border border-(--border-color) p-2.5 rounded-lg flex items-center justify-between gap-2 shadow-xs"
+                  >
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-bold text-(--text-body) truncate" title={item.nombre}>
+                        {item.nombre}
+                      </span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                        {item.nivel}º Año · #{String(item.id).padStart(2, '0')}
+                      </span>
                     </div>
-                    
-                    {/* Tarjeta */}
-                    <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] bg-(--bg-surface) border border-(--border-color) p-3 rounded-lg flex items-center justify-between ml-8 md:ml-0 shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition-colors">
-                      <div className="flex flex-col gap-0.5 overflow-hidden">
-                        <span className="font-mono text-xs font-bold text-(--text-body) truncate" title={item.nombre}>{item.nombre}</span>
-                        <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400">{formatFechaLocal(item.fechaStr)}</span>
-                      </div>
-                      {item.nota !== undefined && (
-                        <div className="ml-3 shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-(--bg-elevated) border border-(--border-color) font-syne font-bold text-xs text-(--text-body)">
-                          {item.nota}
-                        </div>
-                      )}
-                    </div>
+                    <span className="shrink-0 font-syne font-black text-sm px-2 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                      {item.nota}
+                    </span>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-6 text-slate-500 font-mono text-sm border border-dashed border-(--border-color) rounded-lg">
-                No hay registros con fecha asignada.
+                No hay notas registradas. Podés cargar la nota de cada materia al marcarla como aprobada.
               </div>
             )}
           </div>

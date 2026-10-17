@@ -40,10 +40,6 @@ export const SubjectModal: React.FC = () => {
   } = useTracker();
 
   const [notaVal, setNotaVal] = useState<string>('');
-  const [fechaVal, setFechaVal] = useState<string>('');
-  const [libroVal, setLibroVal] = useState<string>('');
-  const [folioVal, setFolioVal] = useState<string>('');
-  const [comentarioVal, setComentarioVal] = useState<string>('');
 
   // Estados para Meta de Examen
   const [selectedTurnoId, setSelectedTurnoId] = useState<string>(TURNOS_EXAMEN[0]?.id || 'feb-2026-l1');
@@ -81,16 +77,8 @@ export const SubjectModal: React.FC = () => {
     if (selectedSubjectId && notas[selectedSubjectId]) {
       const n = notas[selectedSubjectId];
       setNotaVal(n.nota !== undefined ? String(n.nota) : '');
-      setFechaVal(n.fecha || '');
-      setLibroVal(n.libro || '');
-      setFolioVal(n.folio || '');
-      setComentarioVal(n.comentario || '');
     } else {
       setNotaVal('');
-      setFechaVal('');
-      setLibroVal('');
-      setFolioVal('');
-      setComentarioVal('');
     }
 
     if (selectedSubjectId && metasExamen[selectedSubjectId]) {
@@ -167,18 +155,14 @@ export const SubjectModal: React.FC = () => {
     }
   };
 
-  // Guardar notas
+  // Guardar calificación
   const handleSaveNotas = (e: React.FormEvent) => {
     e.preventDefault();
     const num = notaVal.trim() ? parseFloat(notaVal) : undefined;
     setNotaMateria(materia.id, {
-      nota: num,
-      fecha: fechaVal.trim() || undefined,
-      libro: libroVal.trim() || undefined,
-      folio: folioVal.trim() || undefined,
-      comentario: comentarioVal.trim() || undefined
+      nota: num
     });
-    showToast(`✅ Notas guardadas para ${materia.nombre}`);
+    showToast(`✅ Calificación guardada para ${materia.nombre}`);
   };
 
   // Encontrar qué materias destraba esta materia divididas entre Cursar y Rendir
@@ -649,25 +633,28 @@ export const SubjectModal: React.FC = () => {
             </div>
           )}
 
-          {/* Registro de Examen Final / Calificación */}
-          <div className="border-t border-(--border-color) pt-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-syne font-bold text-sm text-(--text-body) flex items-center gap-2">
-                <Award className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                <span>Registro de Examen Final (Opcional)</span>
-              </h3>
-              {notaVal && (
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-500/30 font-bold">
-                  Calificación: {notaVal}
-                </span>
-              )}
-            </div>
+          {/* Calificación de la Materia (Solo si está aprobada) */}
+          {currentEstado === 'aprobada' && (
+            <div className="border-t border-(--border-color) pt-5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-syne font-bold text-sm text-(--text-body) flex items-center gap-2">
+                  <Award className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span>Calificación de la Materia</span>
+                </h3>
+                {notaVal && (
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-500/30 font-bold">
+                    Nota: {notaVal}
+                  </span>
+                )}
+              </div>
 
-            <form onSubmit={handleSaveNotas} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 mb-1 text-[11px]">Nota (1 - 10):</label>
+              <form onSubmit={handleSaveNotas} className="flex items-end gap-3 font-mono text-xs">
+                <div className="flex-1">
+                  <label htmlFor="nota-input" className="block text-slate-600 dark:text-slate-400 mb-1 text-[11px]">
+                    Nota Final / Promoción (1 - 10):
+                  </label>
                   <input
+                    id="nota-input"
                     type="number"
                     min="1"
                     max="10"
@@ -675,69 +662,23 @@ export const SubjectModal: React.FC = () => {
                     value={notaVal}
                     onChange={e => setNotaVal(e.target.value)}
                     placeholder="Ej: 8"
-                    className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
+                    className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-purple-400"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 mb-1 text-[11px]">Fecha de Aprobación:</label>
-                  <input
-                    type="date"
-                    value={fechaVal}
-                    onChange={e => setFechaVal(e.target.value)}
-                    className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-(--text-body) focus:outline-none focus:border-slate-400"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-1.5">
-                  <div>
-                    <label className="block text-slate-600 dark:text-slate-400 mb-1 text-[11px]">Libro:</label>
-                    <input
-                      type="text"
-                      value={libroVal}
-                      onChange={e => setLibroVal(e.target.value)}
-                      placeholder="Libro"
-                      className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-2 py-2 text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-600 dark:text-slate-400 mb-1 text-[11px]">Folio:</label>
-                    <input
-                      type="text"
-                      value={folioVal}
-                      onChange={e => setFolioVal(e.target.value)}
-                      placeholder="Folio"
-                      className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-2 py-2 text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 mb-1 text-[11px] font-mono">Comentarios / Profesor / Cátedra:</label>
-                <input
-                  type="text"
-                  value={comentarioVal}
-                  onChange={e => setComentarioVal(e.target.value)}
-                  placeholder="Ej: Aprobado con el Ing. Pérez en mesa de Febrero..."
-                  className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-xs font-mono text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 font-mono text-xs">
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg text-slate-950 font-bold transition-all shadow-md"
+                  className="px-4 py-2 rounded-lg text-slate-950 font-bold transition-all shadow-md shrink-0 cursor-pointer"
                   style={{
                     background: 'var(--gradient-primary)',
                     boxShadow: '0 0 12px var(--color-primary-glow)'
                   }}
                 >
-                  Guardar Datos
+                  Guardar Nota
                 </button>
-              </div>
-            </form>
-          </div>
+              </form>
+            </div>
+          )}
 
         </div>
       </div>

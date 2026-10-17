@@ -47,22 +47,16 @@ test.describe('Detalle de Materia, Notas y Planificación de Metas', () => {
     const btnAprobada = modal.locator('button:has-text("Aprobada")');
     await btnAprobada.click();
 
-    // 7. Cargar notas del examen final
+    // 7. Cargar calificación de la materia aprobada
     const notaInput = modal.locator('input[placeholder="Ej: 8"]');
     await notaInput.scrollIntoViewIfNeeded();
     await notaInput.fill('9.5');
 
-    const libroInput = modal.locator('input[placeholder="Libro"]');
-    await libroInput.fill('Libro ISI 14');
+    const btnGuardarNota = modal.locator('button:has-text("Guardar Nota")');
+    await btnGuardarNota.click();
 
-    const folioInput = modal.locator('input[placeholder="Folio"]');
-    await folioInput.fill('88');
-
-    const btnGuardarDatos = modal.locator('button:has-text("Guardar Datos")');
-    await btnGuardarDatos.click();
-
-    // Verificar indicador de calificación guardada en el modal
-    await expect(modal.locator('text=Calificación: 9.5')).toBeVisible();
+    // Verificar indicador de nota guardada en el modal
+    await expect(modal.locator('text=Nota: 9.5')).toBeVisible();
 
     // 8. Cerrar modal con el botón de cierre
     const btnCerrar = modal.locator('button[aria-label="Cerrar detalles de la materia"]');

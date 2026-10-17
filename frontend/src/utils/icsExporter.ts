@@ -76,10 +76,10 @@ export function generateICSContent(metas: MetaExamen[]): string {
     const uid = `final-${meta.materiaId}-${dtStart}@tracker-isi.utn`;
     const turnoDesc = meta.turnoNombre || turno?.nombre || 'Turno oficial';
 
-    let desc = `Examen Final de ${materiaNombre}.\\nTurno: ${turnoDesc}`;
+    let desc = String.raw`Examen Final de ${materiaNombre}.\nTurno: ${turnoDesc}`;
     if (diaNombre) desc += ` (${diaNombre})`;
-    if (meta.comentario) desc += `\\nNotas de estudio: ${meta.comentario}`;
-    desc += '\\nFacultad Regional Rosario - Plan 2023 ISI.\\nVerificá aula y horario en Sysacad.';
+    if (meta.comentario) desc += String.raw`\nNotas de estudio: ${meta.comentario}`;
+    desc += String.raw`\nFacultad Regional Rosario - Plan 2023 ISI.\nVerificá aula y horario en Sysacad.`;
 
     lines.push(
       'BEGIN:VEVENT',

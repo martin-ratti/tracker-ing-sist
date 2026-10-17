@@ -42,7 +42,14 @@ const SingleToast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void 
   return (
     <div
       role="alert"
+      tabIndex={0}
       onClick={() => onDismiss(toast.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onDismiss(toast.id);
+        }
+      }}
       className={`relative w-full text-left bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-(--text-body) px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center justify-between gap-3 transition-all duration-200 hover:scale-[1.01] ${style.bg} animate-in fade-in slide-in-from-bottom-3 select-none cursor-pointer`}
     >
       <div className="flex items-center gap-2 flex-1">

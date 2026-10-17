@@ -55,10 +55,8 @@ export const ProfileModal: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const content = event.target?.result as string;
+    file.text()
+      .then((content) => {
         const ok = importBackupJson(content);
         if (ok) {
           showToast('✅ ¡Datos restaurados exitosamente desde JSON!', 'success');
@@ -66,14 +64,15 @@ export const ProfileModal: React.FC = () => {
         } else {
           showToast('❌ El archivo seleccionado no tiene un formato válido', 'error');
         }
-      } catch {
+      })
+      .catch(() => {
         showToast('❌ Error al procesar el archivo JSON', 'error');
-      }
-    };
-    reader.readAsText(file);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+      })
+      .finally(() => {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      });
   };
 
   return (
