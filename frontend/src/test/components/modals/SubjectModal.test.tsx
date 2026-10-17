@@ -161,6 +161,11 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
     expect(screen.getByText(/AM I \(Regular\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Álgebra \(Regular\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Materias que ayuda a destrabar:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Para Cursar \(Regularidad\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Para Rendir \(Aprobación\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Análisis Num\. \(3º Año\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Simulación \(4º Año\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Automatización \(4º Año\)/i)).toBeInTheDocument();
   });
 
   it('debe cerrar el modal al hacer click en el botón de cerrar o presionar Escape', async () => {

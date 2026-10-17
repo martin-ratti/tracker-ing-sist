@@ -158,13 +158,14 @@ export const SubjectModal: React.FC = () => {
     showToast(`✅ Notas guardadas para ${materia.nombre}`);
   };
 
-  // Encontrar qué materias destraba esta materia
-  const materiasQueDestraba = MATERIAS_TRONCALES.filter(m => {
-    const enReg = m.reqRegular.includes(materia.id);
+  // Encontrar qué materias destraba esta materia divididas entre Cursar y Rendir
+  const materiasQueDestrabaCursar = MATERIAS_TRONCALES.filter(m => m.reqRegular.includes(materia.id));
+  const materiasQueDestrabaRendir = MATERIAS_TRONCALES.filter(m => {
     const enApr = Array.isArray(m.reqAprobada) && m.reqAprobada.includes(materia.id);
     const enRendir = Array.isArray(m.reqRendirAprobada) && m.reqRendirAprobada.includes(materia.id);
-    return enReg || enApr || enRendir;
+    return enApr || enRendir;
   });
+  const tieneMateriasQueDestraba = materiasQueDestrabaCursar.length > 0 || materiasQueDestrabaRendir.length > 0;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
@@ -401,22 +402,82 @@ export const SubjectModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Materias que destraba */}
-          {materiasQueDestraba.length > 0 && (
-            <div>
-              <h4 className="text-xs font-mono text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1.5">
+          {/* Materias que destraba divididas entre Cursar y Rendir */}
+          {tieneMateriasQueDestraba && (
+            <div className="space-y-3">
+              <h4 className="text-xs font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                 <ArrowRight className="w-3.5 h-3.5" style={{ color: 'var(--color-primary)' }} />
                 <span>Materias que ayuda a destrabar:</span>
               </h4>
-              <div className="flex flex-wrap gap-1.5">
-                {materiasQueDestraba.map(m => (
-                  <span
-                    key={m.id}
-                    className="px-2 py-1 rounded bg-(--bg-elevated) border border-(--border-color) text-[11px] font-mono text-(--text-body)"
-                  >
-                    {m.nombre} ({m.nivel}º Año)
-                  </span>
-                ))}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Para Cursar (Regularidad) */}
+                <div className="bg-(--bg-elevated) p-3 rounded-xl border border-(--border-color)">
+                  <div className="flex items-center justify-between mb-2">
+                    <span 
+                      className="text-xs font-mono font-bold flex items-center gap-1.5"
+                      style={{ color: 'var(--color-regular)' }}
+                    >
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }} />
+                      <span>Para Cursar (Regularidad)</span>
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) text-slate-500 dark:text-slate-400 font-semibold">
+                      {materiasQueDestrabaCursar.length}
+                    </span>
+                  </div>
+                  {materiasQueDestrabaCursar.length === 0 ? (
+                    <p className="text-[11px] font-mono text-slate-500 italic">No destraba cursado directo</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {materiasQueDestrabaCursar.map(m => (
+                        <span
+                          key={m.id}
+                          className="px-2 py-1 rounded bg-(--bg-surface) border text-[11px] font-mono"
+                          style={{
+                            borderColor: 'var(--color-regular-border)',
+                            color: 'var(--color-regular)'
+                          }}
+                        >
+                          {m.nombre} ({m.nivel}º Año)
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Para Rendir (Aprobación) */}
+                <div className="bg-(--bg-elevated) p-3 rounded-xl border border-(--border-color)">
+                  <div className="flex items-center justify-between mb-2">
+                    <span 
+                      className="text-xs font-mono font-bold flex items-center gap-1.5"
+                      style={{ color: 'var(--color-aprobada)' }}
+                    >
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }} />
+                      <span>Para Rendir (Aprobación)</span>
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) text-slate-500 dark:text-slate-400 font-semibold">
+                      {materiasQueDestrabaRendir.length}
+                    </span>
+                  </div>
+                  {materiasQueDestrabaRendir.length === 0 ? (
+                    <p className="text-[11px] font-mono text-slate-500 italic">No destraba finales directos</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {materiasQueDestrabaRendir.map(m => (
+                        <span
+                          key={m.id}
+                          className="px-2 py-1 rounded bg-(--bg-surface) border text-[11px] font-mono"
+                          style={{
+                            borderColor: 'var(--color-aprobada-border)',
+                            color: 'var(--color-aprobada)'
+                          }}
+                        >
+                          {m.nombre} ({m.nivel}º Año)
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
