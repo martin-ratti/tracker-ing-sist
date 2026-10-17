@@ -9,6 +9,7 @@
     "build": "pnpm --filter tracker-backend build && pnpm --filter frontend build",
     "lint": "oxlint frontend/src backend/src",
     "deploy": "pnpm build && firebase deploy --only hosting",
+    "deploy:all": "pnpm build && firebase deploy",
     "test": "pnpm --filter tracker-backend test && pnpm --filter frontend test",
     "test:coverage": "pnpm --filter tracker-backend test:coverage && pnpm --filter frontend test:coverage",
     "test:e2e": "playwright test",
