@@ -4,9 +4,40 @@
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
 @layer base {
-  :root, [data-theme="cyber"] {
+  :root, [data-theme="frost"] {
     --font-mono: 'IBM Plex Mono', monospace;
     --font-syne: 'Syne', sans-serif;
+    --bg-base: #090e17;
+    --bg-surface: #0d1524;
+    --bg-elevated: #131e33;
+    --border-color: #1c2b45;
+    --text-body: #e2e8f0;
+
+    /* Primario */
+    --color-primary: #38bdf8;
+    --color-primary-bg: rgba(56, 189, 248, 0.15);
+    --color-primary-border: rgba(56, 189, 248, 0.4);
+    --color-primary-glow: rgba(56, 189, 248, 0.45);
+    --gradient-primary: linear-gradient(to right, #38bdf8, #818cf8, #2dd4bf);
+
+    /* Estados Académicos */
+    --color-cursable: #38bdf8;
+    --color-cursable-bg: #082538;
+    --color-cursable-border: #38bdf8;
+    --color-cursable-glow: rgba(56, 189, 248, 0.55);
+
+    --color-regular: #818cf8;
+    --color-regular-bg: #151936;
+    --color-regular-border: #818cf8;
+    --color-regular-glow: rgba(129, 140, 248, 0.45);
+
+    --color-aprobada: #2dd4bf;
+    --color-aprobada-bg: #072b22;
+    --color-aprobada-border: #2dd4bf;
+    --color-aprobada-glow: rgba(45, 212, 191, 0.35);
+  }
+
+  [data-theme="cyber"] {
     --bg-base: #070b13;
     --bg-surface: #0b101c;
     --bg-elevated: #0d1527;
@@ -128,37 +159,6 @@
     --color-aprobada-bg: #0b2914;
     --color-aprobada-border: #10b981;
     --color-aprobada-glow: rgba(16, 185, 129, 0.35);
-  }
-
-  [data-theme="frost"] {
-    --bg-base: #090e17;
-    --bg-surface: #0d1524;
-    --bg-elevated: #131e33;
-    --border-color: #1c2b45;
-    --text-body: #e2e8f0;
-
-    /* Primario */
-    --color-primary: #38bdf8;
-    --color-primary-bg: rgba(56, 189, 248, 0.15);
-    --color-primary-border: rgba(56, 189, 248, 0.4);
-    --color-primary-glow: rgba(56, 189, 248, 0.45);
-    --gradient-primary: linear-gradient(to right, #38bdf8, #818cf8, #2dd4bf);
-
-    /* Estados Académicos */
-    --color-cursable: #38bdf8;
-    --color-cursable-bg: #082538;
-    --color-cursable-border: #38bdf8;
-    --color-cursable-glow: rgba(56, 189, 248, 0.55);
-
-    --color-regular: #818cf8;
-    --color-regular-bg: #151936;
-    --color-regular-border: #818cf8;
-    --color-regular-glow: rgba(129, 140, 248, 0.45);
-
-    --color-aprobada: #2dd4bf;
-    --color-aprobada-bg: #072b22;
-    --color-aprobada-border: #2dd4bf;
-    --color-aprobada-glow: rgba(45, 212, 191, 0.35);
   }
 
   /* ==========================================================================

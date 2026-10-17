@@ -181,7 +181,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setThemeState] = useState<ThemeId>(() => {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
     if (saved && saved in THEMES) return saved as ThemeId;
-    return 'cyber';
+    return 'frost';
   });
 
   const [colorMode, setColorModeState] = useState<ColorMode>(() => {
@@ -222,7 +222,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [theme, colorMode]);
 
   const activeThemeConfig = useMemo(() => {
-    const base = THEMES[theme] || THEMES.cyber;
+    const base = THEMES[theme] || THEMES.frost;
     return {
       ...base,
       graph: colorMode === 'light' ? base.lightGraph : base.graph

@@ -11,9 +11,9 @@ describe('ThemeContext - Manejo de Temas y Modos de Color', () => {
   it('debe iniciar con el tema por defecto y modo oscuro', () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
 
-    expect(result.current.theme).toBe('cyber');
+    expect(result.current.theme).toBe('frost');
     expect(result.current.colorMode).toBe('dark');
-    expect(document.documentElement.getAttribute('data-theme')).toBe('cyber');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('frost');
     expect(document.documentElement.getAttribute('data-mode')).toBe('dark');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
