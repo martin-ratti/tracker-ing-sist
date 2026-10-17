@@ -382,7 +382,7 @@ export const GridView: React.FC = () => {
                                 ADUSI
                               </span>
                             )}
-                            <span className="text-slate-600 dark:text-slate-400 font-medium">{m.horas}hs</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">{m.horas} hs</span>
                           </div>
                         </div>
 

@@ -729,7 +729,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
               <span>Electivas</span>
-              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[10px] text-amber-900 dark:text-amber-300 font-bold">
+              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[10px] text-amber-900 dark:text-amber-300 font-bold whitespace-nowrap">
                 {stats.horasElectivasAprobadas}/20hs
               </span>
             </button>

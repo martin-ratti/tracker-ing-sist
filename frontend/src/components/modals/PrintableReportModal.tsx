@@ -41,13 +41,13 @@ export const PrintableReportModal: React.FC = () => {
     window.print();
   };
 
-  const fechaEmision = new Date().toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const fechaEmision = `${day}/${month}/${year}, ${hours}:${minutes} hs`;
 
   const niveles = [1, 2, 3, 4, 5];
   const electivasAprobadas = MATERIAS_ELECTIVAS.filter(e => estadosElectivas[e.id] === 'aprobada');
@@ -145,9 +145,9 @@ export const PrintableReportModal: React.FC = () => {
               </div>
             </div>
 
-            <div className="text-left sm:text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 print:text-neutral-600">
+            <div className="text-left sm:text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 print:text-neutral-600 shrink-0">
               <div>Fecha de Emisión:</div>
-              <div className="font-bold text-(--text-body) print:text-black">{fechaEmision} hs</div>
+              <div className="font-bold text-(--text-body) print:text-black whitespace-nowrap">{fechaEmision}</div>
             </div>
           </div>
 
@@ -191,14 +191,14 @@ export const PrintableReportModal: React.FC = () => {
 
             <div className="bg-(--bg-surface) print:bg-neutral-50 border border-(--border-color) print:border-neutral-300 rounded-xl p-3">
               <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600 uppercase">Electivas Aprobadas</div>
-              <div className="text-lg font-bold text-amber-600 dark:text-amber-400 print:text-black">{stats.horasElectivasAprobadas} hs</div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600">Meta: 20 hs (ADUSI: 4 hs)</div>
+              <div className="text-lg font-bold text-amber-600 dark:text-amber-400 print:text-black whitespace-nowrap">{stats.horasElectivasAprobadas} hs</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600 whitespace-nowrap">Meta: 20 hs (ADUSI: 4 hs)</div>
             </div>
 
             <div className="bg-(--bg-surface) print:bg-neutral-50 border border-(--border-color) print:border-neutral-300 rounded-xl p-3">
               <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600 uppercase">Práctica PPS</div>
-              <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400 print:text-black">{ppsHoras} hs</div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600">Meta: 200 hs requeridas</div>
+              <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400 print:text-black whitespace-nowrap">{ppsHoras} hs</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-neutral-600 whitespace-nowrap">Meta: 200 hs requeridas</div>
             </div>
           </div>
 
@@ -294,7 +294,7 @@ export const PrintableReportModal: React.FC = () => {
                     className="p-2 rounded bg-(--bg-surface) print:bg-neutral-50 border border-(--border-color) print:border-neutral-300 flex items-center justify-between"
                   >
                     <span className="font-semibold text-(--text-body) print:text-black">{e.nombre} ({e.nivel}º Nivel)</span>
-                    <span className="text-amber-600 dark:text-amber-400 print:text-black font-bold text-[11px]">+{e.horas} hs</span>
+                    <span className="text-amber-600 dark:text-amber-400 print:text-black font-bold text-[11px] whitespace-nowrap">+{e.horas} hs</span>
                   </div>
                 ))}
               </div>

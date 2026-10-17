@@ -103,7 +103,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
               </div>
               <div>
                 <span className="text-slate-600 dark:text-slate-400">Electivas: </span>
-                <span className="font-bold text-amber-700 dark:text-amber-400">{stats.horasElectivasAprobadas} hs</span>
+                <span className="font-bold text-amber-700 dark:text-amber-400 whitespace-nowrap">{stats.horasElectivasAprobadas} hs</span>
               </div>
             </div>
           </div>

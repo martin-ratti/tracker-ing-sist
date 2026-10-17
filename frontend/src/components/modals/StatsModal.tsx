@@ -187,7 +187,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
                   <TrendingUp className="w-4 h-4 text-amber-400" />
                   <span className="text-xs font-mono uppercase">Horas Electivas</span>
                 </div>
-                <span className="font-syne text-2xl font-bold text-amber-400">
+                <span className="font-syne text-2xl font-bold text-amber-400 whitespace-nowrap">
                   {horasElectivasAprobadas}<span className="text-sm text-slate-500"> hs</span>
                 </span>
               </div>

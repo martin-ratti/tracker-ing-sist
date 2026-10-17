@@ -122,11 +122,11 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
               <div className="flex flex-wrap items-center justify-between gap-1 text-(--text-body)">
                 <span>Cumplimiento de 4 hs de Electivas:</span>
                 {stats.horasElectivasAprobadas >= 4 ? (
-                  <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-semibold">
+                  <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-semibold whitespace-nowrap">
                     <CheckCircle2 className="w-3.5 h-3.5" /> {stats.horasElectivasAprobadas} / 4 hs
                   </span>
                 ) : (
-                  <span className="text-amber-700 dark:text-amber-400 font-semibold">
+                  <span className="text-amber-700 dark:text-amber-400 font-semibold whitespace-nowrap">
                     {stats.horasElectivasAprobadas} / 4 hs (faltan {4 - stats.horasElectivasAprobadas} hs)
                   </span>
                 )}
@@ -181,7 +181,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
 
               <div className="flex flex-wrap items-center justify-between gap-1 text-(--text-body)">
                 <span>Mínimo 20 hs de Electivas (5%):</span>
-                <span className={stats.horasElectivasAprobadas >= 20 ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-amber-700 dark:text-amber-400 font-semibold'}>
+                <span className={`whitespace-nowrap ${stats.horasElectivasAprobadas >= 20 ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-amber-700 dark:text-amber-400 font-semibold'}`}>
                   {stats.horasElectivasAprobadas} / 20 hs
                 </span>
               </div>
@@ -190,7 +190,7 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
               <div className="pt-2 border-t border-(--border-color)">
                 <div className="flex flex-wrap items-center justify-between gap-1 mb-1.5 text-(--text-body)">
                   <span>Prácticas Profesionales Supervisadas (PPS - 200 hs, 5%):</span>
-                  <span className={ppsHoras >= 200 ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}>
+                  <span className={`whitespace-nowrap ${ppsHoras >= 200 ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
                     {ppsHoras} / 200 hs
                   </span>
                 </div>
