@@ -28,6 +28,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useTheme, THEMES, type ThemeId } from '../../context/ThemeContext';
+import { formatPromedio } from '../../utils/formatters';
 
 interface HeaderProps {
   onOpenTitles: () => void;
@@ -314,11 +315,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               <Award className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
               <div className="text-left font-mono">
                 <div className="text-purple-900 dark:text-purple-300 font-extrabold text-xs sm:text-sm leading-none">
-                  {stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : stats.promedioConAplazos}
+                  {formatPromedio(stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : stats.promedioConAplazos)}
                 </div>
                 <div 
                   className="text-[10px] text-purple-900 dark:text-purple-300 uppercase leading-tight font-bold cursor-help"
-                  title={`Con aplazos: ${stats.promedioConAplazos} · Sin aplazos: ${stats.promedioSinAplazos ?? '—'}`}
+                  title={`Con aplazos: ${formatPromedio(stats.promedioConAplazos)} · Sin aplazos: ${formatPromedio(stats.promedioSinAplazos)}`}
                 >
                   {stats.promedioSinAplazos !== null ? 'Prom. s/aplazos' : 'Promedio'}
                 </div>
@@ -523,7 +524,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           <div className="p-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 shadow-sm">
             <div className="text-[9px] uppercase font-bold text-purple-900 dark:text-purple-300">Prom</div>
             <div className="text-xs font-extrabold text-purple-900 dark:text-purple-300">
-              {stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : (stats.promedioConAplazos ?? '—')}
+              {formatPromedio(stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : stats.promedioConAplazos)}
             </div>
           </div>
         </div>
@@ -730,7 +731,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               <Sparkles className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
               <span>Electivas</span>
               <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[10px] text-amber-900 dark:text-amber-300 font-bold whitespace-nowrap">
-                {stats.horasElectivasAprobadas}/20hs
+                {stats.horasElectivasAprobadas} / 20 hs
               </span>
             </button>
 
@@ -1001,7 +1002,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                     <div className="p-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 shadow-xs">
                       <span className="block text-[8px] uppercase font-bold text-purple-800 dark:text-purple-300">Promedio</span>
                       <span className="text-xs font-extrabold text-purple-900 dark:text-purple-200">
-                        {stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : (stats.promedioConAplazos ?? '—')}
+                        {formatPromedio(stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : stats.promedioConAplazos)}
                       </span>
                     </div>
                   </div>

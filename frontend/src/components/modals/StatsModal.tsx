@@ -9,6 +9,7 @@ import {
   Award, 
   Calendar 
 } from 'lucide-react';
+import { formatFechaLocal, formatPromedio } from '../../utils/formatters';
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -161,7 +162,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
                   <span className="text-xs font-mono uppercase">Promedio c/Aplazos</span>
                 </div>
                 <span className="font-syne text-2xl font-bold text-(--text-body)">
-                  {promedioConAplazos !== null ? promedioConAplazos.toFixed(2) : '—'}
+                  {formatPromedio(promedioConAplazos)}
                 </span>
               </div>
               <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
@@ -170,7 +171,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
                   <span className="text-xs font-mono uppercase">Promedio s/Aplazos</span>
                 </div>
                 <span className="font-syne text-2xl font-bold text-purple-400">
-                  {promedioSinAplazos !== null ? promedioSinAplazos.toFixed(2) : '—'}
+                  {formatPromedio(promedioSinAplazos)}
                 </span>
               </div>
               <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
@@ -240,7 +241,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
                     <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] bg-(--bg-surface) border border-(--border-color) p-3 rounded-lg flex items-center justify-between ml-8 md:ml-0 shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition-colors">
                       <div className="flex flex-col gap-0.5 overflow-hidden">
                         <span className="font-mono text-xs font-bold text-(--text-body) truncate" title={item.nombre}>{item.nombre}</span>
-                        <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400">{item.fechaStr}</span>
+                        <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400">{formatFechaLocal(item.fechaStr)}</span>
                       </div>
                       {item.nota !== undefined && (
                         <div className="ml-3 shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-(--bg-elevated) border border-(--border-color) font-syne font-bold text-xs text-(--text-body)">

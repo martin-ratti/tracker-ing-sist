@@ -19,6 +19,7 @@ import {
   getFechaExactaMesa,
   DIAS_MESA_POR_MATERIA
 } from '../../data/calendario';
+import { formatFechaLocal, formatRangoFechas } from '../../utils/formatters';
 
 
 
@@ -140,8 +141,18 @@ export const SubjectModal: React.FC = () => {
 
   const handleRemoveMeta = () => {
     if (!materia) return;
+    const prevMeta = currentMeta;
     removeMetaExamen(materia.id);
     setShowMetaForm(false);
+    if (prevMeta) {
+      showToast('Meta de examen eliminada', {
+        variant: 'info',
+        action: {
+          label: 'Deshacer',
+          onClick: () => setMetaExamen(materia.id, prevMeta)
+        }
+      });
+    }
   };
 
   // Guardar notas
@@ -179,7 +190,7 @@ export const SubjectModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="subject-modal-title"
-        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col my-auto"
+        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl modal-pop-in flex flex-col my-auto"
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) relative shrink-0">
@@ -541,7 +552,7 @@ export const SubjectModal: React.FC = () => {
                     if (!exacta) return null;
                     return (
                       <div className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 font-semibold">
-                        <span>Día exacto: {exacta.diaNombre} {exacta.fechaExactaStr}</span>
+                        <span>Día exacto: {exacta.diaNombre} {formatFechaLocal(exacta.fechaExactaStr)}</span>
                       </div>
                     );
                   })()}
@@ -580,7 +591,7 @@ export const SubjectModal: React.FC = () => {
                           const exacta = getFechaExactaMesa(materia.id, t);
                           return (
                             <option key={t.id} value={t.id}>
-                              {t.nombre} ({exacta ? `${exacta.diaNombre} ${exacta.fechaExactaStr}` : `${t.fechaInicio} al ${t.fechaFin}`})
+                              {t.nombre} ({exacta ? `${exacta.diaNombre} ${formatFechaLocal(exacta.fechaExactaStr)}` : formatRangoFechas(t.fechaInicio, t.fechaFin)})
                             </option>
                           );
                         });

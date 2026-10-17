@@ -28,6 +28,7 @@ import {
   Download
 } from 'lucide-react';
 import { exportMetasToICS } from '../../utils/icsExporter';
+import { formatFechaLocal, formatRangoFechas } from '../../utils/formatters';
 
 const NOMBRES_MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
@@ -642,7 +643,7 @@ export const CalendarModal: React.FC = () => {
                                     ? 'bg-purple-500/20 text-purple-700 dark:text-purple-200 border border-purple-400/60 font-bold shadow-[0_0_8px_rgba(168,85,247,0.3)]'
                                     : 'bg-(--color-primary-bg) text-(--color-primary) border border-(--color-primary-border) font-bold'
                               }`}
-                              title={`${turno.nombre} (${turno.fechaInicio} al ${turno.fechaFin})`}
+                              title={`${turno.nombre} (${formatRangoFechas(turno.fechaInicio, turno.fechaFin)})`}
                             >
                               {turno.nombreCorto.replace('Llamado ', 'Ll.')}
                             </span>
@@ -832,7 +833,7 @@ export const CalendarModal: React.FC = () => {
                       <div className={`flex items-center gap-1.5 ${selectedHito.tipo === 'feriado' ? 'text-rose-600 dark:text-rose-300/90' : 'text-amber-600 dark:text-amber-300/90'}`}>
                         <CalendarIcon className={`w-3.5 h-3.5 ${selectedHito.tipo === 'feriado' ? 'text-rose-500' : 'text-amber-500'}`} />
                         <span>
-                          {selectedHito.fechaInicio}{selectedHito.fechaFin ? ` al ${selectedHito.fechaFin}` : ''}
+                          {formatRangoFechas(selectedHito.fechaInicio, selectedHito.fechaFin)}
                         </span>
                       </div>
                       <button
@@ -929,7 +930,7 @@ export const CalendarModal: React.FC = () => {
 
                               {fechaExacta && (
                                 <div className="text-[11px] text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded flex items-center gap-1 font-semibold">
-                                  <span>📅 Mesa Oficial: {fechaExacta.diaNombre} {fechaExacta.fechaExactaStr}</span>
+                                  <span>📅 Mesa Oficial: {fechaExacta.diaNombre} {formatFechaLocal(fechaExacta.fechaExactaStr)}</span>
                                 </div>
                               )}
 
@@ -1031,7 +1032,7 @@ export const CalendarModal: React.FC = () => {
                           <span className="text-slate-500 dark:text-slate-400 text-[11px]">
                             {turno.diasEspecificos 
                               ? `Días: ${turno.diasEspecificos.map(d => Number.parseInt(d.split('-')[2], 10)).join(', ')} de ${turno.mes}`
-                              : `${turno.fechaInicio} al ${turno.fechaFin}`}
+                              : formatRangoFechas(turno.fechaInicio, turno.fechaFin)}
                           </span>
                           <span className={`px-2 py-0.5 rounded text-[10px] border ${countdown.badgeColor}`}>
                             {countdown.text}
