@@ -218,7 +218,7 @@ export const ElectivasDrawer: React.FC = () => {
                         toggleMateriaEstado(seminario.id);
                       }
                     }}
-                    className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer select-none hover:border-pink-500/40 ${cardStyle}`}
+                    className={`p-4 rounded-xl border card-interactive cursor-pointer select-none hover:border-pink-500/40 ${cardStyle}`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
                       <div>
@@ -376,7 +376,7 @@ export const ElectivasDrawer: React.FC = () => {
                         toggleElectivaEstado(e.id);
                       }
                     }}
-                    className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer select-none hover:border-slate-500/50 ${cardStyle}`}
+                    className={`p-4 rounded-xl border card-interactive cursor-pointer select-none hover:border-slate-500/50 ${cardStyle}`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
                       <div>

@@ -37,11 +37,23 @@ interface Stats {
   proximaMeta: ProximaMetaInfo | null;
 }
 
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
+export interface ToastOptions {
+  variant?: 'success' | 'warning' | 'error' | 'info';
+  duration?: number;
+  action?: ToastAction;
+}
+
 export interface ToastItem {
   id: string;
   message: string;
   variant: 'success' | 'warning' | 'error' | 'info';
   duration: number;
+  action?: ToastAction;
 }
 
 interface TrackerContextType {
@@ -83,7 +95,7 @@ interface TrackerContextType {
   setSelectedSubjectId: (id: number | null) => void;
   toastMessage: string | null;
   toasts: ToastItem[];
-  showToast: (msg: string, variant?: 'success' | 'warning' | 'error' | 'info') => void;
+  showToast: (msg: string, variantOrOptions?: 'success' | 'warning' | 'error' | 'info' | ToastOptions) => void;
   dismissToast: (id: string) => void;
   toggleMateriaEstado: (id: number) => void;
   setEstadoDirecto: (id: number, estado: EstadoMateria) => void;
@@ -190,14 +202,23 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
-  const showToast = useCallback((msg: string, variant: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+  const showToast = useCallback((
+    msg: string,
+    variantOrOptions: 'success' | 'warning' | 'error' | 'info' | ToastOptions = 'info'
+  ) => {
     if (!msg) return;
     const id = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' 
       ? crypto.randomUUID() 
       : `${Date.now()}`;
-    const duration = 3500;
+    const isObj = typeof variantOrOptions === 'object';
+    const variant = isObj ? (variantOrOptions.variant || 'info') : variantOrOptions;
+    const duration = isObj && variantOrOptions.duration !== undefined
+      ? variantOrOptions.duration
+      : (isObj && variantOrOptions.action ? 5000 : 3500);
+    const action = isObj ? variantOrOptions.action : undefined;
+
     setToasts(prev => {
-      const next = [...prev, { id, message: msg, variant, duration }];
+      const next = [...prev, { id, message: msg, variant, duration, action }];
       return next.slice(-3);
     });
   }, []);

@@ -47,7 +47,7 @@ export const Modal: React.FC<ModalProps> = ({
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full ${maxWidth} max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col my-auto`}
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full ${maxWidth} max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl modal-pop-in flex flex-col my-auto`}
       >
         <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) relative shrink-0">
           <div className="flex items-start justify-between gap-4">
