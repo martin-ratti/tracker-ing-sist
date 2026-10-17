@@ -118,21 +118,24 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
     }
   }
 
-  // 2. Fallback a Backend Express (si está disponible)
-  try {
-    const res = await fetch('/api/progress', {
-      headers: getAuthHeaders()
-    });
-    if (res.ok) {
-      const data: ProgresoUsuario = await res.json();
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-      return data;
+  // 2. Si hay sesión activa en backend Express (token JWT)
+  const token = getStoredToken();
+  if (token) {
+    try {
+      const res = await fetch('/api/progress', {
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        const data: ProgresoUsuario = await res.json();
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+        return data;
+      }
+    } catch (error) {
+      console.warn('Backend no disponible, cargando desde localStorage:', error);
     }
-  } catch (error) {
-    console.warn('Backend no disponible, cargando desde localStorage:', error);
   }
 
-  // 3. Fallback a LocalStorage
+  // 3. Fallback / Modo Local: LocalStorage
   const local = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (local) {
     try {
@@ -260,19 +263,22 @@ export async function persistProgress(progress: Partial<ProgresoUsuario>): Promi
     });
   }
 
-  // 2. Sincronización secundaria con backend Express si está activo
-  if (saveTimeout) clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(async () => {
-    try {
-      await fetch('/api/progress', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(updated)
-      });
-    } catch {
-      // Ignorar fallo de backend tradicional cuando está en modo serverless
-    }
-  }, 400);
+  // 2. Sincronización secundaria con backend Express si hay sesión autenticada
+  const token = getStoredToken();
+  if (token) {
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async () => {
+      try {
+        await fetch('/api/progress', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(updated)
+        });
+      } catch {
+        // Ignorar fallo de backend tradicional cuando está en modo serverless
+      }
+    }, 400);
+  }
 }
 
 export async function clearProgress(): Promise<void> {
@@ -298,12 +304,15 @@ export async function clearProgress(): Promise<void> {
     });
   }
 
-  try {
-    await fetch('/api/progress/reset', {
-      method: 'POST',
-      headers: getAuthHeaders()
-    });
-  } catch {
-    // Ignorar
+  const token = getStoredToken();
+  if (token) {
+    try {
+      await fetch('/api/progress/reset', {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+    } catch {
+      // Ignorar
+    }
   }
 }
