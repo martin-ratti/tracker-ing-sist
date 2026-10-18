@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { MATERIAS_TRONCALES } from '../../data/plan2023';
-import { Info, CheckCircle2, Clock, Search, Target, X, ExternalLink } from 'lucide-react';
+import { Info, CheckCircle2, Clock, Search, Target, X, ExternalLink, FolderOpen } from 'lucide-react';
+import { getDriveUrlForNivel, getDriveUrlForMateria } from '../../data/driveLinks';
 
 const NIVELES = [1, 2, 3, 4, 5];
 
@@ -85,7 +86,7 @@ export const GridView: React.FC = () => {
             Malla Curricular Plan 2023
           </h2>
           <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono">
-            Estructura cronológica por niveles académicos y correlatividades
+            Estructura cronológica por niveles académicos · <span className="text-(--color-primary) font-medium">Click derecho para ver detalle y notas</span>
           </p>
         </div>
 
@@ -283,14 +284,28 @@ export const GridView: React.FC = () => {
             >
               {/* Encabezado del Nivel */}
               <div className="border-b border-(--border-color) pb-2.5">
-                <div className="flex items-center justify-between">
-                  <span 
-                    className="font-syne font-extrabold text-sm tracking-wider"
-                    style={{ color: 'var(--color-primary)' }}
-                  >
-                    {nivel}º NIVEL
-                  </span>
-                  <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span 
+                      className="font-syne font-extrabold text-sm tracking-wider"
+                      style={{ color: 'var(--color-primary)' }}
+                    >
+                      {nivel}º NIVEL
+                    </span>
+                    <a
+                      href={getDriveUrlForNivel(nivel)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2 py-0.5 rounded-lg border border-(--border-color) bg-(--bg-elevated) hover:border-cyan-500/50 hover:bg-cyan-500/10 text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-all flex items-center gap-1 text-[10px] font-mono shadow-xs"
+                      title={`Abrir carpeta de Google Drive de ${nivel}º Año`}
+                      aria-label={`Abrir carpeta de Google Drive de ${nivel}º Año`}
+                    >
+                      <FolderOpen className="w-3 h-3 text-cyan-500" />
+                      <span className="hidden xl:inline">Drive</span>
+                      <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                    </a>
+                  </div>
+                  <span className="font-mono text-xs text-slate-500 dark:text-slate-400 shrink-0">
                     {aprobadasNivel}/{totalNivel} ({pctNivel}%)
                   </span>
                 </div>
@@ -379,8 +394,13 @@ export const GridView: React.FC = () => {
                         role="button"
                         tabIndex={0}
                         aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
+                        title="Click: alternar estado · Click derecho: ver detalle y notas"
                         className={`group relative p-3 rounded-lg border card-interactive cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${cardStyle}`}
                         onClick={() => handleToggleMateria(m.id)}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          setSelectedSubjectId(m.id);
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
@@ -438,18 +458,31 @@ export const GridView: React.FC = () => {
                             )}
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedSubjectId(m.id);
-                            }}
-                            aria-label={`Ver detalles, correlativas y notas de ${m.nombreCompleto}`}
-                            className="p-2 -mr-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 flex items-center justify-center"
-                            title="Ver correlativas y registrar notas"
-                          >
-                            <Info className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center gap-0.5">
+                            <a
+                              href={getDriveUrlForMateria(m.id, m.nivel)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label={`Abrir carpeta de Google Drive de ${m.nombreCompleto}`}
+                              className="p-2 rounded-lg text-slate-400 hover:text-cyan-500 hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 flex items-center justify-center"
+                              title={`Abrir carpeta de Drive de ${m.nombre} (exámenes y apuntes)`}
+                            >
+                              <FolderOpen className="w-3.5 h-3.5" />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedSubjectId(m.id);
+                              }}
+                              aria-label={`Ver detalles, correlativas y notas de ${m.nombreCompleto}`}
+                              className="p-2 -mr-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 flex items-center justify-center"
+                              title="Ver correlativas y registrar notas"
+                            >
+                              <Info className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );

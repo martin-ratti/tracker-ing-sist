@@ -498,13 +498,6 @@ export const NetworkGraph: React.FC = () => {
       }
     });
 
-    net.on('doubleClick', params => {
-      if (params.nodes.length > 0) {
-        const clickedId = Number(params.nodes[0]);
-        setSelectedSubjectIdRef.current(clickedId);
-      }
-    });
-
     net.on('oncontext', params => {
       params.event.preventDefault();
       const nodeId = net.getNodeAt(params.pointer.DOM);
@@ -862,8 +855,8 @@ export const NetworkGraph: React.FC = () => {
           <span>{interactionMode === 'camino' ? 'Resaltar dependencias' : 'Cambiar estado'}</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Doble Click</kbd>
-          <span>Detalles y notas</span>
+          <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click Derecho</kbd>
+          <span>Detalle de materia</span>
         </span>
         <span className="flex items-center gap-1.5">
           <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Fondo</kbd>

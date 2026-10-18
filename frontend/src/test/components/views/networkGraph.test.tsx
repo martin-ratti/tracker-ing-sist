@@ -15,7 +15,7 @@ vi.mock('vis-network/standalone', () => {
     Network: class {
       on = vi.fn((event, handler) => {
         if (event === 'click') this.clickHandler = handler;
-        if (event === 'doubleClick') this.doubleClickHandler = handler;
+        if (event === 'oncontext') this.contextHandler = handler;
         if (event === 'stabilizationIterationsDone') this.stabilizedHandler = handler;
       });
       once = vi.fn();
@@ -27,9 +27,10 @@ vi.mock('vis-network/standalone', () => {
       setOptions = vi.fn();
       setData = vi.fn();
       redraw = vi.fn();
+      getNodeAt = vi.fn(() => 1);
       getScale = vi.fn(() => 1);
       clickHandler: any = null;
-      doubleClickHandler: any = null;
+      contextHandler: any = null;
       stabilizedHandler: any = null;
       constructor() {
         setMockInstance(this);
@@ -118,9 +119,12 @@ describe('NetworkGraph Component', () => {
         mockNetworkInstance.clickHandler({ nodes: [] });
       });
     }
-    if (mockNetworkInstance?.doubleClickHandler) {
+    if (mockNetworkInstance?.contextHandler) {
       act(() => {
-        mockNetworkInstance.doubleClickHandler({ nodes: ['1'] });
+        mockNetworkInstance.contextHandler({
+          event: { preventDefault: vi.fn() },
+          pointer: { DOM: { x: 100, y: 100 } }
+        });
       });
     }
   });

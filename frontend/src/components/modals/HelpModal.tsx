@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useModalAnimation } from '../../hooks/useModalAnimation';
-import { X, HelpCircle, AlertTriangle, Heart, ExternalLink } from 'lucide-react';
+import { X, HelpCircle, AlertTriangle, ExternalLink, GitFork, Sparkles, BookOpen, Network, CheckCircle2 } from 'lucide-react';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -41,7 +41,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
         }`}
       >
-        <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
+        {/* Cabecera */}
+        <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div 
               className="p-2 rounded-xl border shrink-0"
@@ -73,151 +74,187 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5 text-xs font-mono text-slate-600 dark:text-slate-300 overflow-y-auto flex-1 no-scrollbar">
+        {/* Contenido con módulos resumidos */}
+        <div className="p-4 sm:p-6 space-y-4 text-xs font-mono text-slate-600 dark:text-slate-300 overflow-y-auto flex-1 no-scrollbar">
           
-          <div className="space-y-3">
+          {/* Módulo 1: Flujo de Estados y Controles */}
+          <div className="space-y-2.5">
             <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--color-primary)' }}>
-              <span>Flujo de Estados de una Materia</span>
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Flujo de Estados y Controles</span>
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-              Hacé click en cualquier nodo del grafo o tarjeta de la malla curricular para avanzar en el ciclo:
-            </p>
+            
             <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
-              <div className="p-2.5 rounded-lg bg-(--bg-elevated) border border-(--border-color)">
-                <div className="text-(--text-body) font-bold mb-1">⚪ Pendiente</div>
-                <div className="text-slate-500 dark:text-slate-400">No cursada aún o bloqueada</div>
+              <div className="p-2 rounded-lg bg-(--bg-elevated) border border-(--border-color)">
+                <div className="text-(--text-body) font-bold">⚪ Pendiente</div>
+                <div className="text-slate-500 text-[10px]">No cursada / bloqueada</div>
               </div>
               <div 
-                className="p-2.5 rounded-lg border"
-                style={{
-                  backgroundColor: 'var(--color-regular-bg)',
-                  borderColor: 'var(--color-regular-border)'
-                }}
+                className="p-2 rounded-lg border"
+                style={{ backgroundColor: 'var(--color-regular-bg)', borderColor: 'var(--color-regular-border)' }}
               >
-                <div className="font-bold mb-1" style={{ color: 'var(--color-regular)' }}>🟡 Regular</div>
-                <div className="text-slate-600 dark:text-slate-400">Cursada aprobada, lista para rendir</div>
+                <div className="font-bold" style={{ color: 'var(--color-regular)' }}>🟡 Regular</div>
+                <div className="text-slate-600 dark:text-slate-400 text-[10px]">Cursada lista para rendir</div>
               </div>
               <div 
-                className="p-2.5 rounded-lg border"
-                style={{
-                  backgroundColor: 'var(--color-aprobada-bg)',
-                  borderColor: 'var(--color-aprobada-border)'
-                }}
+                className="p-2 rounded-lg border"
+                style={{ backgroundColor: 'var(--color-aprobada-bg)', borderColor: 'var(--color-aprobada-border)' }}
               >
-                <div className="font-bold mb-1" style={{ color: 'var(--color-aprobada)' }}>🟢 Aprobada</div>
-                <div className="text-slate-600 dark:text-slate-400">Final o promoción acreditada</div>
+                <div className="font-bold" style={{ color: 'var(--color-aprobada)' }}>🟢 Aprobada</div>
+                <div className="text-slate-600 dark:text-slate-400 text-[10px]">Final o promoción</div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5 bg-(--bg-elevated) p-3 rounded-xl border border-(--border-color) text-[11px] leading-relaxed">
+              <div className="flex items-start gap-2">
+                <span className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body) shrink-0">Click Izq</span>
+                <span>Avanza el estado de la materia en ciclo: <strong>Pendiente ➔ Regular ➔ Aprobada</strong>.</span>
+              </div>
+              <div className="flex items-start gap-2 text-cyan-900 dark:text-cyan-300 font-medium">
+                <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 font-bold shrink-0">Click Derecho</span>
+                <span>(o botón ℹ️ en la malla): Abre el <strong>detalle de la materia</strong> para ver correlativas, fechas y asentar notas.</span>
               </div>
             </div>
           </div>
 
-          <div className="space-y-2 border-t border-(--border-color) pt-4">
+          {/* Módulo 2: Efecto Pulso y Estado Cursable */}
+          <div className="space-y-1.5 border-t border-(--border-color) pt-3">
             <h3 className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
               Efecto Pulso y Estado Cursable
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-              Cuando una materia cumple con todos sus requisitos de correlatividades (regulares y aprobadas), se iluminará en el color de estado cursable del tema seleccionado con una animación de pulso. Esto indica que estás habilitado para anotarte y cursarla en el período lectivo.
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-[11px]">
+              Al cumplir todos los requisitos de correlativas (regulares y aprobadas), la materia se ilumina en cyan con un pulso animado, indicando que estás habilitado para cursarla.
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-(--border-color) pt-4">
+          {/* Módulo 3: Reseteo en Cascada Inteligente */}
+          <div className="space-y-1.5 border-t border-(--border-color) pt-3">
             <h3 className="text-sm font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               <span>Reseteo en Cascada Inteligente</span>
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-              Si desmarcás una materia para devolverla a "Pendiente", el sistema automáticamente verificará todas las materias posteriores. Si alguna ya no cumple las correlatividades requeridas, volverá al estado correspondiente de forma recursiva para garantizar que tu plan siempre sea académicamente válido.
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-[11px]">
+              Si desmarcás una materia previa, el sistema recalcula recursivamente las materias posteriores que pierden correlatividad, garantizando siempre la consistencia académica de tu plan.
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-(--border-color) pt-4">
-            <h3 className="text-sm font-bold text-purple-700 dark:text-purple-300">
-              Registro de Notas y Promedios
+          {/* Módulo 4: Registro de Notas y Promedios */}
+          <div className="space-y-1.5 border-t border-(--border-color) pt-3">
+            <h3 className="text-sm font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+              <BookOpen className="w-4 h-4" />
+              <span>Registro de Notas y Promedios</span>
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-              Hacé <strong>doble click</strong> sobre cualquier materia en el grafo (o click en el ícono de información en la malla) para asentar la nota de final, fecha de examen, libro y folio. El tracker calculará tu promedio general en vivo.
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-[11px]">
+              Con <strong>Click Derecho</strong> (o ícono ℹ️) podés asentar la nota de final, fecha, libro y folio. El tracker calcula en tiempo real tu promedio con aplazos y sin aplazos.
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-(--border-color) pt-4">
-            <h3 className="text-sm font-bold text-amber-700 dark:text-amber-300">
-              Panel de Electivas
+          {/* Módulo 5: Panel de Electivas */}
+          <div className="space-y-1.5 border-t border-(--border-color) pt-3">
+            <h3 className="text-sm font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4" />
+              <span>Panel de Electivas</span>
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-              Abrí el panel de <strong className="text-amber-700 dark:text-amber-300">Electivas</strong> (ícono ✨ en el header) para gestionar las materias optativas. Podés filtrar por nivel (2° a 5° Año) y ver el progreso hacia las 4 hs requeridas para ADUSI y las 20 hs para Ingeniería.
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-[11px]">
+              Abrí el panel desde el ícono ✨ en el header para gestionar materias optativas (2° a 5° Año) y controlar el avance hacia las 4 hs de ADUSI y 20 hs de Ingeniería.
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-(--border-color) pt-4">
-            <h3 className="text-sm font-bold text-indigo-700 dark:text-indigo-300">
-              Filtros de Correlativas en el Grafo
+          {/* Módulo 6: Filtros de Correlativas en el Grafo */}
+          <div className="space-y-1.5 border-t border-(--border-color) pt-3">
+            <h3 className="text-sm font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+              <Network className="w-4 h-4" />
+              <span>Filtros de Correlativas en el Grafo</span>
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-              En la vista de Grafo de Red podés filtrar las conexiones visibles: <strong>Todas</strong> (muestra todo), <strong>Para Cursar</strong> (solo flechas de regularidad) o <strong>Para Rendir</strong> (solo flechas de aprobación).
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-[11px]">
+              En el Grafo de Red podés filtrar flechas: <strong>Todas</strong> (mapa completo), <strong>Para Cursar</strong> (regularidades) o <strong>Para Rendir</strong> (aprobaciones).
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-(--border-color) pt-4">
+          {/* Módulo 7: Atajos de Teclado Globales */}
+          <div className="space-y-2 border-t border-(--border-color) pt-3">
             <h3 className="text-sm font-bold text-sky-700 dark:text-sky-300">
               Atajos de Teclado Globales
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
-                <span>Grafo:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">G</kbd>
+            <div className="grid grid-cols-4 gap-1.5 text-[11px]">
+              <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
+                <span>Grafo</span>
+                <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">G</kbd>
               </div>
-              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
-                <span>Malla:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">M</kbd>
+              <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
+                <span>Malla</span>
+                <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">M</kbd>
               </div>
-              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
-                <span>Electivas:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">E</kbd>
+              <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
+                <span>Electivas</span>
+                <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">E</kbd>
               </div>
-              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
-                <span>Calendario:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">C</kbd>
+              <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
+                <span>Calendario</span>
+                <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">C</kbd>
               </div>
-              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
-                <span>Reporte PDF:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">R</kbd>
+              <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
+                <span>Ficha PDF</span>
+                <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">R</kbd>
               </div>
-              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
-                <span>Perfil:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">P</kbd>
+              <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
+                <span>Perfil</span>
+                <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">P</kbd>
               </div>
-              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
-                <span>Compartir:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">S</kbd>
+              <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
+                <span>Compartir</span>
+                <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">S</kbd>
               </div>
-              <div className="p-1.5 rounded bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between">
-                <span>Ayuda:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">?</kbd>
+              <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
+                <span>Ayuda</span>
+                <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">?</kbd>
               </div>
             </div>
           </div>
 
-          <div className="space-y-2 border-t border-(--border-color) pt-4">
-            <h3 className="text-sm font-bold text-(--text-body) flex items-center gap-1.5">
-              <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
-              <span>Agradecimientos e Inspiración</span>
-            </h3>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-xs">
-              Inspirado en el diseño y concepto original de{' '}
+          {/* Módulo 8: Código Abierto & Colaboración en GitHub */}
+          <div className="border-t border-(--border-color) pt-3">
+            <a
+              href="https://github.com/martin-ratti/tracker-ing-sist"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center justify-between p-3 rounded-xl bg-(--bg-elevated) border border-(--border-color) hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all shadow-xs"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-(--bg-surface) border border-(--border-color) flex items-center justify-center shrink-0 text-cyan-500 group-hover:scale-105 transition-transform">
+                  <GitFork className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 text-left">
+                  <div className="text-xs font-bold font-syne text-(--text-body) flex items-center gap-1.5">
+                    <span>¡Colaborá en el Repositorio!</span>
+                    <ExternalLink className="w-3 h-3 text-cyan-500" />
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                    Código abierto en GitHub · Reportá bugs, sugerí electivas o sumá PRs
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 font-bold px-2 py-1 rounded bg-(--bg-surface) border border-(--border-color) shrink-0 ml-2 group-hover:border-cyan-500/40">
+                Ver en GitHub ↗
+              </span>
+            </a>
+          </div>
+
+          {/* Módulo 9: Inspiración y Agradecimientos */}
+          <div className="border-t border-(--border-color) pt-2.5 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+            <span>
+              Inspirado en el{' '}
               <a
                 href="https://tracker-plan-de-estudio.vercel.app/index.html"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-(--color-primary) font-semibold hover:underline inline-flex items-center gap-1 transition-colors"
+                className="text-(--color-primary) underline hover:text-(--text-body)"
               >
-                <span>Tracker Plan de Estudio de Lucas Alonso</span>
-                <ExternalLink className="w-3 h-3" />
+                Tracker de Lucas Alonso
               </a>
-              . Adaptado, expandido y reescrito con arquitectura moderna para el Plan 2023 de Ingeniería en Sistemas de Información (UTN FRRo).
-            </p>
-          </div>
-
-          <div className="text-[11px] text-slate-500 border-t border-(--border-color) pt-3">
-            Presioná <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body)">Esc</kbd> o hacé click fuera para cerrar cualquier panel.
+              . Adaptado y expandido para el Plan 2023 ISI (UTN FRRo).
+            </span>
+            <span className="shrink-0 text-slate-500">Esc para cerrar</span>
           </div>
         </div>
       </div>
