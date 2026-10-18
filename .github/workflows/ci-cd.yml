@@ -1,0 +1,233 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint & Calidad de Código (oxlint)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Instalar dependencias del monorepo
+        run: pnpm install --frozen-lockfile
+
+      - name: Validar código con linter (oxlint)
+        run: pnpm run lint
+
+  test-unit:
+    name: Pruebas Unitarias y de Integración (Vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Instalar dependencias del monorepo
+        run: pnpm install --frozen-lockfile
+
+      - name: Ejecutar pruebas unitarias y de integración con cobertura
+        run: pnpm test:coverage
+
+      - name: Subir reporte de cobertura de backend
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage-report
+          path: backend/coverage/
+          retention-days: 7
+
+      - name: Subir reporte de cobertura de frontend
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage-report
+          path: frontend/coverage/
+          retention-days: 7
+
+  test-e2e:
+    name: Pruebas End-to-End (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Instalar dependencias del monorepo
+        run: pnpm install --frozen-lockfile
+
+      - name: Instalar navegador Chromium para Playwright
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Ejecutar pruebas End-to-End (14 escenarios oficiales)
+        run: pnpm test:e2e
+
+      - name: Subir reporte de Playwright en caso de fallo
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  build:
+    name: Compilación del Monorepo (TypeScript & Vite Rolldown)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Instalar dependencias del monorepo
+        run: pnpm install --frozen-lockfile
+
+      - name: Compilar paquetes, backend y frontend
+        run: pnpm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: 'tracker-isi-utn-6f213.firebaseapp.com'
+          VITE_FIREBASE_PROJECT_ID: 'tracker-isi-utn-6f213'
+          VITE_FIREBASE_STORAGE_BUCKET: 'tracker-isi-utn-6f213.firebasestorage.app'
+          VITE_FIREBASE_MESSAGING_SENDER_ID: '155271149492'
+          VITE_FIREBASE_APP_ID: '1:155271149492:web:7a547c34e36dc81e7824e1'
+          VITE_FIREBASE_MEASUREMENT_ID: 'G-N85G9T5JNH'
+
+  deploy:
+    name: Despliegue Continuo a Producción (Firebase Hosting)
+    needs: [lint, test-unit, test-e2e, build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Instalar dependencias del monorepo
+        run: pnpm install --frozen-lockfile
+
+      - name: Compilar para producción
+        run: pnpm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: 'tracker-isi-utn-6f213.firebaseapp.com'
+          VITE_FIREBASE_PROJECT_ID: 'tracker-isi-utn-6f213'
+          VITE_FIREBASE_STORAGE_BUCKET: 'tracker-isi-utn-6f213.firebasestorage.app'
+          VITE_FIREBASE_MESSAGING_SENDER_ID: '155271149492'
+          VITE_FIREBASE_APP_ID: '1:155271149492:web:7a547c34e36dc81e7824e1'
+          VITE_FIREBASE_MEASUREMENT_ID: 'G-N85G9T5JNH'
+
+      - name: Desplegar a Firebase Hosting (Canal Live)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TRACKER_ISI_UTN_6F213 }}'
+          channelId: live
+          projectId: tracker-isi-utn-6f213
+
+  preview:
+    name: Despliegue de Canal Preview (Firebase Hosting)
+    needs: [lint, test-unit, test-e2e, build]
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Instalar dependencias del monorepo
+        run: pnpm install --frozen-lockfile
+
+      - name: Compilar para preview
+        run: pnpm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: 'tracker-isi-utn-6f213.firebaseapp.com'
+          VITE_FIREBASE_PROJECT_ID: 'tracker-isi-utn-6f213'
+          VITE_FIREBASE_STORAGE_BUCKET: 'tracker-isi-utn-6f213.firebasestorage.app'
+          VITE_FIREBASE_MESSAGING_SENDER_ID: '155271149492'
+          VITE_FIREBASE_APP_ID: '1:155271149492:web:7a547c34e36dc81e7824e1'
+          VITE_FIREBASE_MEASUREMENT_ID: 'G-N85G9T5JNH'
+
+      - name: Desplegar a Canal de Preview
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TRACKER_ISI_UTN_6F213 }}'
+          projectId: tracker-isi-utn-6f213
