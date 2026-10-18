@@ -172,6 +172,10 @@ export function getDriveUrlForMateria(materiaId: number, nivel?: number): string
   if (folderId) {
     return `https://drive.google.com/drive/folders/${folderId}`;
   }
+  // Si es una materia electiva (IDs >= 200 && < 300) sin carpeta propia, redirigir a la carpeta raíz de Electivas
+  if (materiaId >= 200 && materiaId < 300) {
+    return DRIVE_ELECTIVAS_ROOT_URL;
+  }
   if (nivel && DRIVE_NIVELES_IDS[nivel]) {
     return `https://drive.google.com/drive/folders/${DRIVE_NIVELES_IDS[nivel]}`;
   }

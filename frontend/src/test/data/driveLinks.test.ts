@@ -52,15 +52,21 @@ describe('Google Drive Links Data & Helpers (driveLinks.ts)', () => {
     expect(getDriveUrlForMateria(207)).toContain(DRIVE_MATERIAS_IDS[207]);
   });
 
-  it('debe hacer fallback al nivel si la materia no tiene carpeta específica', () => {
-    // ID ficticio 999 con nivel 2
-    expect(hasSpecificDriveFolder(999)).toBe(false);
-    expect(getDriveUrlForMateria(999, 2)).toBe(getDriveUrlForNivel(2));
+  it('debe hacer fallback al nivel si la materia troncal no tiene carpeta específica', () => {
+    // ID ficticio troncal 88 con nivel 2
+    expect(hasSpecificDriveFolder(88)).toBe(false);
+    expect(getDriveUrlForMateria(88, 2)).toBe(getDriveUrlForNivel(2));
   });
 
-  it('debe hacer fallback a la raíz si la materia y el nivel son desconocidos', () => {
-    expect(getDriveUrlForMateria(999, 99)).toBe(DRIVE_ROOT_URL);
-    expect(getDriveUrlForMateria(999)).toBe(DRIVE_ROOT_URL);
+  it('debe hacer fallback a la carpeta general de electivas si la electiva no tiene carpeta específica', () => {
+    // Electiva #204 (Programación Competitiva)
+    expect(hasSpecificDriveFolder(204)).toBe(false);
+    expect(getDriveUrlForMateria(204, 2)).toBe(DRIVE_ELECTIVAS_ROOT_URL);
+  });
+
+  it('debe hacer fallback a la raíz si la materia troncal y el nivel son desconocidos', () => {
+    expect(getDriveUrlForMateria(88, 99)).toBe(DRIVE_ROOT_URL);
+    expect(getDriveUrlForMateria(88)).toBe(DRIVE_ROOT_URL);
   });
 
   it('debe resolver URLs directas para subcarpetas de exámenes', () => {
