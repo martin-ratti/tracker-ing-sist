@@ -12,6 +12,7 @@ El proyecto está configurado como un monorepo administrado con **pnpm workspace
 packages:
   - 'backend'
   - 'frontend'
+  - 'packages/*'
 allowBuilds:
   '@firebase/util': true
   esbuild: true
@@ -19,8 +20,9 @@ allowBuilds:
 ```
 
 ### Paquetes del Workspace:
-1. **`tracker-backend` (`backend/`):** API REST en Node.js, Express y TypeScript.
-2. **`frontend` (`frontend/`):** SPA en React 19, TypeScript, Vite 8 y Tailwind CSS v4.
+1. **`@tracker/types` (`packages/types/`):** Contratos de datos TypeScript compartidos (tipos canónicos para materias, electivas, estados y progreso).
+2. **`tracker-backend` (`backend/`):** API REST en Node.js, Express y TypeScript.
+3. **`frontend` (`frontend/`):** SPA en React 19, TypeScript, Vite 8 y Tailwind CSS v4.
 
 ---
 
@@ -31,12 +33,12 @@ allowBuilds:
 | `pnpm dev` | `concurrently "pnpm --filter tracker-backend dev" "pnpm --filter frontend dev"` | Levanta backend (puerto 3001) y frontend (puerto 5173) en paralelo con prefijos de colores. |
 | `pnpm dev:backend` | `pnpm --filter tracker-backend dev` | Inicia únicamente el backend con `tsx watch src/server.ts`. |
 | `pnpm dev:frontend` | `pnpm --filter frontend dev` | Inicia únicamente el frontend con `vite`. |
-| `pnpm build` | `pnpm --filter tracker-backend build && pnpm --filter frontend build` | Compila TypeScript (`tsc`) en backend y genera el bundle optimizado (`tsc -b && vite build`) en frontend. |
-| `pnpm lint` | `oxlint frontend/src backend/src` | Linter ultrarrápido con Oxc. Aplica la política de 0 advertencias y 0 errores. |
-| `pnpm test` | `pnpm --filter tracker-backend test && pnpm --filter frontend test` | Ejecuta las pruebas unitarias e integración en ambos paquetes con Vitest. |
+| `pnpm build` | `pnpm --filter @tracker/types build && pnpm --filter tracker-backend build && pnpm --filter frontend build` | Compila tipos (`tsc`), backend (`tsc`) y genera el bundle frontend optimizado (`tsc -b && vite build`). |
+| `pnpm lint` | `oxlint packages/types/src frontend/src backend/src` | Linter ultrarrápido con Oxc. Aplica la política de 0 advertencias y 0 errores en 97 archivos. |
+| `pnpm test` | `pnpm --filter tracker-backend test && pnpm --filter frontend test` | Ejecuta las 241 pruebas unitarias e integración en ambos paquetes con Vitest. |
 | `pnpm test:coverage` | `pnpm --filter tracker-backend test:coverage && pnpm --filter frontend test:coverage` | Genera reportes de cobertura V8 para backend y frontend. |
-| `pnpm test:e2e` | `playwright test` | Ejecuta la suite de pruebas End-to-End con Playwright sobre navegadores reales. |
-| `pnpm deploy` | `pnpm build && firebase deploy --only hosting` | Compila ambos paquetes y publica en Firebase Hosting. |
+| `pnpm test:e2e` | `playwright test` | Ejecuta la suite de 23 pruebas End-to-End con Playwright (Chromium Desktop y Mobile Chrome). |
+| `pnpm deploy` | `pnpm build && firebase deploy --only hosting` | Compila los paquetes y publica en Firebase Hosting. |
 | `pnpm deploy:all` | `pnpm build && firebase deploy` | Compila y despliega Hosting, reglas e índices de Cloud Firestore. |
 
 ---

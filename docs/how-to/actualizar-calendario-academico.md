@@ -118,6 +118,6 @@ La función `calcularCierreInscripcion(fechaMesaStr)` en `reglas.ts` calcula aut
 Ejecuta la suite de pruebas del calendario para verificar que los cálculos de días hábiles y turnos se mantengan libres de regresiones:
 
 ```bash
-pnpm --filter frontend test src/test/calendario.test.ts
+pnpm --filter frontend test src/test/data/calendario.test.ts
 ```
 

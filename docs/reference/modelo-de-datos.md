@@ -5,8 +5,9 @@ Esta referencia técnica describe los contratos de tipos, interfaces y estructur
 ---
 
 ## 📌 Ubicación de Archivos de Tipos
-- **Frontend:** [frontend/src/types/plan.ts](../../frontend/src/types/plan.ts)
-- **Backend:** [backend/src/types/plan.ts](../../backend/src/types/plan.ts)
+- **Paquete Canónico Central:** [packages/types/src/plan.ts](../../packages/types/src/plan.ts) (`@tracker/types`)
+- **Frontend (Re-export):** [frontend/src/types/plan.ts](../../frontend/src/types/plan.ts)
+- **Backend (Re-export):** [backend/src/types/plan.ts](../../backend/src/types/plan.ts)
 
 ---
 

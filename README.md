@@ -140,14 +140,16 @@ tracker-ing-sist/
 │   │   ├── data/
 │   │   │   ├── plan2023.ts             # Catálogo local de materias y electivas Plan 2023
 │   │   │   └── calendario/             # Módulo modular anual (turnos oficiales, feriados fijos/móviles e hitos)
-│   │   ├── services/                   # Cliente API, Firebase y algoritmo de merge inteligente
-│   │   ├── test/                       # 18 suites unitarias e integración (Vitest + RTL + JSDOM)
-│   │   ├── types/                      # Tipos de TypeScript compartidos
+│   │   ├── services/                   # Cliente API, Firebase, sanitización segura y merge inteligente
+│   │   ├── test/                       # 24 suites unitarias e integración (Vitest + RTL + JSDOM, 195 tests)
+│   │   ├── types/                      # Tipos re-exportados desde @tracker/types
 │   │   ├── App.tsx
 │   │   └── index.css                   # Variables CSS semánticas y Tailwind CSS v4
 │   ├── package.json
 │   └── vite.config.ts
-├── e2e/                                # 9 suites de pruebas End-to-End con Playwright
+├── packages/
+│   └── types/                          # Paquete de tipos TypeScript canónicos (@tracker/types)
+├── e2e/                                # 12 suites de pruebas End-to-End con Playwright (23 escenarios)
 │   ├── malla.spec.ts                   # Malla curricular y alternancia interactiva
 │   ├── subject-modal.spec.ts           # Modal de materia, actas, notas y metas
 │   ├── calendario.spec.ts              # Navegación de meses y turnos oficiales de examen
@@ -155,8 +157,14 @@ tracker-ing-sist/
 │   ├── electivas.spec.ts               # Drawer de electivas y acreditación de horas
 │   ├── stats-titles.spec.ts            # Métricas, ADUSI e Ingeniería con horas PPS
 │   ├── perfil-share.spec.ts            # Datos del alumno y enlaces compartibles
-│   ├── mobile.spec.ts                  # Emulación móvil, BottomNav y drawer táctil
-│   └── atajos-teclado.spec.ts          # Accesibilidad y atajos de teclado globales
+│   ├── mobile.spec.ts                  # Emulación móvil (Pixel 5), BottomNav y drawer táctil
+│   ├── atajos-teclado.spec.ts          # Accesibilidad y atajos de teclado globales
+│   ├── busqueda-filtros.spec.ts        # Búsqueda predictiva y filtros rápidos por nivel y estado
+│   ├── not-found.spec.ts               # Pantalla de error 404 y recuperación de navegación
+│   └── persistencia-backup.spec.ts     # Persistencia en localStorage tras reload y modal de ayuda
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml                   # Pipeline unificado de CI/CD (lint, vitest, playwright, build, deploy)
 ├── docs/                               # Centro de Documentación Técnica (Diátaxis) y Cartillas
 │   ├── README.md                       # Índice maestro de documentación técnica
 │   ├── tutorials/                      # Guías de aprendizaje paso a paso (primeros pasos)
@@ -226,30 +234,46 @@ npm run deploy
 
 ## 🧪 Testing Automatizado y Cobertura (~100%)
 
-El monorepo cuenta con una suite integral y robusta de **233 pruebas continuas automatizadas** (100% aprobadas) que aseguran la fidelidad académica, la solidez matemática de las correlatividades y la ausencia de regresiones en la interfaz:
+El monorepo cuenta con una suite integral y robusta de **264 pruebas continuas automatizadas** (100% aprobadas) que aseguran la fidelidad académica, la solidez matemática de las correlatividades, la protección contra vulnerabilidades de almacenamiento y la ausencia de regresiones en la interfaz:
 
-- 🔬 **Tests Unitarios y de Integración (219 tests, 100% aprobados):**
-  - **Backend (`tracker-backend`):** 44 tests con **99.05% de cobertura de líneas** (100% en rutas `/api/auth`, `/api/progress`, `/api/plan` y middlewares) ejecutados con `vitest` y `v8`. Valida seguridad JWT, hash bcrypt, middlewares de rate limit y autenticación, persistencia atómica en storage JSON y endpoints REST con Supertest.
-  - **Frontend (`frontend`):** 175 tests con **87.3% de líneas general y 100% en componentes centrales** (`App.tsx`, `plan2023.ts`, módulo anual `calendario/`, primitivas UI, modales `TitlesModal`, `ShareModal`, `HelpModal`, `ThemeSelector`, utilitarios `icsExporter`, `share` y hooks de accesibilidad `useFocusTrap`, `useKeyboardShortcuts`, `useModalAnimation`). Ejecutados con `vitest`, React Testing Library y JSDOM. Cobertura completa sobre el motor de correlatividades, cascada, promedios, calendario de turnos oficiales de examen, diálogo interactivo de metas de examen, pantalla de error 404 y `ErrorBoundary` con respaldo de emergencia.
+- 🔬 **Tests Unitarios y de Integración (241 tests, 100% aprobados):**
+  - **Backend (`tracker-backend`):** 46 tests con **99.05% de cobertura de líneas** (100% en rutas `/api/auth`, `/api/progress`, `/api/plan` y middlewares) ejecutados con `vitest` y `v8`. Valida seguridad JWT, hash bcrypt, middlewares de rate limit y autenticación, persistencia atómica en storage JSON y endpoints REST con Supertest.
+  - **Frontend (`frontend`):** 195 tests en 24 suites con **87.3% de líneas general y 100% en componentes centrales** (`App.tsx`, `plan2023.ts`, módulo anual `calendario/`, primitivas UI, modales `TitlesModal`, `ShareModal`, `HelpModal`, `ThemeSelector`, utilitarios `icsExporter`, `share`, servicios de sanitización segura `api.ts` contra envenenamiento de almacenamiento CWE-502/CWE-79, y hooks de accesibilidad `useFocusTrap`, `useKeyboardShortcuts`, `useModalAnimation`). Ejecutados con `vitest`, React Testing Library y JSDOM. Cobertura completa sobre el motor de correlatividades, cascada, promedios, calendario de turnos oficiales de examen, diálogo interactivo de metas de examen, pantalla de error 404 y `ErrorBoundary` con respaldo de emergencia.
 
-- 🎭 **Pruebas End-to-End con Playwright (14 escenarios, 100% aprobados):**
-  - Validación completa en navegador de la Malla interactiva (`malla.spec.ts`), modal de materias, actas y metas (`subject-modal.spec.ts`), calendario académico 2026/2027 (`calendario.spec.ts`), los 5 temas visuales y modo oscuro (`temas.spec.ts`), horas de electivas (`electivas.spec.ts`), estadísticas y títulos ADUSI/Ingeniería (`stats-titles.spec.ts`), perfil de alumno y avance compartido (`perfil-share.spec.ts`), responsive táctil móvil (`mobile.spec.ts`) y atajos de teclado globales (`atajos-teclado.spec.ts`).
+- 🎭 **Pruebas End-to-End con Playwright (23 escenarios, 100% aprobados):**
+  - **Chromium Desktop (18 tests):** Validación completa en navegador de la Malla interactiva (`malla.spec.ts`), modal de materias, actas y metas (`subject-modal.spec.ts`), calendario académico 2026/2027 (`calendario.spec.ts`), los 5 temas visuales y modo oscuro (`temas.spec.ts`), horas de electivas (`electivas.spec.ts`), estadísticas y títulos ADUSI/Ingeniería (`stats-titles.spec.ts`), perfil de alumno y avance compartido (`perfil-share.spec.ts`), atajos de teclado globales (`atajos-teclado.spec.ts`), buscador predictivo y filtros rápidos (`busqueda-filtros.spec.ts`), página de error 404 (`not-found.spec.ts`) y persistencia en localStorage tras recarga (`persistencia-backup.spec.ts`).
+  - **Mobile Chrome Pixel 5 (5 tests):** Emulación móvil (`mobile.spec.ts`) validando la barra inferior `BottomNav`, el menú lateral `MobileDrawer`, la alternancia táctil de materias en malla, la vista móvil de electivas y el acceso a titulación universitaria.
 
 - ⚡ **Comandos de Test y Calidad:**
 
 ```bash
-# Ejecutar linter Oxlint (0 warnings y 0 errores en 89 archivos)
+# Ejecutar linter Oxlint (0 warnings y 0 errores en 97 archivos)
 pnpm lint
 
-# Ejecutar todos los tests unitarios y de integración (Backend + Frontend, 219 tests)
+# Ejecutar todos los tests unitarios y de integración (Backend + Frontend, 241 tests)
 pnpm test
 
 # Ejecutar y generar reporte de cobertura consolidada V8 en terminal
 pnpm test:coverage
 
-# Ejecutar la suite completa de pruebas End-to-End con Playwright (14 tests)
+# Ejecutar la suite completa de pruebas End-to-End con Playwright (23 tests: Desktop + Mobile)
 pnpm test:e2e
 ```
+
+---
+
+## 🔄 Integración y Despliegue Continuo (CI/CD Pipeline)
+
+El proyecto cuenta con un pipeline automatizado en **GitHub Actions** ([`.github/workflows/ci-cd.yml`](./.github/workflows/ci-cd.yml)) que garantiza la máxima confiabilidad ante cada `push` o `pull_request`:
+
+1. **4 Jobs Paralelos de Verificación:**
+   - **`lint`:** Análisis estático ultrarrápido con `oxlint` (política de 0 warnings).
+   - **`test-unit`:** Ejecución de los 241 tests de Vitest (backend y frontend) con generación y subida de artefactos de cobertura V8.
+   - **`test-e2e`:** Ejecución de los 23 tests de Playwright sobre Chromium Desktop y Mobile Chrome emulado.
+   - **`build`:** Compilación de tipos (`@tracker/types`), backend (`tsc`) y frontend con Vite 8 y Rolldown.
+2. **Despliegue Continuo (CD) a Producción:**
+   - Ante cada `push` a la rama `main`, y tras la aprobación de los 4 jobs previos, se despliega automáticamente a **Firebase Hosting** ([utn-sistemas-frro.web.app](https://utn-sistemas-frro.web.app)) mediante `FirebaseExtended/action-hosting-deploy`.
+   - En Pull Requests, genera automáticamente un canal de previsualización efímero (*Preview Channel*).
 
 ---
 

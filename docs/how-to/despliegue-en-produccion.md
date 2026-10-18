@@ -48,8 +48,9 @@ pnpm build
 ```
 
 Este comando ejecuta secuencialmente:
-1. `pnpm --filter tracker-backend build`: Compilación de TypeScript con `tsc`.
-2. `pnpm --filter frontend build`: Compilación con validación de tipos (`tsc -b`) y empaquetado optimizado mediante **Vite 8 + Rolldown**.
+1. `pnpm --filter @tracker/types build`: Compilación de tipos compartidos con `tsc`.
+2. `pnpm --filter tracker-backend build`: Compilación de TypeScript con `tsc`.
+3. `pnpm --filter frontend build`: Compilación con validación de tipos (`tsc -b`) y empaquetado optimizado mediante **Vite 8 + Rolldown**.
 
 ### Optimizaciones del empaquetado:
 - Los assets en `frontend/dist/assets/` reciben hashes inmutables (`max-age=31536000`).
@@ -70,9 +71,9 @@ Abre la URL indicada (usualmente `http://localhost:4173`) para validar que las f
 
 ---
 
-## Paso 4: Despliegue a Firebase Hosting
+## Paso 4: Despliegue Manual a Firebase Hosting
 
-Para desplegar únicamente los sitios web estáticos (Hosting):
+Para desplegar manualmente desde la máquina local:
 
 ```bash
 pnpm deploy
@@ -88,7 +89,24 @@ pnpm deploy:all
 
 ---
 
-## Paso 5: Verificación en Producción
+## Paso 5: Despliegue Continuo Automatizado (CI/CD con GitHub Actions) 🔄
+
+En lugar de desplegar manualmente, el repositorio cuenta con un pipeline automatizado en [`.github/workflows/ci-cd.yml`](../../.github/workflows/ci-cd.yml):
+
+1. **Gatillado Automático:** Cada `git push origin main` activa el workflow.
+2. **Quality Gates Obligatorios:** Para proceder al despliegue, deben pasar exitosamente los 4 jobs paralelos:
+   - `lint` (oxlint: 0 warnings, 0 errores en 97 archivos).
+   - `test-unit` (vitest: 241 tests con reportes de cobertura).
+   - `test-e2e` (playwright: 23 tests en Chromium Desktop y Mobile Chrome).
+   - `build` (compilación exitosa del monorepo).
+3. **Secretos de GitHub Requeridos:**
+   - `FIREBASE_SERVICE_ACCOUNT_TRACKER_ISI_UTN_6F213`: Clave de cuenta de servicio de Google Cloud para autenticar con Firebase Hosting.
+4. **Despliegues en Pull Requests (Preview Channels):**
+   - Ante cualquier PR, GitHub Actions crea automáticamente una URL temporal con expiración de 7 días para validar los cambios antes de fusionar a `main`.
+
+---
+
+## Paso 6: Verificación en Producción
 
 Una vez completado el despliegue:
 1. Accede a [https://utn-sistemas-frro.web.app](https://utn-sistemas-frro.web.app).

@@ -20,7 +20,7 @@ La información del Plan 2023 está duplicada estratégicamente entre frontend y
 1. **Frontend:** [frontend/src/data/plan2023.ts](../../frontend/src/data/plan2023.ts)
 2. **Backend:** [backend/src/data/plan2023.ts](../../backend/src/data/plan2023.ts)
 
-Ambos archivos implementan los tipos estrictos definidos en [frontend/src/types/plan.ts](../../frontend/src/types/plan.ts) y [backend/src/types/index.ts](../../backend/src/types/index.ts).
+Ambos archivos implementan los tipos estrictos canónicos definidos en el paquete central `@tracker/types` ([packages/types/src/plan.ts](../../packages/types/src/plan.ts)), consumidos mediante `frontend/src/types/plan.ts` y `backend/src/types/plan.ts`.
 
 ---
 

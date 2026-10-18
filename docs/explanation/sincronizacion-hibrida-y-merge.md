@@ -81,6 +81,16 @@ $$\text{ppsFinal} = \max(\text{ppsLocal}, \text{ppsCloud})$$
 
 ---
 
+## 🛡️ Sanitización Estricta y Seguridad de Almacenamiento (CWE-502 / CWE-79)
+
+Para prevenir ataques de **Browser Storage Poisoning** o inyección de propiedades maliciosas a través de `localStorage`, URLs con hashes manipulados o respuestas de red no confiables, el cliente implementa una capa de sanitización estricta (`sanitizeProgress` y `safeSaveProgressToStorage` en [frontend/src/services/api.ts](../../frontend/src/services/api.ts)):
+
+1. **Validación de Enumeraciones:** Cada estado académico se coteja contra `VALID_ESTADOS` (`'pendiente'`, `'regular'`, `'aprobada'`), descartando cualquier valor arbitrario.
+2. **Coerción de Claves Numéricas:** Solo se aceptan IDs de materias enteras positivas dentro de los rangos válidos del Plan 2023.
+3. **Aislamiento de Carga Útil:** Los campos de calificaciones (`nota`, `libro`, `folio`, `comentario`) y perfil de usuario (`nombre`, `legajo`) se limpian y escapan como cadenas de texto planas seguras, previniendo riesgos de deserialización no controlada o Cross-Site Scripting (XSS).
+
+---
+
 ## 🚀 Conclusión
-Gracias a este modelo de datos formal, Tracker ISI garantiza una experiencia fluida multi-dispositivo (PC, tablet y móvil) sin riesgo de sobrescritura destructiva ni inconsistencias entre la base de datos remota y el almacenamiento del cliente.
+Gracias a este modelo de datos formal y a las barreras de sanitización activa, Tracker ISI garantiza una experiencia fluida multi-dispositivo (PC, tablet y móvil) sin riesgo de sobrescritura destructiva, corrupción de estado ni vulnerabilidades de inyección en el almacenamiento del navegador.
 

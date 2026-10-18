@@ -77,28 +77,58 @@ Este comando genera reportes en texto en la terminal y carpetas detalladas en HT
 
 ## 4. Pruebas End-to-End con Playwright
 
-Las pruebas E2E verifican el comportamiento de la interfaz simulando interacciones reales en navegadores Chromium, Firefox y WebKit:
+Las pruebas E2E verifican el comportamiento de la interfaz simulando interacciones reales tanto en navegador de escritorio (`chromium`) como en emulación táctil móvil (`Mobile Chrome` sobre Pixel 5):
 
 ```bash
-# Ejecutar todas las pruebas E2E en modo headless
+# Ejecutar todas las pruebas E2E en modo headless (23 tests)
 pnpm test:e2e
 
 # Abrir el explorador interactivo visual con UI
 pnpm exec playwright test --ui
 
-# Correr solo una suite específica (ej. atajos de teclado)
-pnpm exec playwright test e2e/atajos-teclado.spec.ts
+# Correr solo una suite específica (ej. búsqueda y filtros)
+pnpm exec playwright test e2e/busqueda-filtros.spec.ts
+
+# Correr exclusivamente el proyecto móvil
+pnpm exec playwright test --project="Mobile Chrome"
 ```
 
-Las suites existentes cubren:
+### Configuración del Runner (`playwright.config.ts`)
+- **`chromium` (Desktop Chrome):** Ejecuta todas las suites de escritorio (`testIgnore: /.*mobile\.spec\.ts/`).
+- **`Mobile Chrome` (Pixel 5, 393×851 px):** Ejecuta exclusivamente las pruebas móviles adaptativas (`testMatch: /.*mobile\.spec\.ts/`).
+
+### Suites Implementadas (12 suites, 23 escenarios):
 - [e2e/malla.spec.ts](../../e2e/malla.spec.ts): Clicks en asignaturas, cambio de estados (Pendiente ➔ Regular ➔ Aprobada).
 - [e2e/subject-modal.spec.ts](../../e2e/subject-modal.spec.ts): Carga de notas, libro, folio y fijación de metas de examen.
-- [e2e/temas.spec.ts](../../e2e/temas.spec.ts): Cambio entre las 5 paletas cromáticas y persistencia.
-- [e2e/mobile.spec.ts](../../e2e/mobile.spec.ts): Navegación con BottomNav en pantallas táctiles.
+- [e2e/calendario.spec.ts](../../e2e/calendario.spec.ts): Apertura del calendario académico y navegación de turnos oficiales.
+- [e2e/temas.spec.ts](../../e2e/temas.spec.ts): Cambio entre las 5 paletas cromáticas y alternancia claro/oscuro.
+- [e2e/electivas.spec.ts](../../e2e/electivas.spec.ts): Filtrado por nivel y cómputo de horas acreditables.
+- [e2e/stats-titles.spec.ts](../../e2e/stats-titles.spec.ts): Métricas, requisitos de ADUSI e Ingeniería y carga de horas PPS.
+- [e2e/perfil-share.spec.ts](../../e2e/perfil-share.spec.ts): Edición de perfil del alumno, generación de enlaces y hash comprimido.
+- [e2e/atajos-teclado.spec.ts](../../e2e/atajos-teclado.spec.ts): Accesibilidad completa y atajos de teclado globales.
+- [e2e/busqueda-filtros.spec.ts](../../e2e/busqueda-filtros.spec.ts): Búsqueda en tiempo real por nombre, filtros por año y chips rápidos.
+- [e2e/not-found.spec.ts](../../e2e/not-found.spec.ts): Página de error 404 ante rutas inválidas y retorno a la malla/grafo.
+- [e2e/persistencia-backup.spec.ts](../../e2e/persistencia-backup.spec.ts): Persistencia en localStorage tras recarga (`page.reload()`) y modal de guía/ayuda.
+- [e2e/mobile.spec.ts](../../e2e/mobile.spec.ts): Navegación táctil con `BottomNav`, drawer móvil `Más`, interacción en malla y modal de títulos.
 
 ---
 
-## 5. Escribir un Nuevo Test en Frontend
+## 5. Pipeline de CI/CD Automatizado (GitHub Actions)
+
+El proyecto cuenta con un workflow unificado en [`.github/workflows/ci-cd.yml`](../../.github/workflows/ci-cd.yml) que se dispara automáticamente ante cada `push` o `pull_request`:
+
+1. **Jobs de Validación Continua en Paralelo:**
+   - **`lint`:** Ejecuta `oxlint` sobre `packages/types/src`, `frontend/src` y `backend/src` (exige 0 warnings y 0 errores).
+   - **`test-unit`:** Ejecuta `vitest` en backend y frontend generando reportes de cobertura V8 que se almacenan como artefactos (`upload-artifact`).
+   - **`test-e2e`:** Instala navegadores de Playwright con cache y corre los 23 tests de escritorio y móvil.
+   - **`build`:** Compila `@tracker/types`, `tracker-backend` y `frontend` con Vite y Rolldown.
+2. **Despliegue Automático (CD):**
+   - Si los 4 jobs previos aprueban satisfactoriamente en la rama `main`, el job `deploy` compila y despliega en producción en **Firebase Hosting**.
+   - En pull requests, publica en un canal temporal de preview.
+
+---
+
+## 6. Escribir un Nuevo Test en Frontend
 
 Al crear un nuevo componente o modificar la lógica de correlatividades, sigue este patrón usando `TrackerProvider`:
 

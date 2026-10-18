@@ -14,16 +14,18 @@ src/
 │   ├── layout/                 # Estructura general, barras y navegación
 │   │   ├── Header.tsx          # Barra superior con estadísticas, metas y perfil
 │   │   ├── BottomNav.tsx       # Barra de navegación fija ergonómica para celulares
+│   │   ├── MobileDrawer.tsx    # Menú lateral expandible para pantallas móviles
 │   │   ├── ThemeSelector.tsx   # Menú selector de los 5 temas visuales
 │   │   ├── Toast.tsx           # Notificaciones contextuales flotantes
-│   │   ├── ErrorBoundary.tsx   # Captura de errores en runtime
+│   │   ├── ErrorBoundary.tsx   # Captura de errores en runtime con fallback accesible
 │   │   └── index.ts
 │   ├── views/                  # Vistas principales de la carrera
-│   │   ├── GridView.tsx        # Malla curricular interactiva por niveles (1º a 5º año)
+│   │   ├── GridView.tsx        # Malla curricular interactiva por niveles (1º a 5º año) con filtros
 │   │   ├── NetworkGraph.tsx    # Grafo de correlatividades (lazy loaded, vis-network)
 │   │   ├── GraphSkeleton.tsx   # Esqueleto animado de carga para el grafo
 │   │   ├── ElectivasDrawer.tsx # Panel lateral de materias electivas y Seminario ADUSI
 │   │   ├── MobileElectivasView.tsx # Vista dedicada de electivas optimizada para móvil
+│   │   ├── NotFoundView.tsx    # Pantalla 404 ante rutas inválidas con recuperación
 │   │   └── index.ts
 │   ├── modals/                 # Todos los diálogos modales de la aplicación
 │   │   ├── SubjectModal.tsx    # Detalle de materia, correlatividades, notas y meta
@@ -33,7 +35,7 @@ src/
 │   │   ├── StatsModal.tsx      # Estadísticas avanzadas y gráficas de rendimiento
 │   │   ├── TitlesModal.tsx     # Medidor de avance para ADUSI e Ingeniería + PPS
 │   │   ├── AuthModal.tsx       # Inicio de sesión y registro con fusión inteligente
-│   │   ├── HelpModal.tsx       # Guía interactiva de usuario y simbología
+│   │   ├── HelpModal.tsx       # Guía interactiva de usuario y atajos de teclado
 │   │   ├── ShareModal.tsx      # Generación de enlaces para compartir avance
 │   │   └── index.ts
 │   ├── ui/                     # Primitivas accesibles y reutilizables
@@ -44,21 +46,25 @@ src/
 ├── context/                    # Context API de React
 │   ├── TrackerContext.tsx      # Estado global académico, correlatividades y notas
 │   ├── ThemeContext.tsx        # Gestión reactiva de los 5 temas cromáticos
-│   └── AuthContext.tsx         # Gestión de sesión, autenticación y persistencia
+│   ├── AuthContext.tsx         # Gestión de sesión, autenticación y persistencia
+│   └── UIContext.tsx           # Estado visual secundario y control de modales
 ├── data/                       # Datos estáticos oficiales de la facultad
 │   ├── plan2023.ts             # 36 materias troncales + electivas oficiales Plan 2023
 │   └── calendario/             # Sistema modular anual (turnos oficiales, feriados fijos/móviles e hitos)
 ├── hooks/                      # Custom hooks
 │   ├── useFocusTrap.ts         # Atrapado accesible de foco para modales (WCAG)
-│   └── useKeyboardShortcuts.ts # Atajos rápidos de teclado (G, M, E, C, P, etc.)
-├── services/                   # Clientes de API y sincronización
-│   ├── api.ts                  # Comunicación con backend REST y localStorage
-│   └── firebase.ts             # Conexión con Firebase / Firestore
-├── types/                      # Tipos de TypeScript compartidos
+│   ├── useKeyboardShortcuts.ts # Atajos rápidos de teclado (G, M, E, C, P, etc.)
+│   ├── useHistoryBack.ts       # Sincronización con botón atrás en móviles
+│   └── useModalAnimation.ts    # Control de animación de entrada/salida en diálogos
+├── services/                   # Clientes de API, persistencia y seguridad
+│   ├── api.ts                  # Backend REST, localStorage seguro y sanitización anti-poisoning
+│   └── firebase.ts             # Conexión con Firebase / Cloud Firestore
+├── types/                      # Re-export de tipos canónicos de @tracker/types
 │   └── plan.ts
 ├── utils/                      # Utilidades y funciones auxiliares
 │   ├── icsExporter.ts          # Exportador de metas de examen a formato iCalendar (.ics)
-│   └── share.ts                # Serialización y compresión de progreso para URLs
+│   ├── share.ts                # Serialización y compresión de progreso para URLs
+│   └── formatters.ts           # Formateadores de fecha y notas
 ├── App.tsx                     # Componente raíz y orquestador de vistas
 └── index.css                   # Tailwind CSS v4, temas CSS semánticos y reglas print
 ```
@@ -84,6 +90,12 @@ pnpm dev
 
 # Compilar tipos TypeScript y generar bundle de producción con Vite
 pnpm build
+
+# Ejecutar pruebas unitarias y de integración (195 tests en 24 suites)
+pnpm test
+
+# Ejecutar pruebas en modo watch reactivo
+pnpm test:watch
 
 # Ejecutar el linter Oxlint
 pnpm lint

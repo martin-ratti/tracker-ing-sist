@@ -9,8 +9,9 @@ Esta referencia técnica documenta los Context Providers y Hooks que orquestan e
 ```
 App.tsx
 ├── ThemeProvider (frontend/src/context/ThemeContext.tsx)
-└── AuthProvider (frontend/src/context/AuthContext.tsx)
-    └── TrackerProvider (frontend/src/context/TrackerContext.tsx)
+├── AuthProvider (frontend/src/context/AuthContext.tsx)
+└── TrackerProvider (frontend/src/context/TrackerContext.tsx)
+    └── UIProvider (frontend/src/context/UIContext.tsx)
 ```
 
 ---
@@ -112,4 +113,16 @@ Mapea atajos globales de teclado ignorando inputs de texto:
 ### `useHistoryBack(isOpen, onClose)`
 Ubicación: [frontend/src/hooks/useHistoryBack.ts](../../frontend/src/hooks/useHistoryBack.ts)  
 Sincroniza el historial del navegador (`history.pushState`) con el estado de apertura de los modales, permitiendo cerrarlos con el botón físico o gesto de "Atrás" en dispositivos móviles.
+
+### `useModalAnimation(isOpen, durationMs)`
+Ubicación: [frontend/src/hooks/useModalAnimation.ts](../../frontend/src/hooks/useModalAnimation.ts)  
+Gestiona el ciclo de vida de renderizado y desmontaje de modales (`isMounted` y `isVisible`), garantizando transiciones de opacidad y escala fluidas tanto al abrir como al cerrar sin cortes bruscos.
+
+---
+
+## 5. `UIContext`
+Ubicación: [frontend/src/context/UIContext.tsx](../../frontend/src/context/UIContext.tsx)  
+Hook de acceso: `useUI()`
+
+Provee estado visual complementario desacoplado de la lógica académica (control de modales secundarios, diálogos de ayuda y visibilidad de drawers móviles).
 

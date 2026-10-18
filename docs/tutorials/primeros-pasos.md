@@ -31,7 +31,7 @@ git --version
 Clona el proyecto y sitúate en el directorio raíz:
 
 ```bash
-git clone https://github.com/tu-usuario/tracker-ing-sist.git
+git clone https://github.com/martin-ratti/tracker-ing-sist.git
 cd tracker-ing-sist
 ```
 
@@ -135,7 +135,7 @@ Antes de enviar cualquier cambio, ejecuta las herramientas de calidad configurad
    ```bash
    pnpm test
    ```
-   *Ejecutará las 18 suites de pruebas en el frontend (Vitest + React Testing Library) y las pruebas del backend (Supertest).*
+   *Ejecutará las 24 suites de pruebas en el frontend (195 tests con Vitest + React Testing Library) y las pruebas del backend (46 tests con Supertest y almacenamiento).*
 
 ---
 
