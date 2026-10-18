@@ -30,8 +30,13 @@ export function getStoredUser(): UserAuth | null {
 }
 
 export function saveAuthSession(token: string, user: UserAuth): void {
-  localStorage.setItem(AUTH_TOKEN_KEY, token);
-  localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+  const safeToken = typeof token === 'string' ? token.trim().slice(0, 2048) : '';
+  const safeUser: UserAuth = {
+    id: typeof user?.id === 'string' ? user.id.slice(0, 100) : '',
+    email: typeof user?.email === 'string' ? user.email.slice(0, 255) : ''
+  };
+  localStorage.setItem(AUTH_TOKEN_KEY, safeToken);
+  localStorage.setItem(AUTH_USER_KEY, JSON.stringify(safeUser));
 }
 
 export function clearAuthSession(): void {
@@ -102,7 +107,122 @@ export async function checkAuthMe(): Promise<UserAuth | null> {
   return getStoredUser();
 }
 
-// --- API PROGRESO ---
+// --- API PROGRESO Y SANITIZACIÓN (CWE-502 / CWE-79) ---
+
+const VALID_ESTADOS: ReadonlySet<EstadoMateria> = new Set(['pendiente', 'regular', 'aprobada']);
+
+/**
+ * Sanitiza y valida exhaustivamente un objeto desconocido para asegurar
+ * que cumple estrictamente el tipo ProgresoUsuario antes de guardarlo en almacenamiento
+ * local o memoria, mitigando Browser Storage Poisoning.
+ */
+export function sanitizeProgress(raw: unknown): ProgresoUsuario {
+  const fallback: ProgresoUsuario = {
+    estados: {},
+    estadosElectivas: {},
+    notas: {},
+    ppsHoras: 0,
+    perfil: { nombre: '', legajo: '' },
+    metasExamen: {}
+  };
+
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return fallback;
+  }
+
+  const src = raw as Record<string, unknown>;
+
+  // 1. Estados troncales (IDs numéricos válidos y valores en allowlist)
+  const safeEstados: Record<number, EstadoMateria> = {};
+  if (src.estados && typeof src.estados === 'object' && !Array.isArray(src.estados)) {
+    for (const [key, value] of Object.entries(src.estados)) {
+      const id = Number(key);
+      if (Number.isInteger(id) && id > 0 && id < 100000 && typeof value === 'string' && VALID_ESTADOS.has(value as EstadoMateria)) {
+        safeEstados[id] = value as EstadoMateria;
+      }
+    }
+  }
+
+  // 2. Estados electivas
+  const safeElectivas: Record<number, EstadoMateria> = {};
+  if (src.estadosElectivas && typeof src.estadosElectivas === 'object' && !Array.isArray(src.estadosElectivas)) {
+    for (const [key, value] of Object.entries(src.estadosElectivas)) {
+      const id = Number(key);
+      if (Number.isInteger(id) && id > 0 && id < 100000 && typeof value === 'string' && VALID_ESTADOS.has(value as EstadoMateria)) {
+        safeElectivas[id] = value as EstadoMateria;
+      }
+    }
+  }
+
+  // 3. Notas
+  const safeNotas: Record<number, NotaMateria> = {};
+  if (src.notas && typeof src.notas === 'object' && !Array.isArray(src.notas)) {
+    for (const [key, value] of Object.entries(src.notas)) {
+      const id = Number(key);
+      if (Number.isInteger(id) && id > 0 && id < 100000 && value && typeof value === 'object' && !Array.isArray(value)) {
+        const n = value as Record<string, unknown>;
+        const safeNota: NotaMateria = {};
+        if (typeof n.nota === 'number' && Number.isFinite(n.nota) && n.nota >= 1 && n.nota <= 10) {
+          safeNota.nota = Math.round(n.nota);
+        }
+        if (typeof n.fecha === 'string') safeNota.fecha = n.fecha.slice(0, 30);
+        if (typeof n.libro === 'string') safeNota.libro = n.libro.slice(0, 50);
+        if (typeof n.folio === 'string') safeNota.folio = n.folio.slice(0, 50);
+        if (typeof n.comentario === 'string') safeNota.comentario = n.comentario.slice(0, 500);
+        safeNotas[id] = safeNota;
+      }
+    }
+  }
+
+  // 4. Horas PPS
+  let safePps = 0;
+  if (typeof src.ppsHoras === 'number' && Number.isFinite(src.ppsHoras) && src.ppsHoras >= 0) {
+    safePps = Math.min(Math.floor(src.ppsHoras), 10000);
+  }
+
+  // 5. Perfil
+  const srcPerfil = (src.perfil && typeof src.perfil === 'object' && !Array.isArray(src.perfil))
+    ? (src.perfil as Record<string, unknown>)
+    : {};
+  const safePerfil = {
+    nombre: typeof srcPerfil.nombre === 'string' ? srcPerfil.nombre.slice(0, 100).trim() : '',
+    legajo: typeof srcPerfil.legajo === 'string' ? srcPerfil.legajo.slice(0, 50).trim() : ''
+  };
+
+  // 6. Metas de examen
+  const safeMetas: Record<number, MetaExamen> = {};
+  if (src.metasExamen && typeof src.metasExamen === 'object' && !Array.isArray(src.metasExamen)) {
+    for (const [key, value] of Object.entries(src.metasExamen)) {
+      const id = Number(key);
+      if (Number.isInteger(id) && id > 0 && id < 100000 && value && typeof value === 'object' && !Array.isArray(value)) {
+        const m = value as Record<string, unknown>;
+        safeMetas[id] = {
+          materiaId: id,
+          turnoId: typeof m.turnoId === 'string' ? m.turnoId.slice(0, 50) : '',
+          turnoNombre: typeof m.turnoNombre === 'string' ? m.turnoNombre.slice(0, 100) : '',
+          fechaEstimada: typeof m.fechaEstimada === 'string' ? m.fechaEstimada.slice(0, 30) : undefined,
+          llamado: typeof m.llamado === 'number' && Number.isFinite(m.llamado) ? Math.min(Math.max(1, Math.floor(m.llamado)), 5) : undefined,
+          comentario: typeof m.comentario === 'string' ? m.comentario.slice(0, 500) : undefined
+        };
+      }
+    }
+  }
+
+  return {
+    estados: safeEstados,
+    estadosElectivas: safeElectivas,
+    notas: safeNotas,
+    ppsHoras: safePps,
+    perfil: safePerfil,
+    metasExamen: safeMetas,
+    actualizadoEn: typeof src.actualizadoEn === 'string' ? src.actualizadoEn.slice(0, 50) : new Date().toISOString()
+  };
+}
+
+export function safeSaveProgressToStorage(progress: ProgresoUsuario): void {
+  const safe = sanitizeProgress(progress);
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(safe));
+}
 
 export function hasAnyData(data?: ProgresoUsuario | null): boolean {
   if (!data) return false;
@@ -121,10 +241,11 @@ export async function syncUserProgressOnAuth(userId?: string): Promise<ProgresoU
 
   if (isFirebaseConfigured && uid) {
     try {
-      const cloudData = await fetchProgressFromFirestore(uid);
-      if (cloudData) {
+      const rawFirestore = await fetchProgressFromFirestore(uid);
+      if (rawFirestore) {
+        const cloudData = sanitizeProgress(rawFirestore);
         const merged = mergeProgress(localData, cloudData);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+        safeSaveProgressToStorage(merged);
         await saveProgressToFirestore(uid, merged).catch(() => {});
         return merged;
       } else if (hasAnyData(localData)) {
@@ -141,9 +262,10 @@ export async function syncUserProgressOnAuth(userId?: string): Promise<ProgresoU
     try {
       const res = await fetch('/api/progress', { headers: getAuthHeaders() });
       if (res.ok) {
-        const cloudData: ProgresoUsuario = await res.json();
+        const rawJson: unknown = await res.json();
+        const cloudData: ProgresoUsuario = sanitizeProgress(rawJson);
         const merged = mergeProgress(localData, cloudData);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+        safeSaveProgressToStorage(merged);
         await fetch('/api/progress', {
           method: 'POST',
           headers: getAuthHeaders(),
@@ -165,10 +287,11 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
   // 1. Intentar desde Cloud Firestore si hay usuario activo en Firebase
   if (isFirebaseConfigured && auth?.currentUser?.uid) {
     try {
-      const firestoreData = await fetchProgressFromFirestore(auth.currentUser.uid);
-      if (firestoreData) {
-        const merged = mergeProgress(localData, firestoreData);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+      const rawFirestore = await fetchProgressFromFirestore(auth.currentUser.uid);
+      if (rawFirestore) {
+        const cloudData = sanitizeProgress(rawFirestore);
+        const merged = mergeProgress(localData, cloudData);
+        safeSaveProgressToStorage(merged);
         return merged;
       } else if (hasAnyData(localData)) {
         saveProgressToFirestore(auth.currentUser.uid, localData).catch(() => {});
@@ -188,9 +311,10 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
         headers: getAuthHeaders()
       });
       if (res.ok) {
-        const cloudData: ProgresoUsuario = await res.json();
+        const rawJson: unknown = await res.json();
+        const cloudData: ProgresoUsuario = sanitizeProgress(rawJson);
         const merged = mergeProgress(localData, cloudData);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+        safeSaveProgressToStorage(merged);
         return merged;
       }
     } catch (error: unknown) {
@@ -207,7 +331,8 @@ export function getLocalProgress(): ProgresoUsuario {
   const local = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (local) {
     try {
-      return JSON.parse(local);
+      const parsed = JSON.parse(local);
+      return sanitizeProgress(parsed);
     } catch {
       // Ignorar
     }
@@ -305,7 +430,7 @@ export async function persistProgress(progress: Partial<ProgresoUsuario>): Promi
     ...progress,
     actualizadoEn: new Date().toISOString()
   };
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+  safeSaveProgressToStorage(updated);
 
   // 1. Sincronización en la nube con Firestore en tiempo real
   if (isFirebaseConfigured && auth?.currentUser?.uid) {
