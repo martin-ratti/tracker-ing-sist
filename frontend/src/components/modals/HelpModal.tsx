@@ -250,7 +250,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               >
                 Tracker de Lucas Alonso
               </a>
-              . Adaptado y expandido para el Plan 2023 ISI (UTN FRRo).
+              . Adaptado y reescrito para el Plan 2023 ISI (UTN FRRo).
             </span>
             <span className="shrink-0 text-slate-500">Esc para cerrar</span>
           </div>
