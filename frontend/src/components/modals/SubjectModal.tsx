@@ -12,7 +12,9 @@ import {
   ArrowRight,
   Target,
   Calendar,
-  Trash2
+  Trash2,
+  FolderOpen,
+  ExternalLink
 } from 'lucide-react';
 import { 
   TURNOS_EXAMEN, 
@@ -20,6 +22,7 @@ import {
   getFechaExactaMesa,
   DIAS_MESA_POR_MATERIA
 } from '../../data/calendario';
+import { getDriveUrlForMateria, getDriveUrlForExamenes } from '../../data/driveLinks';
 import { formatFechaLocal, formatRangoFechas } from '../../utils/formatters';
 
 
@@ -249,6 +252,33 @@ export const SubjectModal: React.FC = () => {
               </span>
             )}
           </div>
+
+          {/* Acceso a Material de Estudio en Google Drive */}
+          <a
+            href={getDriveUrlForMateria(materia.id, materia.nivel)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 hover:bg-cyan-500/10 hover:border-cyan-500/50 transition-all group"
+            title={`Abrir carpeta en Google Drive de ${materia.nombreCompleto}`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="p-2 rounded-lg bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                <FolderOpen className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 text-left">
+                <div className="text-xs font-bold text-(--text-body) flex items-center gap-1.5 truncate">
+                  <span>Carpeta de Drive · {materia.nombre}</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-cyan-500 transition-colors shrink-0" />
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                  Exámenes finales, parciales, apuntes y resúmenes
+                </div>
+              </div>
+            </div>
+            <span className="text-[11px] font-mono font-bold text-cyan-600 dark:text-cyan-400 shrink-0 ml-2 hidden sm:inline-flex items-center gap-1">
+              Abrir Drive ↗
+            </span>
+          </a>
         </div>
 
         {/* Cuerpo del modal */}
@@ -562,6 +592,19 @@ export const SubjectModal: React.FC = () => {
                       "{currentMeta.comentario}"
                     </p>
                   )}
+
+                  <div className="pt-2 border-t border-(--border-color) flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500">Preparación de examen:</span>
+                    <a
+                      href={getDriveUrlForExamenes(materia.id, materia.nivel)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline"
+                    >
+                      <FolderOpen className="w-3 h-3" />
+                      <span>Ver exámenes anteriores en Drive ↗</span>
+                    </a>
+                  </div>
                 </div>
               ) : !currentMeta && !showMetaForm ? (
                 <button

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { MATERIAS_ELECTIVAS, MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
-import { X, Sparkles, CheckCircle2, Clock, BookOpen, ChevronLeft } from 'lucide-react';
+import { X, Sparkles, CheckCircle2, Clock, BookOpen, ChevronLeft, FolderOpen, ExternalLink } from 'lucide-react';
+import { DRIVE_ELECTIVAS_ROOT_URL, getDriveUrlForMateria } from '../../data/driveLinks';
 
 interface MobileElectivasViewProps {
   onBack: () => void;
@@ -88,6 +89,21 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
             )}
           </div>
         </div>
+
+        {/* Acceso a Carpeta de Electivas en Google Drive */}
+        <a
+          href={DRIVE_ELECTIVAS_ROOT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2.5 flex items-center justify-between p-2 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/15 text-amber-700 dark:text-amber-300 font-mono text-xs transition-colors shadow-xs"
+          title="Abrir carpeta de Electivas en Google Drive"
+        >
+          <span className="flex items-center gap-2 font-semibold">
+            <FolderOpen className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-[11px]">Carpeta de Electivas en Drive</span>
+          </span>
+          <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+        </a>
 
         {/* Filtros por nivel */}
         <div className="flex items-center gap-1 mt-3 font-mono text-xs overflow-x-auto no-scrollbar py-0.5">
@@ -188,9 +204,16 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   Título Intermedio ADUSI
                 </span>
               </div>
-              <button
-                type="button"
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => toggleMateriaEstado(seminario.id)}
+                onKeyDown={(ev) => {
+                  if (ev.key === 'Enter' || ev.key === ' ') {
+                    ev.preventDefault();
+                    toggleMateriaEstado(seminario.id);
+                  }
+                }}
                 className={`w-full text-left p-3 rounded-2xl border transition-all duration-200 cursor-pointer select-none hover:border-pink-500/50 shadow-xs ${cardStyle}`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
@@ -210,12 +233,25 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
-                  <span className="text-slate-500">Cuatrimestral</span>
-                  <span className="text-slate-400">•</span>
-                  {statusBadge}
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-slate-500">Cuatrimestral</span>
+                    <span className="text-slate-400">•</span>
+                    {statusBadge}
+                  </div>
+                  <a
+                    href={getDriveUrlForMateria(seminario.id, seminario.nivel)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(ev) => ev.stopPropagation()}
+                    className="px-2 py-0.5 rounded text-pink-600 dark:text-pink-400 hover:bg-pink-500/10 transition-colors flex items-center gap-1 font-semibold"
+                    title="Abrir carpeta de Drive del Seminario Integrador"
+                  >
+                    <FolderOpen className="w-3.5 h-3.5 text-pink-500" />
+                    <span>Drive</span>
+                  </a>
                 </div>
-              </button>
+              </div>
             </div>
           );
         })()}
@@ -323,10 +359,23 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
-                  <span className="text-slate-500">{e.tipo} ({e.cuatrimestre})</span>
-                  <span className="text-slate-400">•</span>
-                  {statusBadge}
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-slate-500">{e.tipo} ({e.cuatrimestre})</span>
+                    <span className="text-slate-400">•</span>
+                    {statusBadge}
+                  </div>
+                  <a
+                    href={getDriveUrlForMateria(e.id, e.nivel)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(ev) => ev.stopPropagation()}
+                    className="px-2 py-0.5 rounded text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors flex items-center gap-1 font-semibold"
+                    title={`Abrir carpeta de Drive de ${e.nombre}`}
+                  >
+                    <FolderOpen className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Drive</span>
+                  </a>
                 </div>
 
                 {/* Correlatividades exigidas */}
