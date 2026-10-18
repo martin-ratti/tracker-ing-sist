@@ -176,7 +176,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             <h3 className="text-sm font-bold text-sky-700 dark:text-sky-300">
               Atajos de Teclado Globales
             </h3>
-            <div className="grid grid-cols-4 gap-1.5 text-[11px]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[11px]">
               <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
                 <span>Grafo</span>
                 <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">G</kbd>
@@ -218,30 +218,30 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               href="https://github.com/martin-ratti/tracker-ing-sist"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-between p-3 rounded-xl bg-(--bg-elevated) border border-(--border-color) hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all shadow-xs"
+              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-(--bg-elevated) border border-(--border-color) hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all shadow-xs"
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-(--bg-surface) border border-(--border-color) flex items-center justify-center shrink-0 text-cyan-500 group-hover:scale-105 transition-transform">
+              <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-(--bg-surface) border border-(--border-color) flex items-center justify-center shrink-0 text-cyan-500 group-hover:scale-105 transition-transform mt-0.5 sm:mt-0">
                   <GitFork className="w-4 h-4" />
                 </div>
-                <div className="min-w-0 text-left">
+                <div className="min-w-0 text-left flex-1">
                   <div className="text-xs font-bold font-syne text-(--text-body) flex items-center gap-1.5">
                     <span>¡Colaborá en el Repositorio!</span>
-                    <ExternalLink className="w-3 h-3 text-cyan-500" />
+                    <ExternalLink className="w-3 h-3 text-cyan-500 shrink-0" />
                   </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono leading-relaxed mt-0.5 break-words">
                     Código abierto en GitHub · Reportá bugs, sugerí electivas o sumá PRs
                   </p>
                 </div>
               </div>
-              <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 font-bold px-2 py-1 rounded bg-(--bg-surface) border border-(--border-color) shrink-0 ml-2 group-hover:border-cyan-500/40">
+              <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 font-bold px-2.5 py-1 rounded bg-(--bg-surface) border border-(--border-color) shrink-0 group-hover:border-cyan-500/40 text-center self-start sm:self-center">
                 Ver en GitHub ↗
               </span>
             </a>
           </div>
 
           {/* Módulo 9: Inspiración y Agradecimientos */}
-          <div className="border-t border-(--border-color) pt-2.5 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+          <div className="border-t border-(--border-color) pt-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] text-slate-500 dark:text-slate-400 font-mono">
             <span>
               Inspirado en el{' '}
               <a
