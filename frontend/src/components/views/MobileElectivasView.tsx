@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { MATERIAS_ELECTIVAS, MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { X, Sparkles, CheckCircle2, Clock, BookOpen, ChevronLeft, FolderOpen, ExternalLink } from 'lucide-react';
-import { DRIVE_ELECTIVAS_ROOT_URL, getDriveUrlForMateria } from '../../data/driveLinks';
+import { DRIVE_ELECTIVAS_ROOT_URL, getDriveUrlForMateria, hasSpecificDriveFolder } from '../../data/driveLinks';
 
 interface MobileElectivasViewProps {
   onBack: () => void;
@@ -371,7 +371,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                     rel="noopener noreferrer"
                     onClick={(ev) => ev.stopPropagation()}
                     className="px-2 py-0.5 rounded text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors flex items-center gap-1 font-semibold"
-                    title={`Abrir carpeta de Drive de ${e.nombre}`}
+                    title={hasSpecificDriveFolder(e.id) ? `Abrir carpeta de Drive de ${e.nombre}` : `Abrir carpeta general de Electivas en Drive (sin carpeta propia)`}
                   >
                     <FolderOpen className="w-3.5 h-3.5 text-amber-500" />
                     <span>Drive</span>

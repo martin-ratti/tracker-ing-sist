@@ -26,9 +26,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
       <div
-        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${isVisible ? 'opacity-100' : 'opacity-0'
+          }`}
         aria-hidden="true"
         onClick={onClose}
       />
@@ -37,14 +36,13 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="help-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col my-auto transform transition-all duration-200 ease-out ${
-          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-        }`}
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col my-auto transform transition-all duration-200 ease-out ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+          }`}
       >
         {/* Cabecera */}
         <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <div 
+            <div
               className="p-2 rounded-xl border shrink-0"
               style={{
                 backgroundColor: 'var(--color-primary-bg)',
@@ -76,27 +74,27 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
 
         {/* Contenido con módulos resumidos */}
         <div className="p-4 sm:p-6 space-y-4 text-xs font-mono text-slate-600 dark:text-slate-300 overflow-y-auto flex-1 no-scrollbar">
-          
+
           {/* Módulo 1: Flujo de Estados y Controles */}
           <div className="space-y-2.5">
             <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--color-primary)' }}>
               <CheckCircle2 className="w-4 h-4" />
               <span>Flujo de Estados y Controles</span>
             </h3>
-            
+
             <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
               <div className="p-2 rounded-lg bg-(--bg-elevated) border border-(--border-color)">
                 <div className="text-(--text-body) font-bold">⚪ Pendiente</div>
                 <div className="text-slate-500 text-[10px]">No cursada / bloqueada</div>
               </div>
-              <div 
+              <div
                 className="p-2 rounded-lg border"
                 style={{ backgroundColor: 'var(--color-regular-bg)', borderColor: 'var(--color-regular-border)' }}
               >
                 <div className="font-bold" style={{ color: 'var(--color-regular)' }}>🟡 Regular</div>
                 <div className="text-slate-600 dark:text-slate-400 text-[10px]">Cursada lista para rendir</div>
               </div>
-              <div 
+              <div
                 className="p-2 rounded-lg border"
                 style={{ backgroundColor: 'var(--color-aprobada-bg)', borderColor: 'var(--color-aprobada-border)' }}
               >
@@ -176,7 +174,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             <h3 className="text-sm font-bold text-sky-700 dark:text-sky-300">
               Atajos de Teclado Globales
             </h3>
-            <div className="grid grid-cols-4 gap-1.5 text-[11px]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[11px]">
               <div className="p-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between px-2">
                 <span>Grafo</span>
                 <kbd className="px-1 py-0.2 rounded bg-(--bg-surface) border border-(--border-color) font-bold text-(--text-body)">G</kbd>
@@ -218,30 +216,30 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               href="https://github.com/martin-ratti/tracker-ing-sist"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-between p-3 rounded-xl bg-(--bg-elevated) border border-(--border-color) hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all shadow-xs"
+              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-(--bg-elevated) border border-(--border-color) hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all shadow-xs"
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-(--bg-surface) border border-(--border-color) flex items-center justify-center shrink-0 text-cyan-500 group-hover:scale-105 transition-transform">
+              <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-(--bg-surface) border border-(--border-color) flex items-center justify-center shrink-0 text-cyan-500 group-hover:scale-105 transition-transform mt-0.5 sm:mt-0">
                   <GitFork className="w-4 h-4" />
                 </div>
-                <div className="min-w-0 text-left">
+                <div className="min-w-0 text-left flex-1">
                   <div className="text-xs font-bold font-syne text-(--text-body) flex items-center gap-1.5">
                     <span>¡Colaborá en el Repositorio!</span>
-                    <ExternalLink className="w-3 h-3 text-cyan-500" />
+                    <ExternalLink className="w-3 h-3 text-cyan-500 shrink-0" />
                   </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">
-                    Código abierto en GitHub · Reportá bugs, sugerí electivas o sumá PRs
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono leading-relaxed mt-0.5 break-words">
+                    Código abierto en GitHub · Reportá bugs, sugerí cambios o sumá PRs
                   </p>
                 </div>
               </div>
-              <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 font-bold px-2 py-1 rounded bg-(--bg-surface) border border-(--border-color) shrink-0 ml-2 group-hover:border-cyan-500/40">
+              <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 font-bold px-2.5 py-1 rounded bg-(--bg-surface) border border-(--border-color) shrink-0 group-hover:border-cyan-500/40 text-center self-start sm:self-center">
                 Ver en GitHub ↗
               </span>
             </a>
           </div>
 
           {/* Módulo 9: Inspiración y Agradecimientos */}
-          <div className="border-t border-(--border-color) pt-2.5 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+          <div className="border-t border-(--border-color) pt-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] text-slate-500 dark:text-slate-400 font-mono">
             <span>
               Inspirado en el{' '}
               <a
@@ -252,7 +250,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               >
                 Tracker de Lucas Alonso
               </a>
-              . Adaptado y expandido para el Plan 2023 ISI (UTN FRRo).
+              . Adaptado y reescrito para el Plan 2023 ISI (UTN FRRo).
             </span>
             <span className="shrink-0 text-slate-500">Esc para cerrar</span>
           </div>
