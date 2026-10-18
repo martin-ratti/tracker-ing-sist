@@ -2,11 +2,22 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen } from '../types/plan';
 import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
 import { TURNOS_EXAMEN, getFechaExactaMesa } from '../data/calendario';
-import { fetchProgress, getLocalProgress, persistProgress, clearProgress } from '../services/api';
+import { fetchProgress, getLocalProgress, persistProgress, clearProgress, mergeProgress } from '../services/api';
 import { decodeProgress } from '../utils/share';
 import { subscribeToUserProgress, onFirebaseAuthStateChanged, isFirebaseConfigured } from '../services/firebase';
+import { 
+  UIContext, 
+  UIProvider,
+  useUI, 
+  type UIContextType, 
+  type GridFilterOption, 
+  type ToastAction, 
+  type ToastOptions, 
+  type ToastItem 
+} from './UIContext';
 
-export type GridFilterOption = 'todas' | 'cursables' | 'regulares' | 'aprobadas' | 'con-meta';
+export type { GridFilterOption, ToastAction, ToastOptions, ToastItem, UIContextType };
+export { UIProvider, useUI };
 
 export interface ProximaMetaInfo {
   materiaId: number;
@@ -38,26 +49,7 @@ interface Stats {
   proximaMeta: ProximaMetaInfo | null;
 }
 
-export interface ToastAction {
-  label: string;
-  onClick: () => void;
-}
-
-export interface ToastOptions {
-  variant?: 'success' | 'warning' | 'error' | 'info';
-  duration?: number;
-  action?: ToastAction;
-}
-
-export interface ToastItem {
-  id: string;
-  message: string;
-  variant: 'success' | 'warning' | 'error' | 'info';
-  duration: number;
-  action?: ToastAction;
-}
-
-interface TrackerContextType {
+export interface AcademicTrackerContextType {
   estados: Record<number, EstadoMateria>;
   estadosElectivas: Record<number, EstadoMateria>;
   notas: Record<number, NotaMateria>;
@@ -68,36 +60,10 @@ interface TrackerContextType {
   metasExamen: Record<number, MetaExamen>;
   setMetaExamen: (materiaId: number, meta: MetaExamen) => void;
   removeMetaExamen: (materiaId: number) => void;
-  edgeMode: 'ambos' | 'regular' | 'aprobada';
-  setEdgeMode: (mode: 'ambos' | 'regular' | 'aprobada') => void;
-  viewMode: 'grafo' | 'malla';
-  setViewMode: (mode: 'grafo' | 'malla') => void;
-  gridFilter: GridFilterOption;
-  setGridFilter: (filter: GridFilterOption) => void;
-  electivasOpen: boolean;
-  setElectivasOpen: (open: boolean) => void;
-  calendarOpen: boolean;
-  setCalendarOpen: (open: boolean) => void;
-  reportOpen: boolean;
-  setReportOpen: (open: boolean) => void;
-  profileModalOpen: boolean;
-  setProfileModalOpen: (open: boolean) => void;
-  statsModalOpen: boolean;
-  setStatsModalOpen: (open: boolean) => void;
-  shareModalOpen: boolean;
-  setShareModalOpen: (open: boolean) => void;
   isViewingShared: boolean;
   sharedName: string | null;
   exitSharedMode: () => void;
   importSharedProgress: () => void;
-  focusedSubjectId: number | null;
-  setFocusedSubjectId: (id: number | null) => void;
-  selectedSubjectId: number | null;
-  setSelectedSubjectId: (id: number | null) => void;
-  toastMessage: string | null;
-  toasts: ToastItem[];
-  showToast: (msg: string, variantOrOptions?: 'success' | 'warning' | 'error' | 'info' | ToastOptions) => void;
-  dismissToast: (id: string) => void;
   toggleMateriaEstado: (id: number) => void;
   setEstadoDirecto: (id: number, estado: EstadoMateria) => void;
   toggleElectivaEstado: (id: number) => void;
@@ -111,23 +77,15 @@ interface TrackerContextType {
   stats: Stats;
   resetAll: () => void;
   reloadProgress: () => void;
-  mobileDrawerOpen: boolean;
-  setMobileDrawerOpen: (open: boolean) => void;
-  mobileDrawerView: 'menu' | 'electivas';
-  setMobileDrawerView: (view: 'menu' | 'electivas') => void;
-  openMobileDrawer: (view?: 'menu' | 'electivas') => void;
-  closeMobileDrawer: () => void;
-  dimApproved: boolean;
-  setDimApproved: React.Dispatch<React.SetStateAction<boolean>>;
-  criticalChainActive: boolean;
-  setCriticalChainActive: React.Dispatch<React.SetStateAction<boolean>>;
   exportBackupJson: () => void;
   importBackupJson: (jsonStr: string) => boolean;
 }
 
-const TrackerContext = createContext<TrackerContextType | undefined>(undefined);
+export type TrackerContextType = AcademicTrackerContextType & UIContextType;
 
-export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const TrackerContext = createContext<AcademicTrackerContextType | undefined>(undefined);
+
+const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [estados, setEstados] = useState<Record<number, EstadoMateria>>(() => {
     if (typeof window !== 'undefined') {
       return getLocalProgress().estados || {};
@@ -164,65 +122,18 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
     return {};
   });
-  const [gridFilter, setGridFilter] = useState<GridFilterOption>('todas');
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
-  const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [statsModalOpen, setStatsModalOpen] = useState(false);
-  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [isViewingShared, setIsViewingShared] = useState(false);
   const [sharedName, setSharedName] = useState<string | null>(null);
-  const [focusedSubjectId, setFocusedSubjectId] = useState<number | null>(null);
-  const [edgeMode, setEdgeMode] = useState<'ambos' | 'regular' | 'aprobada'>('ambos');
-  const [viewMode, setViewMode] = useState<'grafo' | 'malla'>(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      return 'malla';
-    }
-    return 'grafo';
-  });
-  const [electivasOpen, setElectivasOpen] = useState(false);
-  const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [mobileDrawerView, setMobileDrawerView] = useState<'menu' | 'electivas'>('menu');
-  const [dimApproved, setDimApproved] = useState(false);
-  const [criticalChainActive, setCriticalChainActive] = useState(false);
 
-  const openMobileDrawer = useCallback((view: 'menu' | 'electivas' = 'menu') => {
-    setMobileDrawerView(view);
-    setMobileDrawerOpen(true);
-  }, []);
-
-  const closeMobileDrawer = useCallback(() => {
-    setMobileDrawerOpen(false);
-  }, []);
-
-  const toastMessage = toasts.length > 0 ? toasts[0].message : null;
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  }, []);
-
+  const ui = useContext(UIContext);
   const showToast = useCallback((
     msg: string,
     variantOrOptions: 'success' | 'warning' | 'error' | 'info' | ToastOptions = 'info'
   ) => {
-    if (!msg) return;
-    const id = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' 
-      ? crypto.randomUUID() 
-      : `${Date.now()}`;
-    const isObj = typeof variantOrOptions === 'object';
-    const variant = isObj ? (variantOrOptions.variant || 'info') : variantOrOptions;
-    const duration = isObj && variantOrOptions.duration !== undefined
-      ? variantOrOptions.duration
-      : (isObj && variantOrOptions.action ? 5000 : 3500);
-    const action = isObj ? variantOrOptions.action : undefined;
-
-    setToasts(prev => {
-      const next = [...prev, { id, message: msg, variant, duration, action }];
-      return next.slice(-3);
-    });
-  }, []);
+    if (ui?.showToast) {
+      ui.showToast(msg, variantOrOptions);
+    }
+  }, [ui]);
 
   // Detect shared progress via URL hash
   useEffect(() => {
@@ -316,12 +227,14 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         unsubscribeSnapshot = subscribeToUserProgress(fbUser.uid, (data) => {
           if (window.location.hash.startsWith('#share=')) return;
           if (data) {
-            setEstados(data.estados || {});
-            setEstadosElectivas(data.estadosElectivas || {});
-            setNotas(data.notas || {});
-            setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
-            setPerfilState(data.perfil || { nombre: '', legajo: '' });
-            setMetasExamenState(data.metasExamen || {});
+            const currentLocal = getLocalProgress();
+            const merged = mergeProgress(currentLocal, data);
+            setEstados(merged.estados || {});
+            setEstadosElectivas(merged.estadosElectivas || {});
+            setNotas(merged.notas || {});
+            setPpsHorasState(merged.ppsHoras !== undefined ? merged.ppsHoras : 0);
+            setPerfilState(merged.perfil || { nombre: '', legajo: '' });
+            setMetasExamenState(merged.metasExamen || {});
           }
         });
       }
@@ -876,36 +789,10 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         metasExamen,
         setMetaExamen,
         removeMetaExamen,
-        edgeMode,
-        setEdgeMode,
-        viewMode,
-        setViewMode,
-        gridFilter,
-        setGridFilter,
-        electivasOpen,
-        setElectivasOpen,
-        calendarOpen,
-        setCalendarOpen,
-        reportOpen,
-        setReportOpen,
-        profileModalOpen,
-        setProfileModalOpen,
-        statsModalOpen,
-        setStatsModalOpen,
-        shareModalOpen,
-        setShareModalOpen,
         isViewingShared,
         sharedName,
         exitSharedMode,
         importSharedProgress,
-        focusedSubjectId,
-        setFocusedSubjectId,
-        selectedSubjectId,
-        setSelectedSubjectId,
-        toastMessage,
-        toasts,
-        showToast,
-        dismissToast,
         toggleMateriaEstado,
         setEstadoDirecto,
         toggleElectivaEstado,
@@ -919,16 +806,6 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         stats,
         resetAll,
         reloadProgress,
-        mobileDrawerOpen,
-        setMobileDrawerOpen,
-        mobileDrawerView,
-        setMobileDrawerView,
-        openMobileDrawer,
-        closeMobileDrawer,
-        dimApproved,
-        setDimApproved,
-        criticalChainActive,
-        setCriticalChainActive,
         exportBackupJson,
         importBackupJson
       }}
@@ -938,10 +815,34 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   );
 };
 
-export function useTracker() {
+export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const existingUI = useContext(UIContext);
+  if (existingUI) {
+    return <AcademicTrackerProvider>{children}</AcademicTrackerProvider>;
+  }
+  return (
+    <UIProvider>
+      <AcademicTrackerProvider>{children}</AcademicTrackerProvider>
+    </UIProvider>
+  );
+};
+
+export function useAcademicTracker(): AcademicTrackerContextType {
   const context = useContext(TrackerContext);
   if (!context) {
-    throw new Error('useTracker debe usarse dentro de un TrackerProvider');
+    throw new Error('useAcademicTracker debe usarse dentro de un TrackerProvider');
   }
   return context;
+}
+
+export function useTracker(): TrackerContextType {
+  const tracker = useContext(TrackerContext);
+  if (!tracker) {
+    throw new Error('useTracker debe usarse dentro de un TrackerProvider');
+  }
+  const ui = useContext(UIContext);
+  if (!ui) {
+    throw new Error('useTracker debe usarse dentro de un TrackerProvider');
+  }
+  return { ...ui, ...tracker };
 }

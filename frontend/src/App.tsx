@@ -1,5 +1,6 @@
 import React, { useState, lazy, Suspense, useMemo, useRef, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
+import { UIProvider } from './context/UIContext';
 import { TrackerProvider, useTracker } from './context/TrackerContext';
 import { AuthProvider } from './context/AuthContext';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -235,9 +236,11 @@ export default function App() {
   return (
     <ThemeProvider>
       <ErrorBoundary>
-        <TrackerProvider>
-          <TrackerMain />
-        </TrackerProvider>
+        <UIProvider>
+          <TrackerProvider>
+            <TrackerMain />
+          </TrackerProvider>
+        </UIProvider>
       </ErrorBoundary>
     </ThemeProvider>
   );

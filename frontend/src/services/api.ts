@@ -104,14 +104,75 @@ export async function checkAuthMe(): Promise<UserAuth | null> {
 
 // --- API PROGRESO ---
 
+export function hasAnyData(data?: ProgresoUsuario | null): boolean {
+  if (!data) return false;
+  const hasEstados = Object.values(data.estados || {}).some(e => e !== 'pendiente');
+  const hasElectivas = Object.values(data.estadosElectivas || {}).some(e => e !== 'pendiente');
+  const hasNotas = Object.keys(data.notas || {}).length > 0;
+  const hasPerfil = Boolean(data.perfil?.nombre?.trim() || data.perfil?.legajo?.trim());
+  const hasMetas = Object.keys(data.metasExamen || {}).length > 0;
+  const hasPps = (data.ppsHoras || 0) > 0;
+  return hasEstados || hasElectivas || hasNotas || hasPerfil || hasMetas || hasPps;
+}
+
+export async function syncUserProgressOnAuth(userId?: string): Promise<ProgresoUsuario> {
+  const localData = getLocalProgress();
+  const uid = userId || auth?.currentUser?.uid;
+
+  if (isFirebaseConfigured && uid) {
+    try {
+      const cloudData = await fetchProgressFromFirestore(uid);
+      if (cloudData) {
+        const merged = mergeProgress(localData, cloudData);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+        await saveProgressToFirestore(uid, merged).catch(() => {});
+        return merged;
+      } else if (hasAnyData(localData)) {
+        await saveProgressToFirestore(uid, localData).catch(() => {});
+        return localData;
+      }
+    } catch (err: unknown) {
+      console.warn('Error al sincronizar con Firestore en autenticación:', err);
+    }
+  }
+
+  const token = getStoredToken();
+  if (token) {
+    try {
+      const res = await fetch('/api/progress', { headers: getAuthHeaders() });
+      if (res.ok) {
+        const cloudData: ProgresoUsuario = await res.json();
+        const merged = mergeProgress(localData, cloudData);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+        await fetch('/api/progress', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(merged)
+        }).catch(() => {});
+        return merged;
+      }
+    } catch {
+      // Ignorar fallback
+    }
+  }
+
+  return localData;
+}
+
 export async function fetchProgress(): Promise<ProgresoUsuario> {
+  const localData = getLocalProgress();
+
   // 1. Intentar desde Cloud Firestore si hay usuario activo en Firebase
   if (isFirebaseConfigured && auth?.currentUser?.uid) {
     try {
       const firestoreData = await fetchProgressFromFirestore(auth.currentUser.uid);
       if (firestoreData) {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(firestoreData));
-        return firestoreData;
+        const merged = mergeProgress(localData, firestoreData);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+        return merged;
+      } else if (hasAnyData(localData)) {
+        saveProgressToFirestore(auth.currentUser.uid, localData).catch(() => {});
+        return localData;
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
@@ -127,9 +188,10 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
         headers: getAuthHeaders()
       });
       if (res.ok) {
-        const data: ProgresoUsuario = await res.json();
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-        return data;
+        const cloudData: ProgresoUsuario = await res.json();
+        const merged = mergeProgress(localData, cloudData);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+        return merged;
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
@@ -138,23 +200,7 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
   }
 
   // 3. Fallback / Modo Local: LocalStorage
-  const local = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (local) {
-    try {
-      return JSON.parse(local);
-    } catch {
-      console.warn('localStorage corrupto, usando estado vacío.');
-    }
-  }
-
-  return {
-    estados: {},
-    estadosElectivas: {},
-    notas: {},
-    ppsHoras: 0,
-    perfil: { nombre: '', legajo: '' },
-    metasExamen: {}
-  };
+  return localData;
 }
 
 export function getLocalProgress(): ProgresoUsuario {

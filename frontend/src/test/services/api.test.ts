@@ -11,7 +11,9 @@ import {
   persistProgress,
   clearProgress,
   getLocalProgress,
-  mergeProgress
+  mergeProgress,
+  hasAnyData,
+  syncUserProgressOnAuth
 } from '../../services/api';
 
 describe('Frontend API & Storage Service (api.ts)', () => {
@@ -325,6 +327,82 @@ describe('Frontend API & Storage Service (api.ts)', () => {
       expect(merged.metasExamen[2].turnoId).toBe('t2');
       expect(merged.perfil?.nombre).toBe('Estudiante Nube');
       expect(merged.perfil?.legajo).toBe('9999');
+    });
+  });
+
+  describe('Detección y Sincronización de Datos (hasAnyData, syncUserProgressOnAuth)', () => {
+    it('hasAnyData debe detectar correctamente cuando hay perfil, electivas o notas cargadas', () => {
+      expect(hasAnyData(null)).toBe(false);
+      expect(hasAnyData({
+        estados: {},
+        estadosElectivas: {},
+        notas: {},
+        ppsHoras: 0,
+        perfil: { nombre: '', legajo: '' },
+        metasExamen: {}
+      })).toBe(false);
+
+      expect(hasAnyData({
+        estados: {},
+        estadosElectivas: {},
+        notas: {},
+        ppsHoras: 0,
+        perfil: { nombre: 'Martín', legajo: '' },
+        metasExamen: {}
+      })).toBe(true);
+
+      expect(hasAnyData({
+        estados: {},
+        estadosElectivas: { 101: 'aprobada' },
+        notas: {},
+        ppsHoras: 0,
+        perfil: { nombre: '', legajo: '' },
+        metasExamen: {}
+      })).toBe(true);
+
+      expect(hasAnyData({
+        estados: {},
+        estadosElectivas: {},
+        notas: { 1: { nota: 8 } },
+        ppsHoras: 0,
+        perfil: { nombre: '', legajo: '' },
+        metasExamen: {}
+      })).toBe(true);
+    });
+
+    it('syncUserProgressOnAuth debe sincronizar con el backend si hay token activo', async () => {
+      saveAuthSession('token-sync-1', { id: 'u-sync', email: 'sync@utn.edu.ar' });
+      localStorage.setItem('utn-sistemas-tracker-2023', JSON.stringify({
+        estados: { 1: 'regular' },
+        estadosElectivas: {},
+        notas: {},
+        ppsHoras: 0,
+        perfil: { nombre: 'Marto', legajo: '123' },
+        metasExamen: {}
+      }));
+
+      globalThis.fetch = vi.fn().mockImplementation((url: string) => {
+        if (url === '/api/progress') {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              estados: { 1: 'aprobada', 2: 'regular' },
+              estadosElectivas: {},
+              notas: {},
+              ppsHoras: 0,
+              perfil: { nombre: '', legajo: '' },
+              metasExamen: {}
+            })
+          });
+        }
+        return Promise.reject(new Error('Unknown url'));
+      });
+
+      const synced = await syncUserProgressOnAuth();
+      expect(synced.estados[1]).toBe('aprobada');
+      expect(synced.estados[2]).toBe('regular');
+      expect(synced.perfil?.nombre).toBe('Marto');
+      expect(synced.perfil?.legajo).toBe('123');
     });
   });
 });

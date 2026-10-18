@@ -12,10 +12,6 @@ import {
   AlertCircle, 
   Loader2 
 } from 'lucide-react';
-import { 
-  getLocalProgress, 
-  persistProgress 
-} from '../../services/api';
 
 export const AuthModal: React.FC = () => {
   const { isAuthModalOpen, closeAuthModal, login, register, loginWithGoogle } = useAuth();
@@ -52,11 +48,6 @@ export const AuthModal: React.FC = () => {
     try {
       setLoading(true);
       await loginWithGoogle();
-      const localData = getLocalProgress();
-      const countLocal = Object.values(localData.estados || {}).filter(e => e !== 'pendiente').length + (localData.ppsHoras || 0);
-      if (countLocal > 0) {
-        await persistProgress(localData);
-      }
     } catch (err: unknown) {
       const errCode = typeof err === 'object' && err !== null && 'code' in err
         ? String((err as { code: unknown }).code)
@@ -90,13 +81,6 @@ export const AuthModal: React.FC = () => {
         await register(email, password);
       } else {
         await login(email, password);
-      }
-
-      // Si había progreso local previo, sincronizarlo
-      const localData = getLocalProgress();
-      const countLocal = Object.values(localData.estados || {}).filter(e => e !== 'pendiente').length + (localData.ppsHoras || 0);
-      if (countLocal > 0) {
-        await persistProgress(localData);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Ocurrió un error. Intenta nuevamente.';

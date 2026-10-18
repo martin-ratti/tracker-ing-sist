@@ -113,16 +113,36 @@ export function onFirebaseAuthStateChanged(callback: (user: User | null) => void
 }
 
 /**
+ * Elimina recursivamente campos con valor `undefined` para evitar que Firestore rechace la escritura
+ */
+function sanitizeForFirestore<T>(data: T): T {
+  if (data === null || typeof data !== 'object') {
+    return data;
+  }
+  if (Array.isArray(data)) {
+    return data.map(sanitizeForFirestore) as unknown as T;
+  }
+  const cleaned: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(data)) {
+    if (val !== undefined) {
+      cleaned[key] = sanitizeForFirestore(val);
+    }
+  }
+  return cleaned as T;
+}
+
+/**
  * Guarda o actualiza el progreso del alumno en Firestore
  */
 export async function saveProgressToFirestore(userId: string, progress: ProgresoUsuario): Promise<void> {
   if (!db) return;
   try {
     const userDocRef = doc(db, 'users', userId);
-    await setDoc(userDocRef, {
+    const sanitized = sanitizeForFirestore({
       ...progress,
       actualizadoEn: new Date().toISOString()
-    }, { merge: true });
+    });
+    await setDoc(userDocRef, sanitized, { merge: true });
   } catch (error) {
     console.error('Error al persistir progreso en Firestore:', error);
     throw error;

@@ -6,7 +6,8 @@ import {
   clearAuthSession, 
   checkAuthMe,
   loginApi,
-  registerApi
+  registerApi,
+  syncUserProgressOnAuth
 } from '../services/api';
 import { 
   isFirebaseConfigured, 
@@ -88,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
     };
     const token = await fbUser.getIdToken();
     saveAuthSession(token, authUser);
+    await syncUserProgressOnAuth(fbUser.uid);
     completeAuth(authUser);
   }, [completeAuth]);
 
@@ -100,9 +102,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
       };
       const token = await fbUser.getIdToken();
       saveAuthSession(token, authUser);
+      await syncUserProgressOnAuth(fbUser.uid);
       completeAuth(authUser);
     } else {
       const res = await loginApi(email, password);
+      if (res.user?.id) {
+        await syncUserProgressOnAuth(res.user.id);
+      }
       completeAuth(res.user);
     }
   }, [completeAuth]);
@@ -116,9 +122,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
       };
       const token = await fbUser.getIdToken();
       saveAuthSession(token, authUser);
+      await syncUserProgressOnAuth(fbUser.uid);
       completeAuth(authUser);
     } else {
       const res = await registerApi(email, password);
+      if (res.user?.id) {
+        await syncUserProgressOnAuth(res.user.id);
+      }
       completeAuth(res.user);
     }
   }, [completeAuth]);
