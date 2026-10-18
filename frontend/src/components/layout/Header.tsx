@@ -26,10 +26,12 @@ import {
   Moon,
   Clock,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  FolderOpen
 } from 'lucide-react';
 import { useTheme, THEMES, type ThemeId } from '../../context/ThemeContext';
 import { formatPromedio } from '../../utils/formatters';
+import { DRIVE_ROOT_URL } from '../../data/driveLinks';
 
 interface HeaderProps {
   onOpenTitles: () => void;
@@ -50,7 +52,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     setProfileModalOpen,
     setStatsModalOpen,
     setShareModalOpen,
-    setSelectedSubjectId,
     perfil,
     resetAll,
     mobileDrawerOpen,
@@ -158,48 +159,61 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
   }, []);
 
   return (
-    <header className="bg-(--bg-surface)/95 backdrop-blur-md border-b border-(--border-color) sticky top-0 z-30 px-4 sm:px-8 xl:px-12 py-3 w-full shrink-0">
+    <header className="bg-(--bg-surface)/95 backdrop-blur-md border-b border-(--border-color) sticky top-0 z-30 px-3 sm:px-8 xl:px-12 py-2 sm:py-3 w-full shrink-0">
       {/* Barra superior con título y controles */}
-      <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="w-full flex flex-col md:flex-row flex-wrap xl:flex-nowrap items-center justify-between gap-2.5 sm:gap-4">
         
         {/* Identidad y Título */}
-        <div className="flex items-center justify-between w-full md:w-auto gap-4">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between w-full md:w-auto gap-2 sm:gap-4 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div 
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-black font-extrabold font-syne text-base tracking-wider shadow-lg transition-all"
-              style={{ backgroundColor: 'var(--color-primary)', boxShadow: '0 0 15px var(--color-primary-glow)' }}
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-black font-extrabold font-syne text-xs sm:text-base tracking-wider shadow-md shrink-0"
+              style={{ backgroundColor: 'var(--color-primary)', boxShadow: '0 0 12px var(--color-primary-glow)' }}
             >
               ISI
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-syne font-extrabold text-base sm:text-lg text-(--text-body) tracking-wider flex items-center gap-2">
-                  UTN SISTEMAS
-                  <span 
-                    className="text-[10px] uppercase font-mono px-2 py-0.5 rounded border transition-colors"
-                    style={{ 
-                      backgroundColor: 'var(--color-primary-bg)', 
-                      borderColor: 'var(--color-primary-border)', 
-                      color: 'var(--color-primary)' 
-                    }}
-                  >
-                    Plan 2023 · FRRo
-                  </span>
-                </h1>
+            <div className="min-w-0 flex flex-col justify-center">
+              <h1 className="font-syne font-extrabold text-[13px] sm:text-base md:text-lg text-(--text-body) tracking-tight sm:tracking-wide truncate">
+                UTN SISTEMAS
+              </h1>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span 
+                  className="text-[9px] sm:text-[10px] uppercase font-mono px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded border transition-colors shrink-0"
+                  style={{ 
+                    backgroundColor: 'var(--color-primary-bg)', 
+                    borderColor: 'var(--color-primary-border)', 
+                    color: 'var(--color-primary)' 
+                  }}
+                >
+                  Plan 2023 · FRRo
+                </span>
+                {/* Subtítulo visible exclusivamente en PC de pantalla ancha para evitar colisiones en pantallas intermedias */}
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono hidden xl:block whitespace-nowrap truncate">
+                  · Tracker Pro de Correlativas y Avance Académico
+                </p>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                Tracker Pro de Correlativas y Avance Académico
-              </p>
             </div>
           </div>
 
           {/* Botones rápidos en móvil (Top-right) */}
-          <div className="flex items-center gap-1.5 md:hidden">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 md:hidden">
+            {/* Acceso Directo Google Drive UTN en móvil */}
+            <a
+              href={DRIVE_ROOT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 sm:p-2 rounded-xl bg-(--bg-elevated) border border-(--border-color) hover:border-cyan-500/50 text-cyan-600 dark:text-cyan-400 transition-colors min-w-8.5 min-h-8.5 sm:min-w-9.5 sm:min-h-9.5 flex items-center justify-center"
+              title="Abrir carpeta general de Google Drive (apuntes, exámenes y resúmenes)"
+              aria-label="Abrir Drive de UTN Sistemas"
+            >
+              <FolderOpen className="w-4 h-4" />
+            </a>
+
             {/* Modo Claro / Oscuro */}
             <button
               type="button"
               onClick={toggleColorMode}
-              className="p-2 rounded-xl bg-(--bg-elevated) border border-(--border-color) text-xs hover:bg-(--bg-base) transition-colors min-w-9.5 min-h-9.5 flex items-center justify-center"
+              className="p-1.5 sm:p-2 rounded-xl bg-(--bg-elevated) border border-(--border-color) text-xs hover:bg-(--bg-base) transition-colors min-w-8.5 min-h-8.5 sm:min-w-9.5 sm:min-h-9.5 flex items-center justify-center"
               title={colorMode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
               aria-label={colorMode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
             >
@@ -215,147 +229,174 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               <button
                 type="button"
                 onClick={() => openDrawer()}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-(--bg-elevated) border border-(--border-color) text-xs font-mono min-h-9.5"
-                title={`Sesión iniciada como ${user.email}`}
+                className="relative p-1.5 sm:p-2 rounded-xl bg-(--bg-elevated) border border-(--border-color) hover:border-slate-400 text-xs font-mono min-w-8.5 min-h-8.5 sm:min-w-9.5 sm:min-h-9.5 flex items-center justify-center transition-colors"
+                title={`Sesión iniciada como ${user.email}. Toca para abrir menú.`}
+                aria-label={`Sesión activa: ${user.email}`}
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" />
-                <span className="text-[11px] font-bold truncate max-w-17.5">
-                  {perfil.nombre?.split(' ')[0] || user.email?.split('@')[0]}
-                </span>
+                <UserIcon className="w-4 h-4 text-indigo-400" />
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={openAuthModal}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all min-h-9.5"
+                className="p-1.5 sm:p-2 rounded-xl border text-xs font-mono font-bold transition-all min-w-8.5 min-h-8.5 sm:min-w-9.5 sm:min-h-9.5 flex items-center justify-center shadow-xs"
                 style={{ 
                   backgroundColor: 'var(--color-primary-bg)', 
                   borderColor: 'var(--color-primary-border)', 
                   color: 'var(--color-primary)' 
                 }}
                 title="Sincronizar avance en la nube"
+                aria-label="Sincronizar avance en la nube"
               >
-                <Cloud className="w-3.5 h-3.5" />
-                <span className="text-[11px]">Nube</span>
+                <Cloud className="w-4 h-4" />
               </button>
             )}
           </div>
         </div>
 
 
-        {/* Estadísticas en vivo adaptadas al tema (solo escritorio) */}
-        <div className="hidden md:flex items-center gap-2 sm:gap-4 overflow-x-auto py-1 w-full md:w-auto justify-center">
-          <div 
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all"
-            style={{ 
-              backgroundColor: 'var(--color-aprobada-bg)', 
-              borderColor: 'var(--color-aprobada-border)' 
-            }}
-          >
-            <span 
-              className="w-2 h-2 rounded-full" 
-              style={{ backgroundColor: 'var(--color-aprobada)' }}
-            />
-            <div className="text-left font-mono">
-              <div 
-                className="font-extrabold text-xs sm:text-sm leading-none"
-                style={{ color: 'var(--color-aprobada)' }}
-              >
-                {stats.aprobadasCount}
-              </div>
-              <div className="text-[10px] text-slate-800 dark:text-slate-200 uppercase leading-tight font-bold">Aprobadas</div>
-            </div>
-          </div>
-
-          <div 
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all"
-            style={{ 
-              backgroundColor: 'var(--color-regular-bg)', 
-              borderColor: 'var(--color-regular-border)' 
-            }}
-          >
-            <span 
-              className="w-2 h-2 rounded-full" 
-              style={{ backgroundColor: 'var(--color-regular)' }}
-            />
-            <div className="text-left font-mono">
-              <div 
-                className="font-extrabold text-xs sm:text-sm leading-none"
-                style={{ color: 'var(--color-regular)' }}
-              >
-                {stats.regularesCount}
-              </div>
-              <div className="text-[10px] text-slate-800 dark:text-slate-200 uppercase leading-tight font-bold">Regulares</div>
-            </div>
-          </div>
-
-          <div 
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all"
-            style={{ 
-              backgroundColor: 'var(--color-cursable-bg)', 
-              borderColor: 'var(--color-cursable-border)' 
-            }}
-          >
-            <span 
-              className={`w-2 h-2 rounded-full ${stats.cursablesCount > 0 ? 'animate-ping' : ''}`}
-              style={{ backgroundColor: 'var(--color-cursable)' }}
-            />
-            <div className="text-left font-mono">
-              <div 
-                className="font-extrabold text-xs sm:text-sm leading-none"
-                style={{ color: 'var(--color-cursable)' }}
-              >
-                {stats.cursablesCount}
-              </div>
-              <div className="text-[10px] text-slate-800 dark:text-slate-200 uppercase leading-tight font-bold">Cursables</div>
-            </div>
-          </div>
-
-          {stats.promedioConAplazos !== null && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-950/40 border border-purple-500/30 shadow-sm">
-              <Award className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
-              <div className="text-left font-mono">
-                <div className="text-purple-900 dark:text-purple-300 font-extrabold text-xs sm:text-sm leading-none">
-                  {formatPromedio(stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : stats.promedioConAplazos)}
-                </div>
+        {/* Indicadores en vivo en desktop: Contadores en modo Grafo + Promedio y Próxima Meta */}
+        {(viewMode === 'grafo' || stats.promedioConAplazos !== null || stats.proximaMeta) && (
+          <div className="hidden md:flex items-center gap-2 sm:gap-3 overflow-x-auto py-1 justify-center">
+            {/* Contadores de materias visibles en modo Grafo (en Malla ya figuran en los filtros interactivos) */}
+            {viewMode === 'grafo' && (
+              <div className="flex items-center gap-2">
                 <div 
-                  className="text-[10px] text-purple-900 dark:text-purple-300 uppercase leading-tight font-bold cursor-help"
-                  title={`Con aplazos: ${formatPromedio(stats.promedioConAplazos)} · Sin aplazos: ${formatPromedio(stats.promedioSinAplazos)}`}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border shadow-sm transition-all"
+                  style={{ 
+                    backgroundColor: 'var(--color-aprobada-bg)', 
+                    borderColor: 'var(--color-aprobada-border)' 
+                  }}
                 >
-                  {stats.promedioSinAplazos !== null ? 'Prom. s/aplazos' : 'Promedio'}
+                  <span 
+                    className="w-2 h-2 rounded-full" 
+                    style={{ backgroundColor: 'var(--color-aprobada)' }}
+                  />
+                  <div className="text-left font-mono">
+                    <div 
+                      className="font-extrabold text-xs leading-none"
+                      style={{ color: 'var(--color-aprobada)' }}
+                    >
+                      {stats.aprobadasCount}
+                    </div>
+                    <div className="text-[9px] text-slate-800 dark:text-slate-200 uppercase leading-tight font-bold">Aprobadas</div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
 
-          {stats.proximaMeta && (
-            <button
-              type="button"
-              onClick={() => setCalendarOpen(true)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm transition-all text-left ${
-                stats.proximaMeta.urgencia === 'urgente'
-                  ? 'bg-rose-500/15 border-rose-500/50 text-rose-700 dark:text-rose-300 animate-pulse'
-                  : stats.proximaMeta.urgencia === 'proxima'
-                  ? 'bg-amber-500/15 border-amber-500/50 text-amber-700 dark:text-amber-300'
-                  : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-700 dark:text-cyan-300'
-              }`}
-              title={`Meta de examen: ${stats.proximaMeta.materiaNombre} (${stats.proximaMeta.fechaExamenStr}). Clic para ver.`}
-            >
-              <Clock className="w-3.5 h-3.5 shrink-0" />
-              <div className="font-mono">
-                <div className="font-bold text-xs sm:text-sm leading-none flex items-center gap-1">
-                  <span>{stats.proximaMeta.diasFaltantes === 0 ? '¡Rinde Hoy!' : `${stats.proximaMeta.diasFaltantes}d`}</span>
+                <div 
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border shadow-sm transition-all"
+                  style={{ 
+                    backgroundColor: 'var(--color-regular-bg)', 
+                    borderColor: 'var(--color-regular-border)' 
+                  }}
+                >
+                  <span 
+                    className="w-2 h-2 rounded-full" 
+                    style={{ backgroundColor: 'var(--color-regular)' }}
+                  />
+                  <div className="text-left font-mono">
+                    <div 
+                      className="font-extrabold text-xs leading-none"
+                      style={{ color: 'var(--color-regular)' }}
+                    >
+                      {stats.regularesCount}
+                    </div>
+                    <div className="text-[9px] text-slate-800 dark:text-slate-200 uppercase leading-tight font-bold">Regulares</div>
+                  </div>
                 </div>
-                <div className="text-[10px] truncate max-w-21.25 leading-tight font-medium opacity-85">
-                  {stats.proximaMeta.materiaNombreCorto}
+
+                <div 
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border shadow-sm transition-all"
+                  style={{ 
+                    backgroundColor: 'var(--color-cursable-bg)', 
+                    borderColor: 'var(--color-cursable-border)' 
+                  }}
+                >
+                  <span 
+                    className={`w-2 h-2 rounded-full ${stats.cursablesCount > 0 ? 'animate-ping' : ''}`}
+                    style={{ backgroundColor: 'var(--color-cursable)' }}
+                  />
+                  <div className="text-left font-mono">
+                    <div 
+                      className="font-extrabold text-xs leading-none"
+                      style={{ color: 'var(--color-cursable)' }}
+                    >
+                      {stats.cursablesCount}
+                    </div>
+                    <div className="text-[9px] text-slate-800 dark:text-slate-200 uppercase leading-tight font-bold">Cursables</div>
+                  </div>
                 </div>
               </div>
-            </button>
-          )}
-        </div>
+            )}
+
+            {stats.promedioConAplazos !== null && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-500/10 dark:bg-purple-950/40 border border-purple-500/30 shadow-sm">
+                <Award className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
+                <div className="text-left font-mono">
+                  <div className="text-purple-900 dark:text-purple-300 font-extrabold text-xs sm:text-sm leading-none">
+                    {formatPromedio(stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : stats.promedioConAplazos)}
+                  </div>
+                  <div 
+                    className="text-[10px] text-purple-900 dark:text-purple-300 uppercase leading-tight font-bold cursor-help"
+                    title={`Con aplazos: ${formatPromedio(stats.promedioConAplazos)} · Sin aplazos: ${formatPromedio(stats.promedioSinAplazos)}`}
+                  >
+                    {stats.promedioSinAplazos !== null ? 'Prom. s/aplazos' : 'Promedio'}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {stats.proximaMeta && (
+              <button
+                type="button"
+                onClick={() => setCalendarOpen(true)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border shadow-sm transition-all text-left ${
+                  stats.proximaMeta.urgencia === 'urgente'
+                    ? 'bg-rose-500/15 border-rose-500/50 text-rose-700 dark:text-rose-300 animate-pulse'
+                    : stats.proximaMeta.urgencia === 'proxima'
+                    ? 'bg-amber-500/15 border-amber-500/50 text-amber-700 dark:text-amber-300'
+                    : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-700 dark:text-cyan-300'
+                }`}
+                title={`Meta de examen: ${stats.proximaMeta.materiaNombre} (${stats.proximaMeta.fechaExamenStr}). Clic para ver.`}
+              >
+                <Clock className="w-3.5 h-3.5 shrink-0" />
+                <div className="font-mono">
+                  <div className="font-bold text-xs sm:text-sm leading-none flex items-center gap-1">
+                    <span>{stats.proximaMeta.diasFaltantes === 0 ? '¡Rinde Hoy!' : `${stats.proximaMeta.diasFaltantes}d`}</span>
+                  </div>
+                  <div className="text-[10px] truncate max-w-24 leading-tight font-medium opacity-85">
+                    {stats.proximaMeta.materiaNombreCorto}
+                  </div>
+                </div>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Acciones de usuario y personalización (superior derecha) */}
         <div className="hidden md:flex items-center gap-2">
+          {/* Botón Acceso Directo Google Drive UTN */}
+          <a
+            href={DRIVE_ROOT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono text-xs font-semibold transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] group"
+            style={{ 
+              backgroundColor: 'var(--color-primary-bg)', 
+              borderColor: 'var(--color-primary-border)', 
+              color: 'var(--color-primary)' 
+            }}
+            title="Abrir carpeta general de Google Drive (exámenes, apuntes y resúmenes de UTN)"
+            aria-label="Abrir Drive de UTN Sistemas"
+          >
+            <FolderOpen className="w-3.5 h-3.5 shrink-0" />
+            <span>Drive UTN</span>
+            <ExternalLink className="w-3 h-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+          </a>
+
+          <div className="h-4 w-px bg-(--border-color) mx-0.5" />
+
           {/* Perfil del Alumno */}
           <button
             onClick={() => setProfileModalOpen(true)}
@@ -417,60 +458,110 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
         </div>
       </div>
 
-      {/* Sub-barra exclusiva para móviles */}
-      <div className="flex md:hidden flex-col gap-2 mt-2 pt-2 border-t border-(--border-color) w-full">
+      {/* Sub-barra exclusiva para móviles: compacta, con barra de avance visible y contadores en modo Grafo */}
+      <div className="flex md:hidden flex-col gap-1.5 mt-2 pt-2 border-t border-(--border-color) w-full">
 
-        {/* Si está en modo Grafo en móvil, selector de correlativas */}
+        {/* Si está en modo Grafo en móvil: selector de correlativas y contadores */}
         {viewMode === 'grafo' && (
-          <div className="flex items-center justify-between bg-(--bg-elevated) p-1 rounded-xl border border-(--border-color) text-xs font-mono">
-            <button
-              type="button"
-              onClick={() => setEdgeMode('ambos')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
-                edgeMode === 'ambos' ? 'bg-(--bg-surface) font-bold shadow-sm border border-(--border-color)' : 'text-slate-600 dark:text-slate-400'
-              }`}
-              style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
-            >
-              Todas
-            </button>
-            <button
-              type="button"
-              onClick={() => setEdgeMode('regular')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
-                edgeMode === 'regular' ? 'font-bold shadow-sm border border-(--color-cursable-border)' : 'text-slate-600 dark:text-slate-400'
-              }`}
-              style={edgeMode === 'regular' ? {
-                backgroundColor: 'var(--color-cursable-bg)',
-                color: 'var(--color-cursable)'
-              } : {}}
-            >
-              Para Cursar
-            </button>
-            <button
-              type="button"
-              onClick={() => setEdgeMode('aprobada')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
-                edgeMode === 'aprobada' ? 'font-bold shadow-sm border border-(--color-regular-border)' : 'text-slate-600 dark:text-slate-400'
-              }`}
-              style={edgeMode === 'aprobada' ? {
-                backgroundColor: 'var(--color-regular-bg)',
-                color: 'var(--color-regular)'
-              } : {}}
-            >
-              Para Rendir
-            </button>
+          <div className="space-y-1.5 mb-1">
+            <div className="flex items-center justify-between bg-(--bg-elevated) p-1 rounded-xl border border-(--border-color) text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => setEdgeMode('ambos')}
+                className={`flex-1 py-1 rounded-lg text-center transition-colors text-[11px] ${
+                  edgeMode === 'ambos' ? 'bg-(--bg-surface) font-bold shadow-sm border border-(--border-color)' : 'text-slate-600 dark:text-slate-400'
+                }`}
+                style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
+              >
+                Todas
+              </button>
+              <button
+                type="button"
+                onClick={() => setEdgeMode('regular')}
+                className={`flex-1 py-1 rounded-lg text-center transition-colors text-[11px] ${
+                  edgeMode === 'regular' ? 'font-bold shadow-sm border border-(--color-cursable-border)' : 'text-slate-600 dark:text-slate-400'
+                }`}
+                style={edgeMode === 'regular' ? {
+                  backgroundColor: 'var(--color-cursable-bg)',
+                  color: 'var(--color-cursable)'
+                } : {}}
+              >
+                Para Cursar
+              </button>
+              <button
+                type="button"
+                onClick={() => setEdgeMode('aprobada')}
+                className={`flex-1 py-1 rounded-lg text-center transition-colors text-[11px] ${
+                  edgeMode === 'aprobada' ? 'font-bold shadow-sm border border-(--color-regular-border)' : 'text-slate-600 dark:text-slate-400'
+                }`}
+                style={edgeMode === 'aprobada' ? {
+                  backgroundColor: 'var(--color-regular-bg)',
+                  color: 'var(--color-regular)'
+                } : {}}
+              >
+                Para Rendir
+              </button>
+            </div>
+
+            {/* Contadores de materias en modo Grafo móvil */}
+            <div className="flex items-center justify-around px-2 text-[10px] font-mono">
+              <span style={{ color: 'var(--color-aprobada)' }} className="font-bold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }} />
+                Apr: {stats.aprobadasCount}
+              </span>
+              <span style={{ color: 'var(--color-regular)' }} className="font-bold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }} />
+                Reg: {stats.regularesCount}
+              </span>
+              <span style={{ color: 'var(--color-cursable)' }} className="font-bold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--color-cursable)' }} />
+                Cur: {stats.cursablesCount}
+              </span>
+            </div>
           </div>
         )}
 
-        {/* Barra compacta de Avance de Carrera */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-mono">
-            <span className="text-slate-600 dark:text-slate-400 font-medium">Avance de Carrera:</span>
-            <span className="font-bold font-syne text-xs" style={{ color: 'var(--color-primary)' }}>
-              {stats.aprobadasCount}/{stats.totalTroncales} ({stats.porcentajeCarrera}%)
-            </span>
+        {/* Barra de Avance y Meta en móvil (con barra de progreso grande en todo el ancho) */}
+        <div className="flex flex-col gap-1 w-full py-0.5">
+          <div className="flex items-center justify-between gap-2 text-xs font-mono">
+            <div className="flex items-center gap-1.5 text-[11px] shrink-0">
+              <span className="text-slate-500 font-medium">Avance:</span>
+              <span className="font-bold font-syne text-(--text-body)">
+                {stats.aprobadasCount}/{stats.totalTroncales}
+              </span>
+              <span className="font-semibold text-[10px]" style={{ color: 'var(--color-primary)' }}>
+                ({stats.porcentajeCarrera}%)
+              </span>
+            </div>
+
+            {/* Próxima meta o Promedio en móvil */}
+            {stats.proximaMeta ? (
+              <button
+                type="button"
+                onClick={() => setCalendarOpen(true)}
+                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] font-mono transition-all truncate max-w-[55%] shrink-0 ${
+                  stats.proximaMeta.urgencia === 'urgente'
+                    ? 'bg-rose-500/15 border-rose-500/50 text-rose-800 dark:text-rose-300 font-bold animate-pulse'
+                    : stats.proximaMeta.urgencia === 'proxima'
+                    ? 'bg-amber-500/15 border-amber-500/50 text-amber-800 dark:text-amber-300 font-semibold'
+                    : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-800 dark:text-cyan-300 font-medium'
+                }`}
+                title={`Meta: ${stats.proximaMeta.materiaNombre}. Clic para abrir calendario.`}
+              >
+                <Clock className="w-3 h-3 shrink-0" />
+                <span className="truncate">🎯 {stats.proximaMeta.materiaNombreCorto}</span>
+                <span className="font-bold shrink-0">{stats.proximaMeta.diasFaltantes === 0 ? '¡Hoy!' : `${stats.proximaMeta.diasFaltantes}d`}</span>
+              </button>
+            ) : stats.promedioConAplazos !== null ? (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-[10px] font-mono font-bold text-purple-700 dark:text-purple-300">
+                <Award className="w-3 h-3" />
+                <span>Prom: {formatPromedio(stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : stats.promedioConAplazos)}</span>
+              </div>
+            ) : null}
           </div>
-          <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-900 border border-(--border-color) overflow-hidden">
+
+          {/* Barra de progreso ancha y visible en todo el ancho de mobile */}
+          <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 border border-(--border-color) overflow-hidden shadow-inner">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
@@ -480,78 +571,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             />
           </div>
         </div>
-
-        {/* Micro-estadísticas en 4 columnas */}
-        <div className="grid grid-cols-4 gap-1.5 font-mono text-[11px] text-center">
-          <div 
-            className="p-1.5 rounded-lg border shadow-sm"
-            style={{ 
-              backgroundColor: 'var(--color-aprobada-bg)', 
-              borderColor: 'var(--color-aprobada-border)' 
-            }}
-          >
-            <div className="text-[9px] uppercase font-bold text-slate-800 dark:text-slate-200">Apr</div>
-            <div className="text-xs font-extrabold" style={{ color: 'var(--color-aprobada)' }}>
-              {stats.aprobadasCount}
-            </div>
-          </div>
-
-          <div 
-            className="p-1.5 rounded-lg border shadow-sm"
-            style={{ 
-              backgroundColor: 'var(--color-regular-bg)', 
-              borderColor: 'var(--color-regular-border)' 
-            }}
-          >
-            <div className="text-[9px] uppercase font-bold text-slate-800 dark:text-slate-200">Reg</div>
-            <div className="text-xs font-extrabold" style={{ color: 'var(--color-regular)' }}>
-              {stats.regularesCount}
-            </div>
-          </div>
-
-          <div 
-            className="p-1.5 rounded-lg border shadow-sm"
-            style={{ 
-              backgroundColor: 'var(--color-cursable-bg)', 
-              borderColor: 'var(--color-cursable-border)' 
-            }}
-          >
-            <div className="text-[9px] uppercase font-bold text-slate-800 dark:text-slate-200">Cur</div>
-            <div className="text-xs font-extrabold" style={{ color: 'var(--color-cursable)' }}>
-              {stats.cursablesCount}
-            </div>
-          </div>
-
-          <div className="p-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 shadow-sm">
-            <div className="text-[9px] uppercase font-bold text-purple-900 dark:text-purple-300">Prom</div>
-            <div className="text-xs font-extrabold text-purple-900 dark:text-purple-300">
-              {formatPromedio(stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : stats.promedioConAplazos)}
-            </div>
-          </div>
-        </div>
-
-        {/* Próxima meta de examen en móvil */}
-        {stats.proximaMeta && (
-          <button
-            type="button"
-            onClick={() => setCalendarOpen(true)}
-            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-mono transition-all min-h-9 ${
-              stats.proximaMeta.urgencia === 'urgente'
-                ? 'bg-rose-500/15 border-rose-500/50 text-rose-800 dark:text-rose-300 animate-pulse font-bold'
-                : stats.proximaMeta.urgencia === 'proxima'
-                ? 'bg-amber-500/15 border-amber-500/50 text-amber-800 dark:text-amber-300 font-semibold'
-                : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-800 dark:text-cyan-300'
-            }`}
-          >
-            <span className="flex items-center gap-1.5 truncate">
-              <Clock className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">🎯 Final: {stats.proximaMeta.materiaNombreCorto}</span>
-            </span>
-            <span className="font-bold shrink-0 ml-2">
-              {stats.proximaMeta.diasFaltantes === 0 ? '¡Hoy!' : `${stats.proximaMeta.diasFaltantes}d`}
-            </span>
-          </button>
-        )}
       </div>
 
       {/* Sub-barra Desktop: Selector de Vistas, Filtros de Correlativas, % de Avance y Botones de Acción */}
@@ -661,17 +680,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </div>
         </div>
 
-        {/* Bloque Derecho: Botones de navegación académica, Leyenda y Reset */}
-        <div className="flex items-center gap-2 flex-wrap ml-auto">
-          {/* Botones de navegación académica */}
-          <div className="hidden md:flex items-center gap-1.5">
+        {/* Bloque Derecho: Módulos Académicos, Reportes, Leyenda y Sistema */}
+        <div className="flex items-center gap-2.5 flex-wrap ml-auto">
+          {/* Módulo Académico (Calendario, Electivas, Títulos) */}
+          <div className="hidden md:flex items-center gap-1.5 p-1 rounded-xl bg-(--bg-elevated) border border-(--border-color) shadow-xs">
             {/* Botón Calendario Oficial y Metas */}
             <button
               onClick={() => setCalendarOpen(true)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all shadow-sm ${
                 stats.metasCount > 0
                   ? 'bg-cyan-500/20 border-cyan-400/60 text-cyan-900 dark:text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                  : 'bg-(--bg-elevated) border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body)'
+                  : 'bg-(--bg-surface) border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body)'
               }`}
               title="Calendario Académico UTN 2026/2027 y Metas de Examen"
             >
@@ -685,47 +704,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               )}
             </button>
 
-            {/* Chip de Próxima Meta de Examen con Cuenta Regresiva (Item 17) */}
-            {stats.proximaMeta && (
-              <button
-                type="button"
-                onClick={() => setSelectedSubjectId(stats.proximaMeta!.materiaId)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all shadow-sm ${
-                  stats.proximaMeta.urgencia === 'urgente'
-                    ? 'bg-rose-500/15 border-rose-500/50 text-rose-800 dark:text-rose-300 animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.25)]'
-                    : stats.proximaMeta.urgencia === 'proxima'
-                    ? 'bg-amber-500/15 border-amber-500/50 text-amber-800 dark:text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
-                    : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-800 dark:text-cyan-300'
-                }`}
-                title={`Meta agendada: ${stats.proximaMeta.materiaNombre} (${stats.proximaMeta.fechaExamenStr} - ${stats.proximaMeta.turnoNombre}). Clic para ver materia.`}
-              >
-                <Clock className="w-3.5 h-3.5" />
-                <span className="font-semibold">{stats.proximaMeta.materiaNombreCorto}:</span>
-                <span className="font-bold">
-                  {stats.proximaMeta.diasFaltantes === 0
-                    ? '¡Hoy!'
-                    : `Faltan ${stats.proximaMeta.diasFaltantes}d`}
-                </span>
-              </button>
-            )}
-
-            {/* Botón Ficha Analítica / Reporte PDF */}
-            <button
-              onClick={() => setReportOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
-              title="Descargar o imprimir ficha analítica oficial en PDF"
-            >
-              <FileText className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
-              <span>Ficha PDF</span>
-            </button>
-
             {/* Botón Electivas */}
             <button
               onClick={() => setElectivasOpen(!electivasOpen)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-all shadow-sm ${
                 electivasOpen
                   ? 'bg-amber-500/20 border-amber-400/60 text-amber-900 dark:text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
-                  : 'bg-(--bg-elevated) border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body)'
+                  : 'bg-(--bg-surface) border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body)'
               }`}
               title="Panel de Materias Electivas y cálculo de horas"
             >
@@ -739,7 +724,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Títulos */}
             <button
               onClick={onOpenTitles}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-surface) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
               title="Requisitos para Título Intermedio ADUSI e Ingeniería"
             >
               <GraduationCap className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-400" />
@@ -748,11 +733,26 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" title="ADUSI alcanzado" />
               )}
             </button>
+          </div>
+
+          <div className="h-4 w-px bg-(--border-color) hidden md:block" />
+
+          {/* Módulo de Reportes & Compartir (Ficha PDF, Estadísticas, Compartir) */}
+          <div className="hidden md:flex items-center gap-1.5 p-1 rounded-xl bg-(--bg-elevated) border border-(--border-color) shadow-xs">
+            {/* Botón Ficha Analítica / Reporte PDF */}
+            <button
+              onClick={() => setReportOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-surface) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
+              title="Descargar o imprimir ficha analítica oficial en PDF"
+            >
+              <FileText className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
+              <span>Ficha PDF</span>
+            </button>
 
             {/* Botón Estadísticas */}
             <button
               onClick={() => setStatsModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-surface) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
               title="Dashboard de Estadísticas Avanzadas"
             >
               <BarChart3 className="w-3.5 h-3.5 text-pink-700 dark:text-pink-400" />
@@ -762,7 +762,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             {/* Botón Compartir */}
             <button
               onClick={() => setShareModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-surface) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
               title="Generar enlace compartible de tu progreso"
             >
               <Share2 className="w-3.5 h-3.5 text-sky-700 dark:text-sky-400" />
@@ -770,32 +770,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             </button>
           </div>
 
-          <div className="h-4 w-px bg-(--border-color) hidden xl:block" />
-
-          {/* Leyenda compacta */}
-          <div className="hidden lg:flex items-center gap-3 text-[11px] text-slate-800 dark:text-slate-200 font-semibold">
-            <div className="flex items-center gap-1.5">
-              <span 
-                className="w-2.5 h-2.5 rounded-full shadow-sm" 
-                style={{ backgroundColor: 'var(--color-cursable)' }}
-              />
-              <span className="text-cyan-900 dark:text-cyan-300 font-bold">Cursable</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span 
-                className="w-2.5 h-2.5 rounded-full shadow-sm" 
-                style={{ backgroundColor: 'var(--color-regular)' }}
-              />
-              <span className="text-amber-900 dark:text-amber-300 font-bold">Regular</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span 
-                className="w-2.5 h-2.5 rounded-full shadow-sm" 
-                style={{ backgroundColor: 'var(--color-aprobada)' }}
-              />
-              <span className="text-emerald-900 dark:text-emerald-300 font-bold">Aprobada</span>
-            </div>
-          </div>
+          <div className="h-4 w-px bg-(--border-color) hidden md:block" />
 
           {/* Ayuda y Reset */}
           <div className="flex items-center gap-1">
@@ -1047,6 +1022,29 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                     Módulos y Utilidades
                   </div>
 
+                  {/* Google Drive UTN */}
+                  <a
+                    href={DRIVE_ROOT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-(--bg-elevated) border border-cyan-500/30 text-slate-800 dark:text-slate-200 hover:border-cyan-500/60 hover:bg-cyan-500/5 transition-all min-h-12.5 shadow-xs group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 text-left">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 shrink-0 group-hover:scale-105 transition-transform">
+                        <FolderOpen className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold font-syne text-(--text-body) truncate flex items-center gap-1.5">
+                          <span>Drive UTN Sistemas</span>
+                          <ExternalLink className="w-3 h-3 text-cyan-500" />
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500 truncate">
+                          Finales, parciales y resúmenes compartidos
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0 ml-2" />
+                  </a>
 
                   {/* Títulos */}
                   <button
