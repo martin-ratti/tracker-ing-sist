@@ -17,6 +17,11 @@ describe('plan2023 - Integridad del Catálogo Académico', () => {
       expect(m.nivel).toBeGreaterThanOrEqual(1);
       expect(m.nivel).toBeLessThanOrEqual(5);
     });
+
+    const m16 = MATERIAS_TRONCALES.find(m => m.id === 16);
+    const m30 = MATERIAS_TRONCALES.find(m => m.id === 30);
+    expect(m16?.nombre).toBe('ADESI');
+    expect(m30?.nombre).toBe('ASI');
   });
 
   it('todas las electivas deben tener IDs mayores o iguales a 200 y carga horaria definida', () => {

@@ -35,7 +35,7 @@ export interface Materia {
   nombreCompleto: string;         // Nombre oficial completo (ej. "Análisis Matemático I")
   nivel: number;                  // 1, 2, 3, 4 o 5
   horas: number;                  // Carga horaria semanal cátedra
-  esIntegradora?: boolean;        // true si es materia eje (ASI, DSI, Admin SI, Proyecto Final)
+  esIntegradora?: boolean;        // true si es materia eje (ADESI, DSI, ASI, Proyecto Final)
   esCuatrimestral?: boolean;      // true si se dicta en un cuatrimestre
   esAdusiSolo?: boolean;          // true exclusivamente para Seminario Integrador ADUSI
   reqRegular: number[];           // IDs de materias que deben estar REGULARES o APROBADAS para cursar

@@ -19,7 +19,7 @@ export const MATERIAS_TRONCALES: Materia[] = [
   { id: 13, nombre: "Sintaxis", nombreCompleto: "Sintaxis y Semántica de los Lenguajes", nivel: 2, horas: 4, esCuatrimestral: true, reqRegular: [5, 6], reqAprobada: [] },
   { id: 14, nombre: "Paradigmas", nombreCompleto: "Paradigmas de Programación", nivel: 2, horas: 4, esCuatrimestral: true, reqRegular: [5, 6], reqAprobada: [] },
   { id: 15, nombre: "S.O.", nombreCompleto: "Sistemas Operativos", nivel: 2, horas: 4, esCuatrimestral: true, reqRegular: [7], reqAprobada: [] },
-  { id: 16, nombre: "ASI", nombreCompleto: "Análisis de Sistemas de Información", nivel: 2, horas: 6, esIntegradora: true, reqRegular: [6, 8], reqAprobada: [] },
+  { id: 16, nombre: "ADESI", nombreCompleto: "Análisis de Sistemas de Información", nivel: 2, horas: 6, esIntegradora: true, reqRegular: [6, 8], reqAprobada: [] },
 
   // 3ER NIVEL
   { id: 17, nombre: "Probabilidad", nombreCompleto: "Probabilidad y Estadística", nivel: 3, horas: 3, reqRegular: [1, 2], reqAprobada: [] },
@@ -38,7 +38,7 @@ export const MATERIAS_TRONCALES: Materia[] = [
   { id: 27, nombre: "Inv. Operativa", nombreCompleto: "Investigación Operativa", nivel: 4, horas: 4, reqRegular: [17, 22], reqAprobada: [] },
   { id: 28, nombre: "Simulación", nombreCompleto: "Simulación", nivel: 4, horas: 3, reqRegular: [17], reqAprobada: [9] },
   { id: 29, nombre: "Automatización", nombreCompleto: "Tecnologías para la Automatización", nivel: 4, horas: 3, reqRegular: [10, 22], reqAprobada: [9] },
-  { id: 30, nombre: "Admin SI", nombreCompleto: "Administración de Sistemas de Información", nivel: 4, horas: 6, esIntegradora: true, reqRegular: [18, 23], reqAprobada: [16] },
+  { id: 30, nombre: "ASI", nombreCompleto: "Administración de Sistemas de Información", nivel: 4, horas: 6, esIntegradora: true, reqRegular: [18, 23], reqAprobada: [16] },
 
   // 5TO NIVEL
   { id: 31, nombre: "IA", nombreCompleto: "Inteligencia Artificial", nivel: 5, horas: 3, reqRegular: [28], reqAprobada: [17, 22] },

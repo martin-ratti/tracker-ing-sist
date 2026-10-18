@@ -53,6 +53,11 @@ describe('Plan 2023 - Estructura de Datos y Correlatividades', () => {
     });
   });
 
+  it('debe tener las denominaciones cortas oficiales: ADESI (id 16) y ASI (id 30)', () => {
+    expect(MATERIAS_MAP[16].nombre).toBe('ADESI');
+    expect(MATERIAS_MAP[30].nombre).toBe('ASI');
+  });
+
   it('todas las correlatividades numéricas deben referenciar a IDs de materias existentes', () => {
     MATERIAS_TRONCALES.forEach((materia) => {
       materia.reqRegular.forEach((corrId) => {

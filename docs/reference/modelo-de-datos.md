@@ -58,7 +58,7 @@ export interface Materia {
 - `nombreCompleto` (`string`): Nombre formal completo oficial de la asignatura (ej. `"Análisis Matemático I"`).
 - `nivel` (`number`): Nivel curricular (del 1 al 5).
 - `horas` (`number`): Horas reloj semanales cátedra.
-- `esIntegradora` (`boolean`, opcional): `true` si es una materia de integración transversal del año (ASI, DSI, Admin SI, Proyecto Final).
+- `esIntegradora` (`boolean`, opcional): `true` si es una materia de integración transversal del año (ADESI, DSI, ASI, Proyecto Final).
 - `esCuatrimestral` (`boolean`, opcional): `true` si su régimen de cursado es de un cuatrimestre en lugar de anual.
 - `esAdusiSolo` (`boolean`, opcional): `true` exclusivamente para el Seminario Integrador ADUSI (ID 99), no forma parte del título de grado de Ingeniería.
 - `reqRegular` (`number[]`): Lista de IDs de materias que deben estar en estado `'regular'` o `'aprobada'` para habilitar el cursado.
