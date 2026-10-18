@@ -13,7 +13,9 @@ import {
   getLocalProgress,
   mergeProgress,
   hasAnyData,
-  syncUserProgressOnAuth
+  syncUserProgressOnAuth,
+  sanitizeProgress,
+  safeSaveProgressToStorage
 } from '../../services/api';
 
 describe('Frontend API & Storage Service (api.ts)', () => {
@@ -403,6 +405,68 @@ describe('Frontend API & Storage Service (api.ts)', () => {
       expect(synced.estados[2]).toBe('regular');
       expect(synced.perfil?.nombre).toBe('Marto');
       expect(synced.perfil?.legajo).toBe('123');
+    });
+  });
+
+  describe('Sanitización y Prevención de Browser Storage Poisoning (CWE-502 / CWE-79)', () => {
+    it('sanitizeProgress debe retornar estructura por defecto segura ante datos nulos o corruptos', () => {
+      const empty1 = sanitizeProgress(null);
+      expect(empty1.estados).toEqual({});
+      expect(empty1.ppsHoras).toBe(0);
+
+      const empty2 = sanitizeProgress('STRING_NO_VALIDO');
+      expect(empty2.estados).toEqual({});
+      expect(empty2.perfil?.nombre).toBe('');
+
+      const empty3 = sanitizeProgress([1, 2, 3]);
+      expect(empty3.estados).toEqual({});
+    });
+
+    it('sanitizeProgress debe filtrar estados maliciosos fuera del allowlist y claves no numéricas', () => {
+      const malicious = {
+        estados: {
+          1: 'aprobada',
+          2: 'invalido_malicioso',
+          '__proto__': 'hack',
+          'constructor': 'hack',
+          'abc': 'regular'
+        },
+        estadosElectivas: {
+          201: 'regular',
+          202: 'ataque_xss'
+        },
+        ppsHoras: -50,
+        perfil: {
+          nombre: 'A'.repeat(300),
+          legajo: '  12345  '
+        }
+      };
+
+      const clean = sanitizeProgress(malicious);
+      expect(clean.estados[1]).toBe('aprobada');
+      expect((clean.estados as Record<string, unknown>)[2]).toBeUndefined();
+      expect((clean.estados as Record<string, unknown>)['abc']).toBeUndefined();
+      expect(clean.estadosElectivas[201]).toBe('regular');
+      expect((clean.estadosElectivas as Record<string, unknown>)[202]).toBeUndefined();
+      expect(clean.ppsHoras).toBe(0);
+      expect(clean.perfil?.nombre.length).toBe(100);
+      expect(clean.perfil?.legajo).toBe('12345');
+    });
+
+    it('safeSaveProgressToStorage debe sanitizar y almacenar de forma segura en localStorage', () => {
+      safeSaveProgressToStorage({
+        estados: { 1: 'aprobada' },
+        estadosElectivas: {},
+        notas: {},
+        ppsHoras: 200,
+        perfil: { nombre: 'Estudiante', legajo: '999' },
+        metasExamen: {}
+      });
+
+      const stored = getLocalProgress();
+      expect(stored.estados[1]).toBe('aprobada');
+      expect(stored.ppsHoras).toBe(200);
+      expect(stored.perfil?.nombre).toBe('Estudiante');
     });
   });
 });

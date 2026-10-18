@@ -1,4 +1,4 @@
-import type { EstadoMateria, NotaMateria, ProgresoUsuario } from '../types/plan';
+import type { EstadoMateria, NotaMateria, ProgresoUsuario, MetaExamen } from '../types/plan';
 import { 
   auth, 
   isFirebaseConfigured, 
