@@ -1,6 +1,8 @@
 import path from 'path';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import { apiRouter } from './routes/api.js';
 
@@ -9,6 +11,14 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 export const app = express();
 const PORT = Number(process.env.PORT) || 3001;
+
+// Seguridad y headers HTTP con Helmet
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
+
+// Compresión gzip / deflate para respuestas API
+app.use(compression());
 
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'],
@@ -27,9 +37,28 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 export function startServer(port = PORT) {
-  return app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`🚀 Servidor de Tracker UTN corriendo en http://localhost:${port}`);
   });
+
+  const gracefulShutdown = (signal: string) => {
+    console.log(`\n🛑 Recibida señal ${signal}. Cerrando servidor grácilmente...`);
+    server.close(() => {
+      console.log('✅ Conexiones HTTP cerradas. Proceso finalizado.');
+      process.exit(0);
+    });
+
+    // Forzar salida si tarda más de 5 segundos
+    setTimeout(() => {
+      console.error('⚠️ Cierre forzado por tiempo límite excedido.');
+      process.exit(1);
+    }, 5000).unref();
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+  return server;
 }
 
 if (process.env.NODE_ENV !== 'test') {

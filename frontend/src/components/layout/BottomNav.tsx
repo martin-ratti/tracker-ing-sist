@@ -26,6 +26,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={() => setViewMode('malla')}
+        aria-current={viewMode === 'malla' ? 'page' : undefined}
         className={`flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl active:scale-90 transition-all ${
           viewMode === 'malla'
             ? 'text-(--color-primary) font-bold'
@@ -42,6 +43,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenMenu, onOpenElectiva
       <button
         type="button"
         onClick={() => setViewMode('grafo')}
+        aria-current={viewMode === 'grafo' ? 'page' : undefined}
         className={`flex-1 py-1 px-1 flex flex-col items-center justify-center gap-0.5 rounded-xl active:scale-90 transition-all ${
           viewMode === 'grafo'
             ? 'text-(--color-primary) font-bold'

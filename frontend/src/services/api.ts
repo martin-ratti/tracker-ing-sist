@@ -1,4 +1,4 @@
-import type { ProgresoUsuario } from '../types/plan';
+import type { EstadoMateria, NotaMateria, ProgresoUsuario } from '../types/plan';
 import { 
   auth, 
   isFirebaseConfigured, 
@@ -113,8 +113,9 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(firestoreData));
         return firestoreData;
       }
-    } catch (err) {
-      console.warn('Error al cargar progreso de Firestore, probando fallback:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('Error al cargar progreso de Firestore, probando fallback:', message);
     }
   }
 
@@ -130,8 +131,9 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
         return data;
       }
-    } catch (error) {
-      console.warn('Backend no disponible, cargando desde localStorage:', error);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn('Backend no disponible, cargando desde localStorage:', message);
     }
   }
 
@@ -183,7 +185,7 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
     ...Object.keys(cloud.estados || {})
   ])).map(Number);
 
-  const mergedEstados: Record<number, any> = {};
+  const mergedEstados: Record<number, EstadoMateria> = {};
   allTroncalKeys.forEach(id => {
     const estL = local.estados?.[id] || 'pendiente';
     const estC = cloud.estados?.[id] || 'pendiente';
@@ -196,7 +198,7 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
     ...Object.keys(cloud.estadosElectivas || {})
   ])).map(Number);
 
-  const mergedElectivas: Record<number, any> = {};
+  const mergedElectivas: Record<number, EstadoMateria> = {};
   allElectivaKeys.forEach(id => {
     const estL = local.estadosElectivas?.[id] || 'pendiente';
     const estC = cloud.estadosElectivas?.[id] || 'pendiente';
@@ -209,7 +211,7 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
     ...Object.keys(cloud.notas || {})
   ])).map(Number);
 
-  const mergedNotas: Record<number, any> = {};
+  const mergedNotas: Record<number, NotaMateria> = {};
   allNotasKeys.forEach(id => {
     const notaL = local.notas?.[id];
     const notaC = cloud.notas?.[id];
@@ -217,7 +219,10 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
       // Preferir la nota más alta o con mayor detalle
       mergedNotas[id] = (notaL.nota || 0) >= (notaC.nota || 0) ? { ...notaC, ...notaL } : { ...notaL, ...notaC };
     } else {
-      mergedNotas[id] = notaL || notaC;
+      const nota = notaL || notaC;
+      if (nota) {
+        mergedNotas[id] = nota;
+      }
     }
   });
 
@@ -258,8 +263,9 @@ export async function persistProgress(progress: Partial<ProgresoUsuario>): Promi
 
   // 1. Sincronización en la nube con Firestore en tiempo real
   if (isFirebaseConfigured && auth?.currentUser?.uid) {
-    saveProgressToFirestore(auth.currentUser.uid, updated).catch(err => {
-      console.warn('No se pudo persistir en Firestore (offline):', err);
+    saveProgressToFirestore(auth.currentUser.uid, updated).catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('No se pudo persistir en Firestore (offline):', message);
     });
   }
 
@@ -297,8 +303,9 @@ export async function clearProgress(): Promise<void> {
   };
 
   if (isFirebaseConfigured && auth?.currentUser?.uid) {
-    saveProgressToFirestore(auth.currentUser.uid, emptyProgress).catch(err => {
-      console.warn('No se pudo resetear en Firestore:', err);
+    saveProgressToFirestore(auth.currentUser.uid, emptyProgress).catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('No se pudo resetear en Firestore:', message);
     });
   }
 

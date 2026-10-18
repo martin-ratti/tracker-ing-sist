@@ -3,3 +3,4 @@ export * from './BottomNav';
 export * from './ThemeSelector';
 export * from './Toast';
 export * from './ErrorBoundary';
+export * from './MobileDrawer';

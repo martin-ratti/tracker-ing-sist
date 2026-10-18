@@ -57,9 +57,13 @@ export const AuthModal: React.FC = () => {
       if (countLocal > 0) {
         await persistProgress(localData);
       }
-    } catch (err: any) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError(err.message || 'Error al autenticarse con Google');
+    } catch (err: unknown) {
+      const errCode = typeof err === 'object' && err !== null && 'code' in err
+        ? String((err as { code: unknown }).code)
+        : undefined;
+      if (errCode !== 'auth/popup-closed-by-user') {
+        const message = err instanceof Error ? err.message : 'Error al autenticarse con Google';
+        setError(message);
       }
     } finally {
       setLoading(false);
@@ -94,8 +98,9 @@ export const AuthModal: React.FC = () => {
       if (countLocal > 0) {
         await persistProgress(localData);
       }
-    } catch (err: any) {
-      setError(err.message || 'Ocurrió un error. Intenta nuevamente.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Ocurrió un error. Intenta nuevamente.';
+      setError(message);
     } finally {
       setLoading(false);
     }

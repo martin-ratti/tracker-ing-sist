@@ -1,0 +1,18 @@
+{
+  "name": "Tracker UTN Sistemas · Plan 2023",
+  "short_name": "Tracker ISI",
+  "description": "Seguimiento interactivo de correlatividades, avance académico, finales y títulos para Ingeniería en Sistemas (UTN FRRo).",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#090e17",
+  "theme_color": "#090e17",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

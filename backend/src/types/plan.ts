@@ -2,7 +2,7 @@ export type EstadoMateria = 'pendiente' | 'regular' | 'aprobada';
 
 export interface Materia {
   id: number;
-  nombre: number | string;
+  nombre: string;
   nombreCompleto?: string;
   nivel: number;
   horas: number;

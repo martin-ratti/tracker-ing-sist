@@ -36,6 +36,9 @@ export const Modal: React.FC<ModalProps> = ({
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
+  const titleId = React.useId();
+  const subtitleId = React.useId();
+
   if (!isMounted) return null;
 
   return (
@@ -51,6 +54,8 @@ export const Modal: React.FC<ModalProps> = ({
         ref={modalRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={subtitle ? subtitleId : undefined}
         className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full ${maxWidth} max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col my-auto transform transition-all duration-200 ease-out ${
           isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
         }`}
@@ -59,9 +64,9 @@ export const Modal: React.FC<ModalProps> = ({
           <div className="flex items-start justify-between gap-4">
             <div>
               {badge && <div className="mb-1.5">{badge}</div>}
-              <h2 className="text-base sm:text-xl font-bold font-syne text-(--text-body)">{title}</h2>
+              <h2 id={titleId} className="text-base sm:text-xl font-bold font-syne text-(--text-body)">{title}</h2>
               {subtitle && (
-                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono mt-1">{subtitle}</p>
+                <p id={subtitleId} className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono mt-1">{subtitle}</p>
               )}
             </div>
             <button

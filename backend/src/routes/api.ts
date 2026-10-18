@@ -72,8 +72,8 @@ apiRouter.post('/auth/register', authLimiter, async (req: Request, res: Response
       token,
       user: { id: user.id, email: user.email }
     });
-  } catch (error: any) {
-    if (error.message === 'EMAIL_IN_USE') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'EMAIL_IN_USE') {
       res.status(409).json({ error: 'El correo electrónico ya se encuentra registrado.' });
       return;
     }
@@ -98,8 +98,8 @@ apiRouter.post('/auth/login', authLimiter, async (req: Request, res: Response) =
       token,
       user: { id: user.id, email: user.email }
     });
-  } catch (error: any) {
-    if (error.message === 'INVALID_CREDENTIALS') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'INVALID_CREDENTIALS') {
       res.status(401).json({ error: 'Credenciales inválidas. Verifica tu correo y contraseña.' });
       return;
     }
