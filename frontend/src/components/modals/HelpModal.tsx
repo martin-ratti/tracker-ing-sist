@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useModalAnimation } from '../../hooks/useModalAnimation';
-import { X, HelpCircle, AlertTriangle, ExternalLink, GitFork, Sparkles, BookOpen, Network, CheckCircle2 } from 'lucide-react';
+import { X, HelpCircle, AlertTriangle, ExternalLink, GitFork, Sparkles, BookOpen, Network, CheckCircle2, Heart, Copy, Check } from 'lucide-react';
+import { DONATION_CONFIG } from '../../data/donations';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -11,6 +12,18 @@ interface HelpModalProps {
 export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
   const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
   const modalRef = useFocusTrap(isOpen);
+  const [copiedAlias, setCopiedAlias] = useState(false);
+
+  const handleCopyAlias = () => {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(DONATION_CONFIG.alias)
+        .then(() => {
+          setCopiedAlias(true);
+          setTimeout(() => setCopiedAlias(false), 2500);
+        })
+        .catch(() => {});
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -238,7 +251,47 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </a>
           </div>
 
-          {/* Módulo 9: Inspiración y Agradecimientos */}
+          {/* Módulo 9: Apoyo y Donaciones (Mercado Pago) */}
+          <div className="border-t border-(--border-color) pt-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-2.5 rounded-xl bg-(--bg-elevated) border border-(--border-color) hover:border-sky-500/40 transition-all shadow-xs">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0 text-sky-500">
+                  <Heart className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 text-left flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold font-syne text-(--text-body)">Si querés apoyar el desarrollo</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold border border-sky-500/20 shrink-0">
+                      Mercado Pago
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono leading-tight mt-0.5">
+                    Alias: <strong className="text-(--text-body) font-bold">{DONATION_CONFIG.alias}</strong> · {DONATION_CONFIG.titular}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyAlias}
+                aria-label="Copiar alias de Mercado Pago"
+                className="flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold px-2.5 py-1.5 rounded-lg bg-(--bg-surface) border border-(--border-color) hover:border-sky-500/40 hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0 transition-all active:scale-95 self-start sm:self-center"
+              >
+                {copiedAlias ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    <span className="text-emerald-500">¡Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copiar Alias</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Módulo 10: Inspiración y Agradecimientos */}
           <div className="border-t border-(--border-color) pt-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] text-slate-500 dark:text-slate-400 font-mono">
             <span>
               Inspirado en el{' '}

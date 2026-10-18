@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useModalAnimation } from '../../hooks/useModalAnimation';
-import { X, User, Check, GraduationCap, Download, Upload, Database } from 'lucide-react';
+import { X, User, Check, GraduationCap, Download, Upload, Database, Heart, Copy } from 'lucide-react';
+import { DONATION_CONFIG } from '../../data/donations';
 
 export const ProfileModal: React.FC = () => {
   const { 
@@ -16,7 +17,24 @@ export const ProfileModal: React.FC = () => {
   } = useTracker();
   const [nombre, setNombre] = useState(perfil.nombre || '');
   const [legajo, setLegajo] = useState(perfil.legajo || '');
+  const [copiedAlias, setCopiedAlias] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCopyAlias = () => {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(DONATION_CONFIG.alias)
+        .then(() => {
+          setCopiedAlias(true);
+          showToast('💙 ¡Alias copiado! Muchas gracias por colaborar', 'success');
+          setTimeout(() => setCopiedAlias(false), 2500);
+        })
+        .catch(() => {
+          showToast(`Alias: ${DONATION_CONFIG.alias}`, 'info');
+        });
+    } else {
+      showToast(`Alias: ${DONATION_CONFIG.alias}`, 'info');
+    }
+  };
 
   const { isMounted, isVisible } = useModalAnimation(profileModalOpen, 200);
   const modalRef = useFocusTrap(profileModalOpen);
@@ -209,6 +227,50 @@ export const ProfileModal: React.FC = () => {
                 className="hidden"
                 onChange={handleFileUpload}
               />
+            </div>
+          </div>
+
+          {/* Sección de Apoyo y Donaciones (Mercado Pago - Compacto) */}
+          <div className="pt-3 border-t border-(--border-color) space-y-1.5">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Si querés apoyar el desarrollo del proyecto:
+            </p>
+            <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-(--bg-elevated) border border-(--border-color) hover:border-sky-500/30 transition-colors">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0 text-sky-500">
+                  <Heart className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-syne font-bold text-xs text-(--text-body)">Apoyá el Tracker</span>
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400">
+                      Mercado Pago
+                    </span>
+                  </div>
+                  <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                    Alias: <strong className="text-(--text-body) font-bold">{DONATION_CONFIG.alias}</strong> · {DONATION_CONFIG.titular}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCopyAlias}
+                aria-label="Copiar alias de Mercado Pago"
+                className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-(--bg-surface) hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-(--border-color) hover:border-sky-500/40 font-mono text-[11px] font-bold transition-all shrink-0 active:scale-95"
+              >
+                {copiedAlias ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    <span className="text-emerald-500">¡Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copiar Alias</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

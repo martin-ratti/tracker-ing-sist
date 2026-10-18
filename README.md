@@ -293,6 +293,22 @@ El repositorio cuenta con una suite completa de documentación técnica estructu
 
 ---
 
+## 💙 Apoyo al Proyecto y Donaciones
+
+El **Tracker UTN Sistemas** es un desarrollo de código abierto libre y gratuito para toda la comunidad académica de Ingeniería en Sistemas de Información.
+
+Si la herramienta te resulta de utilidad para organizar tu cursada, correlatividades y exámenes finales, podés colaborar voluntariamente con su mantenimiento:
+
+| Medio | Datos |
+| :--- | :--- |
+| **Plataforma** | **Mercado Pago** |
+| **Alias** | `epi321` |
+| **Titular** | Martín Ratti |
+
+¡Cualquier colaboración de la comunidad es enormemente agradecida y ayuda a mantener el proyecto activo, actualizado y libre de anuncios invasivos!
+
+---
+
 ## 📜 Licencia y Créditos
 
 - Desarrollado por **Martín Ratti**.

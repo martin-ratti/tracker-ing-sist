@@ -97,6 +97,19 @@ describe('Componentes Modales', () => {
       await user.keyboard('{Escape}');
       expect(handleClose).toHaveBeenCalledTimes(2);
     });
+
+    it('debe mostrar la sección de donación y permitir copiar el alias de Mercado Pago', async () => {
+      const user = userEvent.setup();
+      render(<HelpModal isOpen={true} onClose={() => {}} />);
+      
+      expect(screen.getByText(/apoyar el desarrollo/i)).toBeInTheDocument();
+      expect(screen.getByText('epi321')).toBeInTheDocument();
+
+      const copyBtn = screen.getByRole('button', { name: /Copiar alias de Mercado Pago/i });
+      expect(copyBtn).toBeInTheDocument();
+      await user.click(copyBtn);
+      expect(await screen.findByText(/¡Copiado!/i)).toBeInTheDocument();
+    });
   });
 
   describe('TitlesModal', () => {
@@ -199,6 +212,24 @@ describe('Componentes Modales', () => {
       });
       const validFile = new File([validJson], 'backup.json', { type: 'application/json' });
       await user.upload(fileInput, validFile);
+    });
+
+    it('debe mostrar la sección de Mercado Pago y permitir copiar el alias', async () => {
+      const user = userEvent.setup();
+      render(
+        <TrackerProvider>
+          <ProfileModalWrapper />
+        </TrackerProvider>
+      );
+
+      await user.click(screen.getByRole('button', { name: /Abrir Perfil/i }));
+
+      expect(screen.getByText(/Apoyá el Tracker/i)).toBeInTheDocument();
+      expect(screen.getByText('epi321')).toBeInTheDocument();
+
+      const copyBtn = screen.getByRole('button', { name: /Copiar alias de Mercado Pago/i });
+      await user.click(copyBtn);
+      expect(await screen.findByText(/¡Copiado!/i)).toBeInTheDocument();
     });
   });
 
