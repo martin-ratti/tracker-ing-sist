@@ -40,7 +40,12 @@ tracker-ing-sist/
 ├── GEMINI.md                       # Este documento de contexto
 ├── README.md                       # Documentación principal en español
 │
-├── docs/                           # Documentos oficiales digitalizados de UTN FRRo
+├── docs/                           # Documentación técnica (Diátaxis) y cartillas oficiales
+│   ├── README.md                   # Índice maestro de documentación
+│   ├── tutorials/                  # Tutoriales prácticos (primeros pasos)
+│   ├── how-to/                     # Guías prácticas (materias, calendario, tests, deploy)
+│   ├── reference/                  # Referencia técnica (tipos, API REST, contextos)
+│   ├── explanation/                # Explicaciones de diseño (cascada, merge offline-first, WCAG)
 │   ├── isi-a4-plan-2023-gradiente-utn-frro.pdf # Cartilla oficial del Plan 2023
 │   ├── electivas-plan-2023.png     # Grilla oficial de electivas
 │   └── calendario-2026-2027-gradiente.pdf # Calendario de turnos de examen

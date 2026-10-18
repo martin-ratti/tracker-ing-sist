@@ -157,7 +157,12 @@ tracker-ing-sist/
 │   ├── perfil-share.spec.ts            # Datos del alumno y enlaces compartibles
 │   ├── mobile.spec.ts                  # Emulación móvil, BottomNav y drawer táctil
 │   └── atajos-teclado.spec.ts          # Accesibilidad y atajos de teclado globales
-├── docs/                               # Documentación y cartillas oficiales de UTN FRRo
+├── docs/                               # Centro de Documentación Técnica (Diátaxis) y Cartillas
+│   ├── README.md                       # Índice maestro de documentación técnica
+│   ├── tutorials/                      # Guías de aprendizaje paso a paso (primeros pasos)
+│   ├── how-to/                         # Recetas prácticas (materias, calendario, testing, deploy)
+│   ├── reference/                      # Especificación técnica (modelo de datos, API, contextos)
+│   ├── explanation/                    # Arquitectura, correlatividades en cascada y offline-first
 │   ├── isi-a4-plan-2023-gradiente-utn-frro.pdf
 │   ├── electivas-plan-2023.png
 │   └── calendario-2026-2027-gradiente.pdf
@@ -248,9 +253,16 @@ pnpm test:e2e
 
 ---
 
-## 📚 Documentación Oficial Incluida
+## 📚 Documentación del Proyecto
 
-En la carpeta [`docs/`](./docs) se encuentran digitalizados los documentos oficiales de referencia:
+El repositorio cuenta con una suite completa de documentación técnica estructurada bajo el marco **[Diátaxis](https://diataxis.fr/)** en la carpeta [`docs/`](./docs):
+- 📘 [**Centro de Documentación Técnica (`docs/README.md`)**](./docs/README.md): Índice maestro con mapa de navegación entre tutoriales, guías prácticas, referencias de código y arquitectura.
+  - 🎓 [**Primeros Pasos**](./docs/tutorials/primeros-pasos.md): Guía de instalación, entorno de desarrollo y primera contribución.
+  - 🛠️ [**Guías Prácticas (How-To)**](./docs/how-to/): Agregar materias y electivas, actualizar calendarios, testing y despliegue a Firebase.
+  - 📖 [**Referencia Técnica**](./docs/reference/): Modelo de datos TypeScript, especificación API REST, contextos de React y monorepo.
+  - 💡 [**Explicaciones de Arquitectura**](./docs/explanation/): Motor de correlatividades y cascada, persistencia offline-first y diseño visual WCAG 2.2 AA.
+
+### 🏛️ Cartillas y Material Oficial UTN FRRo
 - 📄 [**Plan 2023 Gradiente UTN FRRo (PDF)**](./docs/isi-a4-plan-2023-gradiente-utn-frro.pdf): Cartilla A4 con las 36 materias troncales, Seminario Integrador ADUSI y correlatividades oficiales.
 - 🖼️ [**Grilla Oficial de Asignaturas Electivas Plan 2023**](./docs/electivas-plan-2023.png): Tabla de materias electivas organizadas por nivel, tipo de dictado y horas anuales.
 - 📅 [**Calendario Académico Oficial 2026-2027 (PDF)**](./docs/calendario-2026-2027-gradiente.pdf): Fechas de mesas de examen, recesos e inscripciones.
