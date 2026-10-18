@@ -130,6 +130,7 @@ export interface MetaExamen {
   fechaEstimada?: string;   // Fecha estimada del examen
   llamado?: number;         // 1 o 2 (para turnos con doble llamado)
   comentario?: string;      // Notas sobre la preparación
+  notificado7Dias?: boolean; // Flag para evitar duplicar alertas de Resend
 }
 ```
 

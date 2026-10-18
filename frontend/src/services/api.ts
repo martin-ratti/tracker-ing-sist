@@ -107,6 +107,19 @@ export async function checkAuthMe(): Promise<UserAuth | null> {
   return getStoredUser();
 }
 
+export async function sendWelcomeEmailApi(email: string, name?: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/mail/welcome', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ email, name })
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 // --- API PROGRESO Y SANITIZACIÓN (CWE-502 / CWE-79) ---
 
 const VALID_ESTADOS: ReadonlySet<EstadoMateria> = new Set(['pendiente', 'regular', 'aprobada']);
@@ -202,7 +215,8 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
           turnoNombre: typeof m.turnoNombre === 'string' ? m.turnoNombre.slice(0, 100) : '',
           fechaEstimada: typeof m.fechaEstimada === 'string' ? m.fechaEstimada.slice(0, 30) : undefined,
           llamado: typeof m.llamado === 'number' && Number.isFinite(m.llamado) ? Math.min(Math.max(1, Math.floor(m.llamado)), 5) : undefined,
-          comentario: typeof m.comentario === 'string' ? m.comentario.slice(0, 500) : undefined
+          comentario: typeof m.comentario === 'string' ? m.comentario.slice(0, 500) : undefined,
+          notificado7Dias: typeof m.notificado7Dias === 'boolean' ? m.notificado7Dias : undefined
         };
       }
     }

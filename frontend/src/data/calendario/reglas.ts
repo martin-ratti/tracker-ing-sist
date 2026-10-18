@@ -1,7 +1,8 @@
 import type { TurnoExamenOficial, DiaSemana } from './types';
 
 export const REGLA_SYSACAD_EXAMEN = {
-  descripcion: 'Una vez habilitado en Sysacad, la inscripción a examen permanecerá abierta hasta las 18:00 hs del penúltimo día hábil previo a la fecha de la mesa.'
+  descripcion: 'Una vez habilitado en Sysacad, la inscripción a examen permanecerá abierta hasta las 18:00 hs del penúltimo día hábil previo a la fecha de la mesa.',
+  url: 'https://alumnos.frro.utn.edu.ar/loginAlumno.asp?refrescar'
 };
 
 export const OFFSET_DIAS: Record<DiaSemana, number> = {

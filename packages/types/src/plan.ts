@@ -45,6 +45,7 @@ export interface MetaExamen {
   fechaEstimada?: string;
   llamado?: number;
   comentario?: string;
+  notificado7Dias?: boolean;
 }
 
 export interface ProgresoUsuario {

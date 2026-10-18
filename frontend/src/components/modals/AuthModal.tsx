@@ -10,7 +10,8 @@ import {
   EyeOff, 
   Cloud, 
   AlertCircle, 
-  Loader2 
+  Loader2,
+  Bell
 } from 'lucide-react';
 
 export const AuthModal: React.FC = () => {
@@ -126,7 +127,7 @@ export const AuthModal: React.FC = () => {
                 {isRegister ? 'Crear Cuenta en la Nube' : 'Iniciar Sesión'}
               </h2>
               <p className="text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400">
-                Sincronizá tu avance en cualquier PC o celular
+                Sincronizá tu avance y recibí alertas de mesas
               </p>
             </div>
           </div>
@@ -143,6 +144,14 @@ export const AuthModal: React.FC = () => {
 
         {/* FORMULARIO DE LOGIN / REGISTRO */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto no-scrollbar">
+            {/* Aviso de recordatorios de mesas por correo */}
+            <div className="p-2.5 sm:p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-2.5 text-blue-600 dark:text-blue-300 text-xs font-mono">
+              <Bell className="w-4 h-4 shrink-0 text-blue-500 mt-0.5" />
+              <div className="leading-snug">
+                <strong>Recordatorios por correo:</strong> Te avisamos 7 días antes de tus mesas para que no te olvides de anotarte en Sysacad.
+              </div>
+            </div>
+
             {error && (
               <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-start gap-2 text-rose-300 text-xs font-mono">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />

@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import { apiRouter } from './routes/api.js';
+import { startReminderScheduler, stopReminderScheduler } from './services/reminderService.js';
 
 dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
@@ -39,10 +40,12 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 export function startServer(port = PORT) {
   const server = app.listen(port, () => {
     console.log(`🚀 Servidor de Tracker UTN corriendo en http://localhost:${port}`);
+    startReminderScheduler();
   });
 
   const gracefulShutdown = (signal: string) => {
     console.log(`\n🛑 Recibida señal ${signal}. Cerrando servidor grácilmente...`);
+    stopReminderScheduler();
     server.close(() => {
       console.log('✅ Conexiones HTTP cerradas. Proceso finalizado.');
       process.exit(0);

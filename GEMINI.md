@@ -22,6 +22,7 @@ Este documento proporciona las directrices, convenciones y mapa arquitectónico 
 | **Iconos & Accesibilidad** | `lucide-react`, Custom Focus Trap (`useFocusTrap.ts`), WCAG 2.2 AA |
 | **Linter** | `oxlint` (Oxc compiler stack, 0 warnings policy) |
 | **Backend (Opcional)** | Node.js, Express, TypeScript, JWT, Bcrypt |
+| **Emails Transaccionales** | Resend SDK (Emails de bienvenida y recordatorios de exámenes a 7 días) |
 | **Nube & Hosting** | Firebase Hosting, Firebase Auth, Cloud Firestore |
 
 ---
@@ -54,7 +55,9 @@ tracker-ing-sist/
 │   ├── src/
 │   │   ├── auth/                   # Autenticación JWT y middlewares
 │   │   ├── data/                   # Catálogo de materias
-│   │   ├── routes/                 # Endpoints /api/plan, /api/progress, /api/auth
+│   │   ├── routes/                 # Endpoints /api/plan, /api/progress, /api/auth, /api/mail/*
+│   │   ├── services/               # emailService.ts (Resend) y reminderService.ts (alertas 7 días)
+│   │   ├── scripts/                # testEmail.ts (prueba directa de correos con Resend)
 │   │   └── server.ts
 │   └── package.json
 │
@@ -119,11 +122,12 @@ pnpm dev              # Levanta backend y frontend concurrentemente
 pnpm dev:frontend     # Solo cliente Vite (puerto 5173)
 
 # Calidad, Pruebas y Compilación
-pnpm lint             # Oxlint sobre packages/types, frontend y backend (0 warnings, 0 errores en 97 archivos)
-pnpm test             # Ejecuta los 241 tests unitarios y de integración (46 backend y 195 frontend)
+pnpm lint             # Oxlint sobre packages/types, frontend y backend (0 warnings, 0 errores en 106 archivos)
+pnpm test             # Ejecuta los 262 tests unitarios y de integración (62 backend y 200 frontend)
 pnpm test:coverage    # Reporte de cobertura V8 consolidada (99.05% backend, 87.3% frontend)
 pnpm test:e2e         # Pruebas End-to-End con Playwright (23 escenarios: 18 Desktop y 5 Mobile, 100% aprobados)
 pnpm build            # Compila TypeScript en types/backend y Vite en frontend
+pnpm --filter tracker-backend test:email # Prueba de envío de correos con Resend a la casilla de revisión
 
 # Despliegue y CI/CD
 pnpm deploy           # Compila y despliega en Firebase Hosting

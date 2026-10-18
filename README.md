@@ -33,7 +33,13 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
   - Integración del Calendario Académico Oficial de UTN FRRo (`docs/calendario-2026-2027-gradiente.pdf`).
   - Selección de turno de examen (16 turnos oficiales entre Feb 2026 y Mar 2027) para cualquier materia regular.
   - Cuenta regresiva automática en días ("Faltan 12 días", "¡Es hoy!").
-  - Modal del Calendario Académico (`CalendarModal.tsx`) con pestañas para "Mis Metas Activas", lista cronológica de turnos y directivas de Sysacad (cierre 18:00 hs del penúltimo día hábil).
+  - Modal del Calendario Académico (`CalendarModal.tsx`) con pestañas para "Mis Metas Activas", lista cronológica de turnos, acceso directo a Sysacad Alumnos y directivas de cierre (18:00 hs del penúltimo día hábil).
+
+- 📬 **Notificaciones Automáticas por Correo (Resend):**
+  - **Email de bienvenida institucional:** Diseño HTML responsivo y personalizado al registrarse o iniciar sesión en el Tracker.
+  - **Recordatorios de exámenes:** Alerta automática por correo **7 días antes** de cada mesa de examen agendada con enlace directo a Sysacad Alumnos (`https://alumnos.frro.utn.edu.ar/loginAlumno.asp?refrescar`), fecha exacta, llamado y checklist previo al examen.
+  - **Scheduler en segundo plano:** Tarea periódica diaria en el backend Express para revisar metas y evitar duplicación de notificaciones.
+  - **Script de prueba:** Ejecución de pruebas de envío con `pnpm --filter tracker-backend test:email`.
 
 - 📄 **Exportar a PDF / Analítico Imprimible Oficial:**
   - Ficha formal con membrete oficial de UTN Facultad Regional Rosario.

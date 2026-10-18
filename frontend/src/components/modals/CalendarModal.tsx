@@ -996,6 +996,17 @@ export const CalendarModal: React.FC = () => {
                 <p className="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
                   {REGLA_SYSACAD_EXAMEN.descripcion}
                 </p>
+                <div className="pt-1">
+                  <a
+                    href="https://alumnos.frro.utn.edu.ar/loginAlumno.asp?refrescar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline"
+                  >
+                    <span>Abrir Sysacad Alumnos</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
 
               {/* Lista de Turnos */}

@@ -5,6 +5,8 @@ import { registerUser, loginUser, getUserById } from '../auth/userService.js';
 import { signToken } from '../auth/jwtService.js';
 import { optionalAuthMiddleware, requireAuthMiddleware, AuthenticatedRequest } from '../auth/authMiddleware.js';
 import { createRateLimiter } from '../middleware/rateLimiter.js';
+import { sendWelcomeEmail } from '../services/emailService.js';
+import { checkAndSendDueReminders } from '../services/reminderService.js';
 
 export const apiRouter = Router();
 
@@ -67,6 +69,12 @@ apiRouter.post('/auth/register', authLimiter, async (req: Request, res: Response
   try {
     const user = await registerUser(email, password);
     const token = signToken({ userId: user.id, email: user.email });
+
+    // Enviar correo de bienvenida en segundo plano
+    sendWelcomeEmail({ to: user.email }).catch(err => {
+      console.warn('Error en segundo plano al enviar bienvenida tras registro:', err);
+    });
+
     res.status(201).json({
       success: true,
       token,
@@ -182,3 +190,39 @@ apiRouter.post('/progress/reset', optionalAuthMiddleware, (req: AuthenticatedReq
   const reset = resetProgress(userId);
   res.json({ success: true, data: reset });
 });
+
+// --- RUTAS DE CORREO (RESEND) ---
+
+apiRouter.post('/mail/welcome', authLimiter, optionalAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+  const targetEmail = (req.body?.email || req.user?.email || '').trim();
+  const name = typeof req.body?.name === 'string' ? req.body.name.slice(0, 100) : undefined;
+
+  if (!targetEmail || !targetEmail.includes('@')) {
+    res.status(400).json({ error: 'Dirección de correo electrónico requerida.' });
+    return;
+  }
+
+  try {
+    const result = await sendWelcomeEmail({ to: targetEmail, name });
+    res.json({
+      success: result.success,
+      recipient: result.recipient,
+      id: result.id,
+      error: result.error
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: 'Error al enviar correo de bienvenida.', details: message });
+  }
+});
+
+apiRouter.post('/mail/check-reminders', requireAuthMiddleware, async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const report = await checkAndSendDueReminders();
+    res.json({ success: true, report });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: 'Error al procesar recordatorios de examen.', details: message });
+  }
+});
+

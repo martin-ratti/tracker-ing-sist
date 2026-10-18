@@ -7,7 +7,8 @@ import {
   checkAuthMe,
   loginApi,
   registerApi,
-  syncUserProgressOnAuth
+  syncUserProgressOnAuth,
+  sendWelcomeEmailApi
 } from '../services/api';
 import { 
   isFirebaseConfigured, 
@@ -78,6 +79,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
   const completeAuth = useCallback((authUser: UserAuth) => {
     setUser(authUser);
     setIsAuthModalOpen(false);
+
+    // Enviar correo de bienvenida en el primer inicio de sesión o registro
+    if (authUser.email && authUser.email.includes('@')) {
+      const welcomeKey = `utn_welcome_sent_${authUser.id}`;
+      if (!localStorage.getItem(welcomeKey)) {
+        sendWelcomeEmailApi(authUser.email).then(success => {
+          if (success) {
+            localStorage.setItem(welcomeKey, 'true');
+          }
+        }).catch(() => {});
+      }
+    }
+
     if (onUserChanged) onUserChanged();
   }, [onUserChanged]);
 

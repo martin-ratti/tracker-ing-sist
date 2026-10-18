@@ -205,3 +205,62 @@ Restablece a cero todos los estados, notas y metas del usuario.
 }
 ```
 
+---
+
+## 4. Endpoints de Correo y Notificaciones (Resend) 📬
+
+Integración con el servicio **Resend** para notificaciones transaccionales y alertas de exámenes.
+
+### `POST /api/mail/welcome`
+Envía el correo de bienvenida formateado e institucional con resumen de funcionalidades del Tracker.
+
+- **Limitador:** 10 peticiones / minuto.
+- **Autenticación:** Opcional (si está autenticado toma el email de sesión).
+- **Cuerpo de la Petición (JSON):**
+```json
+{
+  "email": "estudiante@frro.utn.edu.ar",
+  "name": "Martín"
+}
+```
+- **Respuesta Exitosa (200 OK):**
+```json
+{
+  "success": true,
+  "recipient": "estudiante@frro.utn.edu.ar",
+  "id": "01a14f7a-..."
+}
+```
+
+---
+
+### `POST /api/mail/check-reminders`
+Ejecuta la revisión de todas las metas de exámenes guardadas (`metasExamen`) y despacha alertas a los alumnos cuyas mesas se rinden en **7 días**. Incluye el enlace directo a Sysacad Alumnos (`https://alumnos.frro.utn.edu.ar/loginAlumno.asp?refrescar`).
+
+- **Autenticación:** Requerida (`Bearer <TOKEN>`).
+- **Respuesta Exitosa (200 OK):**
+```json
+{
+  "success": true,
+  "report": {
+    "checkedUsers": 12,
+    "sentReminders": 2,
+    "details": [
+      {
+        "userId": "usr_123",
+        "email": "alumno@frro.utn.edu.ar",
+        "materiaNombre": "Sistemas Operativos",
+        "fechaExamen": "Martes 24 de Noviembre de 2026",
+        "diasFaltantes": 7
+      }
+    ]
+  }
+}
+```
+
+---
+
+### ⏰ Scheduler Automático
+El servidor Express ejecuta en segundo plano un temporizador diario (`startReminderScheduler()`) que dispara automáticamente la revisión de metas cada 24 horas sin requerir invocaciones manuales.
+
+
