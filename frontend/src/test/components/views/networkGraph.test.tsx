@@ -15,6 +15,8 @@ vi.mock('vis-network/standalone', () => {
     Network: class {
       on = vi.fn((event, handler) => {
         if (event === 'click') this.clickHandler = handler;
+        if (event === 'dragStart') this.dragStartHandler = handler;
+        if (event === 'dragEnd') this.dragEndHandler = handler;
         if (event === 'oncontext') this.contextHandler = handler;
         if (event === 'stabilizationIterationsDone') this.stabilizedHandler = handler;
       });
@@ -29,7 +31,10 @@ vi.mock('vis-network/standalone', () => {
       redraw = vi.fn();
       getNodeAt = vi.fn(() => 1);
       getScale = vi.fn(() => 1);
+      getPositions = vi.fn(() => ({ 19: { x: 100, y: 200 } }));
       clickHandler: any = null;
+      dragStartHandler: any = null;
+      dragEndHandler: any = null;
       contextHandler: any = null;
       stabilizedHandler: any = null;
       constructor() {
@@ -63,57 +68,64 @@ describe('NetworkGraph Component', () => {
     expect(fitBtn).toBeInTheDocument();
     await user.click(fitBtn);
 
-    // Controles superiores: Alternar Estado y Camino Crítico
-    const botonCamino = screen.getByRole('button', { name: /Camino Crítico/i });
-    await user.click(botonCamino);
+    // Controles superiores: Interruptor Modo Libre / Jerárquico
+    const switchModoLibre = screen.getByRole('switch', { name: /Interruptor de Modo Libre/i });
+    expect(switchModoLibre).toBeInTheDocument();
+    await user.click(switchModoLibre);
 
-    const botonEstado = screen.getByRole('button', { name: /Alternar Estado/i });
-    await user.click(botonEstado);
+    // Volver a modo jerárquico
+    await user.click(switchModoLibre);
 
-    // Filtros: Atenuar Aprobadas y Cadena Crítica
+    // Filtros: Atenuar Aprobadas
     const botonAtenuar = screen.getByRole('button', { name: /Atenuar Aprobadas/i });
     await user.click(botonAtenuar);
 
-    const botonCadena = screen.getByRole('button', { name: /Cadena Crítica/i });
-    await user.click(botonCadena);
+    // Probar controles de dirección (Horizontal / Vertical) y Reset Layout
+    const botonDireccion = screen.getByTitle(/Orientación actual:/i);
+    await user.click(botonDireccion);
 
-    // Debe mostrar banner de Cadena Crítica con leyenda de regularidad y aprobación
-    expect(screen.getByText(/Cadena Crítica: Proyecto Final/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Regularidad/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Aprobación/i).length).toBeGreaterThanOrEqual(1);
+    const botonResetLayout = screen.getByTitle(/Restablecer Disposición \/ Layout/i);
+    await user.click(botonResetLayout);
 
-    // Probar cierre de cadena crítica con su botón X
-    const botonCerrarCadena = screen.getByTitle(/Desactivar filtro de cadena crítica/i);
-    await user.click(botonCerrarCadena);
-    expect(screen.queryByTitle(/Desactivar filtro de cadena crítica/i)).not.toBeInTheDocument();
+    // Buscar una materia en la barra flotante para enfocarla y activar cadena crítica
+    const searchInput = screen.getByLabelText(/Buscar materia para enfocar en el grafo/i);
+    await user.type(searchInput, 'Base de Datos');
+    const opcion = await screen.findByText(/Base de Datos/i);
+    await user.click(opcion);
 
-    // Cambiar a modo Camino Crítico y hacer clic en una materia (ej. #19 Base de Datos)
-    await user.click(botonCamino);
+    // Debe mostrar inspector con Base de Datos
+    expect(screen.getAllByText(/Base de Datos/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/3º Nivel/i)).toBeInTheDocument();
+
+    // Clic en botón Abrir Ficha del inspector
+    const botonFicha = screen.getByRole('button', { name: /Abrir Ficha/i });
+    await user.click(botonFicha);
+
+    // Clic simple en nodo sobre el grafo -> alterna estado directamente
     if (mockNetworkInstance?.clickHandler) {
       act(() => {
         mockNetworkInstance.clickHandler({ nodes: ['19'] });
       });
     }
 
-    // Debe mostrar banner de Camino Crítico con desglose de regularidad y aprobación
-    expect(screen.getByText(/Base de Datos/i)).toBeInTheDocument();
-    expect(screen.getByText(/Correlativas:/i)).toBeInTheDocument();
-    expect(screen.getByText(/Posteriores:/i)).toBeInTheDocument();
-
-    // Clic en botón Ficha
-    const botonFicha = screen.getByRole('button', { name: /^Ficha$/i });
-    await user.click(botonFicha);
-
-    // Clic en botón Restablecer vista completa
-    const botonResetVista = screen.getByTitle(/Restablecer vista completa/i);
-    await user.click(botonResetVista);
+    // Arrastre iniciado (dragStart) y finalizado (dragEnd) -> congela fondo y gestiona layout
+    if (mockNetworkInstance?.dragStartHandler) {
+      act(() => {
+        mockNetworkInstance.dragStartHandler({ nodes: ['19'] });
+      });
+    }
+    if (mockNetworkInstance?.dragEndHandler) {
+      act(() => {
+        mockNetworkInstance.dragEndHandler({ nodes: ['19'] });
+      });
+    }
 
     // Probar redimensionamiento de ventana
     act(() => {
       window.dispatchEvent(new Event('resize'));
     });
 
-    // Resetear foco de camino crítico
+    // Resetear foco al hacer clic en fondo
     if (mockNetworkInstance?.clickHandler) {
       act(() => {
         mockNetworkInstance.clickHandler({ nodes: [] });

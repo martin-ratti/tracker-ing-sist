@@ -3,10 +3,22 @@ import { Network } from 'vis-network/standalone';
 import { DataSet } from 'vis-data/standalone';
 import { useTracker } from '../../context/TrackerContext';
 import { useTheme } from '../../context/ThemeContext';
-import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../../data/plan2023';
-import { ZoomIn, ZoomOut, Maximize2, X, Compass, MousePointerClick, Eye, EyeOff, Sparkles } from 'lucide-react';
-
+import { 
+  ZoomIn, 
+  ZoomOut, 
+  Maximize2, 
+  Eye, 
+  EyeOff, 
+  ArrowRight, 
+  ArrowDown, 
+  RotateCcw,
+  X
+} from 'lucide-react';
 import type { Node as VisBaseNode, Edge as VisBaseEdge } from 'vis-network/standalone';
+import { MATERIAS_GRAFO, buildDependenciesTree } from './graph/graphDependencies';
+import { computeNodeVisualConfig, computeEdgeVisualConfig } from './graph/graphStyles';
+import { GraphSearchBar } from './graph/GraphSearchBar';
+import { GraphNodeInspector } from './graph/GraphNodeInspector';
 
 interface VisNode extends VisBaseNode {
   id: number;
@@ -19,24 +31,13 @@ interface VisEdge extends VisBaseEdge {
   tipo: 'regular' | 'aprobada';
 }
 
-const MATERIAS_GRAFO = MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo);
-
-// Materias troncales de la columna vertebral que conducen a Proyecto Final (#36)
-const CADENA_CRITICA_IDS = new Set<number>([
-  6,  // Algoritmos y Estructuras de Datos
-  8,  // Sistemas y Procesos de Negocio
-  5,  // Lógica y Estructuras Discretas
-  13, // Sintaxis y Semántica de los Lenguajes
-  14, // Paradigmas de Programación
-  16, // Análisis de Sistemas de Información
-  19, // Base de Datos
-  20, // Desarrollo de Software
-  23, // Diseño de Sistemas de Información
-  25, // Ingeniería y Calidad de Software
-  26, // Redes de Datos
-  30, // Administración de Sistemas de Información
-  36  // Proyecto Final
-]);
+import {
+  STORAGE_POSITIONS_KEY,
+  STORAGE_FREE_MODE_KEY,
+  getCanonicalGraphPositions,
+  isValidPositions,
+  loadSavedPositions
+} from './graph/graphPositions';
 
 export const NetworkGraph: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,8 +45,20 @@ export const NetworkGraph: React.FC = () => {
   const nodesDatasetRef = useRef<DataSet<VisNode> | null>(null);
   const edgesDatasetRef = useRef<DataSet<VisEdge> | null>(null);
 
-  const [interactionMode, setInteractionMode] = useState<'estado' | 'camino'>('estado');
-  const interactionModeRef = useRef<'estado' | 'camino'>('estado');
+  const [isFreeMode, setIsFreeMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(STORAGE_FREE_MODE_KEY) === 'true';
+  });
+  const isFreeModeRef = useRef<boolean>(isFreeMode);
+  useEffect(() => {
+    isFreeModeRef.current = isFreeMode;
+  }, [isFreeMode]);
+
+  const [graphDirection, setGraphDirection] = useState<'UD' | 'LR'>('UD');
+  const graphDirectionRef = useRef<'UD' | 'LR'>(graphDirection);
+  useEffect(() => {
+    graphDirectionRef.current = graphDirection;
+  }, [graphDirection]);
 
   const toggleMateriaEstadoRef = useRef<(id: number) => void>(() => {});
   const setSelectedSubjectIdRef = useRef<(id: number | null) => void>(() => {});
@@ -57,22 +70,17 @@ export const NetworkGraph: React.FC = () => {
     estados,
     edgeMode,
     toggleMateriaEstado,
+    setEstadoDirecto,
     esMateriaCursable,
     esMateriaRendible,
     setSelectedSubjectId,
     focusedSubjectId,
     setFocusedSubjectId,
     dimApproved,
-    setDimApproved,
-    criticalChainActive,
-    setCriticalChainActive
+    setDimApproved
   } = useTracker();
 
   const { themeConfig, colorMode } = useTheme();
-
-  useEffect(() => {
-    interactionModeRef.current = interactionMode;
-  }, [interactionMode]);
 
   useEffect(() => {
     toggleMateriaEstadoRef.current = toggleMateriaEstado;
@@ -86,315 +94,77 @@ export const NetworkGraph: React.FC = () => {
     setFocusedSubjectIdRef.current = setFocusedSubjectId;
   }, [setFocusedSubjectId]);
 
-  // Cálculo de dependencias (Camino Crítico: correlativas y posteriores clasificadas por regularidad y aprobación)
+  // Cálculo de dependencias delegado
   const dependenciesTree = useMemo(() => {
-    if (!focusedSubjectId) return null;
-
-    const ancestors = new Set<number>();
-    const ancestorsRegular = new Set<number>();
-    const ancestorsAprobada = new Set<number>();
-
-    const descendants = new Set<number>();
-    const descendantsRegular = new Set<number>();
-    const descendantsAprobada = new Set<number>();
-
-    // 1. Ancestros (Correlativas previas)
-    function traceAncestors(currId: number, isApprovalRequired: boolean) {
-      const m = MATERIAS_MAP[currId];
-      if (!m) return;
-
-      ancestors.add(currId);
-
-      if (isApprovalRequired) {
-        ancestorsAprobada.add(currId);
-        ancestorsRegular.delete(currId);
-      } else if (!ancestorsAprobada.has(currId)) {
-        ancestorsRegular.add(currId);
-      }
-
-      // Requisitos aprobados
-      const aprs = [
-        ...(Array.isArray(m.reqAprobada) ? m.reqAprobada : []),
-        ...(Array.isArray(m.reqRendirAprobada) ? m.reqRendirAprobada : [])
-      ];
-      aprs.forEach(r => {
-        traceAncestors(r, true);
-      });
-
-      // Requisitos regulares
-      m.reqRegular.forEach(r => {
-        traceAncestors(r, isApprovalRequired);
-      });
-    }
-
-    const focusedMateria = MATERIAS_MAP[focusedSubjectId];
-    if (focusedMateria) {
-      // Directas de aprobación
-      const directApr = [
-        ...(Array.isArray(focusedMateria.reqAprobada) ? focusedMateria.reqAprobada : []),
-        ...(Array.isArray(focusedMateria.reqRendirAprobada) ? focusedMateria.reqRendirAprobada : [])
-      ];
-      directApr.forEach(r => traceAncestors(r, true));
-
-      // Directas de regularidad
-      focusedMateria.reqRegular.forEach(r => {
-        traceAncestors(r, false);
-      });
-    }
-
-    // 2. Descendientes (Materias posteriores que destraba)
-    MATERIAS_GRAFO.forEach(candidate => {
-      const reqApr = (Array.isArray(candidate.reqAprobada) && candidate.reqAprobada.includes(focusedSubjectId)) ||
-        (Array.isArray(candidate.reqRendirAprobada) && candidate.reqRendirAprobada.includes(focusedSubjectId));
-      const reqReg = candidate.reqRegular.includes(focusedSubjectId);
-
-      if (reqApr) {
-        descendants.add(candidate.id);
-        descendantsAprobada.add(candidate.id);
-      } else if (reqReg) {
-        descendants.add(candidate.id);
-        descendantsRegular.add(candidate.id);
-      }
-    });
-
-    // Expandir descendientes transitivos
-    function expandDescendants(currId: number, isApprovalChain: boolean) {
-      MATERIAS_GRAFO.forEach(candidate => {
-        const reqApr = (Array.isArray(candidate.reqAprobada) && candidate.reqAprobada.includes(currId)) ||
-          (Array.isArray(candidate.reqRendirAprobada) && candidate.reqRendirAprobada.includes(currId));
-        const reqReg = candidate.reqRegular.includes(currId);
-
-        if (reqApr || reqReg) {
-          const nextIsApproval = isApprovalChain || reqApr;
-          descendants.add(candidate.id);
-
-          if (nextIsApproval) {
-            if (!descendantsAprobada.has(candidate.id)) {
-              descendantsAprobada.add(candidate.id);
-              descendantsRegular.delete(candidate.id);
-              expandDescendants(candidate.id, true);
-            }
-          } else {
-            if (!descendantsAprobada.has(candidate.id) && !descendantsRegular.has(candidate.id)) {
-              descendantsRegular.add(candidate.id);
-              expandDescendants(candidate.id, false);
-            }
-          }
-        }
-      });
-    }
-
-    Array.from(descendantsAprobada).forEach(id => expandDescendants(id, true));
-    Array.from(descendantsRegular).forEach(id => expandDescendants(id, false));
-
-    return {
-      ancestors,
-      ancestorsRegular,
-      ancestorsAprobada,
-      descendants,
-      descendantsRegular,
-      descendantsAprobada
-    };
+    return buildDependenciesTree(focusedSubjectId);
   }, [focusedSubjectId]);
 
-  // Función pura para obtener configuración visual de un nodo según estado, tema y camino crítico
+  // Cálculo dinámico del largo de cada botón según el texto de las materias (IBM Plex Mono 13px)
+  // Ancho aprox = caracteres * 8.2px + 28px padding + 4px borde
+  const maxNodeWidth = useMemo(() => {
+    const maxChars = Math.max(...MATERIAS_GRAFO.map(m => m.nombre.length));
+    return Math.ceil(maxChars * 8.2 + 32); // ~172px para "Gestión Gerencial"
+  }, []);
+
+  const nodeHeight = 38;
+
+  // Separación calculada para garantizar holgura visual óptima (espacio libre real entre tarjetas)
+  const HORIZONTAL_GAP = 55; // Píxeles de espacio libre garantizados entre materias del mismo año en horizontal
+  const VERTICAL_GAP = 34;   // Píxeles de espacio libre vertical garantizados
+
+  const spacingConfig = useMemo(() => {
+    return {
+      UD: {
+        // En modo vertical: materias del mismo año van en fila horizontal
+        // nodeSpacing = ancho de tarjeta + margen horizontal libre
+        nodeSpacing: maxNodeWidth + HORIZONTAL_GAP, // ~227px
+        levelSeparation: 155, // separación vertical entre años (conservada a gusto del usuario)
+        treeSpacing: maxNodeWidth + HORIZONTAL_GAP + 15 // ~242px
+      },
+      LR: {
+        // En modo horizontal: materias del mismo año van en columna vertical
+        // nodeSpacing = alto de tarjeta + margen vertical libre
+        nodeSpacing: nodeHeight + VERTICAL_GAP, // ~72px
+        levelSeparation: maxNodeWidth + 95, // ~267px (separación horizontal entre columnas de años)
+        treeSpacing: 180
+      }
+    };
+  }, [maxNodeWidth]);
+
   const getNodeVisualConfig = useCallback((m: (typeof MATERIAS_GRAFO)[0]) => {
-    const est = estados[m.id] || 'pendiente';
     const cursable = esMateriaCursable(m);
     const rendible = esMateriaRendible(m);
+    return computeNodeVisualConfig(
+      m,
+      estados,
+      cursable,
+      rendible,
+      dependenciesTree,
+      focusedSubjectId,
+      themeConfig,
+      colorMode,
+      false,
+      dimApproved
+    );
+  }, [estados, esMateriaCursable, esMateriaRendible, dependenciesTree, focusedSubjectId, themeConfig, colorMode, dimApproved]);
 
-    let bg = themeConfig.graph.pendiente.bg;
-    let border = themeConfig.graph.pendiente.border;
-    let fontColor = themeConfig.graph.pendiente.font;
-    let bw = 1.5;
-    let shadowColor = colorMode === 'light' ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.5)';
-    let shadowSize = 8;
-
-    if (dependenciesTree) {
-      const isSelf = m.id === focusedSubjectId;
-      const isAncestorApr = dependenciesTree.ancestorsAprobada.has(m.id);
-      const isAncestorReg = dependenciesTree.ancestorsRegular.has(m.id);
-      const isDescendantApr = dependenciesTree.descendantsAprobada.has(m.id);
-      const isDescendantReg = dependenciesTree.descendantsRegular.has(m.id);
-      const inChain = isSelf || isAncestorApr || isAncestorReg || isDescendantApr || isDescendantReg;
-
-      if (!inChain) {
-        bg = colorMode === 'light' ? '#f8fafc' : '#080c16';
-        border = colorMode === 'light' ? '#cbd5e1' : '#141d2f';
-        fontColor = colorMode === 'light' ? '#94a3b8' : '#334155';
-        bw = 1;
-        shadowSize = 0;
-        shadowColor = 'transparent';
-      } else if (isSelf) {
-        bg = themeConfig.graph.cursable.bg;
-        border = colorMode === 'light' ? '#0f172a' : '#ffffff';
-        fontColor = colorMode === 'light' ? '#0f172a' : '#ffffff';
-        bw = 3.5;
-        shadowSize = 20;
-        shadowColor = colorMode === 'light' ? 'rgba(15,23,42,0.25)' : 'rgba(255,255,255,0.75)';
-      } else if (isAncestorApr || isDescendantApr) {
-        // Correlativa o posterior con Aprobación (Verde / Aprobada)
-        bg = themeConfig.graph.aprobada.bg;
-        border = themeConfig.graph.aprobada.border;
-        fontColor = themeConfig.graph.aprobada.font;
-        bw = 2.6;
-        shadowSize = 14;
-        shadowColor = themeConfig.graph.aprobada.shadow;
-      } else if (isAncestorReg || isDescendantReg) {
-        // Correlativa o posterior con Regularidad (Ámbar / Regular)
-        bg = themeConfig.graph.regular.bg;
-        border = themeConfig.graph.regular.border;
-        fontColor = themeConfig.graph.regular.font;
-        bw = 2.6;
-        shadowSize = 14;
-        shadowColor = themeConfig.graph.regular.shadow;
-      }
-    } else if (criticalChainActive) {
-      const inCritical = CADENA_CRITICA_IDS.has(m.id);
-      if (!inCritical) {
-        bg = colorMode === 'light' ? '#f8fafc' : '#080c16';
-        border = colorMode === 'light' ? '#e2e8f0' : '#141d2f';
-        fontColor = colorMode === 'light' ? '#94a3b8' : '#334155';
-        bw = 1;
-        shadowSize = 0;
-        shadowColor = 'transparent';
-      } else if (m.id === 36) {
-        bg = colorMode === 'light' ? '#fef9c3' : '#382502';
-        border = '#eab308';
-        fontColor = colorMode === 'light' ? '#854d0e' : '#fef08a';
-        bw = 3.5;
-        shadowColor = 'rgba(234,179,8,0.6)';
-        shadowSize = 20;
-      } else if (est === 'aprobada') {
-        bg = themeConfig.graph.aprobada.bg;
-        border = '#10b981';
-        fontColor = themeConfig.graph.aprobada.font;
-        bw = 2.8;
-        shadowColor = 'rgba(16,185,129,0.4)';
-        shadowSize = 14;
-      } else if (est === 'regular') {
-        bg = themeConfig.graph.regular.bg;
-        border = '#f59e0b';
-        fontColor = themeConfig.graph.regular.font;
-        bw = 2.8;
-        shadowColor = 'rgba(245,158,11,0.45)';
-        shadowSize = 14;
-      } else if (cursable) {
-        bg = themeConfig.graph.cursable.bg;
-        border = '#06b6d4';
-        fontColor = themeConfig.graph.cursable.font;
-        bw = 3;
-        shadowColor = 'rgba(6,182,212,0.6)';
-        shadowSize = 18;
-      } else {
-        bg = colorMode === 'light' ? '#e0f2fe' : '#071f30';
-        border = '#0284c7';
-        fontColor = colorMode === 'light' ? '#0369a1' : '#7dd3fc';
-        bw = 2.2;
-        shadowColor = 'rgba(2,132,199,0.3)';
-        shadowSize = 10;
-      }
-    } else {
-      if (est === 'aprobada') {
-        if (dimApproved) {
-          bg = colorMode === 'light' ? '#f1f5f9' : '#080d17';
-          border = colorMode === 'light' ? '#cbd5e1' : '#172236';
-          fontColor = colorMode === 'light' ? '#64748b' : '#3e4c5f';
-          bw = 1;
-          shadowColor = 'transparent';
-          shadowSize = 0;
-        } else {
-          bg = themeConfig.graph.aprobada.bg;
-          border = themeConfig.graph.aprobada.border;
-          fontColor = themeConfig.graph.aprobada.font;
-          bw = 2.2;
-          shadowColor = themeConfig.graph.aprobada.shadow;
-          shadowSize = 10;
-        }
-      } else if (est === 'regular') {
-        bg = themeConfig.graph.regular.bg;
-        border = themeConfig.graph.regular.border;
-        fontColor = themeConfig.graph.regular.font;
-        bw = 2.2;
-        shadowColor = rendible ? themeConfig.graph.regular.shadow : (colorMode === 'light' ? 'rgba(217,119,6,0.15)' : 'rgba(245,158,11,0.25)');
-        shadowSize = rendible ? 14 : 8;
-      } else if (cursable) {
-        bg = themeConfig.graph.cursable.bg;
-        border = themeConfig.graph.cursable.border;
-        fontColor = themeConfig.graph.cursable.font;
-        bw = 2.2;
-        shadowColor = themeConfig.graph.cursable.shadow;
-        shadowSize = 14;
-      }
-    }
-
-    const sig = `${themeConfig.id}_${colorMode}_${dimApproved}_${criticalChainActive}_${focusedSubjectId}_${bg}_${border}_${fontColor}_${bw}_${shadowSize}_${shadowColor}`;
-    return { bg, border, fontColor, bw, shadowColor, shadowSize, sig };
-  }, [estados, esMateriaCursable, esMateriaRendible, themeConfig, colorMode, dependenciesTree, focusedSubjectId, dimApproved, criticalChainActive]);
-
-  // Función pura para obtener configuración visual de una arista
   const getEdgeVisualConfig = useCallback((fromId: number, toId: number, tipo: 'regular' | 'aprobada') => {
-    const estFrom = estados[fromId] || 'pendiente';
-    const estTo = estados[toId] || 'pendiente';
-    const hidden = edgeMode !== 'ambos' && tipo !== edgeMode;
+    return computeEdgeVisualConfig(
+      fromId,
+      toId,
+      tipo,
+      estados,
+      edgeMode,
+      dependenciesTree,
+      focusedSubjectId,
+      themeConfig,
+      colorMode,
+      false,
+      dimApproved
+    );
+  }, [estados, edgeMode, dependenciesTree, focusedSubjectId, themeConfig, colorMode, dimApproved]);
 
-    let color = themeConfig.graph.edgeDefault || '#1e293b';
-    let width = tipo === 'aprobada' ? 2.2 : 1.4;
-
-    if (dependenciesTree) {
-      const fromInChain = fromId === focusedSubjectId || dependenciesTree.ancestors.has(fromId) || dependenciesTree.descendants.has(fromId);
-      const toInChain = toId === focusedSubjectId || dependenciesTree.ancestors.has(toId) || dependenciesTree.descendants.has(toId);
-
-      if (fromInChain && toInChain) {
-        // En camino crítico, mostrar aristas según correspondan a regularidad o aprobación
-        if (tipo === 'aprobada') {
-          color = themeConfig.graph.aprobada.border;
-          width = 3.0;
-        } else {
-          color = themeConfig.graph.regular.border;
-          width = 2.6;
-        }
-      } else {
-        color = themeConfig.graph.edgeMuted || 'rgba(15,23,42,0.06)';
-        width = 0.5;
-      }
-    } else if (criticalChainActive) {
-      const fromInCritical = CADENA_CRITICA_IDS.has(fromId);
-      const toInCritical = CADENA_CRITICA_IDS.has(toId);
-
-      if (fromInCritical && toInCritical) {
-        // En cadena crítica, mostrar aristas según correspondan a regularidad o aprobación
-        if (tipo === 'aprobada') {
-          color = themeConfig.graph.aprobada.border;
-          width = 3.2;
-        } else {
-          color = themeConfig.graph.regular.border;
-          width = 2.8;
-        }
-      } else {
-        color = colorMode === 'light' ? 'rgba(15,23,42,0.05)' : 'rgba(255,255,255,0.04)';
-        width = 0.5;
-      }
-    } else if (!hidden) {
-      if (dimApproved && estFrom === 'aprobada' && estTo === 'aprobada') {
-        color = colorMode === 'light' ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)';
-        width = 0.8;
-      } else if (tipo === 'regular') {
-        if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
-        else if (estFrom === 'regular') color = themeConfig.graph.regular.border;
-        else color = themeConfig.graph.edgeDefault;
-      } else {
-        if (estFrom === 'aprobada') color = themeConfig.graph.aprobada.border;
-        else color = themeConfig.graph.edgeDefault;
-      }
-    }
-
-    const finalColor = hidden && !dependenciesTree && !criticalChainActive ? 'transparent' : color;
-    const sig = `${finalColor}_${width}_${dimApproved}_${criticalChainActive}_${focusedSubjectId}_${tipo}`;
-    return { color: finalColor, width, sig };
-  }, [estados, edgeMode, dependenciesTree, focusedSubjectId, themeConfig, colorMode, criticalChainActive, dimApproved]);
-
-  // Inicializar vis-network una sola vez con los colores reales de entrada
+  // Inicializar vis-network
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -411,7 +181,8 @@ export const NetworkGraph: React.FC = () => {
         color: { background: cfg.bg, border: cfg.border },
         font: { color: cfg.fontColor, size: 13, face: 'IBM Plex Mono' },
         borderWidth: cfg.bw,
-        shadow: { enabled: cfg.shadowSize > 0, color: cfg.shadowColor, size: cfg.shadowSize, x: 0, y: 3 }
+        shadow: { enabled: cfg.shadowSize > 0, color: cfg.shadowColor, size: cfg.shadowSize, x: 0, y: 3 },
+        physics: false
       };
     });
 
@@ -430,7 +201,8 @@ export const NetworkGraph: React.FC = () => {
           color: { color: cfg.color, opacity: 0.8 },
           width: cfg.width,
           arrows: { to: { enabled: true, scaleFactor: 0.45, type: 'arrow' } },
-          smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 }
+          smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 },
+          physics: false
         });
       });
 
@@ -447,7 +219,8 @@ export const NetworkGraph: React.FC = () => {
             color: { color: cfg.color, opacity: 0.8 },
             width: cfg.width,
             arrows: { to: { enabled: true, scaleFactor: 0.5, type: 'arrow' } },
-            smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 }
+            smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 },
+            physics: false
           });
         });
       }
@@ -459,45 +232,91 @@ export const NetworkGraph: React.FC = () => {
     nodesDatasetRef.current = nodesDataSet;
     edgesDatasetRef.current = edgesDataSet;
 
+    const spacing = graphDirection === 'LR' ? spacingConfig.LR : spacingConfig.UD;
+
     const options = {
       layout: {
         hierarchical: {
           enabled: true,
-          direction: 'UD',
-          levelSeparation: 150,
-          nodeSpacing: 140,
-          treeSpacing: 180,
+          direction: graphDirection,
+          levelSeparation: spacing.levelSeparation,
+          nodeSpacing: spacing.nodeSpacing,
+          treeSpacing: spacing.treeSpacing,
+          blockShifting: true,
+          edgeMinimization: false,
+          parentCentralization: true,
           sortMethod: 'directed'
         }
       },
-      physics: false,
+      physics: {
+        enabled: false,
+        stabilization: false
+      },
       interaction: {
         selectConnectedEdges: false,
         hover: true,
         tooltipDelay: 99999,
         zoomView: true,
-        dragView: true
+        dragView: true,
+        dragNodes: isFreeMode
       },
-      nodes: { chosen: false },
-      edges: { chosen: false }
+      nodes: {
+        chosen: false,
+        physics: false
+      },
+      edges: {
+        chosen: false,
+        physics: false
+      }
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const net = new Network(containerRef.current, { nodes: nodesDataSet, edges: edgesDataSet }, options as any);
     networkRef.current = net;
 
-    net.on('click', params => {
-      if (params.nodes.length > 0) {
-        const clickedId = Number(params.nodes[0]);
-        if (interactionModeRef.current === 'camino') {
-          setFocusedSubjectIdRef.current(clickedId);
-        } else {
-          toggleMateriaEstadoRef.current(clickedId);
+    let isDraggingNode = false;
+
+    // Detectar arrastre para evitar que soltar un nodo dispare el evento click
+    net.on('dragStart', params => {
+      if (params.nodes && params.nodes.length > 0) {
+        isDraggingNode = true;
+      }
+    });
+
+    net.on('dragEnd', params => {
+      if (isDraggingNode) {
+        setTimeout(() => {
+          isDraggingNode = false;
+        }, 80);
+      }
+
+      if (isFreeModeRef.current && params.nodes && params.nodes.length > 0) {
+        // En Modo Libre: guardar posiciones personalizadas en cualquier coordenada 2D
+        const positions = net.getPositions();
+        if (isValidPositions(positions)) {
+          try {
+            localStorage.setItem(STORAGE_POSITIONS_KEY, JSON.stringify(positions));
+          } catch {
+            // Ignorar
+          }
         }
+      }
+    });
+
+    // Click simple en una materia: alternar estado directamente (Pendiente -> Regular -> Aprobada -> Pendiente)
+    net.on('click', params => {
+      if (isDraggingNode) return;
+
+      if (params.nodes && params.nodes.length > 0) {
+        const clickedId = Number(params.nodes[0]);
+        toggleMateriaEstadoRef.current(clickedId);
       } else {
+        // Clic en el fondo vacío: limpia el foco / cadena crítica de búsqueda
         setFocusedSubjectIdRef.current(null);
       }
     });
 
+    // Clic derecho en una materia: abrir la ficha modal completa (SubjectModal)
     net.on('oncontext', params => {
       params.event.preventDefault();
       const nodeId = net.getNodeAt(params.pointer.DOM);
@@ -506,9 +325,48 @@ export const NetworkGraph: React.FC = () => {
       }
     });
 
-    // Garantizar que vis-network redibuje después de que el layout esté listo
     net.once('afterDrawing', () => {
       net.redraw();
+
+      // Si el componente monta con Modo Libre activo, transicionar de forma transparente
+      // fijando las coordenadas jerárquicas en el dataset y liberando el eje Y para arrastre 2D
+      if (isFreeModeRef.current) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (net.physics && (net.physics as any).stopSimulation) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (net.physics as any).stopSimulation();
+        }
+        const currentPos = net.getPositions();
+        const saved = loadSavedPositions();
+        const posToUse = (saved && isValidPositions(saved, graphDirectionRef.current))
+          ? saved
+          : currentPos;
+
+        if (nodesDatasetRef.current) {
+          const updates = MATERIAS_GRAFO.map(m => {
+            const p = posToUse[m.id] || currentPos[m.id];
+            return {
+              id: m.id,
+              x: p ? p.x : undefined,
+              y: p ? p.y : undefined,
+              physics: false
+            };
+          });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          nodesDatasetRef.current.update(updates as any);
+        }
+
+        net.setOptions({
+          layout: { hierarchical: { enabled: false } },
+          physics: { enabled: false, stabilization: false },
+          nodes: { physics: false },
+          edges: { physics: false },
+          interaction: {
+            dragNodes: true,
+            dragView: true
+          }
+        });
+      }
     });
 
     const initialRedrawTimer = setTimeout(() => {
@@ -537,7 +395,7 @@ export const NetworkGraph: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Actualizar nodos y aristas cuando cambian los estados, temas, filtros o camino crítico
+  // Actualizar nodos y aristas cuando cambian estados o temas
   useEffect(() => {
     if (!nodesDatasetRef.current || !edgesDatasetRef.current) return;
 
@@ -552,7 +410,7 @@ export const NetworkGraph: React.FC = () => {
         nodeUpdates.push({
           id: m.id,
           color: { background: cfg.bg, border: cfg.border },
-          font: { color: cfg.fontColor, size: 13, face: 'IBM Plex Mono' },
+          font: { color: cfg.fontColor },
           borderWidth: cfg.bw,
           shadow: { enabled: cfg.shadowSize > 0, color: cfg.shadowColor, size: cfg.shadowSize, x: 0, y: 3 }
         });
@@ -560,78 +418,267 @@ export const NetworkGraph: React.FC = () => {
     });
 
     if (nodeUpdates.length > 0) {
-      nodesDatasetRef.current.update(nodeUpdates as VisNode[]);
+      nodesDatasetRef.current.update(nodeUpdates);
+      prevNodeSignaturesRef.current = nextNodeSignatures;
     }
-    prevNodeSignaturesRef.current = nextNodeSignatures;
 
-    // Actualizar aristas con diffing
     const edgeUpdates: Partial<VisEdge>[] = [];
     const nextEdgeSignatures = new Map<number, string>();
 
-    edgesDatasetRef.current.forEach(edge => {
-      const fromId = Number(edge.from);
-      const toId = Number(edge.to);
-      const cfg = getEdgeVisualConfig(fromId, toId, edge.tipo);
+    edgesDatasetRef.current.forEach((edge: VisEdge) => {
+      const cfg = getEdgeVisualConfig(edge.from, edge.to, edge.tipo);
       nextEdgeSignatures.set(edge.id, cfg.sig);
 
       if (prevEdgeSignaturesRef.current.get(edge.id) !== cfg.sig) {
         edgeUpdates.push({
           id: edge.id,
-          color: { color: cfg.color },
+          color: { color: cfg.color, opacity: 0.8 },
           width: cfg.width
         });
       }
     });
 
     if (edgeUpdates.length > 0) {
-      edgesDatasetRef.current.update(edgeUpdates as VisEdge[]);
+      edgesDatasetRef.current.update(edgeUpdates);
+      prevEdgeSignaturesRef.current = nextEdgeSignatures;
     }
-    prevEdgeSignaturesRef.current = nextEdgeSignatures;
-
-    // Redibujar explícitamente el canvas de vis-network cuando hay cambios
-    networkRef.current?.redraw();
   }, [getNodeVisualConfig, getEdgeVisualConfig]);
 
+  // Controles de cámara
   const handleZoomIn = () => {
     if (!networkRef.current) return;
-    const scale = networkRef.current.getScale();
-    networkRef.current.moveTo({ scale: scale * 1.25 });
+    const currentScale = networkRef.current.getScale();
+    networkRef.current.moveTo({ scale: currentScale * 1.25, animation: { duration: 250, easingFunction: 'easeInOutQuad' } });
   };
 
   const handleZoomOut = () => {
     if (!networkRef.current) return;
-    const scale = networkRef.current.getScale();
-    networkRef.current.moveTo({ scale: scale * 0.8 });
+    const currentScale = networkRef.current.getScale();
+    networkRef.current.moveTo({ scale: currentScale * 0.8, animation: { duration: 250, easingFunction: 'easeInOutQuad' } });
   };
 
   const handleFit = () => {
     if (!networkRef.current) return;
-    networkRef.current.fit({ animation: { duration: 600, easingFunction: 'easeInOutQuad' } });
+    networkRef.current.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+  };
+
+  // Alternar dirección de visualización (Horizontal 'LR' vs Vertical 'UD')
+  const handleToggleDirection = () => {
+    const nextDir = graphDirection === 'UD' ? 'LR' : 'UD';
+    setGraphDirection(nextDir);
+    if (!networkRef.current) return;
+
+    if (!isFreeMode) {
+      const spacing = nextDir === 'LR' ? spacingConfig.LR : spacingConfig.UD;
+      networkRef.current.setOptions({
+        layout: {
+          hierarchical: {
+            enabled: true,
+            direction: nextDir,
+            levelSeparation: spacing.levelSeparation,
+            nodeSpacing: spacing.nodeSpacing,
+            treeSpacing: spacing.treeSpacing,
+            blockShifting: true,
+            edgeMinimization: false,
+            parentCentralization: true,
+            sortMethod: 'directed'
+          }
+        },
+        physics: false,
+        interaction: {
+          dragNodes: false,
+          dragView: true
+        }
+      });
+      networkRef.current.fit({ animation: { duration: 400, easingFunction: 'easeInOutQuad' } });
+    }
+  };
+
+  // Alternar entre Modo Jerárquico y Modo Libre (arrastre manual con guardado)
+  const handleToggleFreeMode = () => {
+    const nextMode = !isFreeMode;
+    setIsFreeMode(nextMode);
+    try {
+      localStorage.setItem(STORAGE_FREE_MODE_KEY, String(nextMode));
+    } catch {
+      // Ignorar
+    }
+
+    if (!networkRef.current || !nodesDatasetRef.current) return;
+
+    if (nextMode) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (networkRef.current.physics && (networkRef.current.physics as any).stopSimulation) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (networkRef.current.physics as any).stopSimulation();
+      }
+
+      // 1. Obtener posiciones actuales si son válidas, o el layout canónico limpio
+      const currentPos = networkRef.current.getPositions();
+      const saved = loadSavedPositions();
+      const canonical = getCanonicalGraphPositions(graphDirection);
+      const posToUse = (saved && isValidPositions(saved))
+        ? saved
+        : (isValidPositions(currentPos) ? currentPos : canonical);
+
+      // 2. Fijar { x, y } y physics: false para cada materia de forma que no salten ni se amontonen
+      const nodeUpdates = MATERIAS_GRAFO.map(m => {
+        const p = posToUse[m.id] || canonical[m.id];
+        return {
+          id: m.id,
+          x: p.x,
+          y: p.y,
+          physics: false
+        };
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      nodesDatasetRef.current.update(nodeUpdates as any);
+
+      // 3. Desactivar layout jerárquico y física completamente, y habilitar arrastre libre individual de materias
+      networkRef.current.setOptions({
+        layout: { hierarchical: { enabled: false } },
+        physics: { enabled: false, stabilization: false },
+        nodes: { physics: false },
+        edges: { physics: false },
+        interaction: {
+          dragNodes: true,
+          dragView: true
+        }
+      });
+
+      try {
+        localStorage.setItem(STORAGE_POSITIONS_KEY, JSON.stringify(posToUse));
+      } catch {
+        // Ignorar
+      }
+      networkRef.current.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+    } else {
+      // Volver a Modo Jerárquico canónico
+      const resetCoords = MATERIAS_GRAFO.map(m => ({
+        id: m.id,
+        x: undefined,
+        y: undefined,
+        physics: false
+      }));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      nodesDatasetRef.current.update(resetCoords as any);
+
+      const spacing = graphDirection === 'LR' ? spacingConfig.LR : spacingConfig.UD;
+
+      networkRef.current.setOptions({
+        layout: {
+          hierarchical: {
+            enabled: true,
+            direction: graphDirection,
+            levelSeparation: spacing.levelSeparation,
+            nodeSpacing: spacing.nodeSpacing,
+            treeSpacing: spacing.treeSpacing,
+            blockShifting: true,
+            edgeMinimization: false,
+            parentCentralization: true,
+            sortMethod: 'directed'
+          }
+        },
+        physics: { enabled: false, stabilization: false },
+        nodes: { physics: false },
+        edges: { physics: false },
+        interaction: {
+          dragNodes: false,
+          dragView: true
+        }
+      });
+      networkRef.current.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+    }
+  };
+
+  // Reiniciar disposición y zoom a coordenadas canónicas espaciadas
+  const handleResetLayout = () => {
+    try {
+      localStorage.removeItem('tracker_graph_positions');
+      localStorage.removeItem(STORAGE_POSITIONS_KEY);
+      localStorage.setItem(STORAGE_FREE_MODE_KEY, 'false');
+    } catch {
+      // Ignorar
+    }
+    setIsFreeMode(false);
+
+    if (!networkRef.current || !nodesDatasetRef.current) return;
+
+    const resetNodes = MATERIAS_GRAFO.map(m => ({
+      id: m.id,
+      x: undefined,
+      y: undefined,
+      physics: false
+    }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    nodesDatasetRef.current.update(resetNodes as any);
+
+    const spacing = graphDirection === 'LR' ? spacingConfig.LR : spacingConfig.UD;
+
+    networkRef.current.setOptions({
+      layout: {
+        hierarchical: {
+          enabled: true,
+          direction: graphDirection,
+          levelSeparation: spacing.levelSeparation,
+          nodeSpacing: spacing.nodeSpacing,
+          treeSpacing: spacing.treeSpacing,
+          blockShifting: true,
+          edgeMinimization: false,
+          parentCentralization: true,
+          sortMethod: 'directed'
+        }
+      },
+      physics: { enabled: false, stabilization: false },
+      nodes: { physics: false },
+      edges: { physics: false },
+      interaction: {
+        dragNodes: false,
+        dragView: true
+      }
+    });
+    networkRef.current.fit({ animation: { duration: 450, easingFunction: 'easeInOutQuad' } });
+  };
+
+  // Foco animado al buscar una materia
+  const handleSearchFocus = (materiaId: number) => {
+    setFocusedSubjectId(materiaId);
+    if (networkRef.current) {
+      networkRef.current.focus(materiaId, {
+        scale: 1.2,
+        animation: { duration: 550, easingFunction: 'easeInOutQuad' }
+      });
+    }
   };
 
   return (
-    <div 
-      className="relative w-full h-full overflow-hidden transition-colors duration-300"
-      style={{ backgroundColor: themeConfig.graph.bgBase }}
-    >
-      <section 
+    <div className="relative w-full h-full bg-(--bg-base) overflow-hidden select-none">
+      <div 
         ref={containerRef} 
+        className="w-full h-full cursor-grab active:cursor-grabbing outline-none"
         tabIndex={0}
-        aria-label="Grafo interactivo de correlatividades"
-        className="w-full h-full cursor-grab active:cursor-grabbing outline-none focus-visible:ring-1 focus-visible:ring-slate-500" 
+        aria-label="Grafo interactivo de correlatividades. Usa las flechas para explorar y Enter para interactuar."
       />
 
-      {/* Banner flotante de Camino Crítico activo */}
-      {focusedSubjectId && MATERIAS_MAP[focusedSubjectId] && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.3)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3 max-w-[95vw]">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-pulse shrink-0" />
-            <span className="text-slate-500 dark:text-slate-400">Camino Crítico:</span>
-            <span className="font-bold text-(--text-body) truncate max-w-[200px] sm:max-w-none">{MATERIAS_MAP[focusedSubjectId].nombreCompleto}</span>
+      {/* Barra de Búsqueda Flotante */}
+      <div className="absolute top-3 left-3 md:top-4 md:left-4 z-20">
+        <GraphSearchBar
+          onSelectSubject={handleSearchFocus}
+          estados={estados}
+        />
+      </div>
+
+      {/* Banner flotante de Materia Enfocada */}
+      {focusedSubjectId && (
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 md:top-4 z-20 flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) shadow-2xl py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3 max-w-[95vw]">
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-(--color-primary)">
+              {MATERIAS_GRAFO.find(m => m.id === focusedSubjectId)?.nombre}
+            </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            {/* Correlativas previas */}
+          <div className="flex items-center gap-2 border-l border-(--border-color) pl-2 sm:pl-3 text-[11px]">
+            {/* Materias previas */}
             <div className="flex items-center gap-1">
               <span className="text-slate-500 dark:text-slate-400 font-medium">Correlativas:</span>
               <span 
@@ -690,14 +737,16 @@ export const NetworkGraph: React.FC = () => {
 
           <div className="flex items-center gap-1.5 ml-1 shrink-0">
             <button
+              type="button"
               onClick={() => setSelectedSubjectId(focusedSubjectId)}
-              className="px-2 py-0.5 rounded bg-(--bg-elevated) hover:bg-(--border-color) text-cyan-700 dark:text-cyan-300 text-[11px] transition-colors border border-(--border-color)"
+              className="px-2 py-0.5 rounded bg-(--bg-elevated) hover:bg-(--border-color) text-cyan-700 dark:text-cyan-300 text-[11px] transition-colors border border-(--border-color) cursor-pointer"
             >
               Ficha
             </button>
             <button
+              type="button"
               onClick={() => setFocusedSubjectId(null)}
-              className="p-1 rounded text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors"
+              className="p-1 rounded text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors cursor-pointer"
               title="Restablecer vista completa"
             >
               <X className="w-4 h-4" />
@@ -706,124 +755,94 @@ export const NetworkGraph: React.FC = () => {
         </div>
       )}
 
-      {/* Banner flotante de Cadena Crítica hacia Graduación */}
-      {criticalChainActive && !focusedSubjectId && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-amber-500/50 shadow-[0_0_25px_rgba(245,158,11,0.25)] py-2 px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3 max-w-[95vw]">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse shrink-0" />
-            <span className="font-bold text-(--text-body)">Cadena Crítica: Proyecto Final</span>
-            <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">(13 materias clave)</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-[11px] border-l border-(--border-color) pl-2.5">
-            <span 
-              className="px-2 py-0.5 rounded font-semibold border flex items-center gap-1.5"
-              style={{
-                backgroundColor: 'var(--color-regular-bg)',
-                borderColor: 'var(--color-regular-border)',
-                color: 'var(--color-regular)'
-              }}
-              title="Correlatividades de regularidad para cursar"
-            >
-              <span className="w-2 h-0.5 rounded" style={{ backgroundColor: 'var(--color-regular)' }} />
-              Regularidad
-            </span>
-            <span 
-              className="px-2 py-0.5 rounded font-semibold border flex items-center gap-1.5"
-              style={{
-                backgroundColor: 'var(--color-aprobada-bg)',
-                borderColor: 'var(--color-aprobada-border)',
-                color: 'var(--color-aprobada)'
-              }}
-              title="Correlatividades de examen final para rendir o cursar"
-            >
-              <span className="w-2 h-0.5 rounded" style={{ backgroundColor: 'var(--color-aprobada)' }} />
-              Aprobación
-            </span>
-          </div>
-
-          <button
-            onClick={() => setCriticalChainActive(false)}
-            className="p-1 rounded text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors ml-1"
-            title="Desactivar filtro de cadena crítica"
+      {/* Controles flotantes superiores derechos: Modo Libre, Orientación & Atenuar Aprobadas */}
+      <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10 flex items-center gap-1.5 bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) p-1 rounded-xl shadow-lg font-mono text-xs">
+        {/* Interruptor Switch de Modo Libre */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={isFreeMode}
+          aria-label="Interruptor de Modo Libre"
+          onClick={handleToggleFreeMode}
+          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer select-none ${
+            isFreeMode
+              ? 'bg-purple-500/15 border-purple-500/40'
+              : 'border-transparent hover:bg-(--bg-elevated)'
+          }`}
+          title={isFreeMode ? 'Modo Libre activo: arrastrá las materias libremente a cualquier posición 2D (se guarda tu orden)' : 'Modo Jerárquico activo: las materias rebotan y mantienen su estructura ordenada por niveles. Clic para activar Modo Libre.'}
+        >
+          <span className="text-[11px] font-semibold text-(--text-body) hidden sm:inline">
+            Modo Libre
+          </span>
+          <span
+            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+              isFreeMode ? 'bg-purple-600 dark:bg-purple-500' : 'bg-slate-300 dark:bg-slate-700'
+            }`}
           >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                isFreeMode ? 'translate-x-4' : 'translate-x-0'
+              }`}
+            />
+          </span>
+        </button>
 
-      {/* Controles flotantes superiores derechos */}
-      <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10 flex flex-col items-end gap-2">
-        {/* Selector de modo de interacción */}
-        <div className="flex items-center bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) p-1 rounded-xl shadow-lg font-mono text-xs">
+        {/* Toggle Orientación: Horizontal (LR) vs Vertical (UD) en modo jerárquico */}
+        {!isFreeMode && (
           <button
             type="button"
-            onClick={() => setInteractionMode('estado')}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-9 ${
-              interactionMode === 'estado'
-                ? 'bg-(--bg-elevated) text-(--text-body) font-bold border border-(--border-color) shadow-sm'
-                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
+            onClick={handleToggleDirection}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 cursor-pointer text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body) ${
+              graphDirection === 'LR' ? 'bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border border-cyan-500/40 font-bold' : ''
             }`}
-            title="Al hacer clic en una materia, cambia entre Pendiente, Regular y Aprobada"
+            title={`Orientación actual: ${graphDirection === 'UD' ? 'Vertical (Arriba-Abajo)' : 'Horizontal (Izquierda-Derecha)'}. Clic para alternar.`}
           >
-            <MousePointerClick className="w-3.5 h-3.5" />
-            <span>Alternar Estado</span>
+            {graphDirection === 'UD' ? <ArrowDown className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{graphDirection === 'UD' ? 'Vertical' : 'Horizontal'}</span>
           </button>
+        )}
 
-          <button
-            type="button"
-            onClick={() => setInteractionMode('camino')}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-9 ${
-              interactionMode === 'camino'
-                ? 'bg-cyan-500/20 text-cyan-950 dark:text-cyan-300 font-bold border border-cyan-500/50 shadow-sm'
-                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
-            }`}
-            title="Al hacer clic en una materia, resalta toda su cadena de requisitos y materias desbloqueadas"
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span>Camino Crítico</span>
-          </button>
-        </div>
-
-        {/* Filtros visuales rápidos: Atenuar Aprobadas & Cadena Crítica */}
-        <div className="flex items-center gap-1.5 bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) p-1 rounded-xl shadow-lg font-mono text-xs">
-          <button
-            type="button"
-            onClick={() => setDimApproved(prev => !prev)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 ${
-              dimApproved
-                ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/40 shadow-sm'
-                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
-            }`}
-            title="Atenuar materias ya aprobadas para concentrarse en las materias pendientes y regulares"
-          >
-            {dimApproved ? <EyeOff className="w-3.5 h-3.5 text-emerald-500" /> : <Eye className="w-3.5 h-3.5" />}
-            <span>Atenuar Aprobadas</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setCriticalChainActive(prev => !prev)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 ${
-              criticalChainActive
-                ? 'bg-amber-500/25 text-amber-900 dark:text-amber-200 font-bold border border-amber-500/50 shadow-sm'
-                : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
-            }`}
-            title="Destacar la cadena crítica indispensable hacia el Proyecto Final de carrera"
-          >
-            <Sparkles className={`w-3.5 h-3.5 ${criticalChainActive ? 'text-amber-400 animate-pulse' : ''}`} />
-            <span>Cadena Crítica</span>
-          </button>
-        </div>
+        {/* Toggle Atenuar Aprobadas */}
+        <button
+          type="button"
+          onClick={() => setDimApproved(prev => !prev)}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 cursor-pointer ${
+            dimApproved
+              ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/40 shadow-sm'
+              : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
+          }`}
+          title="Atenuar materias ya aprobadas para concentrarse en las materias pendientes y regulares"
+        >
+          {dimApproved ? <EyeOff className="w-3.5 h-3.5 text-emerald-500" /> : <Eye className="w-3.5 h-3.5" />}
+          <span className="hidden sm:inline">Atenuar Aprobadas</span>
+        </button>
       </div>
 
-      {/* Controles flotantes de Zoom con touch targets de 44px */}
-      <div className="absolute bottom-4 right-4 md:bottom-5 md:right-5 flex flex-col gap-1.5 bg-(--bg-surface)/95 backdrop-blur-md p-1 rounded-xl border border-(--border-color) shadow-xl z-10">
+      {/* Inspector de Nodo Flotante (Mini-HUD en esquina) */}
+      <GraphNodeInspector
+        focusedSubjectId={focusedSubjectId}
+        estados={estados}
+        onClose={() => setFocusedSubjectId(null)}
+        onOpenDetails={(id) => setSelectedSubjectId(id)}
+        onSetEstadoDirecto={(id, est) => setEstadoDirecto(id, est)}
+      />
+
+      {/* Controles flotantes de Zoom y Reset Layout */}
+      <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 flex flex-col gap-1.5 bg-(--bg-surface) p-1.5 rounded-2xl border-2 border-(--border-color) shadow-2xl z-20">
+        <button
+          type="button"
+          onClick={handleResetLayout}
+          aria-label="Restablecer disposición del grafo"
+          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
+          title="Restablecer Disposición / Layout"
+        >
+          <RotateCcw className="w-4 h-4 text-(--color-primary)" />
+        </button>
         <button
           type="button"
           onClick={handleZoomIn}
           aria-label="Acercar vista del grafo"
-          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center"
+          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
           title="Acercar (Zoom In)"
         >
           <ZoomIn className="w-4 h-4" />
@@ -832,7 +851,7 @@ export const NetworkGraph: React.FC = () => {
           type="button"
           onClick={handleZoomOut}
           aria-label="Alejar vista del grafo"
-          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center"
+          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
           title="Alejar (Zoom Out)"
         >
           <ZoomOut className="w-4 h-4" />
@@ -841,38 +860,40 @@ export const NetworkGraph: React.FC = () => {
           type="button"
           onClick={handleFit}
           aria-label="Ajustar y centrar grafo"
-          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center"
+          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
           title="Ajustar y Centrar"
         >
           <Maximize2 className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Guía rápida flotante */}
-      <div className="absolute bottom-4 left-4 md:bottom-5 md:left-5 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-xl bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) text-[11px] font-mono text-slate-800 dark:text-slate-200 pointer-events-none shadow-md font-medium">
-        <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click</kbd>
-          <span>{interactionMode === 'camino' ? 'Resaltar dependencias' : 'Cambiar estado'}</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click Derecho</kbd>
-          <span>Detalle de materia</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Fondo</kbd>
-          <span>Desactivar foco</span>
-        </span>
-        <div className="flex items-center gap-2.5 border-l border-(--border-color) pl-3">
-          <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-regular)' }}>
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }} />
-            <span>Regularidad</span>
+      {/* Guía rápida flotante (solo cuando no hay materia enfocada) */}
+      {!focusedSubjectId && (
+        <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-2xl bg-(--bg-surface) border-2 border-(--border-color) text-[11px] font-mono text-slate-800 dark:text-slate-200 pointer-events-none shadow-xl font-medium">
+          <span className="flex items-center gap-1.5">
+            <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click</kbd>
+            <span>Cambiar estado</span>
           </span>
-          <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-aprobada)' }}>
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }} />
-            <span>Aprobación</span>
+          <span className="flex items-center gap-1.5">
+            <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Buscar</kbd>
+            <span>Cadena crítica y foco</span>
           </span>
+          <span className="flex items-center gap-1.5">
+            <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click Derecho</kbd>
+            <span>Ficha de materia</span>
+          </span>
+          <div className="flex items-center gap-2.5 border-l border-(--border-color) pl-3">
+            <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-regular)' }}>
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }} />
+              <span>Regularidad</span>
+            </span>
+            <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-aprobada)' }}>
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }} />
+              <span>Aprobación</span>
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

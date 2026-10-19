@@ -25,6 +25,8 @@ export interface ThemeOption {
   lightGraph: GraphColorConfig;
 }
 
+export type ThemeConfig = ThemeOption;
+
 export const THEMES: Record<ThemeId, ThemeOption> = {
   cyber: {
     id: 'cyber',
