@@ -412,7 +412,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ onOpenTitles, onOpen
                       </div>
                       <div className="min-w-0">
                         <div className="text-xs font-bold font-syne text-(--text-body) truncate">Ficha Académica PDF</div>
-                        <div className="text-[10px] font-mono text-slate-500 truncate">Reporte imprimible en formato A4</div>
+                        <div className="text-[10px] font-mono text-slate-500 truncate">Descarga directa en formato PDF</div>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0 ml-2" />

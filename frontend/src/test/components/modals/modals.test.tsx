@@ -11,6 +11,7 @@ import { ShareModal } from '../../../components/modals/ShareModal';
 import { StatsModal } from '../../../components/modals/StatsModal';
 import { PrintableReportModal } from '../../../components/modals/PrintableReportModal';
 import { AuthModal } from '../../../components/modals/AuthModal';
+import * as pdfExporterModule from '../../../utils/pdfExporter';
 
 const ProfileModalWrapper: React.FC = () => {
   const { setProfileModalOpen } = useTracker();
@@ -249,8 +250,8 @@ describe('Componentes Modales', () => {
       fireEvent.click(botonCerrar);
     });
 
-    it('debe renderizar materias aprobadas, regulares, electivas acreditadas y metas con opción de imprimir', async () => {
-      window.print = vi.fn();
+    it('debe renderizar materias aprobadas, regulares, electivas acreditadas y metas con opción de descargar PDF', async () => {
+      const exportPdfSpy = vi.spyOn(pdfExporterModule, 'exportFichaCurricularPDF').mockImplementation(() => {});
       localStorage.setItem('utn-sistemas-tracker-2023', JSON.stringify({
         estados: { 1: 'aprobada', 2: 'regular' },
         estadosElectivas: { 201: 'aprobada' },
@@ -279,10 +280,10 @@ describe('Componentes Modales', () => {
       expect(screen.getByText(/Asignaturas Electivas Acreditadas/i)).toBeInTheDocument();
       expect(screen.getByText(/Metas Tentativas de Examen Agendadas/i)).toBeInTheDocument();
 
-      // Clic en imprimir
-      const botonImprimir = screen.getByRole('button', { name: /Imprimir \/ PDF/i });
-      fireEvent.click(botonImprimir);
-      expect(window.print).toHaveBeenCalled();
+      // Clic en descargar PDF
+      const botonDescargar = screen.getByRole('button', { name: /Descargar PDF/i });
+      fireEvent.click(botonDescargar);
+      expect(exportPdfSpy).toHaveBeenCalled();
     });
   });
 

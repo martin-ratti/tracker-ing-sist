@@ -661,7 +661,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             <button
               onClick={() => setReportOpen(true)}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-(--bg-surface) border border-(--border-color) text-slate-800 dark:text-slate-200 font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:text-(--text-body) font-mono text-[11px] transition-colors shadow-sm"
-              title="Descargar o imprimir ficha analítica oficial en PDF"
+              title="Descargar ficha curricular analítica oficial en PDF"
             >
               <FileText className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
               <span>Ficha PDF</span>

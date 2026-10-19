@@ -5,12 +5,13 @@ import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP } from '../../data/plan2023';
 import { 
   X, 
-  Printer, 
+  Download, 
   FileText, 
   User, 
   Sparkles
 } from 'lucide-react';
 import { formatPromedio } from '../../utils/formatters';
+import { exportFichaCurricularPDF } from '../../utils/pdfExporter';
 
 export const PrintableReportModal: React.FC = () => {
   const { 
@@ -26,6 +27,8 @@ export const PrintableReportModal: React.FC = () => {
     metasExamen
   } = useTracker();
 
+  const [isDownloading, setIsDownloading] = React.useState(false);
+
   const { isMounted, isVisible } = useModalAnimation(reportOpen, 200);
   const modalRef = useFocusTrap(reportOpen);
 
@@ -40,8 +43,23 @@ export const PrintableReportModal: React.FC = () => {
 
   if (!isMounted) return null;
 
-  const handlePrint = () => {
-    window.print();
+  const handleDownloadPDF = () => {
+    try {
+      setIsDownloading(true);
+      exportFichaCurricularPDF({
+        perfil,
+        estados,
+        estadosElectivas,
+        notas,
+        ppsHoras,
+        stats,
+        metasExamen
+      });
+    } catch (err) {
+      console.error('Error al generar la ficha curricular en PDF:', err);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const now = new Date();
@@ -57,7 +75,7 @@ export const PrintableReportModal: React.FC = () => {
   const metasArray = Object.values(metasExamen);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 no-scrollbar print:p-0 print:static">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 no-scrollbar print:p-0 print:static print:overflow-visible print:block">
       <div
         className={`fixed inset-0 bg-black/80 backdrop-blur-sm print:hidden transition-opacity duration-200 ease-out ${
           isVisible ? 'opacity-100' : 'opacity-0'
@@ -70,7 +88,7 @@ export const PrintableReportModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="report-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl my-auto print:border-none print:shadow-none print:max-w-none print:max-h-none print:rounded-none print:bg-white print:text-black transform transition-all duration-200 ease-out ${
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl my-auto print:border-none print:shadow-none print:max-w-none print:max-h-none print:h-auto print:rounded-none print:bg-white print:text-black print:overflow-visible print:static print:block transform transition-all duration-200 ease-out ${
           isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
         }`}
       >
@@ -110,11 +128,13 @@ export const PrintableReportModal: React.FC = () => {
 
             <button
               type="button"
-              onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg bg-(--color-primary) hover:opacity-90 active:scale-95 text-slate-950 font-mono text-xs font-bold transition-all shadow-lg"
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg bg-(--color-primary) hover:opacity-90 active:scale-95 text-slate-950 font-mono text-xs font-bold transition-all shadow-lg cursor-pointer disabled:opacity-60"
+              title="Descargar ficha curricular analítica completa en PDF"
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Imprimir / PDF</span>
+              <Download className="w-3.5 h-3.5" />
+              <span>{isDownloading ? 'Generando...' : 'Descargar PDF'}</span>
             </button>
 
             <button
@@ -129,7 +149,7 @@ export const PrintableReportModal: React.FC = () => {
         </div>
 
         {/* CONTENEDOR DE LA FICHA IMPRIMIBLE */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 text-(--text-body) no-scrollbar print:overflow-visible print:p-0 print:text-black bg-(--bg-base) print:bg-white">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 text-(--text-body) no-scrollbar print:overflow-visible print:p-0 print:text-black bg-(--bg-base) print:bg-white print:h-auto print:static print:block">
           
           {/* Encabezado Institucional */}
           <div className="border-b-2 border-(--border-color) print:border-black pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
