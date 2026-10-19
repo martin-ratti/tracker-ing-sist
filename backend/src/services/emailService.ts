@@ -5,6 +5,10 @@ import { renderExamReminderEmailHtml, renderExamReminderEmailText, type ExamRemi
 let resendInstance: Resend | null = null;
 
 export function getResendClient(): Resend | null {
+  // En entorno de test (Vitest o NODE_ENV=test), jamás inicializar Resend para evitar envíos de emails reales
+  if (process.env.NODE_ENV === 'test' || process.env.VITEST) {
+    return null;
+  }
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || apiKey.startsWith('re_tu_api_key')) {
     return null;
@@ -48,7 +52,9 @@ export async function sendWelcomeEmail({ to, name, appUrl }: WelcomeEmailParams)
 
   if (!resend) {
     const errorMsg = 'RESEND_API_KEY no está configurada en las variables de entorno.';
-    console.warn(`[EmailService] ${errorMsg} (Simulación de envío a ${effectiveRecipient})`);
+    if (!process.env.VITEST) {
+      console.warn(`[EmailService] ${errorMsg} (Simulación de envío a ${effectiveRecipient})`);
+    }
     return { success: false, error: errorMsg, recipient: effectiveRecipient };
   }
 
@@ -92,7 +98,9 @@ export async function sendExamReminderEmail(params: ExamReminderEmailParams): Pr
 
   if (!resend) {
     const errorMsg = 'RESEND_API_KEY no está configurada en las variables de entorno.';
-    console.warn(`[EmailService] ${errorMsg} (Simulación de recordatorio a ${effectiveRecipient})`);
+    if (!process.env.VITEST) {
+      console.warn(`[EmailService] ${errorMsg} (Simulación de recordatorio a ${effectiveRecipient})`);
+    }
     return { success: false, error: errorMsg, recipient: effectiveRecipient };
   }
 
