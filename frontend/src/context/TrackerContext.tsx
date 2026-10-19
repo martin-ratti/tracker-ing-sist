@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen } from '../types/plan';
-import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
-import { TURNOS_EXAMEN, getFechaExactaMesa } from '../data/calendario';
+import { MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
 import { fetchProgress, getLocalProgress, persistProgress, clearProgress, mergeProgress } from '../services/api';
 import { decodeProgress } from '../utils/share';
 import { subscribeToUserProgress, onFirebaseAuthStateChanged, isFirebaseConfigured } from '../services/firebase';
@@ -15,39 +14,27 @@ import {
   type ToastOptions, 
   type ToastItem 
 } from './UIContext';
+import {
+  cumpleReqsCursada,
+  puedeRegularMateria as checkPuedeRegular,
+  puedeAprobarMateria as checkPuedeAprobar,
+  esMateriaCursable as checkEsCursable,
+  esMateriaRendible as checkEsRendible,
+  puedeRegularElectiva as checkPuedeRegularElectiva,
+  esElectivaCursable as checkEsElectivaCursable
+} from '../utils/correlativesEngine';
+import { applyCascade } from '../utils/cascadeEngine';
+import {
+  computeAcademicStats,
+  type AcademicStats,
+  type ProximaMetaInfo
+} from '../utils/academicCalculations';
+import { downloadBackupJson, parseBackupJson } from '../utils/backupManager';
 
 export type { GridFilterOption, ToastAction, ToastOptions, ToastItem, UIContextType };
 export { UIProvider, useUI };
-
-export interface ProximaMetaInfo {
-  materiaId: number;
-  materiaNombre: string;
-  materiaNombreCorto: string;
-  turnoNombre: string;
-  fechaExamenStr: string;
-  diasFaltantes: number;
-  urgencia: 'urgente' | 'proxima' | 'lejana';
-}
-
-interface Stats {
-  aprobadasCount: number;
-  regularesCount: number;
-  cursablesCount: number;
-  totalTroncales: number;
-  porcentajeCarrera: number;
-  horasElectivasAprobadas: number;
-  promedio: number | null;
-  promedioConAplazos: number | null;
-  promedioSinAplazos: number | null;
-  adusiCumplido: boolean;
-  adusiProgreso: number; // 0 - 100
-  adusiFaltantes: string[];
-  ingenieroCumplido: boolean;
-  ingenieroProgreso: number; // 0 - 100
-  ingenieroFaltantes: string[];
-  metasCount: number;
-  proximaMeta: ProximaMetaInfo | null;
-}
+export type { ProximaMetaInfo };
+export type Stats = AcademicStats;
 
 export interface AcademicTrackerContextType {
   estados: Record<number, EstadoMateria>;
@@ -87,39 +74,27 @@ const TrackerContext = createContext<AcademicTrackerContextType | undefined>(und
 
 const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [estados, setEstados] = useState<Record<number, EstadoMateria>>(() => {
-    if (typeof window !== 'undefined') {
-      return getLocalProgress().estados || {};
-    }
+    if (typeof window !== 'undefined') return getLocalProgress().estados || {};
     return {};
   });
   const [estadosElectivas, setEstadosElectivas] = useState<Record<number, EstadoMateria>>(() => {
-    if (typeof window !== 'undefined') {
-      return getLocalProgress().estadosElectivas || {};
-    }
+    if (typeof window !== 'undefined') return getLocalProgress().estadosElectivas || {};
     return {};
   });
   const [notas, setNotas] = useState<Record<number, NotaMateria>>(() => {
-    if (typeof window !== 'undefined') {
-      return getLocalProgress().notas || {};
-    }
+    if (typeof window !== 'undefined') return getLocalProgress().notas || {};
     return {};
   });
   const [ppsHoras, setPpsHorasState] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      return getLocalProgress().ppsHoras || 0;
-    }
+    if (typeof window !== 'undefined') return getLocalProgress().ppsHoras || 0;
     return 0;
   });
   const [perfil, setPerfilState] = useState<PerfilAlumno>(() => {
-    if (typeof window !== 'undefined') {
-      return getLocalProgress().perfil || { nombre: '', legajo: '' };
-    }
+    if (typeof window !== 'undefined') return getLocalProgress().perfil || { nombre: '', legajo: '' };
     return { nombre: '', legajo: '' };
   });
   const [metasExamen, setMetasExamenState] = useState<Record<number, MetaExamen>>(() => {
-    if (typeof window !== 'undefined') {
-      return getLocalProgress().metasExamen || {};
-    }
+    if (typeof window !== 'undefined') return getLocalProgress().metasExamen || {};
     return {};
   });
   const [isViewingShared, setIsViewingShared] = useState(false);
@@ -161,11 +136,9 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
-  // Cargar estado
+  // Cargar estado inicial o al refrescar
   const reloadProgress = useCallback(() => {
-    if (window.location.hash.startsWith('#share=')) {
-      return;
-    }
+    if (window.location.hash.startsWith('#share=')) return;
     fetchProgress()
       .then((data: ProgresoUsuario) => {
         setEstados(data.estados || {});
@@ -182,25 +155,11 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     window.location.hash = '';
     setIsViewingShared(false);
     setSharedName(null);
-    fetchProgress()
-      .then((data: ProgresoUsuario) => {
-        setEstados(data.estados || {});
-        setEstadosElectivas(data.estadosElectivas || {});
-        setNotas(data.notas || {});
-        setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
-        setPerfilState(data.perfil || { nombre: '', legajo: '' });
-        setMetasExamenState(data.metasExamen || {});
-      })
-      .catch(err => console.error('Error al cargar progreso:', err));
-  }, []);
+    reloadProgress();
+  }, [reloadProgress]);
 
   const importSharedProgress = useCallback(() => {
-    void persistProgress({
-      estados,
-      estadosElectivas,
-      perfil,
-      ppsHoras
-    });
+    void persistProgress({ estados, estadosElectivas, perfil, ppsHoras });
     window.location.hash = '';
     setIsViewingShared(false);
     setSharedName(null);
@@ -211,12 +170,11 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     reloadProgress();
   }, [reloadProgress]);
 
-  // Sincronización en tiempo real con Firestore para multidispositivo
+  // Sincronización en tiempo real con Firestore
   useEffect(() => {
     if (!isFirebaseConfigured) return;
 
     let unsubscribeSnapshot: (() => void) | null = null;
-
     const unsubscribeAuth = onFirebaseAuthStateChanged((fbUser) => {
       if (unsubscribeSnapshot) {
         unsubscribeSnapshot();
@@ -246,131 +204,17 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
   }, []);
 
-  const getEstado = useCallback((id: number): EstadoMateria => {
-    return estados[id] || 'pendiente';
-  }, [estados]);
+  // Helpers de acceso a estados
+  const getEstado = useCallback((id: number): EstadoMateria => estados[id] || 'pendiente', [estados]);
+  const getEstadoElectiva = useCallback((id: number): EstadoMateria => estadosElectivas[id] || 'pendiente', [estadosElectivas]);
 
-  const getEstadoElectiva = useCallback((id: number): EstadoMateria => {
-    return estadosElectivas[id] || 'pendiente';
-  }, [estadosElectivas]);
-
-  // Validaciones
-  const cumpleReqsCursada = useCallback((m: Materia): boolean => {
-    const regularOk = m.reqRegular.every(c => {
-      const e = getEstado(c);
-      return e === 'regular' || e === 'aprobada';
-    });
-
-    let aprobadaOk = false;
-    if (m.reqAprobada === 'TODAS') {
-      aprobadaOk = MATERIAS_TRONCALES.filter(x => x.id !== m.id).every(x => getEstado(x.id) === 'aprobada');
-    } else {
-      aprobadaOk = m.reqAprobada.every(c => getEstado(c) === 'aprobada');
-    }
-
-    return regularOk && aprobadaOk;
-  }, [getEstado]);
-
-  const puedeRegularMateria = useCallback((m: Materia): boolean => {
-    return cumpleReqsCursada(m);
-  }, [cumpleReqsCursada]);
-
-  const puedeAprobarMateria = useCallback((m: Materia): boolean => {
-    const est = getEstado(m.id);
-    if (est !== 'regular') return false;
-
-    if (m.reqRendirAprobada) {
-      if (m.reqRendirAprobada === 'TODAS') {
-        const todasLasDemas = MATERIAS_TRONCALES.filter(x => x.id !== m.id);
-        return todasLasDemas.every(x => getEstado(x.id) === 'aprobada');
-      } else {
-        return m.reqRendirAprobada.every(c => getEstado(c) === 'aprobada');
-      }
-    }
-    return true;
-  }, [getEstado]);
-
-  const esMateriaCursable = useCallback((m: Materia): boolean => {
-    return getEstado(m.id) === 'pendiente' && cumpleReqsCursada(m);
-  }, [getEstado, cumpleReqsCursada]);
-
-  const esMateriaRendible = useCallback((m: Materia): boolean => {
-    return getEstado(m.id) === 'regular' && puedeAprobarMateria(m);
-  }, [getEstado, puedeAprobarMateria]);
-
-  // Electivas
-  const puedeRegularElectiva = useCallback((e: Electiva): boolean => {
-    const regOk = e.reqRegular.every(c => {
-      const est = getEstado(c);
-      return est === 'regular' || est === 'aprobada';
-    });
-    const aprOk = e.reqAprobada.every(c => getEstado(c) === 'aprobada');
-    return regOk && aprOk;
-  }, [getEstado]);
-
-  const esElectivaCursable = useCallback((e: Electiva): boolean => {
-    return getEstadoElectiva(e.id) === 'pendiente' && puedeRegularElectiva(e);
-  }, [getEstadoElectiva, puedeRegularElectiva]);
-
-  // Reseteo en Cascada
-  const applyCascade = useCallback((currentEstados: Record<number, EstadoMateria>, currentElectivas: Record<number, EstadoMateria>) => {
-    const newEstados = { ...currentEstados };
-    const newElectivas = { ...currentElectivas };
-
-    let changed = true;
-    while (changed) {
-      changed = false;
-
-      // Troncales
-      MATERIAS_TRONCALES.forEach(m => {
-        const est = newEstados[m.id] || 'pendiente';
-        if (est === 'pendiente') return;
-
-        const regularOk = m.reqRegular.every(c => {
-          const e = newEstados[c] || 'pendiente';
-          return e === 'regular' || e === 'aprobada';
-        });
-        const aprobadaOk = m.reqAprobada === 'TODAS'
-          ? MATERIAS_TRONCALES.filter(x => x.id !== m.id).every(x => (newEstados[x.id] || 'pendiente') === 'aprobada')
-          : m.reqAprobada.every(c => (newEstados[c] || 'pendiente') === 'aprobada');
-
-        if (!regularOk || !aprobadaOk) {
-          newEstados[m.id] = 'pendiente';
-          changed = true;
-        } else if (est === 'aprobada' && m.reqRendirAprobada) {
-          let rendirOk = true;
-          if (m.reqRendirAprobada === 'TODAS') {
-            rendirOk = MATERIAS_TRONCALES.filter(x => x.id !== m.id).every(x => (newEstados[x.id] || 'pendiente') === 'aprobada');
-          } else {
-            rendirOk = m.reqRendirAprobada.every(c => (newEstados[c] || 'pendiente') === 'aprobada');
-          }
-          if (!rendirOk) {
-            newEstados[m.id] = 'regular';
-            changed = true;
-          }
-        }
-      });
-
-      // Electivas
-      MATERIAS_ELECTIVAS.forEach(e => {
-        const est = newElectivas[e.id] || 'pendiente';
-        if (est === 'pendiente') return;
-
-        const regOk = e.reqRegular.every(c => {
-          const s = newEstados[c] || 'pendiente';
-          return s === 'regular' || s === 'aprobada';
-        });
-        const aprOk = e.reqAprobada.every(c => (newEstados[c] || 'pendiente') === 'aprobada');
-
-        if (!regOk || !aprOk) {
-          newElectivas[e.id] = 'pendiente';
-          changed = true;
-        }
-      });
-    }
-
-    return { newEstados, newElectivas };
-  }, []);
+  // Validaciones delegadas al motor puro
+  const puedeRegularMateria = useCallback((m: Materia): boolean => checkPuedeRegular(m, getEstado), [getEstado]);
+  const puedeAprobarMateria = useCallback((m: Materia): boolean => checkPuedeAprobar(m, getEstado), [getEstado]);
+  const esMateriaCursable = useCallback((m: Materia): boolean => checkEsCursable(m, getEstado), [getEstado]);
+  const esMateriaRendible = useCallback((m: Materia): boolean => checkEsRendible(m, getEstado), [getEstado]);
+  const puedeRegularElectiva = useCallback((e: Electiva): boolean => checkPuedeRegularElectiva(e, getEstado), [getEstado]);
+  const esElectivaCursable = useCallback((e: Electiva): boolean => checkEsElectivaCursable(e, getEstadoElectiva, getEstado), [getEstadoElectiva, getEstado]);
 
   // Alternar estado de una materia
   const toggleMateriaEstado = useCallback((id: number) => {
@@ -434,9 +278,9 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setEstados(nextEstados);
     setEstadosElectivas(nextElectivas);
     void persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas });
-  }, [estados, estadosElectivas, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, applyCascade, isViewingShared]);
+  }, [estados, estadosElectivas, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, isViewingShared]);
 
-  // Establecer un estado concreto sin pasar por el ciclo de toggle
+  // Establecer un estado directo sin ciclo toggle
   const setEstadoDirecto = useCallback((id: number, estado: EstadoMateria) => {
     if (isViewingShared) {
       showToast('⚠️ Estás en modo de solo lectura del progreso compartido', 'warning');
@@ -451,7 +295,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     if (estado === 'aprobada') {
-      if (!cumpleReqsCursada(m)) {
+      if (!cumpleReqsCursada(m, getEstado)) {
         showToast(`⚠️ No cumples con los requisitos previos de ${m.nombre}`);
         return;
       }
@@ -479,7 +323,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setEstados(nextEstados);
     setEstadosElectivas(nextElectivas);
     void persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas, notas, ppsHoras });
-  }, [estados, estadosElectivas, notas, ppsHoras, applyCascade, puedeRegularMateria, puedeAprobarMateria, cumpleReqsCursada, showToast, isViewingShared]);
+  }, [estados, estadosElectivas, notas, ppsHoras, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, isViewingShared]);
 
   // Alternar estado de una electiva
   const toggleElectivaEstado = useCallback((id: number) => {
@@ -574,206 +418,55 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     showToast('Plan reseteado por completo.');
   }, [showToast]);
 
-  // Cálculo de estadísticas
+  // Cálculo de estadísticas académicas delegado
   const stats: Stats = useMemo(() => {
-    const troncalesArray = MATERIAS_TRONCALES.filter(m => !m.esAdusiSolo);
-    const aprobadas = troncalesArray.filter(m => getEstado(m.id) === 'aprobada').length;
-    const regulares = troncalesArray.filter(m => getEstado(m.id) === 'regular').length;
-    const cursables = troncalesArray.filter(m => esMateriaCursable(m)).length;
-    const totalTroncales = troncalesArray.length;
-    const porcentajeCarrera = Number(((aprobadas / totalTroncales) * 100).toFixed(1));
-
-    // Electivas
-    const electivasAprobadas = MATERIAS_ELECTIVAS.filter(e => getEstadoElectiva(e.id) === 'aprobada');
-    const horasElectivasAprobadas = electivasAprobadas.reduce((acc, curr) => acc + curr.horas, 0);
-
-    // Promedio de materias aprobadas
-    let notasSuma = 0;
-    let notasCount = 0;
-
-    Object.values(notas).forEach(n => {
-      if (n && typeof n.nota === 'number' && !isNaN(n.nota)) {
-        notasSuma += n.nota;
-        notasCount += 1;
-      }
-    });
-
-    const promedio = notasCount > 0 ? Number((notasSuma / notasCount).toFixed(2)) : null;
-
-    // ADUSI: 1º, 2º y 3º año completos (id 1 a 23) + Seminario Integrador (id 99) + >= 4hs electivas
-    const materiasAdusi = MATERIAS_TRONCALES.filter(m => m.nivel <= 3 && !m.esAdusiSolo);
-    const adusiTroncalesAprobadas = materiasAdusi.every(m => getEstado(m.id) === 'aprobada');
-    const seminarioAprobado = getEstado(99) === 'aprobada';
-    const adusiElectivasOk = horasElectivasAprobadas >= 4;
-
-    const adusiFaltantes: string[] = [];
-    if (!adusiTroncalesAprobadas) {
-      const faltan = materiasAdusi.filter(m => getEstado(m.id) !== 'aprobada').map(m => m.nombre);
-      adusiFaltantes.push(`Materias 1°-3° nivel (${faltan.length} pendientes)`);
-    }
-    if (!seminarioAprobado) adusiFaltantes.push('Seminario Integrador');
-    if (!adusiElectivasOk) adusiFaltantes.push(`Electivas (${horasElectivasAprobadas}/4 hs)`);
-
-    const adusiPuntosTotales = materiasAdusi.length + 1 + 1; // troncales + seminario + electivas
-    let adusiPuntosActuales = materiasAdusi.filter(m => getEstado(m.id) === 'aprobada').length;
-    if (seminarioAprobado) adusiPuntosActuales += 1;
-    if (adusiElectivasOk) adusiPuntosActuales += 1;
-    const adusiProgreso = Math.round((adusiPuntosActuales / adusiPuntosTotales) * 100);
-
-    const adusiCumplido = adusiTroncalesAprobadas && seminarioAprobado && adusiElectivasOk;
-
-    // Ingeniero: 36 troncales + 20hs electivas + 200hs PPS
-    const todasTroncalesOk = aprobadas === totalTroncales;
-    const ingElectivasOk = horasElectivasAprobadas >= 20;
-    const ppsOk = ppsHoras >= 200;
-
-    const ingenieroFaltantes: string[] = [];
-    if (!todasTroncalesOk) ingenieroFaltantes.push(`Troncales (${totalTroncales - aprobadas} pendientes)`);
-    if (!ingElectivasOk) ingenieroFaltantes.push(`Electivas (${horasElectivasAprobadas}/20 hs)`);
-    if (!ppsOk) ingenieroFaltantes.push(`PPS (${ppsHoras}/200 hs)`);
-
-    // Ponderación de Ingeniería: 90% Materias Troncales (36 troncales), 5% Electivas (20 hs) y 5% PPS (200 hs)
-    const progresoTroncales = totalTroncales > 0 ? (aprobadas / totalTroncales) * 90 : 0;
-    const progresoElectivas = (Math.min(horasElectivasAprobadas, 20) / 20) * 5;
-    const progresoPPS = (Math.min(ppsHoras, 200) / 200) * 5;
-    const ingenieroProgreso = Math.min(100, Math.round(progresoTroncales + progresoElectivas + progresoPPS));
-
-    const ingenieroCumplido = todasTroncalesOk && ingElectivasOk && ppsOk;
-    const metasCount = Object.keys(metasExamen).length;
-
-    // Próxima meta de examen más cercana (Item 17)
-    let proximaMeta: ProximaMetaInfo | null = null;
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-
-    const metasArray = Object.values(metasExamen);
-    if (metasArray.length > 0) {
-      const metasFuturas: ProximaMetaInfo[] = [];
-
-      for (const meta of metasArray) {
-        if (getEstado(meta.materiaId) === 'aprobada') continue;
-
-        const materia = MATERIAS_MAP[meta.materiaId];
-        let fechaStr = meta.fechaEstimada;
-
-        if (!fechaStr) {
-          const turno = TURNOS_EXAMEN.find(t => t.id === meta.turnoId);
-          if (turno) {
-            const fechaExacta = getFechaExactaMesa(meta.materiaId, turno);
-            fechaStr = fechaExacta ? fechaExacta.fechaExactaStr : turno.fechaInicio;
-          }
-        }
-
-        if (fechaStr) {
-          const target = new Date(fechaStr + 'T00:00:00');
-          const diffMs = target.getTime() - now.getTime();
-          const diasFaltantes = Math.round(diffMs / (1000 * 60 * 60 * 24));
-
-          if (diasFaltantes >= 0) {
-            const urgencia: 'urgente' | 'proxima' | 'lejana' =
-              diasFaltantes <= 7 ? 'urgente' : diasFaltantes <= 30 ? 'proxima' : 'lejana';
-
-            metasFuturas.push({
-              materiaId: meta.materiaId,
-              materiaNombre: materia ? materia.nombreCompleto : `Materia #${meta.materiaId}`,
-              materiaNombreCorto: materia ? materia.nombre : `#${meta.materiaId}`,
-              turnoNombre: meta.turnoNombre,
-              fechaExamenStr: fechaStr,
-              diasFaltantes,
-              urgencia
-            });
-          }
-        }
-      }
-
-      metasFuturas.sort((a, b) => a.diasFaltantes - b.diasFaltantes);
-      if (metasFuturas.length > 0) {
-        proximaMeta = metasFuturas[0];
-      }
-    }
-
-    return {
-      aprobadasCount: aprobadas,
-      regularesCount: regulares,
-      cursablesCount: cursables,
-      totalTroncales,
-      porcentajeCarrera,
-      horasElectivasAprobadas,
-      promedio,
-      promedioConAplazos: promedio,
-      promedioSinAplazos: promedio,
-      adusiCumplido,
-      adusiProgreso,
-      adusiFaltantes,
-      ingenieroCumplido,
-      ingenieroProgreso,
-      ingenieroFaltantes,
-      metasCount,
-      proximaMeta
-    };
-  }, [getEstado, getEstadoElectiva, notas, ppsHoras, metasExamen, esMateriaCursable]);
-
-  const exportBackupJson = useCallback(() => {
-    const backupData = {
-      version: '1.0',
-      exportDate: new Date().toISOString(),
-      plan: 'Plan 2023 ISI UTN FRRo',
+    return computeAcademicStats(
       estados,
       estadosElectivas,
       notas,
       ppsHoras,
-      perfil,
-      metasExamen
-    };
-    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const fileName = `tracker-isi-${perfil.legajo || 'backup'}-${new Date().toISOString().slice(0, 10)}.json`;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+      metasExamen,
+      esMateriaCursable
+    );
+  }, [estados, estadosElectivas, notas, ppsHoras, metasExamen, esMateriaCursable]);
+
+  const exportBackupJson = useCallback(() => {
+    downloadBackupJson(estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen);
     showToast('💾 Copia de seguridad exportada con éxito', 'success');
   }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, showToast]);
 
   const importBackupJson = useCallback((jsonStr: string): boolean => {
-    try {
-      const data = JSON.parse(jsonStr);
-      if (!data || typeof data !== 'object') {
-        showToast('⚠️ Archivo de copia de seguridad no válido', 'error');
-        return false;
-      }
-      const newEstados = data.estados && typeof data.estados === 'object' ? data.estados : estados;
-      const newElectivas = data.estadosElectivas && typeof data.estadosElectivas === 'object' ? data.estadosElectivas : estadosElectivas;
-      const newNotas = data.notas && typeof data.notas === 'object' ? data.notas : notas;
-      const newPps = typeof data.ppsHoras === 'number' ? data.ppsHoras : ppsHoras;
-      const newPerfil = data.perfil && typeof data.perfil === 'object' ? data.perfil : perfil;
-      const newMetas = data.metasExamen && typeof data.metasExamen === 'object' ? data.metasExamen : metasExamen;
-
-      setEstados(newEstados);
-      setEstadosElectivas(newElectivas);
-      setNotas(newNotas);
-      setPpsHorasState(newPps);
-      setPerfilState(newPerfil);
-      setMetasExamenState(newMetas);
-
-      void persistProgress({
-        estados: newEstados,
-        estadosElectivas: newElectivas,
-        notas: newNotas,
-        ppsHoras: newPps,
-        perfil: newPerfil,
-        metasExamen: newMetas
-      });
-
-      showToast('✅ ¡Progreso restaurado correctamente!', 'success');
-      return true;
-    } catch {
+    const data = parseBackupJson(jsonStr);
+    if (!data) {
       showToast('❌ Error al procesar el archivo JSON', 'error');
       return false;
     }
+
+    const newEstados = data.estados && typeof data.estados === 'object' ? data.estados : estados;
+    const newElectivas = data.estadosElectivas && typeof data.estadosElectivas === 'object' ? data.estadosElectivas : estadosElectivas;
+    const newNotas = data.notas && typeof data.notas === 'object' ? data.notas : notas;
+    const newPps = typeof data.ppsHoras === 'number' ? data.ppsHoras : ppsHoras;
+    const newPerfil = data.perfil && typeof data.perfil === 'object' ? data.perfil : perfil;
+    const newMetas = data.metasExamen && typeof data.metasExamen === 'object' ? data.metasExamen : metasExamen;
+
+    setEstados(newEstados);
+    setEstadosElectivas(newElectivas);
+    setNotas(newNotas);
+    setPpsHorasState(newPps);
+    setPerfilState(newPerfil);
+    setMetasExamenState(newMetas);
+
+    void persistProgress({
+      estados: newEstados,
+      estadosElectivas: newElectivas,
+      notas: newNotas,
+      ppsHoras: newPps,
+      perfil: newPerfil,
+      metasExamen: newMetas
+    });
+
+    showToast('✅ ¡Progreso restaurado correctamente!', 'success');
+    return true;
   }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, showToast]);
 
   return (
