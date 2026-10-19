@@ -332,10 +332,7 @@ export const NetworkGraph: React.FC = () => {
       // fijando las coordenadas jerárquicas en el dataset y liberando el eje Y para arrastre 2D
       if (isFreeModeRef.current) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (net.physics && (net.physics as any).stopSimulation) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (net.physics as any).stopSimulation();
-        }
+        (net as any)?.physics?.stopSimulation?.();
         const currentPos = net.getPositions();
         const saved = loadSavedPositions();
         const posToUse = (saved && isValidPositions(saved, graphDirectionRef.current))
@@ -508,10 +505,7 @@ export const NetworkGraph: React.FC = () => {
 
     if (nextMode) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (networkRef.current.physics && (networkRef.current.physics as any).stopSimulation) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (networkRef.current.physics as any).stopSimulation();
-      }
+      (networkRef.current as any)?.physics?.stopSimulation?.();
 
       // 1. Obtener posiciones actuales si son válidas, o el layout canónico limpio
       const currentPos = networkRef.current.getPositions();
