@@ -175,7 +175,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
 
 
         {/* Indicadores en vivo en desktop: Contadores en modo Grafo + Promedio y Próxima Meta */}
-        {(viewMode === 'grafo' || stats.promedioConAplazos !== null || stats.proximaMeta) && (
+        {(viewMode === 'grafo' || stats.promedio !== null || stats.proximaMeta) && (
           <div className="hidden md:flex items-center gap-2 sm:gap-3 overflow-x-auto py-1 justify-center">
             {/* Contadores de materias visibles en modo Grafo (en Malla ya figuran en los filtros interactivos) */}
             {viewMode === 'grafo' && (
@@ -248,18 +248,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               </div>
             )}
 
-            {stats.promedioConAplazos !== null && (
+            {stats.promedio !== null && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-500/10 dark:bg-purple-950/40 border border-purple-500/30 shadow-sm">
                 <Award className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
                 <div className="text-left font-mono">
                   <div className="text-purple-900 dark:text-purple-300 font-extrabold text-xs sm:text-sm leading-none">
-                    {formatPromedio(stats.promedioSinAplazos !== null ? stats.promedioSinAplazos : stats.promedioConAplazos)}
+                    {formatPromedio(stats.promedio)}
                   </div>
                   <div 
                     className="text-[10px] text-purple-900 dark:text-purple-300 uppercase leading-tight font-bold cursor-help"
-                    title={`Con aplazos: ${formatPromedio(stats.promedioConAplazos)} · Sin aplazos: ${formatPromedio(stats.promedioSinAplazos)}`}
+                    title={`Promedio general de materias aprobadas: ${formatPromedio(stats.promedio)}`}
                   >
-                    {stats.promedioSinAplazos !== null ? 'Prom. s/aplazos' : 'Promedio'}
+                    Promedio
                   </div>
                 </div>
               </div>

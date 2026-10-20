@@ -66,6 +66,14 @@ export interface AcademicTrackerContextType {
   reloadProgress: () => void;
   exportBackupJson: () => void;
   importBackupJson: (jsonStr: string) => boolean;
+  cascadeConfirmDialog: {
+    isOpen: boolean;
+    materiaNombre: string;
+    totalAfectadas: number;
+    materiasAfectadas: string[];
+    onConfirm: () => void;
+  } | null;
+  closeCascadeConfirmDialog: () => void;
 }
 
 export type TrackerContextType = AcademicTrackerContextType & UIContextType;
@@ -204,6 +212,18 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
   }, []);
 
+  const [cascadeConfirmDialog, setCascadeConfirmDialog] = useState<{
+    isOpen: boolean;
+    materiaNombre: string;
+    totalAfectadas: number;
+    materiasAfectadas: string[];
+    onConfirm: () => void;
+  } | null>(null);
+
+  const closeCascadeConfirmDialog = useCallback(() => {
+    setCascadeConfirmDialog(null);
+  }, []);
+
   // Helpers de acceso a estados
   const getEstado = useCallback((id: number): EstadoMateria => estados[id] || 'pendiente', [estados]);
   const getEstadoElectiva = useCallback((id: number): EstadoMateria => estadosElectivas[id] || 'pendiente', [estadosElectivas]);
@@ -216,6 +236,76 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const puedeRegularElectiva = useCallback((e: Electiva): boolean => checkPuedeRegularElectiva(e, getEstado), [getEstado]);
   const esElectivaCursable = useCallback((e: Electiva): boolean => checkEsElectivaCursable(e, getEstadoElectiva, getEstado), [getEstadoElectiva, getEstado]);
 
+  const executeResetToPendiente = useCallback((mId: number, mNombre: string) => {
+    const prevEstados = { ...estados };
+    const prevElectivas = { ...estadosElectivas };
+    const prevNotas = { ...notas };
+
+    const nextTemp = { ...estados, [mId]: 'pendiente' as EstadoMateria };
+    const cascaded = applyCascade(nextTemp, estadosElectivas);
+
+    // Limpiamos notas de materias que ya no quedan aprobadas
+    const nextNotas = { ...notas };
+    delete nextNotas[mId];
+    for (const [k, v] of Object.entries(cascaded.newEstados)) {
+      if (v !== 'aprobada') {
+        delete nextNotas[Number(k)];
+      }
+    }
+
+    setEstados(cascaded.newEstados);
+    setEstadosElectivas(cascaded.newElectivas);
+    setNotas(nextNotas);
+    void persistProgress({ estados: cascaded.newEstados, estadosElectivas: cascaded.newElectivas, notas: nextNotas, ppsHoras });
+
+    showToast(`⚪ ${mNombre} reseteada a PENDIENTE`, {
+      variant: 'info',
+      action: {
+        label: 'Deshacer',
+        onClick: () => {
+          setEstados(prevEstados);
+          setEstadosElectivas(prevElectivas);
+          setNotas(prevNotas);
+          void persistProgress({ estados: prevEstados, estadosElectivas: prevElectivas, notas: prevNotas, ppsHoras });
+          showToast(`↩️ Se restauró ${mNombre} y sus materias correlativas`, 'success');
+        }
+      }
+    });
+  }, [estados, estadosElectivas, notas, ppsHoras, showToast]);
+
+  const requestResetToPendiente = useCallback((mId: number, mNombre: string) => {
+    const nextTemp = { ...estados, [mId]: 'pendiente' as EstadoMateria };
+    const cascaded = applyCascade(nextTemp, estadosElectivas);
+
+    const afectadas: string[] = [];
+    for (const [k, v] of Object.entries(estados)) {
+      const num = Number(k);
+      if (num !== mId && v !== 'pendiente' && cascaded.newEstados[num] === 'pendiente') {
+        const mat = MATERIAS_MAP[num];
+        if (mat) afectadas.push(mat.nombre);
+      }
+    }
+    for (const [k, v] of Object.entries(estadosElectivas)) {
+      const num = Number(k);
+      if (v !== 'pendiente' && cascaded.newElectivas[num] === 'pendiente') {
+        const ele = ELECTIVAS_MAP[num];
+        if (ele) afectadas.push(ele.nombre);
+      }
+    }
+
+    if (afectadas.length > 3) {
+      setCascadeConfirmDialog({
+        isOpen: true,
+        materiaNombre: mNombre,
+        totalAfectadas: afectadas.length,
+        materiasAfectadas: afectadas,
+        onConfirm: () => executeResetToPendiente(mId, mNombre)
+      });
+    } else {
+      executeResetToPendiente(mId, mNombre);
+    }
+  }, [estados, estadosElectivas, executeResetToPendiente]);
+
   // Alternar estado de una materia
   const toggleMateriaEstado = useCallback((id: number) => {
     if (isViewingShared) {
@@ -225,9 +315,6 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const m = MATERIAS_MAP[id];
     if (!m) return;
     const actual = getEstado(id);
-
-    let nextEstados = { ...estados };
-    let nextElectivas = { ...estadosElectivas };
 
     if (actual === 'pendiente') {
       if (!puedeRegularMateria(m)) {
@@ -250,7 +337,9 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         showToast(msgPartes.join(' • '));
         return;
       }
-      nextEstados[id] = 'regular';
+      const nextEstados = { ...estados, [id]: 'regular' as EstadoMateria };
+      setEstados(nextEstados);
+      void persistProgress({ estados: nextEstados, estadosElectivas });
       showToast(`🟡 ${m.nombre} marcada como REGULAR`);
     } else if (actual === 'regular') {
       if (!puedeAprobarMateria(m)) {
@@ -265,20 +354,14 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         showToast(`⚠️ No cumples con las correlativas necesarias para aprobar ${m.nombre}`);
         return;
       }
-      nextEstados[id] = 'aprobada';
+      const nextEstados = { ...estados, [id]: 'aprobada' as EstadoMateria };
+      setEstados(nextEstados);
+      void persistProgress({ estados: nextEstados, estadosElectivas });
       showToast(`🟢 ${m.nombre} marcada como APROBADA`);
     } else {
-      nextEstados[id] = 'pendiente';
-      showToast(`⚪ ${m.nombre} reseteada a PENDIENTE`);
-      const cascaded = applyCascade(nextEstados, nextElectivas);
-      nextEstados = cascaded.newEstados;
-      nextElectivas = cascaded.newElectivas;
+      requestResetToPendiente(id, m.nombre);
     }
-
-    setEstados(nextEstados);
-    setEstadosElectivas(nextElectivas);
-    void persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas });
-  }, [estados, estadosElectivas, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, isViewingShared]);
+  }, [estados, estadosElectivas, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, isViewingShared, requestResetToPendiente]);
 
   // Establecer un estado directo sin ciclo toggle
   const setEstadoDirecto = useCallback((id: number, estado: EstadoMateria) => {
@@ -311,19 +394,34 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     }
 
-    let nextEstados = { ...estados, [id]: estado };
-    let nextElectivas = { ...estadosElectivas };
-
     if (estado === 'pendiente') {
-      const cascaded = applyCascade(nextEstados, nextElectivas);
-      nextEstados = cascaded.newEstados;
-      nextElectivas = cascaded.newElectivas;
+      requestResetToPendiente(id, m.nombre);
+      return;
     }
 
-    setEstados(nextEstados);
-    setEstadosElectivas(nextElectivas);
-    void persistProgress({ estados: nextEstados, estadosElectivas: nextElectivas, notas, ppsHoras });
-  }, [estados, estadosElectivas, notas, ppsHoras, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, isViewingShared]);
+    const nextEstados = { ...estados, [id]: estado };
+    const nextNotas = { ...notas };
+    if (estado !== 'aprobada') {
+      delete nextNotas[id];
+    }
+
+    const cascaded = applyCascade(nextEstados, estadosElectivas);
+    for (const [k, v] of Object.entries(cascaded.newEstados)) {
+      if (v !== 'aprobada') {
+        delete nextNotas[Number(k)];
+      }
+    }
+
+    setEstados(cascaded.newEstados);
+    setEstadosElectivas(cascaded.newElectivas);
+    setNotas(nextNotas);
+    void persistProgress({ estados: cascaded.newEstados, estadosElectivas: cascaded.newElectivas, notas: nextNotas, ppsHoras });
+    if (estado === 'regular') {
+      showToast(`🟡 ${m.nombre} marcada como REGULAR`);
+    } else if (estado === 'aprobada') {
+      showToast(`🟢 ${m.nombre} marcada como APROBADA`, { variant: 'success' });
+    }
+  }, [estados, estadosElectivas, notas, ppsHoras, getEstado, puedeRegularMateria, puedeAprobarMateria, showToast, isViewingShared, requestResetToPendiente]);
 
   // Alternar estado de una electiva
   const toggleElectivaEstado = useCallback((id: number) => {
@@ -398,14 +496,36 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [showToast]);
 
   const removeMetaExamen = useCallback((materiaId: number) => {
+    const prevMeta = metasExamen[materiaId];
+    const mat = MATERIAS_MAP[materiaId];
+    const nombreMat = mat ? mat.nombre : `#${materiaId}`;
+
     setMetasExamenState(prev => {
       const next = { ...prev };
       delete next[materiaId];
       void persistProgress({ metasExamen: next });
       return next;
     });
-    showToast('Meta de examen eliminada');
-  }, [showToast]);
+
+    if (prevMeta) {
+      showToast(`🎯 Meta de examen eliminada para ${nombreMat}`, {
+        variant: 'info',
+        action: {
+          label: 'Deshacer',
+          onClick: () => {
+            setMetasExamenState(prev => {
+              const restored = { ...prev, [materiaId]: prevMeta };
+              void persistProgress({ metasExamen: restored });
+              return restored;
+            });
+            showToast(`↩️ Meta de final restaurada para ${nombreMat}`, 'success');
+          }
+        }
+      });
+    } else {
+      showToast('Meta de examen eliminada');
+    }
+  }, [metasExamen, showToast]);
 
   const resetAll = useCallback(() => {
     setEstados({});
@@ -500,7 +620,9 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         resetAll,
         reloadProgress,
         exportBackupJson,
-        importBackupJson
+        importBackupJson,
+        cascadeConfirmDialog,
+        closeCascadeConfirmDialog
       }}
     >
       {children}

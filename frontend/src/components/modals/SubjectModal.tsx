@@ -14,7 +14,8 @@ import {
   Calendar,
   Trash2,
   FolderOpen,
-  ExternalLink
+  ExternalLink,
+  AlertTriangle
 } from 'lucide-react';
 import { 
   TURNOS_EXAMEN, 
@@ -36,10 +37,10 @@ export const SubjectModal: React.FC = () => {
     metasExamen,
     setMetaExamen,
     removeMetaExamen,
-    toggleMateriaEstado,
     setEstadoDirecto,
     setNotaMateria,
-    showToast
+    showToast,
+    esMateriaRendible
   } = useTracker();
 
   const [notaVal, setNotaVal] = useState<string>('');
@@ -144,18 +145,8 @@ export const SubjectModal: React.FC = () => {
 
   const handleRemoveMeta = () => {
     if (!materia) return;
-    const prevMeta = currentMeta;
     removeMetaExamen(materia.id);
     setShowMetaForm(false);
-    if (prevMeta) {
-      showToast('Meta de examen eliminada', {
-        variant: 'info',
-        action: {
-          label: 'Deshacer',
-          onClick: () => setMetaExamen(materia.id, prevMeta)
-        }
-      });
-    }
   };
 
   // Guardar calificación
@@ -176,6 +167,16 @@ export const SubjectModal: React.FC = () => {
     return enApr || enRendir;
   });
   const tieneMateriasQueDestraba = materiasQueDestrabaCursar.length > 0 || materiasQueDestrabaRendir.length > 0;
+  const esRendible = esMateriaRendible(materia);
+  const correlativasFaltantesParaRendir = (
+    Array.isArray(materia.reqRendirAprobada)
+      ? materia.reqRendirAprobada
+      : Array.isArray(materia.reqAprobada)
+        ? materia.reqAprobada
+        : []
+  )
+    .filter(reqId => estados[reqId] !== 'aprobada')
+    .map(reqId => MATERIAS_MAP[reqId]?.nombre || `#${reqId}`);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
@@ -293,12 +294,12 @@ export const SubjectModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  if (currentEstado !== 'pendiente') toggleMateriaEstado(materia.id);
+                  if (currentEstado !== 'pendiente') setEstadoDirecto(materia.id, 'pendiente');
                 }}
                 className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 active:scale-95 transition-all min-h-11 ${
                   currentEstado === 'pendiente'
                     ? 'bg-slate-200 dark:bg-slate-800 border-slate-400 dark:border-slate-600 text-(--text-body) font-bold shadow-md'
-                    : 'bg-(--bg-elevated) border-(--border-color) text-slate-500 dark:text-slate-400 hover:border-slate-400'
+                    : 'bg-(--bg-elevated) border-(--border-color) text-slate-500 dark:text-slate-400 hover:border-slate-400 cursor-pointer'
                 }`}
               >
                 <span>⚪</span>
@@ -308,12 +309,12 @@ export const SubjectModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  if (currentEstado === 'pendiente') toggleMateriaEstado(materia.id);
+                  if (currentEstado !== 'regular') setEstadoDirecto(materia.id, 'regular');
                 }}
                 className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 active:scale-95 transition-all min-h-11 ${
                   currentEstado === 'regular'
                     ? 'font-bold shadow-md'
-                    : 'bg-(--bg-elevated) border-(--border-color) text-slate-500 dark:text-slate-400 hover:border-slate-400'
+                    : 'bg-(--bg-elevated) border-(--border-color) text-slate-500 dark:text-slate-400 hover:border-slate-400 cursor-pointer'
                 }`}
                 style={currentEstado === 'regular' ? {
                   backgroundColor: 'var(--color-regular-bg)',
@@ -329,16 +330,12 @@ export const SubjectModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  if (currentEstado === 'regular') toggleMateriaEstado(materia.id);
-                  else if (currentEstado === 'pendiente') {
-                    setEstadoDirecto(materia.id, 'aprobada');
-                    showToast(`🟢 ${materia.nombre} marcada como APROBADA`, 'success');
-                  }
+                  if (currentEstado !== 'aprobada') setEstadoDirecto(materia.id, 'aprobada');
                 }}
                 className={`py-2.5 px-2 rounded-xl border flex items-center justify-center gap-1.5 active:scale-95 transition-all min-h-11 ${
                   currentEstado === 'aprobada'
                     ? 'font-bold shadow-md'
-                    : 'bg-(--bg-elevated) border-(--border-color) text-slate-500 dark:text-slate-400 hover:border-slate-400'
+                    : 'bg-(--bg-elevated) border-(--border-color) text-slate-500 dark:text-slate-400 hover:border-slate-400 cursor-pointer'
                 }`}
                 style={currentEstado === 'aprobada' ? {
                   backgroundColor: 'var(--color-aprobada-bg)',
@@ -617,6 +614,14 @@ export const SubjectModal: React.FC = () => {
                 </button>
               ) : (
                 <form onSubmit={handleSaveMeta} className="space-y-3 pt-1">
+                  {!esRendible && correlativasFaltantesParaRendir.length > 0 && (
+                    <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-mono flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold">Aviso de correlatividades:</span> Aún tenés pendiente aprobar <strong>{correlativasFaltantesParaRendir.join(', ')}</strong> antes de rendir esta materia. Podés agendar la meta igualmente como planificación temprana.
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <label htmlFor="materia-turno-select" className="block text-[11px] font-mono text-slate-600 dark:text-slate-400 mb-1">
                       Seleccionar Turno Oficial UTN FRRo:

@@ -16,6 +16,7 @@ export const GridView: React.FC = () => {
     stats,
     toggleMateriaEstado,
     esMateriaCursable,
+    esMateriaRendible,
     setSelectedSubjectId
   } = useTracker();
 
@@ -46,7 +47,7 @@ export const GridView: React.FC = () => {
 
     // Filtro rápido por estado
     const est = estados[m.id] || 'pendiente';
-    const cursable = esMateriaCursable(m);
+                    const cursable = esMateriaCursable(m);
     const hasMeta = Boolean(metasExamen[m.id]);
 
     if (gridFilter === 'cursables' && !cursable) return false;
@@ -86,7 +87,7 @@ export const GridView: React.FC = () => {
             Malla Curricular Plan 2023
           </h2>
           <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono">
-            Estructura cronológica por niveles académicos · <span className="text-(--color-primary) font-medium">Click derecho para ver detalle y notas</span>
+            Estructura cronológica por niveles académicos<span className="hidden sm:inline"> · <span className="text-(--color-primary) font-medium">Click derecho para ver detalle y notas</span></span>
           </p>
         </div>
 
@@ -98,6 +99,12 @@ export const GridView: React.FC = () => {
             aria-label="Buscar materia por nombre o código"
             value={search}
             onChange={e => setSearch(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Escape') {
+                setSearch('');
+                e.currentTarget.blur();
+              }
+            }}
             className="w-full bg-(--bg-surface) border border-(--border-color) rounded-xl pl-9 pr-9 py-2 text-xs font-mono text-(--text-body) placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors shadow-sm"
           />
           {search && (
@@ -330,6 +337,7 @@ export const GridView: React.FC = () => {
                   materiasNivel.map(m => {
                     const est = estados[m.id] || 'pendiente';
                     const cursable = esMateriaCursable(m);
+                    const rendible = esMateriaRendible(m);
                     const nota = notas[m.id]?.nota;
 
                     // Estilos de tarjeta según estado adaptados al tema
@@ -365,7 +373,7 @@ export const GridView: React.FC = () => {
                             backgroundColor: 'var(--color-regular-bg)' 
                           }}
                         >
-                          <Clock className="w-3 h-3" /> Regular
+                          <Clock className="w-3 h-3" /> {rendible ? 'Regular 🎯' : 'Regular'}
                         </span>
                       );
                     } else if (cursable) {
@@ -442,7 +450,7 @@ export const GridView: React.FC = () => {
                         <div className="flex items-center justify-between pt-1 border-t border-(--border-color) mt-1">
                           <div className="flex flex-wrap items-center gap-1.5">
                             {statusBadge}
-                            {nota !== undefined && (
+                            {est === 'aprobada' && nota !== undefined && (
                               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-800 dark:text-purple-300">
                                 Nota: {nota}
                               </span>

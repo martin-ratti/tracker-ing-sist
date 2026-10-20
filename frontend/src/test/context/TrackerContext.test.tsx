@@ -115,6 +115,19 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     const { result } = renderHook(() => useTracker(), { wrapper });
 
     act(() => {
+      result.current.setEstadoDirecto(1, 'regular');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(1, 'aprobada');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(2, 'regular');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(2, 'aprobada');
+    });
+
+    act(() => {
       result.current.setNotaMateria(1, { nota: 8 });
     });
     act(() => {
@@ -277,5 +290,170 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
       result.current.removeMetaExamen(1);
     });
     expect(result.current.metasExamen[1]).toBeUndefined();
+  });
+
+  it('al eliminar una meta debe emitir un Toast con acción Deshacer y permitir restaurarla', () => {
+    const { result } = renderHook(() => useTracker(), { wrapper });
+
+    act(() => {
+      result.current.setMetaExamen(1, {
+        materiaId: 1,
+        turnoId: 'feb-2026-l1',
+        turnoNombre: 'Febrero 1° Llamado',
+        fechaEstimada: '2026-02-16'
+      });
+    });
+
+    expect(result.current.metasExamen[1]).toBeDefined();
+
+    act(() => {
+      result.current.removeMetaExamen(1);
+    });
+
+    expect(result.current.metasExamen[1]).toBeUndefined();
+    // Debe existir un toast con acción Deshacer
+    const toastConUndo = result.current.toasts.find(t => t.action?.label === 'Deshacer');
+    expect(toastConUndo).toBeDefined();
+
+    // Ejecutar el Deshacer
+    act(() => {
+      toastConUndo?.action?.onClick();
+    });
+
+    // La meta debe quedar restaurada
+    expect(result.current.metasExamen[1]).toBeDefined();
+    expect(result.current.metasExamen[1].turnoId).toBe('feb-2026-l1');
+  });
+
+  it('al resetear una materia a pendiente debe emitir Toast con Deshacer y permitir restaurar', () => {
+    const { result } = renderHook(() => useTracker(), { wrapper });
+
+    // Aprobamos una materia sin correlativas complejas
+    act(() => {
+      result.current.setEstadoDirecto(3, 'regular');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(3, 'aprobada'); // Física I
+    });
+    expect(result.current.estados[3]).toBe('aprobada');
+
+    act(() => {
+      result.current.setEstadoDirecto(3, 'pendiente');
+    });
+
+    expect(result.current.estados[3]).toBe('pendiente');
+    const toastUndo = result.current.toasts.find(t => t.action?.label === 'Deshacer');
+    expect(toastUndo).toBeDefined();
+
+    // Ejecutamos Deshacer
+    act(() => {
+      toastUndo?.action?.onClick();
+    });
+
+    expect(result.current.estados[3]).toBe('aprobada');
+  });
+
+  it('debe abrir cascadeConfirmDialog cuando desaprobar una materia afecta a más de 3 correlativas', () => {
+    const { result } = renderHook(() => useTracker(), { wrapper });
+
+    // 1. Regularizamos 1, 2 y 3
+    act(() => { result.current.setEstadoDirecto(1, 'regular'); });
+    act(() => { result.current.setEstadoDirecto(2, 'regular'); });
+    act(() => { result.current.setEstadoDirecto(3, 'regular'); });
+
+    // 2. Aprobamos 1, 2 y 3
+    act(() => { result.current.setEstadoDirecto(1, 'aprobada'); });
+    act(() => { result.current.setEstadoDirecto(2, 'aprobada'); });
+    act(() => { result.current.setEstadoDirecto(3, 'aprobada'); });
+
+    // 3. Regularizamos las 4 correlativas que dependen de 1: 9, 10, 17 y 18
+    act(() => { result.current.setEstadoDirecto(9, 'regular'); });
+    act(() => { result.current.setEstadoDirecto(10, 'regular'); });
+    act(() => { result.current.setEstadoDirecto(17, 'regular'); });
+    act(() => { result.current.setEstadoDirecto(18, 'regular'); });
+
+    // 4. Aprobamos las 4 correlativas
+    act(() => { result.current.setEstadoDirecto(9, 'aprobada'); });
+    act(() => { result.current.setEstadoDirecto(10, 'aprobada'); });
+    act(() => { result.current.setEstadoDirecto(17, 'aprobada'); });
+    act(() => { result.current.setEstadoDirecto(18, 'aprobada'); });
+
+    expect(result.current.estados[1]).toBe('aprobada');
+    expect(result.current.estados[9]).toBe('aprobada');
+    expect(result.current.estados[10]).toBe('aprobada');
+    expect(result.current.estados[17]).toBe('aprobada');
+    expect(result.current.estados[18]).toBe('aprobada');
+
+    // Intentamos resetear Análisis 1 (id 1). Desaprobarla afecta a 9, 10, 17 y 18 (4 materias > 3):
+    act(() => {
+      result.current.toggleMateriaEstado(1);
+    });
+
+    // Como afecta a más de 3 materias, abre el diálogo de confirmación
+    expect(result.current.cascadeConfirmDialog).not.toBeNull();
+    expect(result.current.cascadeConfirmDialog?.isOpen).toBe(true);
+    expect(result.current.cascadeConfirmDialog?.totalAfectadas).toBe(4);
+
+    // Si cancela:
+    act(() => {
+      result.current.closeCascadeConfirmDialog();
+    });
+    expect(result.current.cascadeConfirmDialog).toBeNull();
+    expect(result.current.estados[1]).toBe('aprobada'); // Se mantiene aprobada
+
+    // Si confirma:
+    act(() => {
+      result.current.toggleMateriaEstado(1);
+    });
+    expect(result.current.cascadeConfirmDialog?.isOpen).toBe(true);
+    act(() => {
+      result.current.cascadeConfirmDialog?.onConfirm();
+    });
+
+    // Ahora sí se resetean en cascada
+    expect(result.current.estados[1]).toBe('pendiente');
+    expect(result.current.estados[9]).toBe('pendiente');
+    expect(result.current.estados[10]).toBe('pendiente');
+    expect(result.current.estados[17]).toBe('pendiente');
+    expect(result.current.estados[18]).toBe('pendiente');
+  });
+
+  it('cuando una materia tiene nota y se presiona para cambiar de estado debe permitir cambiarla limpiando la nota y restaurando con Deshacer', () => {
+    const { result } = renderHook(() => useTracker(), { wrapper });
+
+    // Regularizamos y aprobamos Sistemas y Procesos (id 8)
+    act(() => {
+      result.current.setEstadoDirecto(8, 'regular');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(8, 'aprobada');
+    });
+    // Le asignamos una calificación
+    act(() => {
+      result.current.setNotaMateria(8, { nota: 9 });
+    });
+
+    expect(result.current.estados[8]).toBe('aprobada');
+    expect(result.current.notas[8]?.nota).toBe(9);
+
+    // Al apretarla (toggle de aprobada -> pendiente):
+    act(() => {
+      result.current.toggleMateriaEstado(8);
+    });
+
+    expect(result.current.estados[8]).toBe('pendiente');
+    expect(result.current.notas[8]).toBeUndefined();
+
+    // Verificamos que emitió Toast con Deshacer
+    const toastUndo = result.current.toasts.find(t => t.action?.label === 'Deshacer');
+    expect(toastUndo).toBeDefined();
+
+    // Si hace click en Deshacer, restaura tanto el estado como la nota
+    act(() => {
+      toastUndo?.action?.onClick();
+    });
+
+    expect(result.current.estados[8]).toBe('aprobada');
+    expect(result.current.notas[8]?.nota).toBe(9);
   });
 });

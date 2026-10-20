@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useModalAnimation } from '../../hooks/useModalAnimation';
-import { X, User, Check, GraduationCap, Download, Upload, Database, Heart, Copy } from 'lucide-react';
+import { X, User, Check, GraduationCap, Download, Upload, Database, Heart, Copy, FileDown } from 'lucide-react';
 import { DONATION_CONFIG } from '../../data/donations';
+import { exportFichaCurricularPDF } from '../../utils/pdfExporter';
 
 export const ProfileModal: React.FC = () => {
   const { 
@@ -13,7 +14,13 @@ export const ProfileModal: React.FC = () => {
     setPerfil, 
     showToast,
     exportBackupJson,
-    importBackupJson
+    importBackupJson,
+    estados,
+    estadosElectivas,
+    notas,
+    ppsHoras,
+    stats,
+    metasExamen
   } = useTracker();
   const [nombre, setNombre] = useState(perfil.nombre || '');
   const [legajo, setLegajo] = useState(perfil.legajo || '');
@@ -69,18 +76,44 @@ export const ProfileModal: React.FC = () => {
     setProfileModalOpen(false);
   };
 
+  const handleDownloadPDF = () => {
+    try {
+      exportFichaCurricularPDF({
+        perfil: { nombre: nombre.trim(), legajo: legajo.trim() },
+        estados,
+        estadosElectivas,
+        notas,
+        ppsHoras,
+        stats,
+        metasExamen
+      });
+      showToast('📄 ¡Ficha Analítica PDF descargada con éxito!', 'success');
+    } catch (err: unknown) {
+      console.error('Error al exportar ficha PDF:', err);
+      showToast('❌ Error al generar la ficha analítica en PDF', 'error');
+    }
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     file.text()
       .then((content) => {
-        const ok = importBackupJson(content);
-        if (ok) {
-          showToast('✅ ¡Datos restaurados exitosamente desde JSON!', 'success');
-          setProfileModalOpen(false);
-        } else {
-          showToast('❌ El archivo seleccionado no tiene un formato válido', 'error');
+        try {
+          const parsed = JSON.parse(content) as Record<string, unknown>;
+          const ok = importBackupJson(content);
+          if (ok) {
+            const aprCount = Object.values((parsed.estados as Record<string, string>) || {}).filter(val => val === 'aprobada').length;
+            const regCount = Object.values((parsed.estados as Record<string, string>) || {}).filter(val => val === 'regular').length;
+            const metaCount = Object.keys((parsed.metasExamen as Record<string, unknown>) || {}).length;
+            showToast(`✅ Restauradas con éxito: ${aprCount} aprobadas, ${regCount} regulares y ${metaCount} metas`, 'success');
+            setProfileModalOpen(false);
+          } else {
+            showToast('❌ El archivo seleccionado no tiene un formato válido', 'error');
+          }
+        } catch {
+          showToast('❌ Error al procesar el archivo JSON', 'error');
         }
       })
       .catch(() => {
@@ -177,10 +210,20 @@ export const ProfileModal: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-1">
+            <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
+              <button
+                type="button"
+                onClick={handleDownloadPDF}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 font-bold transition-all shadow-xs text-xs cursor-pointer"
+                title="Generar y descargar Ficha Analítica Curricular oficial en PDF"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                <span>Descargar Ficha PDF</span>
+              </button>
+
               <button
                 type="submit"
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-md"
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-md text-xs cursor-pointer"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Guardar Datos Alumno</span>

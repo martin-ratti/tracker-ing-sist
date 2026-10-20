@@ -21,6 +21,7 @@ import {
   ProfileModal,
   StatsModal,
   ShareModal,
+  CascadeConfirmModal,
   NotFoundView
 } from './components';
 
@@ -218,6 +219,9 @@ const TrackerMain: React.FC = () => {
 
         {/* Modal de Autenticación / Nube */}
         <AuthModal />
+
+        {/* Modal de Confirmación de Reseteo en Cascada (> 3 materias afectadas) */}
+        <CascadeConfirmModal />
 
         {/* Barra de navegación inferior móvil */}
         <BottomNav 

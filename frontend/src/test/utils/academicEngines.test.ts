@@ -103,6 +103,19 @@ describe('Academic Engines (correlativesEngine, cascadeEngine, academicCalculati
       expect(stats.ingenieroCumplido).toBe(false);
     });
 
+    it('no debe incluir notas de materias pendientes o desmarcadas en el promedio', () => {
+      const stats = computeAcademicStats(
+        { 1: 'aprobada', 2: 'pendiente', 3: 'regular' },
+        {},
+        { 1: { nota: 8 }, 2: { nota: 2 }, 3: { nota: 4 } },
+        0,
+        {},
+        () => false
+      );
+      // Solo la materia 1 está aprobada con 8, las materias 2 y 3 no deben sumar
+      expect(stats.promedio).toBe(8);
+    });
+
     it('debe detectar la próxima meta de examen futura', () => {
       const metas: Record<number, MetaExamen> = {
         1: {

@@ -27,10 +27,6 @@ export interface Electiva {
 
 export interface NotaMateria {
   nota?: number;
-  fecha?: string;
-  libro?: string;
-  folio?: string;
-  comentario?: string;
 }
 
 export interface PerfilAlumno {

@@ -113,12 +113,14 @@ export function computeAcademicStats(
   const electivasAprobadas = MATERIAS_ELECTIVAS.filter(e => getEstadoElectiva(e.id) === 'aprobada');
   const horasElectivasAprobadas = electivasAprobadas.reduce((acc, curr) => acc + curr.horas, 0);
 
-  // Promedio
+  // Promedio (calculado exclusivamente sobre materias efectivamente aprobadas)
   let notasSuma = 0;
   let notasCount = 0;
 
-  Object.values(notas).forEach(n => {
-    if (n && typeof n.nota === 'number' && !isNaN(n.nota)) {
+  Object.entries(notas).forEach(([idStr, n]) => {
+    const id = Number(idStr);
+    const estaAprobada = getEstado(id) === 'aprobada' || getEstadoElectiva(id) === 'aprobada';
+    if (estaAprobada && n && typeof n.nota === 'number' && !isNaN(n.nota)) {
       notasSuma += n.nota;
       notasCount += 1;
     }

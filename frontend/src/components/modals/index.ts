@@ -7,3 +7,4 @@ export * from './ShareModal';
 export * from './StatsModal';
 export * from './SubjectModal';
 export * from './TitlesModal';
+export * from './CascadeConfirmModal';

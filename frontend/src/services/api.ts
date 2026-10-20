@@ -215,12 +215,6 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
         if (typeof n.nota === 'number' && Number.isFinite(n.nota) && n.nota >= 1 && n.nota <= 10) {
           safeNota.nota = Math.round(n.nota);
         }
-        if (typeof n.fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(n.fecha.trim())) {
-          safeNota.fecha = n.fecha.trim().slice(0, 30);
-        }
-        if (typeof n.libro === 'string') safeNota.libro = sanitizeAlphanumericCode(n.libro, 50);
-        if (typeof n.folio === 'string') safeNota.folio = sanitizeAlphanumericCode(n.folio, 50);
-        if (typeof n.comentario === 'string') safeNota.comentario = sanitizeSafeText(n.comentario, 500);
         safeNotas[id] = safeNota;
       }
     }

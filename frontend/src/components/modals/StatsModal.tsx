@@ -17,7 +17,7 @@ interface StatsModalProps {
 }
 
 export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
-  const { stats, estados, notas } = useTracker();
+  const { stats, estados, estadosElectivas, notas } = useTracker();
   const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
   const modalRef = useFocusTrap(isOpen);
 
@@ -67,8 +67,9 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
   const calificacionesList = useMemo(() => {
     const entries = [];
     for (const [idStr, notaData] of Object.entries(notas)) {
-      if (notaData && typeof notaData.nota === 'number') {
-        const id = Number(idStr);
+      const id = Number(idStr);
+      const isAprobada = estados[id] === 'aprobada' || estadosElectivas[id] === 'aprobada';
+      if (isAprobada && notaData && typeof notaData.nota === 'number') {
         const materia = MATERIAS_MAP[id];
         if (materia) {
           entries.push({
@@ -81,7 +82,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
       }
     }
     return entries.sort((a, b) => a.id - b.id);
-  }, [notas]);
+  }, [notas, estados, estadosElectivas]);
 
   if (!isMounted) return null;
 
