@@ -41,17 +41,33 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
   - **Scheduler en segundo plano:** Tarea periódica diaria en el backend Express para revisar metas y evitar duplicación de notificaciones.
   - **Script de prueba:** Ejecución de pruebas de envío con `pnpm --filter tracker-backend test:email`.
 
-- 📄 **Exportar a PDF / Analítico Imprimible Oficial:**
-  - Ficha formal con membrete oficial de UTN Facultad Regional Rosario.
-  - Identificación del estudiante (Nombre y Legajo universitario).
-  - Métricas completas: promedios (con y sin aplazos), avance ADUSI / Ingeniería, horas de electivas y PPS.
-  - Grilla analítica por nivel académico con códigos de asignatura, notas, libros, folios y fechas.
-  - Optimizado para impresión directa o guardado en formato PDF estándar A4 sin barras ni botones superfluos.
+- 📄 **Ficha Curricular y Analítico Oficial en PDF (jsPDF + Autotable):**
+  - **Generación Vectorial Nativa:** Motor cliente integrado con `jsPDF` y `jspdf-autotable` para compilar y descargar directamente un documento formal `.pdf` (`Ficha_Curricular_UTN_ISI_[legajo].pdf`) sin depender de diálogos del navegador.
+  - **Membrete Institucional Oficial:** Identificación formal de la Universidad Tecnológica Nacional (UTN), Facultad Regional Rosario (FRRo), Departamento de Ingeniería en Sistemas de Información, isotipo institucional y fecha/hora exacta de emisión.
+  - **Ficha del Estudiante:** Identificación de Nombre, Legajo universitario y Carrera.
+  - **Tarjetas Métricas Académicas:** Cuatro indicadores destacados con porcentaje de avance de carrera, promedio académico de materias aprobadas, horas de electivas acreditadas (metas 4 hs / 20 hs) y horas de Práctica Profesional Supervisada (PPS vs 200 hs).
+  - **Grilla Analítica Completa por Nivel (1º a 5º Año):** Tablas organizadas por año con código de asignatura (`#XX`), denominación oficial, régimen de cursado (cuatrimestral o anual), carga horaria, estado académico coloreado (`APROBADA` en verde esmeralda, `REGULAR` en ámbar y `PENDIENTE` en gris pizarra) y calificación final.
+  - **Sección de Asignaturas Electivas Acreditadas:** Tabla con denominación, nivel cursado, horas computadas y estado.
+  - **Metas Tentativas de Examen Agendadas:** Registro de turnos de examen y fechas estimadas para próximos finales.
+  - **Paginación Formal:** Foliación automática institucional (`Página X de Y`) y pie de página en todas las hojas.
+  - **Doble Modalidad:** Descarga directa en archivo `.pdf` con botón "Descargar PDF" y compatibilidad completa con `@media print` para impresión física directa o guardado A4. Atajo de teclado: **`R`**.
+
+- 💾 **Copia de Seguridad y Migración Local en JSON (.json):**
+  - **Exportar Copia de Respaldo:** Descarga instantánea de un archivo `.json` (`tracker-isi-[legajo]-[fecha].json`) con todo el progreso: estados de cursada, notas de exámenes, fechas, libros/folios, horas de PPS, metas de finales y datos del estudiante (`backupManager.ts`).
+  - **Restaurar Copia:** Importación directa de archivos `.json` con validación y sanitización segura contra datos maliciosos, permitiendo trasladar avances entre computadoras o navegadores sin necesidad obligatoria de registrarse en la nube.
+
+- 📂 **Integración Comunitaria de Material de Estudio (Google Drive):**
+  - Acceso directo al **Drive General de la Carrera** desde el encabezado superior y menú móvil con resúmenes, libros y apuntes comunitarios.
+  - Acceso al **Drive de Asignaturas Electivas** desde los paneles de electivas.
+  - Enlaces contextuales en cada materia (`SubjectModal.tsx` y `GridView.tsx`) para saltar directamente a la carpeta de material de la cátedra y a la subcarpeta de exámenes y parciales resueltos.
+
+- 📆 **Exportación de Metas a Calendarios Personales (.ics / iCalendar):**
+  - Exportación de las mesas de exámenes agendadas a formato de eventos `.ics` (`icsExporter.ts`), compatible con Google Calendar, Apple Calendar y Microsoft Outlook.
 
 - 👤 **Perfil Universitario del Alumno:**
   - Modal interactivo para configurar Nombre y Legajo estudiantil (`ProfileModal.tsx`).
   - Persistencia automática tanto en local como en la nube.
-  - Avatar de iniciales en la barra superior.
+  - Avatar con iniciales en la barra superior y atajo de teclado: **`P`**.
 
 - 🔄 **Fusión Inteligente de Progreso (Merge Local ↔ Nube):**
   - Al iniciar sesión con datos existentes en el dispositivo, ofrece fusionar de forma inteligente para no perder avances, dando prioridad al estado más avanzado, combinando notas y conservando metas de examen.
@@ -65,11 +81,11 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
     - **Nordic Frost:** Azul glacial nórdico con índigo y turquesa polar.
   - Toda la interfaz (malla, grafo, modales, contadores métricos, botones y leyenda) se sincroniza reactivamente.
 
-- ☁️ **Sincronización en la Nube con Cuentas de Usuario:**
-  - Registro e inicio de sesión con correo y contraseña cifrada con `bcrypt`.
-  - Tokens JWT de sesión con persistencia multi-dispositivo (PC, celular, tablet).
-  - Protección de seguridad en el backend con limitador de tasa (*Rate Limiter*).
-  - **Modo Local Offline Híbrido:** Si preferís no registrarte, podés usar el tracker al 100% en local mediante `localStorage`.
+- ☁️ **Sincronización en la Nube con Cuentas de Usuario (Arquitectura Híbrida):**
+  - **Firebase Authentication & Cloud Firestore (Producción):** Registro con email/contraseña o inicio de sesión con Google en un clic, con almacenamiento persistente y sincronización reactiva multi-dispositivo (PC, celular, tablet).
+  - **Backend API REST Node.js + Express (Auto-hospedado):** Soporte alternativo con tokens JWT, contraseñas cifradas con `bcrypt` y protección con limitador de tasa (*Rate Limiter*).
+  - **Modo Local Offline-First:** Si preferís no registrarte, podés usar el tracker al 100% en local mediante `localStorage`.
+  - **Fusión Inteligente (Merge Local ↔ Nube):** Al iniciar sesión con datos existentes en el dispositivo, fusiona de forma inteligente para no perder avances, dando prioridad al estado más avanzado, combinando notas y conservando metas de examen.
 
 - 🛡️ **Validación Estricta y Reseteo en Cascada:**
   - No permite marcar estados inválidos si faltan correlativas. Muestra alertas contextuales (*Toast*) indicando con precisión qué materias faltan regularizar o aprobar.
@@ -90,11 +106,25 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
 
 - 📝 **Libreta de Exámenes y Promedios:**
   - Formulario completo para registrar calificación (1 a 10), fecha de examen, libro, folio y anotaciones sobre la cátedra.
-  - Cálculo automático del promedio general (con y sin aplazos).
+  - Cálculo automático en tiempo real del promedio de asignaturas aprobadas.
 
-- ♿ **Accesibilidad WCAG 2.2:**
-  - Soporte completo de navegación por teclado (`Escape` para cerrar, `Enter` / `Espacio` para interactuar, `Tab` con foco atrapado en modales `useFocusTrap`).
-  - Etiquetas ARIA y diálogos accesibles.
+- ⌨️ **Atajos Rápidos de Teclado (Navegación Fluida):**
+  - Acceso inmediato a cualquier vista o función sin necesidad de usar el cursor (`useKeyboardShortcuts.ts`):
+    - <kbd>G</kbd> : Vista Grafo de Correlatividades
+    - <kbd>M</kbd> : Vista Malla Curricular
+    - <kbd>E</kbd> : Panel de Asignaturas Electivas
+    - <kbd>C</kbd> : Calendario Académico de Finales
+    - <kbd>T</kbd> : Panel de Títulos (ADUSI / Ingeniería)
+    - <kbd>R</kbd> : Ficha Curricular y Analítico en PDF
+    - <kbd>P</kbd> : Perfil del Alumno y Copia de Seguridad
+    - <kbd>S</kbd> : Compartir Avance (enlace comprimido)
+    - <kbd>A</kbd> : Iniciar Sesión / Gestionar Cuenta
+    - <kbd>?</kbd> : Guía Interactiva y Atajos
+    - <kbd>Escape</kbd> : Cerrar cualquier diálogo o panel modal activo
+
+- ♿ **Accesibilidad WCAG 2.2 AA:**
+  - Soporte completo de navegación por teclado con foco atrapado en modales (`useFocusTrap`).
+  - Etiquetas ARIA semánticas, contraste visual riguroso y diálogos accesibles.
 
 ---
 
@@ -102,10 +132,10 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
 
 | Capa | Tecnologías |
 | :--- | :--- |
-| **Frontend** | React 19, TypeScript, Vite 8 (Rolldown), Tailwind CSS v4, Vis-Network, Lucide Icons |
-| **Backend** | Node.js, Express, TypeScript, JWT, Bcrypt, Express-Rate-Limit, CORS, TSX |
+| **Frontend** | React 19, TypeScript (~6.0), Vite 8 (Rolldown), Tailwind CSS v4, Vis-Network, jsPDF, jspdf-autotable, Lucide Icons |
+| **Backend & Nube** | Firebase Hosting, Firebase Auth, Cloud Firestore, Node.js, Express, TypeScript, JWT, Bcrypt, Resend SDK, Express-Rate-Limit, CORS |
 | **Testing & Calidad** | Vitest, React Testing Library, Supertest, Playwright (E2E), Oxlint, V8 Coverage |
-| **Persistencia** | Almacenamiento JSON con debounce (cuentas y progreso) + LocalStorage offline |
+| **Persistencia** | Cloud Firestore + Almacenamiento JSON con debounce + LocalStorage offline-first + Respaldo .JSON |
 | **Gestor de Paquetes** | `pnpm` (Monorepo con workspaces) |
 
 ---
@@ -119,9 +149,11 @@ tracker-ing-sist/
 │   │   ├── auth/             # Generación y verificación de tokens JWT y usuarios
 │   │   ├── data/             # Catálogo oficial de materias troncales y electivas Plan 2023
 │   │   ├── middleware/       # Limitador de peticiones (rate limiter) y autenticación
-│   │   ├── routes/           # Endpoints de API (/api/plan, /api/progress, /api/auth)
+│   │   ├── routes/           # Endpoints de API (/api/plan, /api/progress, /api/auth, /api/mail/*)
+│   │   ├── services/         # emailService.ts (Resend) y reminderService.ts (alertas automáticas 7 días)
+│   │   ├── scripts/          # testEmail.ts (prueba directa de correos con Resend)
 │   │   ├── storage/          # Persistencia en JSON (usuarios y progresos)
-│   │   ├── test/             # Pruebas unitarias e integración HTTP (Vitest + Supertest)
+│   │   ├── test/             # 10 suites de pruebas unitarias e integración HTTP (Vitest + Supertest, 62 tests)
 │   │   ├── types/            # Tipos TypeScript compartidos (incluye PerfilAlumno y MetaExamen)
 │   │   └── server.ts         # Servidor Express
 │   ├── package.json
@@ -130,27 +162,34 @@ tracker-ing-sist/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── layout/                 # Navegación, Header, BottomNav, ThemeSelector, Toast
-│   │   │   ├── views/                  # Vistas principales: GridView, NetworkGraph, ElectivasDrawer
-│   │   │   ├── modals/                 # Diálogos modales: Subject, Calendar, Profile, Stats, etc.
-│   │   │   ├── ui/                     # Componentes base: Modal accesible, StatusBadge
+│   │   │   ├── layout/                 # Navegación, Header, BottomNav, MobileDrawer, ThemeSelector, Toast, ErrorBoundary
+│   │   │   ├── views/                  # GridView, NetworkGraph, ElectivasDrawer, MobileElectivasView, NotFoundView
+│   │   │   │   └── graph/              # Submódulos del grafo: GraphNodeInspector, GraphSearchBar, posiciones y estilos
+│   │   │   ├── modals/                 # SubjectModal, CalendarModal, PrintableReportModal, ProfileModal, StatsModal, TitlesModal, etc.
+│   │   │   │   └── calendar/           # Submódulos del calendario: CalendarMetasTab, CalendarTurnosTab, CalendarMonthGrid, ScheduleDialog
+│   │   │   ├── ui/                     # Componentes base accesibles: Modal (FocusTrap), StatusBadge
 │   │   │   └── index.ts                # Barrel export centralizado
 │   │   ├── context/
-│   │   │   ├── TrackerContext.tsx      # Lógica de correlativas, filtros, metas y perfil
-│   │   │   ├── ThemeContext.tsx        # Gestión de los 5 temas visuales
-│   │   │   └── AuthContext.tsx         # Sesión de usuario y sincronización remota
+│   │   │   ├── TrackerContext.tsx      # Lógica de correlativas, filtros, metas, notas y cálculo de promedios
+│   │   │   ├── ThemeContext.tsx        # Gestión reactiva de los 5 temas visuales
+│   │   │   ├── AuthContext.tsx         # Sesión híbrida (Firebase Auth / Backend JWT / Local)
+│   │   │   └── UIContext.tsx           # Estado visual secundario y control de visibilidad de modales
 │   │   ├── hooks/
 │   │   │   ├── useFocusTrap.ts         # Atrapado de foco accesible para modales (WCAG)
-│   │   │   ├── useHistoryBack.ts       # Navegación y cierre natural con botón atrás
-│   │   │   └── useKeyboardShortcuts.ts # Atajos rápidos de teclado (G, M, E, C, etc.)
+│   │   │   ├── useHistoryBack.ts       # Navegación y cierre natural con botón atrás en móviles
+│   │   │   ├── useKeyboardShortcuts.ts # Atajos rápidos de teclado globales (G, M, E, C, R, P, etc.)
+│   │   │   └── useModalAnimation.ts    # Control fluido de animaciones de entrada y salida modal
 │   │   ├── data/
-│   │   │   ├── plan2023.ts             # Catálogo local de materias y electivas Plan 2023
-│   │   │   └── calendario/             # Módulo modular anual (turnos oficiales, feriados fijos/móviles e hitos)
+│   │   │   ├── plan2023.ts             # Catálogo de 36 materias troncales y 19 electivas Plan 2023
+│   │   │   ├── calendario/             # Módulo modular anual (turnos oficiales, feriados fijos/móviles e hitos)
+│   │   │   ├── donations.ts            # Datos y configuración de donaciones (Mercado Pago)
+│   │   │   └── driveLinks.ts           # Enlaces directos a carpetas comunitarias de apuntes y exámenes en Google Drive
 │   │   ├── services/                   # Cliente API, Firebase, sanitización segura y merge inteligente
-│   │   ├── test/                       # 24 suites unitarias e integración (Vitest + RTL + JSDOM, 195 tests)
+│   │   ├── utils/                      # pdfExporter.ts, backupManager.ts, academicCalculations.ts, cascadeEngine.ts, icsExporter.ts, share.ts
+│   │   ├── test/                       # 28 suites unitarias e integración (Vitest + RTL + JSDOM, 216 tests)
 │   │   ├── types/                      # Tipos re-exportados desde @tracker/types
-│   │   ├── App.tsx
-│   │   └── index.css                   # Variables CSS semánticas y Tailwind CSS v4
+│   │   ├── App.tsx                     # Componente raíz con layout y orquestación
+│   │   └── index.css                   # Variables CSS semánticas, temas y Tailwind CSS v4
 │   ├── package.json
 │   └── vite.config.ts
 ├── packages/
@@ -233,18 +272,18 @@ pnpm dev:frontend  # en otra terminal (puerto 5173)
 pnpm build
 
 # Compilar y desplegar automáticamente en Firebase Hosting
-npm run deploy
+pnpm deploy
 ```
 
 ---
 
 ## 🧪 Testing Automatizado y Cobertura (~100%)
 
-El monorepo cuenta con una suite integral y robusta de **264 pruebas continuas automatizadas** (100% aprobadas) que aseguran la fidelidad académica, la solidez matemática de las correlatividades, la protección contra vulnerabilidades de almacenamiento y la ausencia de regresiones en la interfaz:
+El monorepo cuenta con una suite integral y robusta de **301 pruebas continuas automatizadas** (100% aprobadas) que aseguran la fidelidad académica, la solidez matemática de las correlatividades, la protección contra vulnerabilidades de almacenamiento y la ausencia de regresiones en la interfaz:
 
-- 🔬 **Tests Unitarios y de Integración (241 tests, 100% aprobados):**
-  - **Backend (`tracker-backend`):** 46 tests con **99.05% de cobertura de líneas** (100% en rutas `/api/auth`, `/api/progress`, `/api/plan` y middlewares) ejecutados con `vitest` y `v8`. Valida seguridad JWT, hash bcrypt, middlewares de rate limit y autenticación, persistencia atómica en storage JSON y endpoints REST con Supertest.
-  - **Frontend (`frontend`):** 195 tests en 24 suites con **87.3% de líneas general y 100% en componentes centrales** (`App.tsx`, `plan2023.ts`, módulo anual `calendario/`, primitivas UI, modales `TitlesModal`, `ShareModal`, `HelpModal`, `ThemeSelector`, utilitarios `icsExporter`, `share`, servicios de sanitización segura `api.ts` contra envenenamiento de almacenamiento CWE-502/CWE-79, y hooks de accesibilidad `useFocusTrap`, `useKeyboardShortcuts`, `useModalAnimation`). Ejecutados con `vitest`, React Testing Library y JSDOM. Cobertura completa sobre el motor de correlatividades, cascada, promedios, calendario de turnos oficiales de examen, diálogo interactivo de metas de examen, pantalla de error 404 y `ErrorBoundary` con respaldo de emergencia.
+- 🔬 **Tests Unitarios y de Integración (278 tests, 100% aprobados):**
+  - **Backend (`tracker-backend`):** 62 tests en 10 suites con **99.05% de cobertura de líneas** en servicios centrales y 100% en rutas `/api/auth`, `/api/progress`, `/api/plan` y middlewares, ejecutados con `vitest` y `v8`. Valida seguridad JWT, hash bcrypt, middlewares de rate limit y autenticación, persistencia atómica en storage JSON, envío de emails transaccionales y endpoints REST con Supertest.
+  - **Frontend (`frontend`):** 216 tests en 28 suites con **85.34% de líneas general y 100% en componentes centrales** (`App.tsx`, `plan2023.ts`, submódulos anuales de `calendario/`, datos de `donations.ts` y `driveLinks.ts`, primitivas UI, modales `TitlesModal`, `ShareModal`, `HelpModal`, `ThemeSelector`, `PrintableReportModal`, exportador vectorial `pdfExporter.ts`, gestor de respaldos `backupManager.ts`, utilitarios `icsExporter.ts`, `share.ts`, servicios de sanitización segura `api.ts` contra envenenamiento de almacenamiento CWE-502/CWE-79, y hooks de accesibilidad `useFocusTrap`, `useKeyboardShortcuts`, `useModalAnimation`). Ejecutados con `vitest`, React Testing Library y JSDOM. Cobertura completa sobre el motor de correlatividades, cascada, promedios, calendario de turnos oficiales de examen, diálogo interactivo de metas de examen, pantalla de error 404 y `ErrorBoundary` con respaldo de emergencia.
 
 - 🎭 **Pruebas End-to-End con Playwright (23 escenarios, 100% aprobados):**
   - **Chromium Desktop (18 tests):** Validación completa en navegador de la Malla interactiva (`malla.spec.ts`), modal de materias, actas y metas (`subject-modal.spec.ts`), calendario académico 2026/2027 (`calendario.spec.ts`), los 5 temas visuales y modo oscuro (`temas.spec.ts`), horas de electivas (`electivas.spec.ts`), estadísticas y títulos ADUSI/Ingeniería (`stats-titles.spec.ts`), perfil de alumno y avance compartido (`perfil-share.spec.ts`), atajos de teclado globales (`atajos-teclado.spec.ts`), buscador predictivo y filtros rápidos (`busqueda-filtros.spec.ts`), página de error 404 (`not-found.spec.ts`) y persistencia en localStorage tras recarga (`persistencia-backup.spec.ts`).
@@ -253,10 +292,10 @@ El monorepo cuenta con una suite integral y robusta de **264 pruebas continuas a
 - ⚡ **Comandos de Test y Calidad:**
 
 ```bash
-# Ejecutar linter Oxlint (0 warnings y 0 errores en 97 archivos)
+# Ejecutar linter Oxlint (0 warnings y 0 errores en 123 archivos)
 pnpm lint
 
-# Ejecutar todos los tests unitarios y de integración (Backend + Frontend, 241 tests)
+# Ejecutar todos los tests unitarios y de integración (Backend + Frontend, 278 tests)
 pnpm test
 
 # Ejecutar y generar reporte de cobertura consolidada V8 en terminal
@@ -273,8 +312,8 @@ pnpm test:e2e
 El proyecto cuenta con un pipeline automatizado en **GitHub Actions** ([`.github/workflows/ci-cd.yml`](./.github/workflows/ci-cd.yml)) que garantiza la máxima confiabilidad ante cada `push` o `pull_request`:
 
 1. **4 Jobs Paralelos de Verificación:**
-   - **`lint`:** Análisis estático ultrarrápido con `oxlint` (política de 0 warnings).
-   - **`test-unit`:** Ejecución de los 241 tests de Vitest (backend y frontend) con generación y subida de artefactos de cobertura V8.
+   - **`lint`:** Análisis estático ultrarrápido con `oxlint` (política de 0 warnings en 123 archivos).
+   - **`test-unit`:** Ejecución de los 278 tests de Vitest (backend y frontend) con generación y subida de artefactos de cobertura V8.
    - **`test-e2e`:** Ejecución de los 23 tests de Playwright sobre Chromium Desktop y Mobile Chrome emulado.
    - **`build`:** Compilación de tipos (`@tracker/types`), backend (`tsc`) y frontend con Vite 8 y Rolldown.
 2. **Despliegue Continuo (CD) a Producción:**

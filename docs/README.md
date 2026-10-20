@@ -39,7 +39,7 @@ Recetas directas para resolver tareas y problemáticas específicas de desarroll
 Especificaciones formales, diccionarios de tipos, endpoints y descripciones exhaustivas de la maquinaria.
 - [Modelo de Datos y Tipos TypeScript](./reference/modelo-de-datos.md): Definición canónica de `Materia`, `Electiva`, `EstadoMateria`, `ProgresoUsuario`, `MetaExamen` y validaciones.
 - [Referencia de la API REST del Backend](./reference/api-backend.md): Contratos de endpoints `/api/auth/*`, `/api/plan` y `/api/progress`, códigos HTTP, JWT y limitadores de tasa.
-- [Contextos React y Gestión del Estado](./reference/contextos-y-estado.md): Especificación de `TrackerContext`, `AuthContext`, `ThemeContext` y custom hooks (`useFocusTrap`, `useKeyboardShortcuts`, `useHistoryBack`).
+- [Contextos React y Gestión del Estado](./reference/contextos-y-estado.md): Especificación de `TrackerContext`, `AuthContext`, `ThemeContext`, `UIContext` y custom hooks (`useFocusTrap`, `useKeyboardShortcuts`, `useHistoryBack`, `useModalAnimation`).
 - [Monorepo, Herramientas y Scripts](./reference/arquitectura-monorepo.md): Estructura del workspace pnpm, scripts de automatización, configuración de Tailwind CSS v4 y Oxlint.
 
 ### 4. 💡 Explicaciones de Arquitectura (Understanding-oriented)

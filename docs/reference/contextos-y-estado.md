@@ -43,11 +43,13 @@ Es el núcleo de la lógica académica y de interacción de la plataforma.
 - `esMateriaCursable(m: Materia): boolean`: Retorna `true` si la materia está pendiente y habilitada para cursar.
 - `esMateriaRendible(m: Materia): boolean`: Retorna `true` si la materia está regular y habilitada para rendir final.
 
-### Acciones de Mutación
+### Acciones de Mutación y Respaldo
 - `toggleMateriaEstado(id: number)`: Cicla el estado de la materia (Pendiente ➔ Regular ➔ Aprobada ➔ Pendiente). Si pasa a Pendiente, ejecuta el reseteo en cascada.
 - `setEstadoDirecto(id: number, estado: EstadoMateria)`: Asigna directamente un estado validando correlatividades.
 - `setNotaMateria(id: number, nota: NotaMateria)`: Guarda la calificación y datos de libreta.
 - `setMetaExamen(materiaId: number, meta: MetaExamen)`: Agenda un examen en un turno oficial.
+- `exportBackupJson()`: Genera y descarga un archivo de respaldo local `.json` versionado (`tracker-isi-[legajo]-[fecha].json`) con todo el avance.
+- `importBackupJson(jsonStr: string): boolean`: Valida y restaura el 100% del progreso desde una copia de seguridad en JSON.
 - `resetAll()`: Reinicia todo el progreso a estado inicial tras confirmación.
 
 ### Métricas Académicas (`stats`)
@@ -63,7 +65,7 @@ Es el núcleo de la lógica académica y de interacción de la plataforma.
 Ubicación: [frontend/src/context/AuthContext.tsx](../../frontend/src/context/AuthContext.tsx)  
 Hook de acceso: `useAuth()`
 
-Gestiona la identidad del usuario, tokens JWT y la sincronización entre `localStorage` y la nube.
+Gestiona la identidad del usuario, tokens JWT y la sincronización entre `localStorage` y la nube (soporte híbrido Firebase Auth / Cloud Firestore en producción y backend Node.js Express con JWT).
 
 ### Propiedades y Métodos
 - `user: User | null`: Objeto con `id` y `email`.
@@ -104,11 +106,17 @@ Garantiza el cumplimiento de accesibilidad **WCAG 2.2 AA**:
 ### `useKeyboardShortcuts(shortcuts)`
 Ubicación: [frontend/src/hooks/useKeyboardShortcuts.ts](../../frontend/src/hooks/useKeyboardShortcuts.ts)  
 Mapea atajos globales de teclado ignorando inputs de texto:
-- `G`: Cambiar a vista de Grafo.
-- `M`: Cambiar a vista de Malla.
-- `E`: Abrir panel de Electivas.
-- `C`: Abrir Calendario de Turnos.
-- `Escape`: Cerrar cualquier diálogo abierto.
+- `G`: Cambiar a vista de Grafo de Correlatividades.
+- `M`: Cambiar a vista de Malla Curricular.
+- `E`: Abrir panel de Asignaturas Electivas.
+- `C`: Abrir Calendario de Turnos y Finales.
+- `T`: Abrir panel de Titulación (ADUSI / Ingeniería).
+- `R`: Abrir Ficha Curricular y Analítico en PDF.
+- `P`: Abrir Perfil del Alumno y Respaldo JSON.
+- `S`: Compartir Avance (enlace comprimido).
+- `A`: Iniciar Sesión / Cuenta de Usuario.
+- `?`: Abrir Guía Interactiva y Atajos.
+- `Escape`: Cerrar cualquier diálogo o panel abierto.
 
 ### `useHistoryBack(isOpen, onClose)`
 Ubicación: [frontend/src/hooks/useHistoryBack.ts](../../frontend/src/hooks/useHistoryBack.ts)  
@@ -124,5 +132,8 @@ Gestiona el ciclo de vida de renderizado y desmontaje de modales (`isMounted` y 
 Ubicación: [frontend/src/context/UIContext.tsx](../../frontend/src/context/UIContext.tsx)  
 Hook de acceso: `useUI()`
 
-Provee estado visual complementario desacoplado de la lógica académica (control de modales secundarios, diálogos de ayuda y visibilidad de drawers móviles).
+Provee estado visual complementario desacoplado de la lógica académica:
+- Control de visibilidad de modales: `reportOpen`, `profileModalOpen`, `helpModalOpen`, `statsModalOpen`, `titlesModalOpen`, `shareModalOpen`, `authModalOpen`.
+- Control del menú deslizable en móviles: `drawerOpen`, `setDrawerOpen`.
+- Sistema de notificaciones flotantes: `toast` y `showToast(mensaje, tipo)`.
 

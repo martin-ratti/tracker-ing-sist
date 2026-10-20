@@ -151,3 +151,41 @@ export interface ProgresoUsuario {
 }
 ```
 
+---
+
+## 4. Exportaciones y Respaldos
+
+### `BackupPayload` (Copia de Seguridad .JSON)
+Estructura del archivo JSON descargable e importable mediante `backupManager.ts`:
+
+```typescript
+export interface BackupPayload {
+  version: string;                                  // Versión del esquema (ej. "1.0")
+  exportDate: string;                               // Timestamp ISO de generación
+  plan: string;                                     // "Plan 2023 ISI UTN FRRo"
+  estados: Record<number, EstadoMateria>;
+  estadosElectivas: Record<number, EstadoMateria>;
+  notas: Record<number, NotaMateria>;
+  ppsHoras: number;
+  perfil: PerfilAlumno;
+  metasExamen: Record<number, MetaExamen>;
+}
+```
+
+---
+
+### `FichaCurricularPDFOptions` (Generador de Analítico PDF)
+Parámetros provistos a `exportFichaCurricularPDF` (`pdfExporter.ts`) para compilar el documento formal multi-página:
+
+```typescript
+export interface FichaCurricularPDFOptions {
+  perfil: Partial<PerfilAlumno>;
+  estados: Record<number, EstadoMateria>;
+  estadosElectivas: Record<number, EstadoMateria>;
+  notas: Record<number, NotaMateria>;
+  ppsHoras: number;
+  stats: AcademicStats;
+  metasExamen: Record<number, MetaExamen>;
+}
+```
+

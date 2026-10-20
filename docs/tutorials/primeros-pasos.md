@@ -135,7 +135,7 @@ Antes de enviar cualquier cambio, ejecuta las herramientas de calidad configurad
    ```bash
    pnpm test
    ```
-   *Ejecutará las 24 suites de pruebas en el frontend (195 tests con Vitest + React Testing Library) y las pruebas del backend (46 tests con Supertest y almacenamiento).*
+   *Ejecutará las 28 suites de pruebas en el frontend (216 tests con Vitest + React Testing Library) y las 10 suites del backend (62 tests con Supertest, servicios y almacenamiento).*
 
 ---
 

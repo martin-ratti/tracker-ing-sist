@@ -34,8 +34,8 @@ allowBuilds:
 | `pnpm dev:backend` | `pnpm --filter tracker-backend dev` | Inicia únicamente el backend con `tsx watch src/server.ts`. |
 | `pnpm dev:frontend` | `pnpm --filter frontend dev` | Inicia únicamente el frontend con `vite`. |
 | `pnpm build` | `pnpm --filter @tracker/types build && pnpm --filter tracker-backend build && pnpm --filter frontend build` | Compila tipos (`tsc`), backend (`tsc`) y genera el bundle frontend optimizado (`tsc -b && vite build`). |
-| `pnpm lint` | `oxlint packages/types/src frontend/src backend/src` | Linter ultrarrápido con Oxc. Aplica la política de 0 advertencias y 0 errores en 97 archivos. |
-| `pnpm test` | `pnpm --filter tracker-backend test && pnpm --filter frontend test` | Ejecuta las 241 pruebas unitarias e integración en ambos paquetes con Vitest. |
+| `pnpm lint` | `oxlint packages/types/src frontend/src backend/src` | Linter ultrarrápido con Oxc. Aplica la política de 0 advertencias y 0 errores en 123 archivos. |
+| `pnpm test` | `pnpm --filter tracker-backend test && pnpm --filter frontend test` | Ejecuta las 278 pruebas unitarias e integración en ambos paquetes con Vitest (62 backend y 216 frontend). |
 | `pnpm test:coverage` | `pnpm --filter tracker-backend test:coverage && pnpm --filter frontend test:coverage` | Genera reportes de cobertura V8 para backend y frontend. |
 | `pnpm test:e2e` | `playwright test` | Ejecuta la suite de 23 pruebas End-to-End con Playwright (Chromium Desktop y Mobile Chrome). |
 | `pnpm deploy` | `pnpm build && firebase deploy --only hosting` | Compila los paquetes y publica en Firebase Hosting. |

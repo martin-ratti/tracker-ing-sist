@@ -122,9 +122,9 @@ pnpm dev              # Levanta backend y frontend concurrentemente
 pnpm dev:frontend     # Solo cliente Vite (puerto 5173)
 
 # Calidad, Pruebas y Compilación
-pnpm lint             # Oxlint sobre packages/types, frontend y backend (0 warnings, 0 errores en 106 archivos)
-pnpm test             # Ejecuta los 262 tests unitarios y de integración (62 backend y 200 frontend)
-pnpm test:coverage    # Reporte de cobertura V8 consolidada (99.05% backend, 87.3% frontend)
+pnpm lint             # Oxlint sobre packages/types, frontend y backend (0 warnings, 0 errores en 123 archivos)
+pnpm test             # Ejecuta los 278 tests unitarios y de integración (62 backend y 216 frontend)
+pnpm test:coverage    # Reporte de cobertura V8 consolidada (99.05% backend, 85.34% frontend)
 pnpm test:e2e         # Pruebas End-to-End con Playwright (23 escenarios: 18 Desktop y 5 Mobile, 100% aprobados)
 pnpm build            # Compila TypeScript en types/backend y Vite en frontend
 pnpm --filter tracker-backend test:email # Prueba de envío de correos con Resend a la casilla de revisión

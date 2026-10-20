@@ -95,8 +95,8 @@ En lugar de desplegar manualmente, el repositorio cuenta con un pipeline automat
 
 1. **Gatillado Automático:** Cada `git push origin main` activa el workflow.
 2. **Quality Gates Obligatorios:** Para proceder al despliegue, deben pasar exitosamente los 4 jobs paralelos:
-   - `lint` (oxlint: 0 warnings, 0 errores en 97 archivos).
-   - `test-unit` (vitest: 241 tests con reportes de cobertura).
+   - `lint` (oxlint: 0 warnings, 0 errores en 123 archivos).
+   - `test-unit` (vitest: 278 tests con reportes de cobertura).
    - `test-e2e` (playwright: 23 tests en Chromium Desktop y Mobile Chrome).
    - `build` (compilación exitosa del monorepo).
 3. **Secretos de GitHub Requeridos:**

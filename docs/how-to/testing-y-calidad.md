@@ -70,8 +70,8 @@ pnpm test:coverage
 ```
 
 Este comando genera reportes en texto en la terminal y carpetas detalladas en HTML:
-- `backend/coverage/index.html` (cobertura ~99%)
-- `frontend/coverage/index.html` (cobertura ~87%)
+- `backend/coverage/index.html` (cobertura ~99% de líneas en servicios centrales y 100% en rutas/middlewares)
+- `frontend/coverage/index.html` (cobertura ~85.3% de líneas general y 100% en motores académicos, utilitarios y componentes centrales)
 
 ---
 
@@ -118,8 +118,8 @@ pnpm exec playwright test --project="Mobile Chrome"
 El proyecto cuenta con un workflow unificado en [`.github/workflows/ci-cd.yml`](../../.github/workflows/ci-cd.yml) que se dispara automáticamente ante cada `push` o `pull_request`:
 
 1. **Jobs de Validación Continua en Paralelo:**
-   - **`lint`:** Ejecuta `oxlint` sobre `packages/types/src`, `frontend/src` y `backend/src` (exige 0 warnings y 0 errores).
-   - **`test-unit`:** Ejecuta `vitest` en backend y frontend generando reportes de cobertura V8 que se almacenan como artefactos (`upload-artifact`).
+   - **`lint`:** Ejecuta `oxlint` sobre `packages/types/src`, `frontend/src` y `backend/src` (exige 0 warnings y 0 errores en 123 archivos).
+   - **`test-unit`:** Ejecuta `vitest` en backend y frontend (278 tests) generando reportes de cobertura V8 que se almacenan como artefactos (`upload-artifact`).
    - **`test-e2e`:** Instala navegadores de Playwright con cache y corre los 23 tests de escritorio y móvil.
    - **`build`:** Compila `@tracker/types`, `tracker-backend` y `frontend` con Vite y Rolldown.
 2. **Despliegue Automático (CD):**
