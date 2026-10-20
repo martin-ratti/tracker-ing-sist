@@ -44,9 +44,11 @@ Es el núcleo de la lógica académica y de interacción de la plataforma.
 - `esMateriaRendible(m: Materia): boolean`: Retorna `true` si la materia está regular y habilitada para rendir final.
 
 ### Acciones de Mutación y Respaldo
-- `toggleMateriaEstado(id: number)`: Cicla el estado de la materia (Pendiente ➔ Regular ➔ Aprobada ➔ Pendiente). Si pasa a Pendiente, ejecuta el reseteo en cascada.
-- `setEstadoDirecto(id: number, estado: EstadoMateria)`: Asigna directamente un estado validando correlatividades.
-- `setNotaMateria(id: number, nota: NotaMateria)`: Guarda la calificación y datos de libreta.
+- `toggleMateriaEstado(id: number)`: Cicla el estado de la materia (Pendiente ➔ Regular ➔ Aprobada ➔ Pendiente). Si pasa a Pendiente, evalúa el impacto de la cascada. Si afecta a más de 3 materias correlativas, despliega el diálogo protector `cascadeConfirmDialog`.
+- `executeResetToPendiente(mId: number, mNombre: string)`: Ejecuta el reseteo y emite un Toast interactivo con botón **Deshacer** para restaurar el estado académico anterior en un clic.
+- `cascadeConfirmDialog`: Estado del modal de confirmación de cascada (`CascadeConfirmModal.tsx`), indicando total y nombres de materias afectadas.
+- `setEstadoDirecto(id: number, estado: EstadoMateria)`: Asigna directamente un estado validando correlatividades sin degradar accidentalmente las notas registradas.
+- `setNotaMateria(id: number, nota: NotaMateria)`: Guarda la calificación numérica de forma persistente y no destructiva (computada en el promedio solo si la materia está aprobada).
 - `setMetaExamen(materiaId: number, meta: MetaExamen)`: Agenda un examen en un turno oficial.
 - `exportBackupJson()`: Genera y descarga un archivo de respaldo local `.json` versionado (`tracker-isi-[legajo]-[fecha].json`) con todo el avance.
 - `importBackupJson(jsonStr: string): boolean`: Valida y restaura el 100% del progreso desde una copia de seguridad en JSON.

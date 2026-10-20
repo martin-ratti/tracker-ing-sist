@@ -749,8 +749,23 @@ export const NetworkGraph: React.FC = () => {
         </div>
       )}
 
-      {/* Controles flotantes superiores derechos: Modo Libre, Orientación & Atenuar Aprobadas */}
+      {/* Controles flotantes superiores derechos: Orientación, Modo Libre & Atenuar Aprobadas */}
       <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10 flex items-center gap-1.5 bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) p-1 rounded-xl shadow-lg font-mono text-xs">
+        {/* Toggle Orientación: Horizontal (LR) vs Vertical (UD) en modo jerárquico */}
+        {!isFreeMode && (
+          <button
+            type="button"
+            onClick={handleToggleDirection}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 cursor-pointer text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body) ${
+              graphDirection === 'LR' ? 'bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border border-cyan-500/40 font-bold' : ''
+            }`}
+            title={`Orientación actual: ${graphDirection === 'UD' ? 'Vertical (Arriba-Abajo)' : 'Horizontal (Izquierda-Derecha)'}. Clic para alternar.`}
+          >
+            {graphDirection === 'UD' ? <ArrowDown className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{graphDirection === 'UD' ? 'Vertical' : 'Horizontal'}</span>
+          </button>
+        )}
+
         {/* Interruptor Switch de Modo Libre */}
         <button
           type="button"
@@ -780,21 +795,6 @@ export const NetworkGraph: React.FC = () => {
             />
           </span>
         </button>
-
-        {/* Toggle Orientación: Horizontal (LR) vs Vertical (UD) en modo jerárquico */}
-        {!isFreeMode && (
-          <button
-            type="button"
-            onClick={handleToggleDirection}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 cursor-pointer text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body) ${
-              graphDirection === 'LR' ? 'bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border border-cyan-500/40 font-bold' : ''
-            }`}
-            title={`Orientación actual: ${graphDirection === 'UD' ? 'Vertical (Arriba-Abajo)' : 'Horizontal (Izquierda-Derecha)'}. Clic para alternar.`}
-          >
-            {graphDirection === 'UD' ? <ArrowDown className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{graphDirection === 'UD' ? 'Vertical' : 'Horizontal'}</span>
-          </button>
-        )}
 
         {/* Toggle Atenuar Aprobadas */}
         <button

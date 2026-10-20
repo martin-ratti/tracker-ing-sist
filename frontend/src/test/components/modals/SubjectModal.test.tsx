@@ -163,6 +163,10 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
     expect(screen.getByText(/Para Cursar \(Regulares \/ Aprobadas\)/i)).toBeInTheDocument();
     expect(screen.getByText(/AM I \(Regular\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Álgebra \(Regular\)/i)).toBeInTheDocument();
+    // Requisitos para rendir examen final
+    expect(screen.getByText(/Para Rendir Examen Final/i)).toBeInTheDocument();
+    expect(screen.getByText(/AM I \(Aprobada\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Álgebra \(Aprobada\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Materias que ayuda a destrabar:/i)).toBeInTheDocument();
     expect(screen.getByText(/Para Cursar \(Regularidad\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Para Rendir \(Aprobación\)/i)).toBeInTheDocument();
@@ -182,8 +186,8 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
     await user.click(screen.getByRole('button', { name: /Seleccionar Economía/i }));
 
     expect(screen.getByText('Economía')).toBeInTheDocument();
-    expect(screen.getByText(/AM I \(Aprobada\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/Álgebra \(Aprobada\)/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/AM I \(Aprobada\)/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Álgebra \(Aprobada\)/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it('debe cerrar el modal al hacer click en el botón de cerrar o presionar Escape', async () => {

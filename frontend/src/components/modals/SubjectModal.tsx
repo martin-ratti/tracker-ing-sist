@@ -170,14 +170,22 @@ export const SubjectModal: React.FC = () => {
   });
   const tieneMateriasQueDestraba = materiasQueDestrabaCursar.length > 0 || materiasQueDestrabaRendir.length > 0;
   const esRendible = esMateriaRendible(materia);
-  const correlativasFaltantesParaRendir = (
-    Array.isArray(materia.reqRendirAprobada)
-      ? materia.reqRendirAprobada
-      : Array.isArray(materia.reqAprobada)
-        ? materia.reqAprobada
-        : []
-  )
-    .filter(reqId => estados[reqId] !== 'aprobada')
+
+  const materiasParaRendirIds = (() => {
+    const ids = new Set<number>();
+    materia.reqRegular.forEach(id => ids.add(id));
+    if (Array.isArray(materia.reqAprobada)) {
+      materia.reqAprobada.forEach(id => ids.add(id));
+    }
+    if (Array.isArray(materia.reqRendirAprobada)) {
+      materia.reqRendirAprobada.forEach(id => ids.add(id));
+    }
+    ids.delete(materia.id);
+    return Array.from(ids);
+  })();
+
+  const correlativasFaltantesParaRendir = materiasParaRendirIds
+    .filter(reqId => (estados[reqId] || 'pendiente') !== 'aprobada')
     .map(reqId => MATERIAS_MAP[reqId]?.nombre || `#${reqId}`);
 
   return (
@@ -431,6 +439,26 @@ export const SubjectModal: React.FC = () => {
                     </span>
                   )}
                 </li>
+
+                {materiasParaRendirIds.map(reqId => {
+                  const reqM = MATERIAS_MAP[reqId];
+                  const est = estados[reqId] || 'pendiente';
+                  const ok = est === 'aprobada';
+                  return (
+                    <li key={reqId} className="flex items-center justify-between text-(--text-body)">
+                      <span className="truncate">{reqM?.nombre || `#${reqId}`} (Aprobada)</span>
+                      {ok ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 text-[11px] font-semibold">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> OK
+                        </span>
+                      ) : (
+                        <span className="text-rose-600 dark:text-rose-400/80 flex items-center gap-1 text-[11px] font-semibold">
+                          <XCircle className="w-3.5 h-3.5" /> Falta
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
 
                 {materia.reqRendirAprobada === 'TODAS' && (
                   <li className="flex items-center justify-between text-amber-700 dark:text-amber-300/90 pt-1 border-t border-(--border-color)">

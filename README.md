@@ -20,13 +20,14 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
     - 🟡 **Regular:** Cursada acreditada, lista para rendir examen final.
     - 🟢 **Aprobada:** Examen final o promoción aprobada.
   - Filtro dinámico de conexiones: *Todas*, *Solo para Cursar* (regulares) y *Solo para Rendir* (aprobadas).
-  - Controles táctiles y en pantalla: Zoom in/out, ajustar y centrar pantalla, y paneo fluido.
+  - Controles ergonómicos superiores: Zoom in/out, ajustar pantalla, orientación jerárquica (Vertical/Horizontal) y switch de Modo Libre fijado a la derecha para interactuar con fluidez sin saltos bajo el cursor.
 
 - 📋 **Vista Dual: Grafo de Red / Malla Curricular con Filtros Rápidos:**
   - Alterná con un clic entre el grafo de relaciones y una cuadrícula interactiva estilo cartilla física organizada por niveles (1º a 5º año).
   - **Filtros Rápidos Tipo Chip:** *Todas*, *Cursables*, *Regulares*, *Aprobadas* y *Con Meta 🎯* con contadores en vivo.
   - Buscador predictivo por nombre o código de materia.
   - Barras de progreso de avance porcentual individuales por nivel académico.
+  - **Distintivo 'Regular 🎯 (Lista para Rendir)':** Diferencia visualmente las materias regularizadas que ya tienen todas sus correlativas de final aprobadas y están expeditas para rendir.
   - Badges contextuales de metas agendadas con cuenta regresiva en días.
 
 - 📅 **Agenda de Mesas de Finales & Metas Tentativas (Calendario 2026-2027):**
@@ -66,6 +67,7 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
 
 - 👤 **Perfil Universitario del Alumno:**
   - Modal interactivo para configurar Nombre y Legajo estudiantil (`ProfileModal.tsx`).
+  - Botón de acceso directo para descargar la **Ficha Analítica PDF** con membrete oficial tras completar los datos.
   - Persistencia automática tanto en local como en la nube.
   - Avatar con iniciales en la barra superior y atajo de teclado: **`P`**.
 
@@ -91,6 +93,8 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
   - No permite marcar estados inválidos si faltan correlativas. Muestra alertas contextuales (*Toast*) indicando con precisión qué materias faltan regularizar o aprobar.
   - **Seminario Integrador ADUSI:** Validación oficial que exige tener aprobadas las 23 materias de 1º, 2º y 3º año para poder asentarlo como aprobado.
   - Si una materia correlativa vuelve a "Pendiente", el sistema recalcula en cascada e invalida de forma recursiva todas las materias dependientes para garantizar consistencia académica.
+  - **Diálogo Protector de Cascada (`CascadeConfirmModal`):** Si desmarcar una asignatura resetea más de 3 materias correlativas avanzadas, solicita confirmación explícita con el listado detallado de materias afectadas.
+  - **Acción 'Deshacer' Inmediata:** Notificación flotante con botón *Deshacer* para revertir al instante reseteos accidentales y restaurar estados y notas previas en un solo clic.
 
 - 🎓 **Seguimiento de Doble Titulación:**
   - **ADUSI (Analista Desarrollador Universitario en Sistemas de Información):**
@@ -103,6 +107,11 @@ Inspirado en el diseño original de [Tracker Plan de Estudio](https://tracker-pl
   - Catálogo completo con las 19 materias electivas oficiales del Plan 2023 de UTN FRRo.
   - Cómputo directo de horas reales según normativa de la facultad.
   - Indicadores de meta para 4 hs (ADUSI) y 20 hs (Ingeniería).
+
+- 🔍 **Detalle Integral de Asignatura y Correlativas para Rendir:**
+  - **Discriminación de Requisitos en Tiempo Real:** Visualización en dos columnas de requisitos para cursar (regulares/aprobadas) vs. requisitos para rendir final (regularidad y lista explícita de materias previas que deben estar aprobadas con badges OK / Falta).
+  - **Planificación Temprana y Alertas:** Advertencia informativa preventiva al programar una meta de final si todavía restan correlativas previas por aprobar.
+  - **Preservación Segura de Notas:** Las calificaciones guardadas se conservan de forma no destructiva y solo se computan al promedio cuando la materia se encuentra aprobada.
 
 - 📝 **Libreta de Exámenes y Promedios:**
   - Formulario completo para registrar calificación (1 a 10), fecha de examen, libro, folio y anotaciones sobre la cátedra.

@@ -36,6 +36,20 @@ export function puedeAprobarMateria(m: Materia, getEstado: EstadoGetter): boolea
   const est = getEstado(m.id);
   if (est !== 'regular') return false;
 
+  // 1. Requisito de rendir final: materias de cursada deben estar APROBADAS
+  const regularAprobadasOk = m.reqRegular.every(c => getEstado(c) === 'aprobada');
+  if (!regularAprobadasOk) return false;
+
+  // 2. Materias requeridas aprobadas para cursada también deben estar APROBADAS
+  let aprobadaOk = false;
+  if (m.reqAprobada === 'TODAS') {
+    aprobadaOk = MATERIAS_TRONCALES.filter(x => x.id !== m.id).every(x => getEstado(x.id) === 'aprobada');
+  } else {
+    aprobadaOk = m.reqAprobada.every(c => getEstado(c) === 'aprobada');
+  }
+  if (!aprobadaOk) return false;
+
+  // 3. Requisitos adicionales específicos de rendir final
   if (m.reqRendirAprobada) {
     if (m.reqRendirAprobada === 'TODAS') {
       const todasLasDemas = MATERIAS_TRONCALES.filter(x => x.id !== m.id);

@@ -37,12 +37,15 @@ export function applyCascade(
       if (!regularOk || !aprobadaOk) {
         newEstados[m.id] = 'pendiente';
         changed = true;
-      } else if (est === 'aprobada' && m.reqRendirAprobada) {
-        let rendirOk = true;
-        if (m.reqRendirAprobada === 'TODAS') {
-          rendirOk = MATERIAS_TRONCALES.filter(x => x.id !== m.id).every(x => (newEstados[x.id] || 'pendiente') === 'aprobada');
-        } else {
-          rendirOk = m.reqRendirAprobada.every(c => (newEstados[c] || 'pendiente') === 'aprobada');
+      } else if (est === 'aprobada') {
+        const reqRegularAprobadas = m.reqRegular.every(c => (newEstados[c] || 'pendiente') === 'aprobada');
+        let rendirOk = reqRegularAprobadas;
+        if (rendirOk && m.reqRendirAprobada) {
+          if (m.reqRendirAprobada === 'TODAS') {
+            rendirOk = MATERIAS_TRONCALES.filter(x => x.id !== m.id).every(x => (newEstados[x.id] || 'pendiente') === 'aprobada');
+          } else {
+            rendirOk = m.reqRendirAprobada.every(c => (newEstados[c] || 'pendiente') === 'aprobada');
+          }
         }
         if (!rendirOk) {
           newEstados[m.id] = 'regular';

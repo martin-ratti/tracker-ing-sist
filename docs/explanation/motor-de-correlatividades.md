@@ -44,8 +44,9 @@ $$\land \quad \forall a \in \text{reqAprobada}, \quad \text{estado}(a) = \text{'
 
 ### 2. Validación de Examen Final (`puedeAprobarMateria`)
 Una asignatura regularizada solo puede pasar a `'aprobada'` si:
-$$\forall c \in \text{reqRegular}, \quad \text{estado}(c) = \text{'aprobada'}$$
-$$\land \quad \forall r \in \text{reqRendirAprobada}, \quad \text{estado}(r) = \text{'aprobada'}$$
+$\forall c \in \text{reqRegular}, \quad \text{estado}(c) = \text{'aprobada'}$
+$\land \quad \forall a \in \text{reqAprobada}, \quad \text{estado}(a) = \text{'aprobada'}$
+$\land \quad \forall r \in \text{reqRendirAprobada}, \quad \text{estado}(r) = \text{'aprobada'}$
 
 ---
 
@@ -103,5 +104,6 @@ while (changed) {
 ### Propiedades del Algoritmo:
 1. **Convergencia Garantizada:** Dado que el grafo de correlatividades es un **Grafo Acíclico Dirigido (DAG)** y los estados solo se degradan (`aprobada` $\to$ `regular` $\to$ `pendiente`), el bucle converge en un número finito de iteraciones proporcional a la profundidad máxima del grafo (máximo 5 iteraciones correspondientes a los 5 niveles académicos).
 2. **Degradación Inteligente:** No resetea todo a cero; si una materia pierde los requisitos de final pero aún cumple los de cursada, se degrada a `'regular'` conservando el avance del año.
-3. **Notificación Contextual:** Cuando el usuario intenta forzar un estado no válido, el sistema emite un Toast alertando qué asignaturas exactas impiden la acción.
+3. **Notificación Contextual y Acción Deshacer:** Cuando el usuario intenta forzar un estado no válido, el sistema emite un Toast alertando qué asignaturas exactas impiden la acción. Al resetear una materia a pendiente, el Toast incorpora un botón *Deshacer* para revertir la acción inmediatamente.
+4. **Protección contra Reseteos Masivos (`CascadeConfirmModal`):** Si desmarcar una asignatura base degrada más de 3 materias correlativas avanzadas, se suspende la ejecución automática y se solicita confirmación interactiva al estudiante detallando todas las materias afectadas.
 
