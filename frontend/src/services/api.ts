@@ -125,6 +125,43 @@ export async function sendWelcomeEmailApi(email: string, name?: string): Promise
 const VALID_ESTADOS: ReadonlySet<EstadoMateria> = new Set(['pendiente', 'regular', 'aprobada']);
 
 /**
+ * Sanitiza cadenas de texto libre eliminando caracteres de control, scripts,
+ * tags HTML y comillas que puedan utilizarse en ataques de inyección o envenenamiento de almacenamiento.
+ */
+function sanitizeSafeText(raw: unknown, maxLength: number): string {
+  if (typeof raw !== 'string') return '';
+  // Elimina tags HTML, comillas, backslashes y caracteres de control
+  return raw
+    .replace(/[<>"'`\\]/g, '')
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+    .slice(0, maxLength)
+    .trim();
+}
+
+/**
+ * Sanitiza identificadores y códigos alfanuméricos simples (legajos, IDs de turnos, libros, folios).
+ */
+function sanitizeAlphanumericCode(raw: unknown, maxLength: number): string {
+  if (typeof raw !== 'string') return '';
+  return raw
+    .replace(/[^a-zA-Z0-9_\-\s.]/g, '')
+    .slice(0, maxLength)
+    .trim();
+}
+
+/**
+ * Sanitiza nombres de personas permitiendo únicamente letras, tildes, diéresis, espacios y signos seguros.
+ */
+function sanitizePersonName(raw: unknown, maxLength: number): string {
+  if (typeof raw !== 'string') return '';
+  return raw
+    .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.'-]/g, '')
+    .slice(0, maxLength)
+    .trim();
+}
+
+/**
  * Sanitiza y valida exhaustivamente un objeto desconocido para asegurar
  * que cumple estrictamente el tipo ProgresoUsuario antes de guardarlo en almacenamiento
  * local o memoria, mitigando Browser Storage Poisoning.
@@ -178,10 +215,12 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
         if (typeof n.nota === 'number' && Number.isFinite(n.nota) && n.nota >= 1 && n.nota <= 10) {
           safeNota.nota = Math.round(n.nota);
         }
-        if (typeof n.fecha === 'string') safeNota.fecha = n.fecha.slice(0, 30);
-        if (typeof n.libro === 'string') safeNota.libro = n.libro.slice(0, 50);
-        if (typeof n.folio === 'string') safeNota.folio = n.folio.slice(0, 50);
-        if (typeof n.comentario === 'string') safeNota.comentario = n.comentario.slice(0, 500);
+        if (typeof n.fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(n.fecha.trim())) {
+          safeNota.fecha = n.fecha.trim().slice(0, 30);
+        }
+        if (typeof n.libro === 'string') safeNota.libro = sanitizeAlphanumericCode(n.libro, 50);
+        if (typeof n.folio === 'string') safeNota.folio = sanitizeAlphanumericCode(n.folio, 50);
+        if (typeof n.comentario === 'string') safeNota.comentario = sanitizeSafeText(n.comentario, 500);
         safeNotas[id] = safeNota;
       }
     }
@@ -198,8 +237,8 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
     ? (src.perfil as Record<string, unknown>)
     : {};
   const safePerfil = {
-    nombre: typeof srcPerfil.nombre === 'string' ? srcPerfil.nombre.slice(0, 100).trim() : '',
-    legajo: typeof srcPerfil.legajo === 'string' ? srcPerfil.legajo.slice(0, 50).trim() : ''
+    nombre: sanitizePersonName(srcPerfil.nombre, 100),
+    legajo: sanitizeAlphanumericCode(srcPerfil.legajo, 50)
   };
 
   // 6. Metas de examen
@@ -211,11 +250,11 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
         const m = value as Record<string, unknown>;
         safeMetas[id] = {
           materiaId: id,
-          turnoId: typeof m.turnoId === 'string' ? m.turnoId.slice(0, 50) : '',
-          turnoNombre: typeof m.turnoNombre === 'string' ? m.turnoNombre.slice(0, 100) : '',
-          fechaEstimada: typeof m.fechaEstimada === 'string' ? m.fechaEstimada.slice(0, 30) : undefined,
+          turnoId: sanitizeAlphanumericCode(m.turnoId, 50),
+          turnoNombre: sanitizeSafeText(m.turnoNombre, 100),
+          fechaEstimada: typeof m.fechaEstimada === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(m.fechaEstimada.trim()) ? m.fechaEstimada.trim().slice(0, 30) : undefined,
           llamado: typeof m.llamado === 'number' && Number.isFinite(m.llamado) ? Math.min(Math.max(1, Math.floor(m.llamado)), 5) : undefined,
-          comentario: typeof m.comentario === 'string' ? m.comentario.slice(0, 500) : undefined,
+          comentario: typeof m.comentario === 'string' ? sanitizeSafeText(m.comentario, 500) : undefined,
           notificado7Dias: typeof m.notificado7Dias === 'boolean' ? m.notificado7Dias : undefined
         };
       }
@@ -235,7 +274,12 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
 
 export function safeSaveProgressToStorage(progress: ProgresoUsuario): void {
   const safe = sanitizeProgress(progress);
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(safe));
+  try {
+    const serialized = JSON.stringify(safe);
+    localStorage.setItem(LOCAL_STORAGE_KEY, serialized);
+  } catch (err: unknown) {
+    console.warn('No se pudo guardar el progreso en localStorage:', err);
+  }
 }
 
 export function hasAnyData(data?: ProgresoUsuario | null): boolean {
@@ -419,8 +463,8 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
 
   // Perfil
   const mergedPerfil = {
-    nombre: local.perfil?.nombre || cloud.perfil?.nombre || '',
-    legajo: local.perfil?.legajo || cloud.perfil?.legajo || ''
+    nombre: sanitizePersonName(local.perfil?.nombre || cloud.perfil?.nombre || '', 100),
+    legajo: sanitizeAlphanumericCode(local.perfil?.legajo || cloud.perfil?.legajo || '', 50)
   };
 
   return {
