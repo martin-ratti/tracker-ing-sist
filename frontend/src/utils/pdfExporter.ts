@@ -210,7 +210,7 @@ export function exportFichaCurricularPDF(options: FichaCurricularPDFOptions): vo
       const est = estados[m.id] || 'pendiente';
       const n = notas[m.id];
       const estadoText = est === 'aprobada' ? 'APROBADA' : est === 'regular' ? 'REGULAR' : 'PENDIENTE';
-      const notaText = n?.nota !== undefined ? String(n.nota) : '-';
+      const notaText = est === 'aprobada' && n?.nota !== undefined ? String(n.nota) : '-';
 
       return [
         `#${String(m.id).padStart(2, '0')}`,

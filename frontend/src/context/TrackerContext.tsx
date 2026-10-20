@@ -239,24 +239,13 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const executeResetToPendiente = useCallback((mId: number, mNombre: string) => {
     const prevEstados = { ...estados };
     const prevElectivas = { ...estadosElectivas };
-    const prevNotas = { ...notas };
 
     const nextTemp = { ...estados, [mId]: 'pendiente' as EstadoMateria };
     const cascaded = applyCascade(nextTemp, estadosElectivas);
 
-    // Limpiamos notas de materias que ya no quedan aprobadas
-    const nextNotas = { ...notas };
-    delete nextNotas[mId];
-    for (const [k, v] of Object.entries(cascaded.newEstados)) {
-      if (v !== 'aprobada') {
-        delete nextNotas[Number(k)];
-      }
-    }
-
     setEstados(cascaded.newEstados);
     setEstadosElectivas(cascaded.newElectivas);
-    setNotas(nextNotas);
-    void persistProgress({ estados: cascaded.newEstados, estadosElectivas: cascaded.newElectivas, notas: nextNotas, ppsHoras });
+    void persistProgress({ estados: cascaded.newEstados, estadosElectivas: cascaded.newElectivas, notas, ppsHoras });
 
     showToast(`⚪ ${mNombre} reseteada a PENDIENTE`, {
       variant: 'info',
@@ -265,8 +254,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         onClick: () => {
           setEstados(prevEstados);
           setEstadosElectivas(prevElectivas);
-          setNotas(prevNotas);
-          void persistProgress({ estados: prevEstados, estadosElectivas: prevElectivas, notas: prevNotas, ppsHoras });
+          void persistProgress({ estados: prevEstados, estadosElectivas: prevElectivas, notas, ppsHoras });
           showToast(`↩️ Se restauró ${mNombre} y sus materias correlativas`, 'success');
         }
       }
@@ -400,22 +388,11 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     const nextEstados = { ...estados, [id]: estado };
-    const nextNotas = { ...notas };
-    if (estado !== 'aprobada') {
-      delete nextNotas[id];
-    }
-
     const cascaded = applyCascade(nextEstados, estadosElectivas);
-    for (const [k, v] of Object.entries(cascaded.newEstados)) {
-      if (v !== 'aprobada') {
-        delete nextNotas[Number(k)];
-      }
-    }
 
     setEstados(cascaded.newEstados);
     setEstadosElectivas(cascaded.newElectivas);
-    setNotas(nextNotas);
-    void persistProgress({ estados: cascaded.newEstados, estadosElectivas: cascaded.newElectivas, notas: nextNotas, ppsHoras });
+    void persistProgress({ estados: cascaded.newEstados, estadosElectivas: cascaded.newElectivas, notas, ppsHoras });
     if (estado === 'regular') {
       showToast(`🟡 ${m.nombre} marcada como REGULAR`);
     } else if (estado === 'aprobada') {
@@ -470,7 +447,12 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const setNotaMateria = useCallback((id: number, notaData: NotaMateria) => {
     setNotas(prev => {
-      const next = { ...prev, [id]: notaData };
+      const next = { ...prev };
+      if (notaData.nota === undefined || isNaN(notaData.nota)) {
+        delete next[id];
+      } else {
+        next[id] = notaData;
+      }
       void persistProgress({ notas: next });
       return next;
     });

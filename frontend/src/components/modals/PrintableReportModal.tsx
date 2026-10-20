@@ -287,7 +287,7 @@ export const PrintableReportModal: React.FC = () => {
                               <td className="py-1 px-2 text-center text-slate-500 dark:text-slate-400 print:text-neutral-700 whitespace-nowrap">{m.horas} hs</td>
                               <td className="py-1 px-2 text-center text-[10px]">{estadoBadge}</td>
                               <td className="py-1 px-2 text-center font-bold text-purple-600 dark:text-purple-300 print:text-black">
-                                {n?.nota !== undefined ? n.nota : '—'}
+                                {est === 'aprobada' && n?.nota !== undefined ? n.nota : '—'}
                               </td>
                             </tr>
                           );

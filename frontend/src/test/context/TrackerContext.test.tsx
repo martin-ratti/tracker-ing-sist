@@ -418,7 +418,7 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     expect(result.current.estados[18]).toBe('pendiente');
   });
 
-  it('cuando una materia tiene nota y se presiona para cambiar de estado debe permitir cambiarla limpiando la nota y restaurando con Deshacer', () => {
+  it('cuando una materia tiene nota y cambia de estado preserva la nota pero no computa en promedio hasta volver a aprobada', () => {
     const { result } = renderHook(() => useTracker(), { wrapper });
 
     // Regularizamos y aprobamos Sistemas y Procesos (id 8)
@@ -435,6 +435,7 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
 
     expect(result.current.estados[8]).toBe('aprobada');
     expect(result.current.notas[8]?.nota).toBe(9);
+    expect(result.current.stats.promedio).toBe(9);
 
     // Al apretarla (toggle de aprobada -> pendiente):
     act(() => {
@@ -442,18 +443,26 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     });
 
     expect(result.current.estados[8]).toBe('pendiente');
-    expect(result.current.notas[8]).toBeUndefined();
-
-    // Verificamos que emitió Toast con Deshacer
-    const toastUndo = result.current.toasts.find(t => t.action?.label === 'Deshacer');
-    expect(toastUndo).toBeDefined();
-
-    // Si hace click en Deshacer, restaura tanto el estado como la nota
-    act(() => {
-      toastUndo?.action?.onClick();
-    });
-
-    expect(result.current.estados[8]).toBe('aprobada');
+    // La nota se preserva pero el promedio no la computa por estar pendiente
     expect(result.current.notas[8]?.nota).toBe(9);
+    expect(result.current.stats.promedio).toBeNull();
+
+    // Si vuelve a marcarla como regular y luego aprobada, vuelve a computar automáticamente
+    act(() => {
+      result.current.setEstadoDirecto(8, 'regular');
+    });
+    expect(result.current.stats.promedio).toBeNull();
+
+    act(() => {
+      result.current.setEstadoDirecto(8, 'aprobada');
+    });
+    expect(result.current.stats.promedio).toBe(9);
+
+    // Si se elimina explícitamente la nota
+    act(() => {
+      result.current.setNotaMateria(8, { nota: undefined });
+    });
+    expect(result.current.notas[8]).toBeUndefined();
+    expect(result.current.stats.promedio).toBeNull();
   });
 });

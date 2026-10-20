@@ -74,13 +74,15 @@ export const SubjectModal: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, setSelectedSubjectId]);
 
+  const currentNotaNum = selectedSubjectId ? notas[selectedSubjectId]?.nota : undefined;
   const [prevSubjectId, setPrevSubjectId] = useState(selectedSubjectId);
+  const [prevNotaNum, setPrevNotaNum] = useState(currentNotaNum);
 
-  if (selectedSubjectId !== prevSubjectId) {
+  if (selectedSubjectId !== prevSubjectId || currentNotaNum !== prevNotaNum) {
     setPrevSubjectId(selectedSubjectId);
-    if (selectedSubjectId && notas[selectedSubjectId]) {
-      const n = notas[selectedSubjectId];
-      setNotaVal(n.nota !== undefined ? String(n.nota) : '');
+    setPrevNotaNum(currentNotaNum);
+    if (currentNotaNum !== undefined) {
+      setNotaVal(String(currentNotaNum));
     } else {
       setNotaVal('');
     }
@@ -687,7 +689,7 @@ export const SubjectModal: React.FC = () => {
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-syne font-bold text-sm text-(--text-body) flex items-center gap-2">
                   <Award className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  <span>Calificación de la Materia</span>
+                  <span>Calificación de la Materia Aprobada</span>
                 </h3>
                 {notaVal && (
                   <span className="text-xs font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-500/30 font-bold">
@@ -696,7 +698,7 @@ export const SubjectModal: React.FC = () => {
                 )}
               </div>
 
-              <form onSubmit={handleSaveNotas} className="flex items-end gap-3 font-mono text-xs">
+              <form onSubmit={handleSaveNotas} className="flex items-end gap-2.5 font-mono text-xs">
                 <div className="flex-1">
                   <label htmlFor="nota-input" className="block text-slate-600 dark:text-slate-400 mb-1 text-[11px]">
                     Nota Final / Promoción (1 - 10):
@@ -714,17 +716,71 @@ export const SubjectModal: React.FC = () => {
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-lg text-slate-950 font-bold transition-all shadow-md shrink-0 cursor-pointer"
-                  style={{
-                    background: 'var(--gradient-primary)',
-                    boxShadow: '0 0 12px var(--color-primary-glow)'
-                  }}
-                >
-                  Guardar Nota
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {notas[materia.id]?.nota !== undefined && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNotaMateria(materia.id, { nota: undefined });
+                        setNotaVal('');
+                        showToast(`🗑️ Calificación eliminada para ${materia.nombre}`);
+                      }}
+                      className="p-2 rounded-lg border border-(--border-color) hover:border-rose-500 text-slate-400 hover:text-rose-500 transition-colors"
+                      title="Eliminar calificación"
+                      aria-label="Eliminar calificación"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-lg text-slate-950 font-bold transition-all shadow-md shrink-0 cursor-pointer"
+                    style={{
+                      background: 'var(--gradient-primary)',
+                      boxShadow: '0 0 12px var(--color-primary-glow)'
+                    }}
+                  >
+                    Guardar Nota
+                  </button>
+                </div>
               </form>
+            </div>
+          )}
+
+          {/* Calificación guardada previa (materia no aprobada) */}
+          {currentEstado !== 'aprobada' && notas[materia.id]?.nota !== undefined && (
+            <div className="border-t border-(--border-color) pt-4">
+              <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-between text-xs font-mono gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-600 dark:text-purple-400 shrink-0">
+                    <Award className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-bold text-(--text-body)">Nota guardada:</span>
+                      <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-800 dark:text-purple-300 font-extrabold border border-purple-500/30">
+                        {notas[materia.id].nota}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                      Esta nota está guardada pero no suma al promedio. Se computará automáticamente cuando la materia esté Aprobada.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNotaMateria(materia.id, { nota: undefined });
+                    setNotaVal('');
+                    showToast(`🗑️ Calificación eliminada para ${materia.nombre}`);
+                  }}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-(--bg-surface) transition-colors shrink-0"
+                  title="Eliminar calificación guardada"
+                  aria-label="Eliminar calificación guardada"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           )}
 
