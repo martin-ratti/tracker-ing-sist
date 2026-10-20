@@ -247,17 +247,7 @@ export const CalendarModal: React.FC = () => {
   };
 
   const handleRemoveMeta = (materiaId: number) => {
-    const prevMeta = metasExamen[materiaId];
     removeMetaExamen(materiaId);
-    if (prevMeta) {
-      showToast('Meta de examen eliminada', {
-        variant: 'info',
-        action: {
-          label: 'Deshacer',
-          onClick: () => setMetaExamen(materiaId, prevMeta)
-        }
-      });
-    }
   };
 
   if (!isMounted) return null;

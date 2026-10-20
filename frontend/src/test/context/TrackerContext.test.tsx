@@ -465,4 +465,37 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     expect(result.current.notas[8]).toBeUndefined();
     expect(result.current.stats.promedio).toBeNull();
   });
+
+  it('si una materia está regular pero no cumple para aprobar, toggleMateriaEstado debe ciclar a pendiente (cursable)', () => {
+    const { result } = renderHook(() => useTracker(), { wrapper });
+
+    // AM II (id 9) requiere regularizar AM I (1) y Álgebra (2)
+    act(() => {
+      result.current.setEstadoDirecto(1, 'regular');
+    });
+    act(() => {
+      result.current.setEstadoDirecto(2, 'regular');
+    });
+
+    expect(result.current.estados[9] || 'pendiente').toBe('pendiente');
+
+    // Clic en AM II -> pasa a REGULAR
+    act(() => {
+      result.current.toggleMateriaEstado(9);
+    });
+    expect(result.current.estados[9]).toBe('regular');
+
+    // Clic en AM II estando regular: como AM1 y Álgebra NO están aprobadas,
+    // no puede pasar a aprobada. Debe pasar a PENDIENTE (cursable) y alternar.
+    act(() => {
+      result.current.toggleMateriaEstado(9);
+    });
+    expect(result.current.estados[9]).toBe('pendiente');
+
+    // Y si vuelve a hacer clic, pasa a regular nuevamente
+    act(() => {
+      result.current.toggleMateriaEstado(9);
+    });
+    expect(result.current.estados[9]).toBe('regular');
+  });
 });

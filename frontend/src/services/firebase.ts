@@ -142,7 +142,7 @@ export async function saveProgressToFirestore(userId: string, progress: Progreso
       ...progress,
       actualizadoEn: new Date().toISOString()
     });
-    await setDoc(userDocRef, sanitized, { merge: true });
+    await setDoc(userDocRef, sanitized);
   } catch (error) {
     console.error('Error al persistir progreso en Firestore:', error);
     throw error;

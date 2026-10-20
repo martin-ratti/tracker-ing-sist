@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen } from '../types/plan';
 import { MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
-import { fetchProgress, getLocalProgress, persistProgress, clearProgress, mergeProgress } from '../services/api';
+import { fetchProgress, getLocalProgress, persistProgress, clearProgress, safeSaveProgressToStorage } from '../services/api';
 import { decodeProgress } from '../utils/share';
 import { subscribeToUserProgress, onFirebaseAuthStateChanged, isFirebaseConfigured } from '../services/firebase';
 import { 
@@ -193,14 +193,13 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         unsubscribeSnapshot = subscribeToUserProgress(fbUser.uid, (data) => {
           if (window.location.hash.startsWith('#share=')) return;
           if (data) {
-            const currentLocal = getLocalProgress();
-            const merged = mergeProgress(currentLocal, data);
-            setEstados(merged.estados || {});
-            setEstadosElectivas(merged.estadosElectivas || {});
-            setNotas(merged.notas || {});
-            setPpsHorasState(merged.ppsHoras !== undefined ? merged.ppsHoras : 0);
-            setPerfilState(merged.perfil || { nombre: '', legajo: '' });
-            setMetasExamenState(merged.metasExamen || {});
+            safeSaveProgressToStorage(data);
+            setEstados(data.estados || {});
+            setEstadosElectivas(data.estadosElectivas || {});
+            setNotas(data.notas || {});
+            setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
+            setPerfilState(data.perfil || { nombre: '', legajo: '' });
+            setMetasExamenState(data.metasExamen || {});
           }
         });
       }
@@ -236,7 +235,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const puedeRegularElectiva = useCallback((e: Electiva): boolean => checkPuedeRegularElectiva(e, getEstado), [getEstado]);
   const esElectivaCursable = useCallback((e: Electiva): boolean => checkEsElectivaCursable(e, getEstadoElectiva, getEstado), [getEstadoElectiva, getEstado]);
 
-  const executeResetToPendiente = useCallback((mId: number, mNombre: string) => {
+  const executeResetToPendiente = useCallback((mId: number, mNombre: string, customToastMsg?: string) => {
     const prevEstados = { ...estados };
     const prevElectivas = { ...estadosElectivas };
 
@@ -247,7 +246,9 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setEstadosElectivas(cascaded.newElectivas);
     void persistProgress({ estados: cascaded.newEstados, estadosElectivas: cascaded.newElectivas, notas, ppsHoras });
 
-    showToast(`⚪ ${mNombre} reseteada a PENDIENTE`, {
+    const toastMsg = customToastMsg || `⚪ ${mNombre} reseteada a PENDIENTE`;
+
+    showToast(toastMsg, {
       variant: 'info',
       action: {
         label: 'Deshacer',
@@ -261,7 +262,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   }, [estados, estadosElectivas, notas, ppsHoras, showToast]);
 
-  const requestResetToPendiente = useCallback((mId: number, mNombre: string) => {
+  const requestResetToPendiente = useCallback((mId: number, mNombre: string, customToastMsg?: string) => {
     const nextTemp = { ...estados, [mId]: 'pendiente' as EstadoMateria };
     const cascaded = applyCascade(nextTemp, estadosElectivas);
 
@@ -287,10 +288,10 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         materiaNombre: mNombre,
         totalAfectadas: afectadas.length,
         materiasAfectadas: afectadas,
-        onConfirm: () => executeResetToPendiente(mId, mNombre)
+        onConfirm: () => executeResetToPendiente(mId, mNombre, customToastMsg)
       });
     } else {
-      executeResetToPendiente(mId, mNombre);
+      executeResetToPendiente(mId, mNombre, customToastMsg);
     }
   }, [estados, estadosElectivas, executeResetToPendiente]);
 
@@ -331,15 +332,13 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       showToast(`🟡 ${m.nombre} marcada como REGULAR`);
     } else if (actual === 'regular') {
       if (!puedeAprobarMateria(m)) {
+        let motivo = 'correlativas de final pendientes';
         if (m.reqRendirAprobada === 'TODAS') {
-          showToast('⚠️ Para rendir Proyecto Final debes tener TODAS las materias anteriores aprobadas');
-          return;
+          motivo = 'requiere materias anteriores aprobadas';
+        } else if (m.esAdusiSolo) {
+          motivo = 'requiere 1º, 2º y 3º año aprobado';
         }
-        if (m.esAdusiSolo) {
-          showToast('⚠️ Para aprobar el Seminario ADUSI debes tener aprobado todo 1º, 2º y 3º año');
-          return;
-        }
-        showToast(`⚠️ No cumples con las correlativas necesarias para aprobar ${m.nombre}`);
+        requestResetToPendiente(id, m.nombre, `⚪ ${m.nombre} pasó a Cursable (${motivo})`);
         return;
       }
       const nextEstados = { ...estados, [id]: 'aprobada' as EstadoMateria };
