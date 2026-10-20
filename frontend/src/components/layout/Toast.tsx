@@ -50,11 +50,11 @@ const SingleToast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void 
           onDismiss(toast.id);
         }
       }}
-      className={`relative w-full text-left bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-(--text-body) px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center justify-between gap-3 transition-all duration-200 hover:scale-[1.01] ${style.bg} animate-in fade-in slide-in-from-bottom-3 select-none cursor-pointer`}
+      className={`relative w-full sm:w-auto text-left bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-(--text-body) px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center justify-between gap-3 sm:gap-4 transition-all duration-200 hover:scale-[1.01] ${style.bg} animate-in fade-in slide-in-from-bottom-3 select-none cursor-pointer shadow-lg`}
     >
-      <div className="flex items-center gap-2 flex-1">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
         <span className={`w-2 h-2 rounded-full shrink-0 animate-pulse ${style.dot}`} />
-        <span className="flex-1">{toast.message}</span>
+        <span className="flex-1 whitespace-normal sm:whitespace-nowrap">{toast.message}</span>
       </div>
 
       {toast.action && (
@@ -94,7 +94,7 @@ export const Toast: React.FC = () => {
           to { width: 0%; }
         }
       `}</style>
-      <div className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col-reverse gap-2 pointer-events-auto max-w-md w-full px-4 safe-bottom">
+      <div className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col-reverse gap-2 pointer-events-auto w-auto max-w-[calc(100vw-2rem)] sm:max-w-2xl md:max-w-3xl px-2 sm:px-4 safe-bottom items-center">
         {toasts.map(toast => (
           <SingleToast key={toast.id} toast={toast} onDismiss={dismissToast} />
         ))}
