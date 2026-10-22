@@ -7,7 +7,9 @@ import {
   X, 
   BarChart3, 
   TrendingUp, 
-  Award
+  Award,
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 import { formatPromedio } from '../../utils/formatters';
 
@@ -97,7 +99,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
       />
       <div 
         ref={modalRef}
-        className={`relative z-10 w-full max-w-3xl 2xl:max-w-4xl 4k:max-w-5xl max-h-[92vh] sm:max-h-[90vh] bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto transform transition-all duration-200 ease-out ${
+        className={`relative z-10 w-full max-w-3xl lg:max-w-4xl 2xl:max-w-5xl min-[2800px]:max-w-6xl 4k:max-w-6xl max-h-[92vh] sm:max-h-[90vh] bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto transform transition-all duration-200 ease-out ${
           isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
         }`}
         role="dialog"
@@ -124,106 +126,133 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-6 sm:space-y-8 no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-5 sm:space-y-6 no-scrollbar">
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Fila superior: Tarjetas de Métricas Clave (KPIs) compactas y armónicas */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+            <div className="bg-(--bg-elevated) p-3 sm:p-3.5 rounded-xl border border-(--border-color) flex flex-col justify-between shadow-xs">
+              <div className="flex items-center justify-between text-slate-400 mb-1">
+                <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">Promedio</span>
+                <Award className="w-4 h-4 text-purple-400 shrink-0" />
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="font-syne text-xl sm:text-2xl font-bold text-purple-400">
+                  {formatPromedio(promedio)}
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">/ 10</span>
+              </div>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">Materias aprobadas</span>
+            </div>
+
+            <div className="bg-(--bg-elevated) p-3 sm:p-3.5 rounded-xl border border-(--border-color) flex flex-col justify-between shadow-xs">
+              <div className="flex items-center justify-between text-slate-400 mb-1">
+                <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">Avance Carrera</span>
+                <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="font-syne text-xl sm:text-2xl font-bold text-emerald-400">
+                  {stats.porcentajeCarrera}%
+                </span>
+              </div>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">Plan 2023 ISI</span>
+            </div>
+
+            <div className="bg-(--bg-elevated) p-3 sm:p-3.5 rounded-xl border border-(--border-color) flex flex-col justify-between shadow-xs">
+              <div className="flex items-center justify-between text-slate-400 mb-1">
+                <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">Troncales</span>
+                <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="font-syne text-xl sm:text-2xl font-bold text-cyan-400">
+                  {aprobadasCount}
+                </span>
+                <span className="text-xs text-slate-500 font-mono">/ {totalTroncales}</span>
+              </div>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                {regularesCount > 0 ? `+${regularesCount} regulares` : 'Aprobadas'}
+              </span>
+            </div>
+
+            <div className="bg-(--bg-elevated) p-3 sm:p-3.5 rounded-xl border border-(--border-color) flex flex-col justify-between shadow-xs">
+              <div className="flex items-center justify-between text-slate-400 mb-1">
+                <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">Horas Electivas</span>
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="font-syne text-xl sm:text-2xl font-bold text-amber-400 whitespace-nowrap">
+                  {horasElectivasAprobadas}
+                </span>
+                <span className="text-xs text-slate-500 font-mono">/ 20 hs</span>
+              </div>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                {Math.min(Math.round((horasElectivasAprobadas / 20) * 100), 100)}% de meta
+              </span>
+            </div>
+          </div>
+
+          {/* Fila intermedia: Distribución (Donut) y Progreso por Nivel enfrentados en 2 columnas */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Gráfico de distribución */}
-            <div className="bg-(--bg-elevated) p-5 rounded-xl border border-(--border-color) flex flex-col items-center">
-              <h3 className="font-syne text-sm font-semibold text-(--text-body) mb-6 w-full flex items-center gap-2">
+            <div className="bg-(--bg-elevated) p-4 sm:p-5 rounded-xl border border-(--border-color) flex flex-col items-center justify-between">
+              <h3 className="font-syne text-sm font-semibold text-(--text-body) mb-4 w-full flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
                 Distribución por Estado
               </h3>
               
-              <div className="relative w-48 h-48 rounded-full mb-6" style={{ background: conicGradient }}>
-                <div className="absolute inset-2 bg-(--bg-elevated) rounded-full flex flex-col items-center justify-center">
-                  <span className="font-syne text-2xl font-bold text-(--text-body)">
+              <div className="relative w-44 h-44 2xl:w-56 2xl:h-56 4k:w-64 4k:h-64 rounded-full my-auto" style={{ background: conicGradient }}>
+                <div className="absolute inset-2 2xl:inset-2.5 bg-(--bg-elevated) rounded-full flex flex-col items-center justify-center">
+                  <span className="font-syne text-2xl 2xl:text-3xl font-bold text-(--text-body)">
                     {Math.round(pApr)}%
                   </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">Completado</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">Completado</span>
                 </div>
               </div>
 
-              <div className="w-full grid grid-cols-2 gap-2 text-xs font-mono">
+              <div className="w-full grid grid-cols-2 gap-2 text-xs font-mono mt-4 pt-3 border-t border-(--border-color)">
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }}></span>
-                  <span className="text-(--text-body)">Aprobadas ({aprobadasCount})</span>
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-aprobada)' }}></span>
+                  <span className="text-(--text-body) truncate">Aprobadas ({aprobadasCount})</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }}></span>
-                  <span className="text-(--text-body)">Regulares ({regularesCount})</span>
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-regular)' }}></span>
+                  <span className="text-(--text-body) truncate">Regulares ({regularesCount})</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-cursable)' }}></span>
-                  <span className="text-(--text-body)">Cursables ({cursablesCount})</span>
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-cursable)' }}></span>
+                  <span className="text-(--text-body) truncate">Cursables ({cursablesCount})</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-(--bg-surface) border border-(--border-color)"></span>
-                  <span className="text-(--text-body)">Bloqueadas ({pendientesCount})</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-(--bg-surface) border border-(--border-color) shrink-0"></span>
+                  <span className="text-(--text-body) truncate">Bloqueadas ({pendientesCount})</span>
                 </div>
               </div>
             </div>
 
-            {/* Promedios y Métricas */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
-                <div className="flex items-center gap-2 text-slate-400 mb-2">
-                  <Award className="w-4 h-4 text-purple-400" />
-                  <span className="text-xs font-mono uppercase">Promedio Académico</span>
-                </div>
-                <span className="font-syne text-2xl font-bold text-purple-400">
-                  {formatPromedio(promedio)}
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono mt-1">Materias aprobadas</span>
-              </div>
-
-              <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
-                <div className="flex items-center gap-2 text-slate-400 mb-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs font-mono uppercase">Avance Troncales</span>
-                </div>
-                <span className="font-syne text-2xl font-bold text-emerald-400">
-                  {aprobadasCount}<span className="text-sm text-slate-500">/{totalTroncales}</span>
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono mt-1">{stats.porcentajeCarrera}% de la carrera</span>
-              </div>
-
-              <div className="bg-(--bg-elevated) p-4 rounded-xl border border-(--border-color) flex flex-col justify-center">
-                <div className="flex items-center gap-2 text-slate-400 mb-2">
-                  <TrendingUp className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs font-mono uppercase">Horas Electivas</span>
-                </div>
-                <span className="font-syne text-2xl font-bold text-amber-400 whitespace-nowrap">
-                  {horasElectivasAprobadas}<span className="text-sm text-slate-500"> hs</span>
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono mt-1">Total acumulado</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Progreso por Nivel */}
-          <div className="bg-(--bg-elevated) p-5 rounded-xl border border-(--border-color)">
-            <h3 className="font-syne text-sm font-semibold text-(--text-body) mb-4 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Progreso por Nivel
-            </h3>
-            <div className="space-y-4">
-              {nivelesProgress.map(np => (
-                <div key={np.nivel} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-(--text-body) font-bold">{np.nivel}º Año</span>
-                    <span className="text-slate-500 dark:text-slate-400">{np.aprobadas} / {np.total} aprobadas</span>
+            {/* Progreso por Nivel */}
+            <div className="bg-(--bg-elevated) p-4 sm:p-5 rounded-xl border border-(--border-color) flex flex-col justify-between">
+              <h3 className="font-syne text-sm font-semibold text-(--text-body) mb-4 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Progreso por Nivel
+              </h3>
+              <div className="space-y-3.5 my-auto">
+                {nivelesProgress.map(np => (
+                  <div key={np.nivel} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-(--text-body) font-bold">{np.nivel}º Año</span>
+                      <span className="text-slate-500 dark:text-slate-400">{np.aprobadas} / {np.total} ({Math.round(np.porcentaje)}%)</span>
+                    </div>
+                    <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-(--border-color)">
+                      <div 
+                        className="h-full transition-all duration-1000 ease-out"
+                        style={{ 
+                          width: `${np.porcentaje}%`,
+                          background: 'var(--gradient-primary)'
+                        }}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-(--border-color)">
-                    <div 
-                      className="h-full transition-all duration-1000 ease-out"
-                      style={{ 
-                        width: `${np.porcentaje}%`,
-                        background: 'var(--gradient-primary)'
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 

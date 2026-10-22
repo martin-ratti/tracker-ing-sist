@@ -99,7 +99,7 @@ export function getResolutionProfile(width: number, height: number, isCalendarTa
         isCompactHeight: true,
         isStandardHeight: false,
         // En 720p maximizamos el alto a 96vh con padding ultracompacto para que quepan las 6 filas con cero scroll
-        calendarModalSize: isCalendarTab ? 'max-w-5xl h-[96vh]' : 'max-w-4xl max-h-[94vh]',
+        calendarModalSize: isCalendarTab ? 'max-w-5xl h-[93vh]' : 'max-w-4xl max-h-[92vh]',
         containerPadding: 'p-1.5 sm:p-2',
         dayCellPadding: 'p-0.5 sm:p-1',
         dayNumberSize: 'text-[10px] sm:text-[11px]',
