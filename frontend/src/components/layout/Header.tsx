@@ -106,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   Plan 2023 · FRRo
                 </span>
                 {/* Subtítulo visible exclusivamente en PC de pantalla ancha para evitar colisiones en pantallas intermedias */}
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono hidden xl:block whitespace-nowrap truncate">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono hidden 2xl:block whitespace-nowrap truncate">
                   · Tracker Pro de Correlativas y Avance Académico
                 </p>
               </div>
@@ -492,7 +492,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
       </div>
 
       {/* Sub-barra Desktop: Selector de Vistas, Filtros de Correlativas, % de Avance y Botones de Acción */}
-      <div className="hidden md:flex w-full mt-3 pt-2.5 border-t border-(--border-color) flex-wrap items-center justify-between gap-3 text-xs font-mono">
+      <div className="hidden md:flex w-full mt-3 pt-2.5 border-t border-(--border-color) flex-wrap items-center justify-between gap-2 sm:gap-3 text-xs font-mono">
         {/* Bloque Izquierdo: Vistas, Filtro de Correlativas y % de Carrera */}
         <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
           {/* Selector de vistas: Grafo vs Malla */}
@@ -534,7 +534,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
               <div className="flex items-center bg-(--bg-elevated) p-1 rounded-lg border border-(--border-color)">
                 <button
                   onClick={() => setEdgeMode('ambos')}
-                  className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
+                  className={`px-2 sm:px-2.5 py-0.5 rounded text-[11px] transition-colors ${
                     edgeMode === 'ambos' ? 'bg-(--bg-surface) font-extrabold shadow-sm border border-(--border-color)' : 'text-slate-700 dark:text-slate-300 hover:text-(--text-body) font-medium'
                   }`}
                   style={edgeMode === 'ambos' ? { color: 'var(--color-primary)' } : {}}
@@ -574,10 +574,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
             <div className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">
               <span>Avance:</span>
               <span className="text-(--text-body) font-bold">
-                {stats.aprobadasCount} / {stats.totalTroncales} materias
+                {stats.aprobadasCount}/{stats.totalTroncales} <span className="hidden 2xl:inline">materias</span>
               </span>
             </div>
-            <div className="w-36 sm:w-56 md:w-72 lg:w-85 xl:w-115 2xl:w-140 h-2.5 sm:h-3 rounded-full bg-slate-200 dark:bg-slate-950/90 overflow-hidden border border-slate-300 dark:border-slate-700/60 p-0.5 relative shadow-inner">
+            <div className="w-28 sm:w-40 md:w-44 lg:w-48 xl:w-48 2xl:w-96 min-[2800px]:w-140 h-2.5 sm:h-3 rounded-full bg-slate-200 dark:bg-slate-950/90 overflow-hidden border border-slate-300 dark:border-slate-700/60 p-0.5 relative shadow-inner">
               <div 
                 className="h-full rounded-full transition-all duration-700 ease-out relative"
                 style={{ 

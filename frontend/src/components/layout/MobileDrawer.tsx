@@ -466,7 +466,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ onOpenTitles, onOpen
                       </div>
                       <div className="min-w-0">
                         <div className="text-xs font-bold font-syne text-(--text-body) truncate">Guía del Plan 2023</div>
-                        <div className="text-[10px] font-mono text-slate-500 truncate">Reglamento, correlativas y ordenanza</div>
+                        <div className="text-[10px] font-mono text-slate-500 truncate">Atajos, correlativas y ordenanza</div>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0 ml-2" />
