@@ -63,6 +63,8 @@ export const NetworkGraph: React.FC = () => {
   const toggleMateriaEstadoRef = useRef<(id: number) => void>(() => {});
   const setSelectedSubjectIdRef = useRef<(id: number | null) => void>(() => {});
   const setFocusedSubjectIdRef = useRef<(id: number | null) => void>(() => {});
+  const focusedSubjectIdRef = useRef<number | null>(null);
+  const fitToSafeAreaRef = useRef<(animate?: boolean) => void>(() => {});
   const prevNodeSignaturesRef = useRef<Map<number, string>>(new Map());
   const prevEdgeSignaturesRef = useRef<Map<number, string>>(new Map());
 
@@ -93,6 +95,10 @@ export const NetworkGraph: React.FC = () => {
   useEffect(() => {
     setFocusedSubjectIdRef.current = setFocusedSubjectId;
   }, [setFocusedSubjectId]);
+
+  useEffect(() => {
+    focusedSubjectIdRef.current = focusedSubjectId;
+  }, [focusedSubjectId]);
 
   // Cálculo de dependencias delegado
   const dependenciesTree = useMemo(() => {
@@ -364,14 +370,20 @@ export const NetworkGraph: React.FC = () => {
           }
         });
       }
+
+      fitToSafeAreaRef.current(false);
     });
 
     const initialRedrawTimer = setTimeout(() => {
       net.redraw();
-    }, 80);
+      fitToSafeAreaRef.current(false);
+    }, 100);
 
     const handleResize = () => {
       net.redraw();
+      if (!focusedSubjectIdRef.current) {
+        fitToSafeAreaRef.current(false);
+      }
     };
     window.addEventListener('resize', handleResize);
 
@@ -379,6 +391,9 @@ export const NetworkGraph: React.FC = () => {
     if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
       resizeObserver = new ResizeObserver(() => {
         net.redraw();
+        if (!focusedSubjectIdRef.current) {
+          fitToSafeAreaRef.current(false);
+        }
       });
       resizeObserver.observe(containerRef.current);
     }
@@ -441,6 +456,89 @@ export const NetworkGraph: React.FC = () => {
     }
   }, [getNodeVisualConfig, getEdgeVisualConfig]);
 
+  // Cálculo exacto del bounding box de las materias en coordenadas de lienzo
+  const getGraphBounds = useCallback(() => {
+    const net = networkRef.current;
+    if (!net) return null;
+    const positions = net.getPositions();
+    const ids = Object.keys(positions);
+    if (ids.length === 0) return null;
+
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    for (const id of ids) {
+      const pos = positions[id];
+      if (typeof pos?.x === 'number' && typeof pos?.y === 'number') {
+        if (pos.x < minX) minX = pos.x;
+        if (pos.x > maxX) maxX = pos.x;
+        if (pos.y < minY) minY = pos.y;
+        if (pos.y > maxY) maxY = pos.y;
+      }
+    }
+
+    if (!isFinite(minX) || !isFinite(maxX) || !isFinite(minY) || !isFinite(maxY)) return null;
+
+    // Resguardo de medio nodo para margen, bordes y tipografía
+    const padX = 105;
+    const padY = 28;
+
+    return {
+      centerX: (minX + maxX) / 2,
+      centerY: (minY + maxY) / 2,
+      width: Math.max((maxX - minX) + padX * 2, 200),
+      height: Math.max((maxY - minY) + padY * 2, 200)
+    };
+  }, []);
+
+  // Ajuste inteligente a área segura (Safe Area) para 720p, 1080p, 2K, 4K y Mobile
+  const fitToSafeArea = useCallback((animate = true) => {
+    const net = networkRef.current;
+    const container = containerRef.current;
+    if (!net || !container) return;
+
+    const canvasW = container.clientWidth;
+    const canvasH = container.clientHeight;
+    if (canvasW === 0 || canvasH === 0) return;
+
+    const bounds = getGraphBounds();
+    if (!bounds) {
+      net.fit({ maxZoomLevel: 3.5, animation: animate ? { duration: 380, easingFunction: 'easeInOutQuad' } : false });
+      return;
+    }
+
+    // Insets de seguridad calibrados para dejar espacio a las barras flotantes
+    const is4k = canvasW >= 3200;
+    const is2k = canvasW >= 2200 && !is4k;
+    const is1080p = canvasW >= 1600 && !is2k && !is4k;
+    const isMobile = canvasW < 640;
+
+    const topClearance = is4k ? 95 : is2k ? 75 : is1080p ? 60 : isMobile ? 55 : 48;
+    const bottomClearance = is4k ? 95 : is2k ? 75 : is1080p ? 60 : isMobile ? 65 : 48;
+    const sideClearance = is4k ? 120 : is2k ? 80 : is1080p ? 50 : isMobile ? 20 : 30;
+
+    const usableW = Math.max(canvasW - sideClearance * 2, 100);
+    const usableH = Math.max(canvasH - topClearance - bottomClearance, 100);
+
+    // Escala proporcional óptima que llena la pantalla con 3% de colchón de seguridad
+    const targetScale = Math.min(usableW / bounds.width, usableH / bounds.height) * 0.97;
+
+    const verticalShiftInPixels = (topClearance - bottomClearance) / 2;
+    const canvasOffsetY = verticalShiftInPixels / (targetScale || 1);
+
+    net.moveTo({
+      position: { x: bounds.centerX, y: bounds.centerY - canvasOffsetY },
+      scale: targetScale,
+      animation: animate ? { duration: 380, easingFunction: 'easeInOutQuad' } : false
+    });
+  }, [getGraphBounds]);
+
+  useEffect(() => {
+    fitToSafeAreaRef.current = fitToSafeArea;
+  }, [fitToSafeArea]);
+
   // Controles de cámara
   const handleZoomIn = () => {
     if (!networkRef.current) return;
@@ -455,8 +553,7 @@ export const NetworkGraph: React.FC = () => {
   };
 
   const handleFit = () => {
-    if (!networkRef.current) return;
-    networkRef.current.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+    fitToSafeArea(true);
   };
 
   // Alternar dirección de visualización (Horizontal 'LR' vs Vertical 'UD')
@@ -487,7 +584,7 @@ export const NetworkGraph: React.FC = () => {
           dragView: true
         }
       });
-      networkRef.current.fit({ animation: { duration: 400, easingFunction: 'easeInOutQuad' } });
+      fitToSafeArea(true);
     }
   };
 
@@ -545,7 +642,7 @@ export const NetworkGraph: React.FC = () => {
       } catch {
         // Ignorar
       }
-      networkRef.current.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+      fitToSafeArea(true);
     } else {
       // Volver a Modo Jerárquico canónico
       const resetCoords = MATERIAS_GRAFO.map(m => ({
@@ -581,7 +678,7 @@ export const NetworkGraph: React.FC = () => {
           dragView: true
         }
       });
-      networkRef.current.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+      fitToSafeArea(true);
     }
   };
 
@@ -631,7 +728,7 @@ export const NetworkGraph: React.FC = () => {
         dragView: true
       }
     });
-    networkRef.current.fit({ animation: { duration: 450, easingFunction: 'easeInOutQuad' } });
+    fitToSafeArea(true);
   };
 
   // Foco animado al buscar una materia
@@ -655,7 +752,7 @@ export const NetworkGraph: React.FC = () => {
       />
 
       {/* Barra de Búsqueda Flotante */}
-      <div className="absolute top-3 left-3 md:top-4 md:left-4 z-20">
+      <div className="absolute top-3 left-3 md:top-3.5 md:left-4 2xl:top-5 2xl:left-6 z-20">
         <GraphSearchBar
           onSelectSubject={handleSearchFocus}
           estados={estados}
@@ -664,19 +761,19 @@ export const NetworkGraph: React.FC = () => {
 
       {/* Banner flotante de Materia Enfocada */}
       {focusedSubjectId && (
-        <div className="absolute top-14 left-1/2 -translate-x-1/2 md:top-4 z-20 flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) shadow-2xl py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl font-mono text-xs animate-in fade-in slide-in-from-top-3 max-w-[95vw]">
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 md:top-3.5 2xl:top-5 z-20 flex flex-wrap items-center justify-center gap-2 sm:gap-3 2xl:gap-4 bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) shadow-2xl py-1.5 sm:py-2 2xl:py-2.5 px-3 sm:px-4 2xl:px-6 rounded-xl 2xl:rounded-2xl font-mono text-xs 2xl:text-sm animate-in fade-in slide-in-from-top-3 max-w-[95vw]">
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-(--color-primary)">
               {MATERIAS_GRAFO.find(m => m.id === focusedSubjectId)?.nombre}
             </span>
           </div>
 
-          <div className="flex items-center gap-2 border-l border-(--border-color) pl-2 sm:pl-3 text-[11px]">
+          <div className="flex items-center gap-2 2xl:gap-3 border-l border-(--border-color) pl-2 sm:pl-3 2xl:pl-4 text-[11px] 2xl:text-xs">
             {/* Materias previas */}
             <div className="flex items-center gap-1">
               <span className="text-slate-500 dark:text-slate-400 font-medium">Correlativas:</span>
               <span 
-                className="px-2 py-0.5 rounded font-semibold border"
+                className="px-2 py-0.5 2xl:px-2.5 2xl:py-1 rounded font-semibold border"
                 style={{
                   backgroundColor: 'var(--color-regular-bg)',
                   borderColor: 'var(--color-regular-border)',
@@ -687,7 +784,7 @@ export const NetworkGraph: React.FC = () => {
                 {dependenciesTree?.ancestorsRegular.size || 0} regular
               </span>
               <span 
-                className="px-2 py-0.5 rounded font-semibold border"
+                className="px-2 py-0.5 2xl:px-2.5 2xl:py-1 rounded font-semibold border"
                 style={{
                   backgroundColor: 'var(--color-aprobada-bg)',
                   borderColor: 'var(--color-aprobada-border)',
@@ -705,7 +802,7 @@ export const NetworkGraph: React.FC = () => {
             <div className="flex items-center gap-1">
               <span className="text-slate-500 dark:text-slate-400 font-medium">Posteriores:</span>
               <span 
-                className="px-2 py-0.5 rounded font-semibold border"
+                className="px-2 py-0.5 2xl:px-2.5 2xl:py-1 rounded font-semibold border"
                 style={{
                   backgroundColor: 'var(--color-regular-bg)',
                   borderColor: 'var(--color-regular-border)',
@@ -716,7 +813,7 @@ export const NetworkGraph: React.FC = () => {
                 {dependenciesTree?.descendantsRegular.size || 0} regular
               </span>
               <span 
-                className="px-2 py-0.5 rounded font-semibold border"
+                className="px-2 py-0.5 2xl:px-2.5 2xl:py-1 rounded font-semibold border"
                 style={{
                   backgroundColor: 'var(--color-aprobada-bg)',
                   borderColor: 'var(--color-aprobada-border)',
@@ -733,35 +830,35 @@ export const NetworkGraph: React.FC = () => {
             <button
               type="button"
               onClick={() => setSelectedSubjectId(focusedSubjectId)}
-              className="px-2 py-0.5 rounded bg-(--bg-elevated) hover:bg-(--border-color) text-cyan-700 dark:text-cyan-300 text-[11px] transition-colors border border-(--border-color) cursor-pointer"
+              className="px-2 2xl:px-3 py-0.5 2xl:py-1 rounded bg-(--bg-elevated) hover:bg-(--border-color) text-cyan-700 dark:text-cyan-300 text-[11px] 2xl:text-xs transition-colors border border-(--border-color) cursor-pointer"
             >
               Ficha
             </button>
             <button
               type="button"
               onClick={() => setFocusedSubjectId(null)}
-              className="p-1 rounded text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors cursor-pointer"
+              className="p-1 2xl:p-1.5 rounded text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors cursor-pointer"
               title="Restablecer vista completa"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 2xl:w-5 2xl:h-5" />
             </button>
           </div>
         </div>
       )}
 
       {/* Controles flotantes superiores derechos: Orientación, Modo Libre & Atenuar Aprobadas */}
-      <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10 flex items-center gap-1.5 bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) p-1 rounded-xl shadow-lg font-mono text-xs">
+      <div className="absolute top-3 right-3 md:top-3.5 md:right-4 2xl:top-5 2xl:right-6 z-10 flex items-center gap-1.5 2xl:gap-2.5 bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) p-1 2xl:p-1.5 rounded-xl 2xl:rounded-2xl shadow-lg font-mono text-xs 2xl:text-sm">
         {/* Toggle Orientación: Horizontal (LR) vs Vertical (UD) en modo jerárquico */}
         {!isFreeMode && (
           <button
             type="button"
             onClick={handleToggleDirection}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 cursor-pointer text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body) ${
+            className={`flex items-center gap-1 2xl:gap-1.5 px-2.5 2xl:px-3.5 py-1.5 2xl:py-2 rounded-lg 2xl:rounded-xl transition-colors min-h-8.5 2xl:min-h-10 cursor-pointer text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body) ${
               graphDirection === 'LR' ? 'bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border border-cyan-500/40 font-bold' : ''
             }`}
             title={`Orientación actual: ${graphDirection === 'UD' ? 'Vertical (Arriba-Abajo)' : 'Horizontal (Izquierda-Derecha)'}. Clic para alternar.`}
           >
-            {graphDirection === 'UD' ? <ArrowDown className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+            {graphDirection === 'UD' ? <ArrowDown className="w-3.5 h-3.5 2xl:w-4 2xl:h-4" /> : <ArrowRight className="w-3.5 h-3.5 2xl:w-4 2xl:h-4" />}
             <span className="hidden sm:inline">{graphDirection === 'UD' ? 'Vertical' : 'Horizontal'}</span>
           </button>
         )}
@@ -773,24 +870,24 @@ export const NetworkGraph: React.FC = () => {
           aria-checked={isFreeMode}
           aria-label="Interruptor de Modo Libre"
           onClick={handleToggleFreeMode}
-          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer select-none ${
+          className={`flex items-center gap-2 2xl:gap-2.5 px-2.5 2xl:px-3.5 py-1.5 2xl:py-2 rounded-lg 2xl:rounded-xl border transition-all cursor-pointer select-none ${
             isFreeMode
               ? 'bg-purple-500/15 border-purple-500/40'
               : 'border-transparent hover:bg-(--bg-elevated)'
           }`}
           title={isFreeMode ? 'Modo Libre activo: arrastrá las materias libremente a cualquier posición 2D (se guarda tu orden)' : 'Modo Jerárquico activo: las materias rebotan y mantienen su estructura ordenada por niveles. Clic para activar Modo Libre.'}
         >
-          <span className="text-[11px] font-semibold text-(--text-body) hidden sm:inline">
+          <span className="text-[11px] 2xl:text-xs font-semibold text-(--text-body) hidden sm:inline">
             Modo Libre
           </span>
           <span
-            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+            className={`relative inline-flex h-5 w-9 2xl:h-6 2xl:w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
               isFreeMode ? 'bg-purple-600 dark:bg-purple-500' : 'bg-slate-300 dark:bg-slate-700'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                isFreeMode ? 'translate-x-4' : 'translate-x-0'
+              className={`pointer-events-none inline-block h-4 w-4 2xl:h-5 2xl:w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                isFreeMode ? 'translate-x-4 2xl:translate-x-5' : 'translate-x-0'
               }`}
             />
           </span>
@@ -800,14 +897,14 @@ export const NetworkGraph: React.FC = () => {
         <button
           type="button"
           onClick={() => setDimApproved(prev => !prev)}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors min-h-8.5 cursor-pointer ${
+          className={`flex items-center gap-1.5 2xl:gap-2 px-2.5 2xl:px-3.5 py-1.5 2xl:py-2 rounded-lg 2xl:rounded-xl transition-colors min-h-8.5 2xl:min-h-10 cursor-pointer ${
             dimApproved
               ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/40 shadow-sm'
               : 'text-slate-700 dark:text-slate-300 font-semibold hover:text-(--text-body)'
           }`}
           title="Atenuar materias ya aprobadas para concentrarse en las materias pendientes y regulares"
         >
-          {dimApproved ? <EyeOff className="w-3.5 h-3.5 text-emerald-500" /> : <Eye className="w-3.5 h-3.5" />}
+          {dimApproved ? <EyeOff className="w-3.5 h-3.5 2xl:w-4 2xl:h-4 text-emerald-500" /> : <Eye className="w-3.5 h-3.5 2xl:w-4 2xl:h-4" />}
           <span className="hidden sm:inline">Atenuar Aprobadas</span>
         </button>
       </div>
@@ -822,67 +919,67 @@ export const NetworkGraph: React.FC = () => {
       />
 
       {/* Controles flotantes de Zoom y Reset Layout */}
-      <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 flex flex-col gap-1.5 bg-(--bg-surface) p-1.5 rounded-2xl border-2 border-(--border-color) shadow-2xl z-20">
+      <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 2xl:bottom-6 2xl:right-6 flex flex-col gap-1.5 2xl:gap-2 bg-(--bg-surface)/95 backdrop-blur-md p-1.5 2xl:p-2 rounded-2xl 2xl:rounded-3xl border border-(--border-color) shadow-2xl z-20">
         <button
           type="button"
           onClick={handleResetLayout}
           aria-label="Restablecer disposición del grafo"
-          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
+          className="p-2 2xl:p-2.5 rounded-lg 2xl:rounded-xl text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 2xl:min-w-11 2xl:min-h-11 flex items-center justify-center cursor-pointer"
           title="Restablecer Disposición / Layout"
         >
-          <RotateCcw className="w-4 h-4 text-(--color-primary)" />
+          <RotateCcw className="w-4 h-4 2xl:w-5 2xl:h-5 text-(--color-primary)" />
         </button>
         <button
           type="button"
           onClick={handleZoomIn}
           aria-label="Acercar vista del grafo"
-          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
+          className="p-2 2xl:p-2.5 rounded-lg 2xl:rounded-xl text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 2xl:min-w-11 2xl:min-h-11 flex items-center justify-center cursor-pointer"
           title="Acercar (Zoom In)"
         >
-          <ZoomIn className="w-4 h-4" />
+          <ZoomIn className="w-4 h-4 2xl:w-5 2xl:h-5" />
         </button>
         <button
           type="button"
           onClick={handleZoomOut}
           aria-label="Alejar vista del grafo"
-          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
+          className="p-2 2xl:p-2.5 rounded-lg 2xl:rounded-xl text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 2xl:min-w-11 2xl:min-h-11 flex items-center justify-center cursor-pointer"
           title="Alejar (Zoom Out)"
         >
-          <ZoomOut className="w-4 h-4" />
+          <ZoomOut className="w-4 h-4 2xl:w-5 2xl:h-5" />
         </button>
         <button
           type="button"
           onClick={handleFit}
           aria-label="Ajustar y centrar grafo"
-          className="p-2.5 rounded-lg text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
+          className="p-2 2xl:p-2.5 rounded-lg 2xl:rounded-xl text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 2xl:min-w-11 2xl:min-h-11 flex items-center justify-center cursor-pointer"
           title="Ajustar y Centrar"
         >
-          <Maximize2 className="w-4 h-4" />
+          <Maximize2 className="w-4 h-4 2xl:w-5 2xl:h-5" />
         </button>
       </div>
 
       {/* Guía rápida flotante (solo cuando no hay materia enfocada) */}
       {!focusedSubjectId && (
-        <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8 hidden md:flex items-center gap-4 px-3.5 py-2 rounded-2xl bg-(--bg-surface) border-2 border-(--border-color) text-[11px] font-mono text-slate-800 dark:text-slate-200 pointer-events-none shadow-xl font-medium">
-          <span className="flex items-center gap-1.5">
+        <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 2xl:bottom-6 2xl:left-6 hidden md:flex items-center gap-3 2xl:gap-5 px-3 py-1.5 2xl:px-4 2xl:py-2 rounded-xl 2xl:rounded-2xl bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) text-[10px] 2xl:text-xs font-mono text-slate-800 dark:text-slate-200 pointer-events-none shadow-xl font-medium">
+          <span className="flex items-center gap-1 2xl:gap-1.5">
             <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click</kbd>
             <span>Cambiar estado</span>
           </span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1 2xl:gap-1.5">
             <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Buscar</kbd>
-            <span>Cadena crítica y foco</span>
+            <span>Cadena crítica</span>
           </span>
-          <span className="flex items-center gap-1.5">
-            <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click Derecho</kbd>
-            <span>Ficha de materia</span>
+          <span className="flex items-center gap-1 2xl:gap-1.5">
+            <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click Der.</kbd>
+            <span>Ficha</span>
           </span>
-          <div className="flex items-center gap-2.5 border-l border-(--border-color) pl-3">
-            <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-regular)' }}>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }} />
+          <div className="flex items-center gap-2 2xl:gap-3 border-l border-(--border-color) pl-2.5 2xl:pl-3.5">
+            <span className="flex items-center gap-1 2xl:gap-1.5 font-semibold" style={{ color: 'var(--color-regular)' }}>
+              <span className="w-2 2xl:w-2.5 h-2 2xl:h-2.5 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }} />
               <span>Regularidad</span>
             </span>
-            <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-aprobada)' }}>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }} />
+            <span className="flex items-center gap-1 2xl:gap-1.5 font-semibold" style={{ color: 'var(--color-aprobada)' }}>
+              <span className="w-2 2xl:w-2.5 h-2 2xl:h-2.5 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }} />
               <span>Aprobación</span>
             </span>
           </div>

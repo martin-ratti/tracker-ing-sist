@@ -150,9 +150,9 @@ export const GraphSearchBar: React.FC<GraphSearchBarProps> = ({ onSelectSubject,
   };
 
   return (
-    <div ref={containerRef} className="relative z-20 w-48 sm:w-64 font-mono text-xs">
+    <div ref={containerRef} className="relative z-20 w-48 sm:w-64 2xl:w-80 4k:w-96 font-mono text-xs 2xl:text-sm">
       <div className="relative">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+        <Search className="absolute left-2.5 2xl:left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 2xl:w-4.5 2xl:h-4.5 text-slate-400 pointer-events-none" />
         <input
           type="text"
           value={query}
@@ -164,7 +164,7 @@ export const GraphSearchBar: React.FC<GraphSearchBarProps> = ({ onSelectSubject,
           onKeyDown={handleKeyDown}
           placeholder="Enfocar materia..."
           aria-label="Buscar materia para enfocar en el grafo"
-          className="w-full bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) rounded-xl pl-8 pr-7 py-1.5 text-xs text-(--text-body) placeholder:text-slate-500 focus:outline-none focus:border-(--color-primary) shadow-lg transition-colors"
+          className="w-full bg-(--bg-surface)/90 backdrop-blur-md border border-(--border-color) rounded-xl 2xl:rounded-2xl pl-8 2xl:pl-10.5 pr-7 2xl:pr-9 py-1.5 2xl:py-2.5 text-xs 2xl:text-sm text-(--text-body) placeholder:text-slate-500 focus:outline-none focus:border-(--color-primary) shadow-lg transition-colors"
         />
         {query && (
           <button
@@ -175,9 +175,9 @@ export const GraphSearchBar: React.FC<GraphSearchBarProps> = ({ onSelectSubject,
               setSelectedIndex(0);
             }}
             aria-label="Limpiar búsqueda"
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-(--text-body)"
+            className="absolute right-2 2xl:right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-(--text-body)"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3.5 h-3.5 2xl:w-4.5 2xl:h-4.5" />
           </button>
         )}
       </div>
@@ -186,7 +186,7 @@ export const GraphSearchBar: React.FC<GraphSearchBarProps> = ({ onSelectSubject,
         <div 
           role="listbox" 
           aria-label="Sugerencias de materias"
-          className="absolute top-full left-0 right-0 mt-1.5 bg-(--bg-surface) border border-(--border-color) rounded-xl shadow-2xl overflow-hidden py-1 divide-y divide-(--border-color) max-h-72 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-1.5 2xl:mt-2 bg-(--bg-surface) border border-(--border-color) rounded-xl 2xl:rounded-2xl shadow-2xl overflow-hidden py-1 2xl:py-1.5 divide-y divide-(--border-color) max-h-72 2xl:max-h-96 overflow-y-auto"
         >
           {filtered.map((m, idx) => {
             const est = estados[m.id] || 'pendiente';
@@ -200,7 +200,7 @@ export const GraphSearchBar: React.FC<GraphSearchBarProps> = ({ onSelectSubject,
                 aria-selected={isSelected}
                 onClick={() => handleSelect(m.id)}
                 onMouseEnter={() => setSelectedIndex(idx)}
-                className={`w-full px-3 py-2 text-left transition-colors flex items-center justify-between gap-2 group cursor-pointer ${
+                className={`w-full px-3 2xl:px-4 py-2 2xl:py-2.5 text-left transition-colors flex items-center justify-between gap-2 group cursor-pointer ${
                   isSelected 
                     ? 'bg-(--bg-elevated) ring-1 ring-inset ring-(--color-primary)/50 text-(--color-primary)' 
                     : 'hover:bg-(--bg-elevated)'
@@ -210,13 +210,13 @@ export const GraphSearchBar: React.FC<GraphSearchBarProps> = ({ onSelectSubject,
                   <div className="font-semibold text-(--text-body) group-hover:text-(--color-primary) truncate">
                     {m.nombreCompleto || m.nombre}
                   </div>
-                  <div className="text-[10px] text-slate-500">
+                  <div className="text-[10px] 2xl:text-xs text-slate-500">
                     {m.nivel}º Año · #{m.id}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${
+                <div className="flex items-center gap-1.5 2xl:gap-2 shrink-0">
+                  <span className={`text-[9px] 2xl:text-[11px] px-1.5 2xl:px-2 py-0.2 2xl:py-0.5 rounded border font-semibold ${
                     est === 'aprobada'
                       ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                       : est === 'regular'
@@ -225,7 +225,7 @@ export const GraphSearchBar: React.FC<GraphSearchBarProps> = ({ onSelectSubject,
                   }`}>
                     {est}
                   </span>
-                  <Crosshair className="w-3.5 h-3.5 text-slate-400 group-hover:text-(--color-primary)" />
+                  <Crosshair className="w-3.5 h-3.5 2xl:w-4 2xl:h-4 text-slate-400 group-hover:text-(--color-primary)" />
                 </div>
               </button>
             );
