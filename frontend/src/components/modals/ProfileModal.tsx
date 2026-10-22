@@ -140,7 +140,7 @@ export const ProfileModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl my-auto flex flex-col transform transition-all duration-200 ease-out ${
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md 2xl:max-w-lg 4k:max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl my-auto flex flex-col transform transition-all duration-200 ease-out ${
           isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
         }`}
       >

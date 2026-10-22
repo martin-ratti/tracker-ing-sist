@@ -431,14 +431,14 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
             onClick={() => setSelectedHito(null)}
           />
           <div 
-            className={`relative z-10 bg-(--bg-surface) border rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl font-mono text-left animate-in slide-in-from-bottom-4 duration-200 ${
+            className={`relative z-10 bg-(--bg-surface) border rounded-2xl max-w-md 2xl:max-w-xl 4k:max-w-2xl w-full p-4 sm:p-5 2xl:p-7 space-y-3 2xl:space-y-4 shadow-2xl font-mono text-left animate-in slide-in-from-bottom-4 duration-200 ${
               selectedHito.tipo === 'feriado'
                 ? 'border-rose-500/50 shadow-[0_0_24px_rgba(244,63,94,0.2)]'
                 : 'border-amber-500/50 shadow-[0_0_24px_rgba(245,158,11,0.2)]'
             }`}
           >
             <div className="flex items-start justify-between gap-3">
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
+              <span className={`text-[10px] 2xl:text-xs font-bold px-2 2xl:px-2.5 py-0.5 2xl:py-1 rounded border uppercase tracking-wider ${
                 selectedHito.tipo === 'feriado'
                   ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40'
                   : selectedHito.tipo === 'inscripcion'
@@ -452,25 +452,25 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedHito(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-(--text-body) hover:bg-(--border-color)/50 transition-colors cursor-pointer"
+                className="p-1 2xl:p-1.5 rounded-lg text-slate-400 hover:text-(--text-body) hover:bg-(--border-color)/50 transition-colors cursor-pointer"
                 aria-label="Cerrar detalle"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 2xl:w-5 2xl:h-5" />
               </button>
             </div>
 
             <div>
-              <h4 className="font-syne font-bold text-sm sm:text-base text-(--text-body)">
+              <h4 className="font-syne font-bold text-sm sm:text-base 2xl:text-xl text-(--text-body)">
                 {selectedHito.titulo}
               </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+              <p className="text-xs 2xl:text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
                 {selectedHito.detalle}
               </p>
             </div>
 
-            <div className="pt-2 border-t border-(--border-color) flex items-center justify-between text-xs">
+            <div className="pt-2 2xl:pt-3 border-t border-(--border-color) flex items-center justify-between text-xs 2xl:text-sm">
               <div className={`flex items-center gap-1.5 ${selectedHito.tipo === 'feriado' ? 'text-rose-600 dark:text-rose-300/90' : 'text-amber-600 dark:text-amber-300/90'}`}>
-                <CalendarIcon className={`w-3.5 h-3.5 ${selectedHito.tipo === 'feriado' ? 'text-rose-500' : 'text-amber-500'}`} />
+                <CalendarIcon className={`w-3.5 h-3.5 2xl:w-4 2xl:h-4 ${selectedHito.tipo === 'feriado' ? 'text-rose-500' : 'text-amber-500'}`} />
                 <span>
                   {formatRangoFechas(selectedHito.fechaInicio, selectedHito.fechaFin)}
                 </span>
@@ -478,7 +478,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedHito(null)}
-                className={`px-3 py-1 rounded-lg text-xs border transition-colors cursor-pointer ${
+                className={`px-3 2xl:px-5 py-1 2xl:py-1.5 rounded-lg text-xs 2xl:text-sm border transition-colors cursor-pointer ${
                   selectedHito.tipo === 'feriado'
                     ? 'bg-rose-500/15 dark:bg-rose-500/20 border-rose-500/40 text-rose-700 dark:text-rose-200 hover:bg-rose-500/30'
                     : 'bg-amber-500/15 dark:bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-200 hover:bg-amber-500/30'

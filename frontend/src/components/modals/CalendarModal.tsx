@@ -273,25 +273,25 @@ export const CalendarModal: React.FC = () => {
         }`}
       >
         {/* Cabecera del modal con selector de pestañas */}
-        <div className="p-3.5 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) relative shrink-0">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
+        <div className="p-2.5 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) relative shrink-0">
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
               <div 
-                className="p-2 rounded-xl border shrink-0"
+                className="p-1.5 sm:p-2 rounded-xl border shrink-0"
                 style={{
                   backgroundColor: 'var(--color-primary-bg)',
                   borderColor: 'var(--color-primary-border)',
                   color: 'var(--color-primary)'
                 }}
               >
-                <CalendarIcon className="w-5 h-5" />
+                <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h2 id="calendar-modal-title" className="text-base sm:text-lg font-bold font-syne text-(--text-body)">
-                  Calendario Académico y Metas de Examen
+              <div className="min-w-0">
+                <h2 id="calendar-modal-title" className="text-sm sm:text-lg font-bold font-syne text-(--text-body) leading-tight truncate">
+                  Calendario Académico y Metas
                 </h2>
-                <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                  Mesas oficiales de examen, hitos del ciclo lectivo y planificación
+                <p className="text-[10px] sm:text-[11px] font-mono text-slate-500 dark:text-slate-400 line-clamp-1 sm:line-clamp-none">
+                  Mesas oficiales de examen, hitos y planificación
                 </p>
               </div>
             </div>
@@ -306,45 +306,48 @@ export const CalendarModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Selector de Pestañas (Tabs) */}
-          <div className="flex items-center gap-2 mt-3 font-mono text-xs overflow-x-auto pb-0.5 no-scrollbar">
+          {/* Selector de Pestañas (Tabs) adaptativo y simétrico en mobile */}
+          <div className="grid grid-cols-3 gap-1.5 mt-2.5 sm:flex sm:items-center sm:gap-2 sm:mt-3 font-mono text-xs">
             <button
               type="button"
               onClick={() => setActiveTab('calendario')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg border text-[11px] sm:text-xs transition-all cursor-pointer whitespace-nowrap min-w-0 ${
                 activeTab === 'calendario'
                   ? 'bg-(--color-primary-bg) text-(--color-primary) border-(--color-primary-border) font-bold shadow-sm'
                   : 'bg-(--bg-surface) text-slate-500 dark:text-slate-400 border-(--border-color) hover:text-(--text-body)'
               }`}
             >
-              <CalendarDays className="w-3.5 h-3.5" />
-              <span>Vista Mensual</span>
+              <CalendarDays className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Vista Mensual</span>
+              <span className="sm:hidden">Mensual</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('metas')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg border text-[11px] sm:text-xs transition-all cursor-pointer whitespace-nowrap min-w-0 ${
                 activeTab === 'metas'
                   ? 'bg-(--color-primary-bg) text-(--color-primary) border-(--color-primary-border) font-bold shadow-sm'
                   : 'bg-(--bg-surface) text-slate-500 dark:text-slate-400 border-(--border-color) hover:text-(--text-body)'
               }`}
             >
-              <Target className="w-3.5 h-3.5" />
-              <span>Mis Metas de Final ({metasArray.length})</span>
+              <Target className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Mis Metas de Final ({metasArray.length})</span>
+              <span className="sm:hidden">Metas ({metasArray.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('turnos')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg border text-[11px] sm:text-xs transition-all cursor-pointer whitespace-nowrap min-w-0 ${
                 activeTab === 'turnos'
                   ? 'bg-(--color-primary-bg) text-(--color-primary) border-(--color-primary-border) font-bold shadow-sm'
                   : 'bg-(--bg-surface) text-slate-500 dark:text-slate-400 border-(--border-color) hover:text-(--text-body)'
               }`}
             >
-              <List className="w-3.5 h-3.5" />
-              <span>Turnos Oficiales y Sysacad</span>
+              <List className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Turnos Oficiales y Sysacad</span>
+              <span className="sm:hidden">Turnos</span>
             </button>
           </div>
         </div>
