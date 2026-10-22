@@ -79,7 +79,7 @@ export const GridView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1700px] mx-auto p-3 sm:p-6 overflow-y-auto min-h-[calc(100vh-130px)]">
+    <div className="max-w-[1700px] 2xl:max-w-[2250px] min-[2800px]:max-w-[3200px] 4k:max-w-[3200px] mx-auto p-3 sm:p-6 2xl:p-8 overflow-y-auto min-h-[calc(100vh-130px)]">
       {/* Barra de búsqueda y título */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 mb-3 sm:mb-4">
         <div>
@@ -271,10 +271,10 @@ export const GridView: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className={`grid gap-4 ${
+        <div className={`grid gap-4 2xl:gap-6 ${
           activeNivel === 'todos'
             ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
-            : 'grid-cols-1 max-w-xl mx-auto'
+            : 'grid-cols-1 max-w-xl 2xl:max-w-2xl mx-auto'
         }`}>
         {displayedNiveles.map(nivel => {
           const materiasNivel = filteredMaterias.filter(m => m.nivel === nivel);
@@ -287,14 +287,14 @@ export const GridView: React.FC = () => {
           return (
             <div
               key={nivel}
-              className="bg-(--bg-surface) border border-(--border-color) rounded-xl p-3 flex flex-col gap-3 shadow-lg"
+              className="bg-(--bg-surface) border border-(--border-color) rounded-xl 2xl:rounded-2xl p-3 2xl:p-4.5 flex flex-col gap-3 2xl:gap-3.5 shadow-lg"
             >
               {/* Encabezado del Nivel */}
               <div className="border-b border-(--border-color) pb-2.5">
                 <div className="flex items-center justify-between gap-1.5">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span 
-                      className="font-syne font-extrabold text-sm tracking-wider"
+                      className="font-syne font-extrabold text-sm 2xl:text-base tracking-wider"
                       style={{ color: 'var(--color-primary)' }}
                     >
                       {nivel}º NIVEL
@@ -403,7 +403,7 @@ export const GridView: React.FC = () => {
                         tabIndex={0}
                         aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
                         title="Click: alternar estado · Click derecho: ver detalle y notas"
-                        className={`group relative p-3 rounded-lg border card-interactive cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${cardStyle}`}
+                        className={`group relative p-3 2xl:p-4 rounded-lg 2xl:rounded-xl border card-interactive cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${cardStyle}`}
                         onClick={() => handleToggleMateria(m.id)}
                         onContextMenu={(e) => {
                           e.preventDefault();
@@ -442,7 +442,7 @@ export const GridView: React.FC = () => {
                         </div>
 
                         {/* Nombre de la materia */}
-                        <div className="font-semibold text-xs leading-snug mb-2 font-mono text-(--text-body)">
+                        <div className="font-semibold text-xs 2xl:text-sm leading-snug mb-2 font-mono text-(--text-body)">
                           {m.nombreCompleto}
                         </div>
 

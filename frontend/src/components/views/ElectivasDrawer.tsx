@@ -52,7 +52,7 @@ export const ElectivasDrawer: React.FC = () => {
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10 pointer-events-none">
         <div 
-          className={`w-full sm:w-screen max-w-xl bg-(--bg-surface) border-l border-(--border-color) shadow-2xl flex flex-col pointer-events-auto transform transition-transform duration-300 ease-out ${
+          className={`w-full sm:w-screen max-w-xl 2xl:max-w-4xl 4k:max-w-5xl bg-(--bg-surface) border-l border-(--border-color) shadow-2xl flex flex-col pointer-events-auto transform transition-transform duration-300 ease-out ${
             isVisible ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
@@ -344,7 +344,8 @@ export const ElectivasDrawer: React.FC = () => {
                 No hay electivas disponibles para este nivel.
               </p>
             ) : (
-              filteredElectivas.map(e => {
+              <div className="grid grid-cols-1 2xl:grid-cols-2 gap-3.5">
+                {filteredElectivas.map(e => {
                 const est = estadosElectivas[e.id] || 'pendiente';
                 const cursable = esElectivaCursable(e);
 
@@ -504,7 +505,8 @@ export const ElectivasDrawer: React.FC = () => {
                     )}
                   </div>
                 );
-              })
+              })}
+              </div>
             )}
           </div>
 

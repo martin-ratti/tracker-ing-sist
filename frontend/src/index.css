@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --breakpoint-3xl: 2200px;
+  --breakpoint-4k: 2800px;
+}
+
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
 @layer base {
