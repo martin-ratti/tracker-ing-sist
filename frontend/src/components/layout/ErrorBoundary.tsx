@@ -168,7 +168,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1 overflow-hidden">
                     <span className="text-[10px] font-mono uppercase text-slate-500 font-bold">Mensaje de excepción:</span>
-                    <p className="font-mono text-xs text-rose-400 break-words">
+                    <p className="font-mono text-xs text-rose-400 wrap-break-word">
                       {this.state.error.message}
                     </p>
                   </div>

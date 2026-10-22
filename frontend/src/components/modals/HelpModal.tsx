@@ -240,7 +240,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                     <span>¡Colaborá en el Repositorio!</span>
                     <ExternalLink className="w-3 h-3 text-cyan-500 shrink-0" />
                   </div>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono leading-relaxed mt-0.5 break-words">
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono leading-relaxed mt-0.5 wrap-break-word">
                     Código abierto en GitHub · Reportá bugs, sugerí cambios o sumá PRs
                   </p>
                 </div>

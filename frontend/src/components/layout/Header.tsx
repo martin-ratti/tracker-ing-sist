@@ -577,7 +577,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                 {stats.aprobadasCount}/{stats.totalTroncales} <span className="hidden 2xl:inline">materias</span>
               </span>
             </div>
-            <div className="w-28 sm:w-40 md:w-44 lg:w-48 xl:w-48 2xl:w-96 min-[2800px]:w-140 h-2.5 sm:h-3 rounded-full bg-slate-200 dark:bg-slate-950/90 overflow-hidden border border-slate-300 dark:border-slate-700/60 p-0.5 relative shadow-inner">
+            <div className="w-28 sm:w-40 md:w-44 lg:w-48 xl:w-48 2xl:w-96 4k:w-140 h-2.5 sm:h-3 rounded-full bg-slate-200 dark:bg-slate-950/90 overflow-hidden border border-slate-300 dark:border-slate-700/60 p-0.5 relative shadow-inner">
               <div 
                 className="h-full rounded-full transition-all duration-700 ease-out relative"
                 style={{ 

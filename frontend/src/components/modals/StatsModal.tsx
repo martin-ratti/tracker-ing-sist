@@ -99,7 +99,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
       />
       <div 
         ref={modalRef}
-        className={`relative z-10 w-full max-w-3xl lg:max-w-4xl 2xl:max-w-5xl min-[2800px]:max-w-6xl 4k:max-w-6xl max-h-[92vh] sm:max-h-[90vh] bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto transform transition-all duration-200 ease-out ${
+        className={`relative z-10 w-full max-w-3xl lg:max-w-4xl 2xl:max-w-5xl 4k:max-w-6xl max-h-[92vh] sm:max-h-[90vh] bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto transform transition-all duration-200 ease-out ${
           isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
         }`}
         role="dialog"

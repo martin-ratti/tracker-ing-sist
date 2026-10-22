@@ -79,7 +79,7 @@ export const GridView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1700px] 2xl:max-w-[2250px] min-[2800px]:max-w-[3200px] 4k:max-w-[3200px] mx-auto p-3 sm:p-6 2xl:p-8 overflow-y-auto min-h-[calc(100vh-130px)]">
+    <div className="max-w-[1700px] 2xl:max-w-[2250px] 4k:max-w-[3200px] mx-auto p-3 sm:p-6 2xl:p-8 overflow-y-auto min-h-[calc(100vh-130px)]">
       {/* Barra de búsqueda y título */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 mb-3 sm:mb-4">
         <div>

@@ -239,12 +239,12 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                       ? 'bg-slate-200/50 dark:bg-(--bg-base)/40 text-slate-400 dark:text-slate-600 opacity-50 border border-slate-300/40 dark:border-slate-900/60'
                       : esDiaMesaActiva
                         ? turno.esEspecial
-                          ? 'bg-gradient-to-b from-purple-500/15 via-purple-500/5 to-transparent border-purple-400/80 text-purple-900 dark:text-purple-100 cursor-pointer sm:cursor-default'
-                          : 'bg-gradient-to-b from-(--color-primary-bg) via-transparent to-transparent border-(--color-primary-border) text-(--text-body) cursor-pointer sm:cursor-default'
+                          ? 'bg-linear-to-b from-purple-500/15 via-purple-500/5 to-transparent border-purple-400/80 text-purple-900 dark:text-purple-100 cursor-pointer sm:cursor-default'
+                          : 'bg-linear-to-b from-(--color-primary-bg) via-transparent to-transparent border-(--color-primary-border) text-(--text-body) cursor-pointer sm:cursor-default'
                         : hito?.tipo === 'feriado'
-                          ? 'bg-gradient-to-b from-rose-500/15 via-rose-500/5 to-(--bg-surface) border-rose-500/40 text-rose-900 dark:text-rose-100 hover:border-rose-400/70 cursor-pointer'
+                          ? 'bg-linear-to-b from-rose-500/15 via-rose-500/5 to-(--bg-surface) border-rose-500/40 text-rose-900 dark:text-rose-100 hover:border-rose-400/70 cursor-pointer'
                           : hito
-                            ? 'bg-gradient-to-b from-amber-500/15 via-amber-500/5 to-(--bg-surface) border-amber-500/40 text-amber-900 dark:text-amber-100 hover:border-amber-400/70 cursor-pointer'
+                            ? 'bg-linear-to-b from-amber-500/15 via-amber-500/5 to-(--bg-surface) border-amber-500/40 text-amber-900 dark:text-amber-100 hover:border-amber-400/70 cursor-pointer'
                             : 'bg-(--bg-surface) border border-(--border-color) text-(--text-body) hover:border-slate-400 dark:hover:border-slate-600'
                 }`}
                 style={esDiaMesaActiva ? {
