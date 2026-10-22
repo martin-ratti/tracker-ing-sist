@@ -35,6 +35,12 @@ describe('jwtService', () => {
     expect(() => getJwtSecret()).toThrow('JWT_SECRET debe estar configurado');
   });
 
+  it('debe lanzar error en producción si JWT_SECRET tiene menos de 32 caracteres', () => {
+    process.env.JWT_SECRET = 'clave-corta-insegura';
+    process.env.NODE_ENV = 'production';
+    expect(() => getJwtSecret()).toThrow('al menos 32 caracteres');
+  });
+
   it('debe fallar al verificar un token alterado o inválido', () => {
     expect(() => verifyToken('token.invalido.falso')).toThrow();
   });

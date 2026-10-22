@@ -2,6 +2,9 @@ import jwt from 'jsonwebtoken';
 
 export function getJwtSecret(): string {
   if (process.env.JWT_SECRET) {
+    if (process.env.NODE_ENV === 'production' && process.env.JWT_SECRET.length < 32) {
+      throw new Error('JWT_SECRET debe tener al menos 32 caracteres (256 bits) en producción para garantizar seguridad criptográfica.');
+    }
     return process.env.JWT_SECRET;
   }
   if (process.env.NODE_ENV === 'production') {
