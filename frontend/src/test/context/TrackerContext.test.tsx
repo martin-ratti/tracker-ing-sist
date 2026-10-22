@@ -466,7 +466,7 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     expect(result.current.stats.promedio).toBeNull();
   });
 
-  it('si una materia está regular pero no cumple para aprobar, toggleMateriaEstado debe ciclar a pendiente (cursable)', () => {
+  it('permite aprobar una materia por promoción si cumple requisitos de cursada aunque las correlativas previas solo estén regulares', () => {
     const { result } = renderHook(() => useTracker(), { wrapper });
 
     // AM II (id 9) requiere regularizar AM I (1) y Álgebra (2)
@@ -485,17 +485,37 @@ describe('TrackerContext - Lógica de Negocio y Progreso Académico', () => {
     });
     expect(result.current.estados[9]).toBe('regular');
 
-    // Clic en AM II estando regular: como AM1 y Álgebra NO están aprobadas,
-    // no puede pasar a aprobada. Debe pasar a PENDIENTE (cursable) y alternar.
+    // Clic en AM II estando regular: como cumple requisitos de cursada,
+    // se puede promocionar/aprobar directamente!
+    act(() => {
+      result.current.toggleMateriaEstado(9);
+    });
+    expect(result.current.estados[9]).toBe('aprobada');
+
+    // Clic en AM II estando aprobada -> pasa a PENDIENTE
     act(() => {
       result.current.toggleMateriaEstado(9);
     });
     expect(result.current.estados[9]).toBe('pendiente');
+  });
 
-    // Y si vuelve a hacer clic, pasa a regular nuevamente
+  it('permite pasar directamente de pendiente a aprobada con setEstadoDirecto por régimen de promoción', () => {
+    const { result } = renderHook(() => useTracker(), { wrapper });
+
+    // AM I (1) no tiene correlativas previas, debe poder pasarse a aprobada directamente
     act(() => {
-      result.current.toggleMateriaEstado(9);
+      result.current.setEstadoDirecto(1, 'aprobada');
     });
-    expect(result.current.estados[9]).toBe('regular');
+    expect(result.current.estados[1]).toBe('aprobada');
+
+    // Física II (10) requiere AM I (1) y Física I (3) regular. Seteamos Física I regular.
+    act(() => {
+      result.current.setEstadoDirecto(3, 'regular');
+    });
+    // Física II puede aprobarse directamente desde pendiente por promoción
+    act(() => {
+      result.current.setEstadoDirecto(10, 'aprobada');
+    });
+    expect(result.current.estados[10]).toBe('aprobada');
   });
 });

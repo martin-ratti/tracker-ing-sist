@@ -30,9 +30,24 @@ export function puedeRegularMateria(m: Materia, getEstado: EstadoGetter): boolea
 }
 
 /**
- * Valida si una materia puede ser aprobada (debe estar regular y cumplir correlativas de aprobación).
+ * Valida si una materia puede ser aprobada (por cursado/promoción directa o final).
+ * En la UTN FRRo (Plan 2023), una materia puede aprobarse directamente por régimen
+ * de promoción sin necesidad de haber quedado previamente en estado 'regular'
+ * ni de contar con las correlativas de rendir final aprobadas.
+ * Por lo tanto, la condición para aprobar una materia es poder cursarla (cumpleReqsCursada).
  */
 export function puedeAprobarMateria(m: Materia, getEstado: EstadoGetter): boolean {
+  return cumpleReqsCursada(m, getEstado);
+}
+
+/**
+ * Valida si una materia cumple los requisitos para rendir examen final:
+ * 1. Debe estar en estado 'regular'.
+ * 2. Las materias requeridas regulares para cursada (reqRegular) deben estar APROBADAS.
+ * 3. Las materias requeridas aprobadas para cursada (reqAprobada) deben estar APROBADAS.
+ * 4. Requisitos adicionales específicos de rendir final (reqRendirAprobada), si existieren.
+ */
+export function puedeRendirFinal(m: Materia, getEstado: EstadoGetter): boolean {
   const est = getEstado(m.id);
   if (est !== 'regular') return false;
 
@@ -71,7 +86,7 @@ export function esMateriaCursable(m: Materia, getEstado: EstadoGetter): boolean 
  * Determina si una materia troncal está habilitada para rendir final (regular y con correlativas de final).
  */
 export function esMateriaRendible(m: Materia, getEstado: EstadoGetter): boolean {
-  return getEstado(m.id) === 'regular' && puedeAprobarMateria(m, getEstado);
+  return puedeRendirFinal(m, getEstado);
 }
 
 /**
@@ -84,6 +99,13 @@ export function puedeRegularElectiva(e: Electiva, getEstado: EstadoGetter): bool
   });
   const aprOk = e.reqAprobada.every(c => getEstado(c) === 'aprobada');
   return regOk && aprOk;
+}
+
+/**
+ * Valida si una electiva puede aprobarse (por cursado/promoción o final).
+ */
+export function puedeAprobarElectiva(e: Electiva, getEstado: EstadoGetter): boolean {
+  return puedeRegularElectiva(e, getEstado);
 }
 
 /**

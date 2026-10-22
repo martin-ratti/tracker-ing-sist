@@ -4,9 +4,11 @@ import {
   cumpleReqsCursada,
   puedeRegularMateria,
   puedeAprobarMateria,
+  puedeRendirFinal,
   esMateriaCursable,
   esMateriaRendible,
   puedeRegularElectiva,
+  puedeAprobarElectiva,
   esElectivaCursable
 } from '../../utils/correlativesEngine';
 import { applyCascade } from '../../utils/cascadeEngine';
@@ -16,16 +18,41 @@ import type { EstadoMateria, MetaExamen } from '../../types/plan';
 
 describe('Academic Engines (correlativesEngine, cascadeEngine, academicCalculations, backupManager)', () => {
   describe('correlativesEngine', () => {
-    it('debe permitir cursar materias de 1er nivel sin requisitos', () => {
+    it('debe permitir cursar materias de 1er nivel sin requisitos y aprobarlas directamente por promoción', () => {
       const am1 = MATERIAS_MAP[1]; // Análisis Matemático I
       const getEstado = () => 'pendiente' as EstadoMateria;
 
       expect(cumpleReqsCursada(am1, getEstado)).toBe(true);
       expect(puedeRegularMateria(am1, getEstado)).toBe(true);
       expect(esMateriaCursable(am1, getEstado)).toBe(true);
-      expect(esMateriaRendible(am1, getEstado)).toBe(false);
-      expect(puedeAprobarMateria(am1, getEstado)).toBe(false); // No está regular
+      expect(esMateriaRendible(am1, getEstado)).toBe(false); // No está regular
+      expect(puedeAprobarMateria(am1, getEstado)).toBe(true); // Se puede aprobar directamente por promoción
       expect(puedeAprobarMateria(am1, () => 'regular')).toBe(true);
+    });
+
+    it('debe permitir aprobar por promoción materias de 2do nivel si se pueden cursar aunque las previas no estén aprobadas', () => {
+      const fisica2 = MATERIAS_MAP[10]; // Física II requiere AM I (1) y Física I (3) regulares
+      const estados: Record<number, EstadoMateria> = { 1: 'regular', 3: 'regular' };
+      const getEstado = (id: number) => estados[id] || 'pendiente';
+
+      // Puede cursar y puede aprobar directamente (promoción directa)
+      expect(cumpleReqsCursada(fisica2, getEstado)).toBe(true);
+      expect(puedeRegularMateria(fisica2, getEstado)).toBe(true);
+      expect(puedeAprobarMateria(fisica2, getEstado)).toBe(true);
+
+      // Sin embargo, para rendir final NO está habilitada (requiere estar regular y tener correlativas previas aprobadas)
+      expect(puedeRendirFinal(fisica2, getEstado)).toBe(false);
+      expect(esMateriaRendible(fisica2, getEstado)).toBe(false);
+
+      // Ahora marcamos Física II regular pero previas siguen sin estar aprobadas
+      estados[10] = 'regular';
+      expect(puedeRendirFinal(fisica2, getEstado)).toBe(false); // Sigue sin poder rendir final porque 1 y 3 no están aprobadas
+
+      // Solo cuando 1 y 3 están aprobadas se puede rendir el examen final
+      estados[1] = 'aprobada';
+      estados[3] = 'aprobada';
+      expect(puedeRendirFinal(fisica2, getEstado)).toBe(true);
+      expect(esMateriaRendible(fisica2, getEstado)).toBe(true);
     });
 
     it('debe bloquear materias de niveles superiores si faltan requisitos', () => {
@@ -35,11 +62,13 @@ describe('Academic Engines (correlativesEngine, cascadeEngine, academicCalculati
 
       expect(cumpleReqsCursada(am2, getEstado)).toBe(false);
       expect(esMateriaCursable(am2, getEstado)).toBe(false);
+      expect(puedeAprobarMateria(am2, getEstado)).toBe(false);
 
       // Ahora regulariza Álgebra
       estados[2] = 'regular';
       expect(cumpleReqsCursada(am2, getEstado)).toBe(true);
       expect(esMateriaCursable(am2, getEstado)).toBe(true);
+      expect(puedeAprobarMateria(am2, getEstado)).toBe(true);
     });
 
     it('debe validar electivas correctamente', () => {
@@ -53,6 +82,7 @@ describe('Academic Engines (correlativesEngine, cascadeEngine, academicCalculati
       const getEstadoElectiva = () => 'pendiente' as EstadoMateria;
 
       expect(puedeRegularElectiva(electiva, getEstado)).toBe(true);
+      expect(puedeAprobarElectiva(electiva, getEstado)).toBe(true);
       expect(esElectivaCursable(electiva, getEstadoElectiva, getEstado)).toBe(true);
     });
   });
@@ -72,6 +102,20 @@ describe('Academic Engines (correlativesEngine, cascadeEngine, academicCalculati
       const { newEstados } = applyCascade(estadosModificados, initialElectivas);
 
       expect(newEstados[9]).toBe('pendiente');
+    });
+
+    it('no debe degradar una materia aprobada por promoción a regular si sus correlativas de cursada siguen cumplidas', () => {
+      // Física II (10) aprobada por promoción teniendo AM I (1) y Física I (3) regulares
+      const initialEstados: Record<number, EstadoMateria> = {
+        1: 'regular',
+        3: 'regular',
+        10: 'aprobada'
+      };
+      const initialElectivas: Record<number, EstadoMateria> = {};
+
+      const { newEstados } = applyCascade(initialEstados, initialElectivas);
+      // Debe conservar el estado 'aprobada'
+      expect(newEstados[10]).toBe('aprobada');
     });
   });
 

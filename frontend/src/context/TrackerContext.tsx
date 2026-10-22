@@ -15,9 +15,9 @@ import {
   type ToastItem 
 } from './UIContext';
 import {
-  cumpleReqsCursada,
   puedeRegularMateria as checkPuedeRegular,
   puedeAprobarMateria as checkPuedeAprobar,
+  puedeRendirFinal as checkPuedeRendirFinal,
   esMateriaCursable as checkEsCursable,
   esMateriaRendible as checkEsRendible,
   puedeRegularElectiva as checkPuedeRegularElectiva,
@@ -57,6 +57,7 @@ export interface AcademicTrackerContextType {
   setNotaMateria: (id: number, nota: NotaMateria) => void;
   puedeRegularMateria: (m: Materia) => boolean;
   puedeAprobarMateria: (m: Materia) => boolean;
+  puedeRendirFinal: (m: Materia) => boolean;
   esMateriaCursable: (m: Materia) => boolean;
   esMateriaRendible: (m: Materia) => boolean;
   puedeRegularElectiva: (e: Electiva) => boolean;
@@ -230,6 +231,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Validaciones delegadas al motor puro
   const puedeRegularMateria = useCallback((m: Materia): boolean => checkPuedeRegular(m, getEstado), [getEstado]);
   const puedeAprobarMateria = useCallback((m: Materia): boolean => checkPuedeAprobar(m, getEstado), [getEstado]);
+  const puedeRendirFinal = useCallback((m: Materia): boolean => checkPuedeRendirFinal(m, getEstado), [getEstado]);
   const esMateriaCursable = useCallback((m: Materia): boolean => checkEsCursable(m, getEstado), [getEstado]);
   const esMateriaRendible = useCallback((m: Materia): boolean => checkEsRendible(m, getEstado), [getEstado]);
   const puedeRegularElectiva = useCallback((e: Electiva): boolean => checkPuedeRegularElectiva(e, getEstado), [getEstado]);
@@ -332,19 +334,13 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       showToast(`🟡 ${m.nombre} marcada como REGULAR`);
     } else if (actual === 'regular') {
       if (!puedeAprobarMateria(m)) {
-        let motivo = 'correlativas de final pendientes';
-        if (m.reqRendirAprobada === 'TODAS') {
-          motivo = 'requiere materias anteriores aprobadas';
-        } else if (m.esAdusiSolo) {
-          motivo = 'requiere 1º, 2º y 3º año aprobado';
-        }
-        requestResetToPendiente(id, m.nombre, `⚪ ${m.nombre} pasó a Cursable (${motivo})`);
+        showToast(`⚠️ No cumples con los requisitos previos para aprobar ${m.nombre}`);
         return;
       }
       const nextEstados = { ...estados, [id]: 'aprobada' as EstadoMateria };
       setEstados(nextEstados);
       void persistProgress({ estados: nextEstados, estadosElectivas });
-      showToast(`🟢 ${m.nombre} marcada como APROBADA`);
+      showToast(`🟢 ${m.nombre} marcada como APROBADA`, { variant: 'success' });
     } else {
       requestResetToPendiente(id, m.nombre);
     }
@@ -365,18 +361,24 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     if (estado === 'aprobada') {
-      if (!cumpleReqsCursada(m, getEstado)) {
-        showToast(`⚠️ No cumples con los requisitos previos de ${m.nombre}`);
-        return;
-      }
       if (!puedeAprobarMateria(m)) {
-        if (m.esAdusiSolo) {
-          showToast('⚠️ Para aprobar el Seminario ADUSI debes tener aprobado todo 1º, 2º y 3º año');
-        } else if (m.reqRendirAprobada === 'TODAS') {
-          showToast('⚠️ Para aprobar Proyecto Final debes tener aprobadas todas las materias anteriores');
-        } else {
-          showToast(`⚠️ No cumples con las correlativas de aprobación para ${m.nombre}`);
-        }
+        const faltaReg = m.reqRegular
+          .filter(c => {
+            const e = getEstado(c);
+            return e !== 'regular' && e !== 'aprobada';
+          })
+          .map(c => MATERIAS_MAP[c]?.nombre || `#${c}`);
+
+        const faltaApr = m.reqAprobada === 'TODAS'
+          ? ['Todas las materias restantes']
+          : m.reqAprobada
+              .filter(c => getEstado(c) !== 'aprobada')
+              .map(c => MATERIAS_MAP[c]?.nombre || `#${c}`);
+
+        const msgPartes: string[] = [];
+        if (faltaReg.length > 0) msgPartes.push(`Regularizar: ${faltaReg.join(', ')}`);
+        if (faltaApr.length > 0) msgPartes.push(`Aprobar: ${faltaApr.join(', ')}`);
+        showToast(`⚠️ No cumples con los requisitos para cursar/aprobar ${m.nombre}${msgPartes.length ? ` (${msgPartes.join(' • ')})` : ''}`);
         return;
       }
     }
@@ -593,6 +595,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setNotaMateria,
         puedeRegularMateria,
         puedeAprobarMateria,
+        puedeRendirFinal,
         esMateriaCursable,
         esMateriaRendible,
         puedeRegularElectiva,
