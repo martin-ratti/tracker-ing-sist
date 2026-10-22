@@ -57,7 +57,7 @@ export const CalendarMetasTab: React.FC<CalendarMetasTabProps> = ({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
         {metasArray.map(meta => {
           const materia = MATERIAS_MAP[meta.materiaId];
           const countdown = meta.fechaEstimada ? getDaysRemaining(meta.fechaEstimada) : null;

@@ -12,6 +12,7 @@ import {
 } from '../../../data/calendario';
 import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../../../data/plan2023';
 import { formatRangoFechas } from '../../../utils/formatters';
+import { useViewportResolution } from '../../../hooks/useViewportResolution';
 
 const NOMBRES_MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
@@ -73,10 +74,12 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
   setSelectedHito,
   onOpenMetaDialog
 }) => {
+  const resolution = useViewportResolution(true);
+
   return (
-    <div className="space-y-3 font-mono">
+    <div className="flex flex-col flex-1 min-h-0 space-y-1.5 sm:space-y-2 lg:space-y-2.5 font-mono">
       {/* Barra superior de controles del calendario */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
         <div className="flex items-center gap-2">
           <h3 className="font-syne font-bold text-base sm:text-lg text-(--text-body)">
             {NOMBRES_MESES[navMonth]} {navYear}
@@ -137,7 +140,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
       </div>
 
       {/* Referencias de color */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] text-slate-500 dark:text-slate-400 bg-(--bg-elevated) p-2 sm:p-2.5 rounded-xl border border-(--border-color)">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] text-slate-500 dark:text-slate-400 bg-(--bg-elevated) p-1.5 sm:p-2 rounded-xl border border-(--border-color) shrink-0">
         <span className="font-semibold text-slate-700 dark:text-slate-300">Referencias:</span>
         <div className="flex items-center gap-1">
           <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded border border-(--color-primary-border) bg-(--color-primary-bg) shrink-0" />
@@ -162,9 +165,9 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
       </div>
 
       {/* Cuadrícula de 7 columnas */}
-      <div className="rounded-xl border border-(--border-color) overflow-hidden bg-(--bg-base)">
+      <div className="flex flex-col flex-1 min-h-0 rounded-xl border border-(--border-color) overflow-hidden bg-(--bg-base)">
         {/* Cabecera de días de la semana */}
-        <div className="grid grid-cols-7 border-b border-(--border-color) bg-(--bg-elevated) text-center text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 py-1.5 sm:py-2">
+        <div className="grid grid-cols-7 border-b border-(--border-color) bg-(--bg-elevated) text-center text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 py-1 sm:py-1.5 shrink-0">
           {DIAS_SEMANA_HEADERS.map((dia, idx) => (
             <div key={idx} className={idx >= 5 ? 'text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}>
               <span className="sm:hidden">{dia.charAt(0)}</span>
@@ -174,7 +177,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
         </div>
 
         {/* Celdas de días */}
-        <div className="grid grid-cols-7 divide-x divide-y divide-(--border-color)">
+        <div className="grid grid-cols-7 grid-rows-6 flex-1 min-h-0 divide-x divide-y divide-(--border-color)">
           {calendarCells.map((cell, idx) => {
             const diaNum = cell.date.getDate();
             const isPast = cell.dateStr < todayStr;
@@ -229,7 +232,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                     handleDiaClick();
                   }
                 } : undefined}
-                className={`h-13 sm:h-auto sm:min-h-25 p-1 sm:p-2 flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
+                className={`h-13 sm:h-full sm:min-h-0 ${resolution.dayCellPadding} flex flex-col justify-between transition-all relative group rounded-md sm:rounded-lg m-0.5 ${
                   !cell.isCurrentMonth
                     ? 'bg-slate-100/70 dark:bg-(--bg-base)/70 text-slate-400 dark:text-slate-600 opacity-30 border border-transparent'
                     : isPast
@@ -257,7 +260,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
               >
                 {/* Fila superior de la celda */}
                 <div className="flex items-center justify-between gap-1">
-                  <span className={`text-[11px] sm:text-xs font-bold font-syne ${
+                  <span className={`font-bold font-syne ${resolution.dayNumberSize} ${
                     isToday 
                       ? 'w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-(--color-primary) text-white dark:text-slate-950 flex items-center justify-center font-extrabold shadow-[0_0_10px_var(--color-primary-glow)]' 
                       : isPast 
@@ -277,7 +280,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
 
                   {turno && (
                     <span 
-                      className={`hidden sm:inline text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80px] font-mono ${
+                      className={`hidden sm:inline ${resolution.turnBadgeSize} px-1.5 py-0.5 rounded truncate font-mono ${
                         isPast 
                           ? 'bg-slate-200 dark:bg-slate-800 text-slate-500 border border-(--border-color)' 
                           : turno.esEspecial
@@ -331,7 +334,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                 </div>
 
                 {/* Contenido desktop */}
-                <div className="hidden sm:block space-y-1 my-1">
+                <div className="hidden sm:block space-y-1 my-0.5">
                   {hito && (
                     <button
                       type="button"
@@ -339,7 +342,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                         e.stopPropagation();
                         setSelectedHito(hito);
                       }}
-                      className={`w-full text-left text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors font-medium flex items-center gap-1 ${
+                      className={`w-full text-left ${resolution.metaBadgeSize} px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors font-medium flex items-center gap-1 ${
                         hito.tipo === 'feriado'
                           ? 'bg-rose-500/15 dark:bg-rose-500/20 border border-rose-500/40 text-rose-700 dark:text-rose-300 hover:bg-rose-500/25'
                           : 'bg-amber-500/15 dark:bg-amber-500/20 border border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25'
@@ -356,7 +359,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                     return (
                       <div
                         key={meta.materiaId}
-                        className="px-1.5 py-0.5 rounded bg-emerald-500/15 dark:bg-emerald-500/25 border border-emerald-500/60 text-emerald-700 dark:text-emerald-200 text-[10px] font-bold flex items-center justify-between gap-1 shadow-[0_0_8px_rgba(16,185,129,0.2)]"
+                        className={`px-1.5 py-0.5 rounded bg-emerald-500/15 dark:bg-emerald-500/25 border border-emerald-500/60 text-emerald-700 dark:text-emerald-200 ${resolution.metaBadgeSize} font-bold flex items-center justify-between gap-1 shadow-[0_0_8px_rgba(16,185,129,0.2)]`}
                         title={`Meta agendada: ${materia?.nombreCompleto || meta.turnoNombre}`}
                       >
                         <span className="truncate">{materia?.nombre || `#${meta.materiaId}`}</span>
@@ -378,7 +381,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                   {esDiaMesaActiva && metasEnEsteDia.length === 0 && regularesQueRindenHoy.length > 0 && (
                     <button
                       type="button"
-                      className={`w-full text-left text-[9px] px-1.5 py-0.5 rounded border truncate font-semibold cursor-pointer transition-colors ${
+                      className={`w-full text-left ${resolution.metaBadgeSize} px-1.5 py-0.5 rounded border truncate font-semibold cursor-pointer transition-colors ${
                         turno.esEspecial
                           ? 'bg-purple-500/15 dark:bg-purple-500/20 text-purple-700 dark:text-purple-200 border-purple-400/40 hover:bg-purple-500/30'
                           : 'bg-(--color-primary-bg) text-(--color-primary) border border-(--color-primary-border) hover:opacity-90'
@@ -402,7 +405,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                       e.stopPropagation();
                       onOpenMetaDialog(cell.dateStr, turno);
                     }}
-                    className={`hidden sm:flex w-full py-1 rounded border text-[10px] font-mono font-semibold items-center justify-center gap-1 transition-all shadow-sm cursor-pointer ${
+                    className={`hidden sm:flex w-full ${resolution.anotarButtonSize} rounded border font-mono font-semibold items-center justify-center gap-1 transition-all shadow-sm cursor-pointer ${
                       turno.esEspecial
                         ? 'border-purple-500/40 hover:border-purple-300 bg-purple-500/10 hover:bg-purple-500/25 text-purple-600 dark:text-purple-300 hover:text-(--text-body)'
                         : 'border-(--color-primary-border) hover:border-(--color-primary) bg-(--color-primary-bg) hover:opacity-90 text-(--color-primary)'

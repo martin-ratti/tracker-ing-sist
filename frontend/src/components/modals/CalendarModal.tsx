@@ -16,6 +16,7 @@ import {
   List
 } from 'lucide-react';
 import { exportMetasToICS } from '../../utils/icsExporter';
+import { useViewportResolution } from '../../hooks/useViewportResolution';
 import { CalendarMonthGrid, type CalendarCell } from './calendar/CalendarMonthGrid';
 import { CalendarMetasTab } from './calendar/CalendarMetasTab';
 import { CalendarTurnosTab } from './calendar/CalendarTurnosTab';
@@ -35,6 +36,7 @@ export const CalendarModal: React.FC = () => {
 
   const { isMounted, isVisible } = useModalAnimation(calendarOpen, 200);
   const [activeTab, setActiveTab] = useState<'calendario' | 'metas' | 'turnos'>('calendario');
+  const resolution = useViewportResolution(activeTab === 'calendario');
   const [selectedHito, setSelectedHito] = useState<HitoAcademico | null>(null);
 
   const modalRef = useFocusTrap(calendarOpen);
@@ -253,7 +255,7 @@ export const CalendarModal: React.FC = () => {
   if (!isMounted) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 no-scrollbar">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 lg:p-6 no-scrollbar">
       <div
         className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
           isVisible ? 'opacity-100' : 'opacity-0'
@@ -266,7 +268,7 @@ export const CalendarModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="calendar-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl my-auto transform transition-all duration-200 ease-out ${
+        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full flex flex-col overflow-hidden shadow-2xl my-auto transform transition-all duration-200 ease-out ${resolution.calendarModalSize} ${
           isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
         }`}
       >
@@ -347,8 +349,14 @@ export const CalendarModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Cuerpo del Modal con scroll */}
-        <div className="p-3 sm:p-5 overflow-y-auto flex-1 no-scrollbar space-y-4">
+        {/* Cuerpo del Modal con scroll adaptativo */}
+        <div
+          className={`overflow-y-auto flex-1 no-scrollbar ${
+            activeTab === 'calendario'
+              ? `${resolution.containerPadding} flex flex-col min-h-0`
+              : 'p-3 sm:p-5 space-y-4'
+          }`}
+        >
           {activeTab === 'calendario' && (
             <CalendarMonthGrid
               navYear={navYear}
