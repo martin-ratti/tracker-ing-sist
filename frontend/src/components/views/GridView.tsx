@@ -343,7 +343,7 @@ export const GridView: React.FC = () => {
                     // Estilos de tarjeta según estado adaptados al tema
                     let cardStyle = 'bg-(--bg-elevated) border-(--border-color) text-slate-700 dark:text-slate-400';
                     let statusBadge = (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono border border-slate-300 dark:border-slate-700/60 font-medium">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-mono border border-slate-300 dark:border-slate-700/60 font-medium whitespace-nowrap shrink-0">
                         Bloqueada
                       </span>
                     );
@@ -359,7 +359,7 @@ export const GridView: React.FC = () => {
                             backgroundColor: 'var(--color-aprobada-bg)' 
                           }}
                         >
-                          <CheckCircle2 className="w-3 h-3" /> Aprobada
+                          <CheckCircle2 className="w-3 h-3 shrink-0" /> Aprobada
                         </span>
                       );
                     } else if (est === 'regular') {
@@ -373,7 +373,7 @@ export const GridView: React.FC = () => {
                             backgroundColor: 'var(--color-regular-bg)' 
                           }}
                         >
-                          <Clock className="w-3 h-3" /> {rendible ? 'Regular 🎯' : 'Regular'}
+                          <Clock className="w-3 h-3 shrink-0" /> {rendible ? 'Regular 🎯' : 'Regular'}
                         </span>
                       );
                     } else if (cursable) {
@@ -403,7 +403,7 @@ export const GridView: React.FC = () => {
                         tabIndex={0}
                         aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
                         title="Click: alternar estado · Click derecho: ver detalle y notas"
-                        className={`group relative p-3 2xl:p-4 rounded-lg 2xl:rounded-xl border card-interactive cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${cardStyle}`}
+                        className={`group relative p-3 2xl:p-4 rounded-lg 2xl:rounded-xl border card-interactive cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 flex flex-col justify-between ${cardStyle}`}
                         onClick={() => handleToggleMateria(m.id)}
                         onContextMenu={(e) => {
                           e.preventDefault();
@@ -416,57 +416,59 @@ export const GridView: React.FC = () => {
                           }
                         }}
                       >
-                        {/* Fila superior: ID y Badges */}
-                        <div className="flex items-center justify-between gap-1 mb-1.5 font-mono text-[10px]">
-                          <span className="font-bold text-slate-500 dark:text-slate-400 group-hover:text-(--text-body) transition-colors">
-                            #{String(m.id).padStart(2, '0')}
+                        <div>
+                          {/* Fila superior: ID y Badges con altura uniforme */}
+                          <div className="flex items-center justify-between gap-1 mb-1.5 font-mono text-[10px] h-5">
+                            <span className="font-bold text-slate-500 dark:text-slate-400 group-hover:text-(--text-body) transition-colors leading-none">
+                              #{String(m.id).padStart(2, '0')}
                           </span>
                           <div className="flex items-center gap-1">
                             {m.esIntegradora && (
-                              <span className="px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-700 dark:text-purple-300 text-[9px] font-semibold">
+                              <span className="px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-700 dark:text-purple-300 text-[9px] font-semibold leading-none">
                                 INT
                               </span>
                             )}
                             {m.esCuatrimestral && (
-                              <span className="px-1.5 py-0.5 rounded bg-blue-500/20 border border-blue-500/40 text-blue-700 dark:text-blue-300 text-[9px] font-semibold">
+                              <span className="px-1.5 py-0.5 rounded bg-blue-500/20 border border-blue-500/40 text-blue-700 dark:text-blue-300 text-[9px] font-semibold leading-none">
                                 1C/2C
                               </span>
                             )}
                             {m.esAdusiSolo && (
-                              <span className="px-1.5 py-0.5 rounded bg-pink-500/20 border border-pink-500/40 text-pink-700 dark:text-pink-300 text-[9px] font-semibold">
+                              <span className="px-1.5 py-0.5 rounded bg-pink-500/20 border border-pink-500/40 text-pink-700 dark:text-pink-300 text-[9px] font-semibold leading-none">
                                 ADUSI
                               </span>
                             )}
-                            <span className="text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">{m.horas} hs</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap leading-none">{m.horas} hs</span>
                           </div>
                         </div>
 
                         {/* Nombre de la materia */}
-                        <div className="font-semibold text-xs 2xl:text-sm leading-snug mb-2 font-mono text-(--text-body)">
-                          {m.nombreCompleto}
+                          <div className="font-semibold text-xs 2xl:text-sm leading-snug mb-2 font-mono text-(--text-body) min-h-[2.5rem] 2xl:min-h-[2.75rem] flex items-center">
+                            {m.nombreCompleto}
+                          </div>
                         </div>
 
                         {/* Fila inferior: Estado, Nota, Meta y Botón de Información */}
-                        <div className="flex items-center justify-between pt-1 border-t border-(--border-color) mt-1">
-                          <div className="flex flex-wrap items-center gap-1.5">
+                        <div className="flex items-center justify-between pt-1 border-t border-(--border-color) mt-1 min-h-9">
+                          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                             {statusBadge}
                             {est === 'aprobada' && nota !== undefined && (
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-800 dark:text-purple-300">
+                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/40 text-purple-800 dark:text-purple-300 whitespace-nowrap shrink-0">
                                 Nota: {nota}
                               </span>
                             )}
                             {metasExamen[m.id] && (
                               <span 
-                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 text-cyan-800 dark:text-cyan-300 flex items-center gap-1"
+                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 text-cyan-800 dark:text-cyan-300 flex items-center gap-1 whitespace-nowrap shrink-0"
                                 title={`Meta agendada: ${metasExamen[m.id].turnoNombre}`}
                               >
                                 <Target className="w-2.5 h-2.5" />
-                                <span>{metasExamen[m.id].turnoNombre.split('(')[0].trim()}</span>
+                                <span className="truncate max-w-[85px] sm:max-w-[110px] 2xl:max-w-none">{metasExamen[m.id].turnoNombre.split('(')[0].trim()}</span>
                               </span>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-0.5">
+                          <div className="flex items-center gap-0.5 shrink-0">
                             <a
                               href={getDriveUrlForMateria(m.id, m.nivel)}
                               target="_blank"
