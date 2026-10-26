@@ -44,6 +44,13 @@ export interface MetaExamen {
   notificado7Dias?: boolean;
 }
 
+export interface MetaGlobalizador {
+  materiaId: number;
+  fecha: string;
+  comentario?: string;
+  notificado7Dias?: boolean;
+}
+
 export interface ProgresoUsuario {
   estados: Record<number, EstadoMateria>;
   estadosElectivas: Record<number, EstadoMateria>;
@@ -51,6 +58,7 @@ export interface ProgresoUsuario {
   ppsHoras: number;
   perfil?: PerfilAlumno;
   metasExamen?: Record<number, MetaExamen>;
+  metasGlobalizador?: Record<number, MetaGlobalizador>;
   actualizadoEn?: string;
 }
 

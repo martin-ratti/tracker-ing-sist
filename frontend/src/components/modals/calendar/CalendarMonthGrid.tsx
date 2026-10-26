@@ -1,6 +1,6 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, Trash2, Calendar as CalendarIcon, X, Plus } from 'lucide-react';
-import type { MetaExamen, EstadoMateria } from '../../../types/plan';
+import { ChevronLeft, ChevronRight, Trash2, Calendar as CalendarIcon, X, Plus, BookOpen } from 'lucide-react';
+import type { MetaExamen, MetaGlobalizador, EstadoMateria } from '../../../types/plan';
 import { 
   TURNOS_EXAMEN, 
   HITOS_ACADEMICOS, 
@@ -48,12 +48,15 @@ interface CalendarMonthGridProps {
   calendarCells: CalendarCell[];
   todayStr: string;
   metasArray: MetaExamen[];
+  metasGlobalizadorArray: MetaGlobalizador[];
   estados: Record<number, EstadoMateria>;
   metasExamen: Record<number, MetaExamen>;
   removeMetaExamen: (materiaId: number) => void;
+  removeMetaGlobalizador: (materiaId: number) => void;
   selectedHito: HitoAcademico | null;
   setSelectedHito: (hito: HitoAcademico | null) => void;
   onOpenMetaDialog: (fechaStr: string, turno: TurnoExamenOficial) => void;
+  onSelectDay: (fechaStr: string, turno: TurnoExamenOficial | null, hito: HitoAcademico | null) => void;
 }
 
 export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
@@ -67,12 +70,15 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
   calendarCells,
   todayStr,
   metasArray,
+  metasGlobalizadorArray,
   estados,
   metasExamen,
   removeMetaExamen,
+  removeMetaGlobalizador,
   selectedHito,
   setSelectedHito,
-  onOpenMetaDialog
+  onOpenMetaDialog,
+  onSelectDay
 }) => {
   const resolution = useViewportResolution(true);
 
@@ -204,20 +210,18 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
               return false;
             });
 
+            const metasGlobalizadorEnEsteDia = metasGlobalizadorArray.filter(mg => mg.fecha === cell.dateStr);
+
             const diaSemanaNombre = DIAS_SEMANA_MAP[cell.date.getDay()];
             const esFinDeSemana = cell.date.getDay() === 0 || cell.date.getDay() === 6;
             const esDiaMesaActiva = turno && !isPast && !esFinDeSemana;
 
             const materiasQueRindenHoy = MATERIAS_TRONCALES.filter(m => DIAS_MESA_POR_MATERIA[m.id] === diaSemanaNombre);
             const regularesQueRindenHoy = materiasQueRindenHoy.filter(m => estados[m.id] === 'regular' && !metasExamen[m.id]);
-            const esClickeable = Boolean(hito || (esDiaMesaActiva && metasEnEsteDia.length === 0));
+            const esClickeable = cell.isCurrentMonth;
 
             const handleDiaClick = () => {
-              if (hito) {
-                setSelectedHito(hito);
-              } else if (esDiaMesaActiva && metasEnEsteDia.length === 0) {
-                onOpenMetaDialog(cell.dateStr, turno);
-              }
+              onSelectDay(cell.dateStr, turno || null, hito || null);
             };
 
             return (
@@ -236,16 +240,16 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                   !cell.isCurrentMonth
                     ? 'bg-slate-100/70 dark:bg-(--bg-base)/70 text-slate-400 dark:text-slate-600 opacity-30 border border-transparent'
                     : isPast
-                      ? 'bg-slate-200/50 dark:bg-(--bg-base)/40 text-slate-400 dark:text-slate-600 opacity-50 border border-slate-300/40 dark:border-slate-900/60'
+                      ? 'bg-slate-200/50 dark:bg-(--bg-base)/40 text-slate-400 dark:text-slate-600 opacity-50 border border-slate-300/40 dark:border-slate-900/60 cursor-pointer hover:border-slate-400 dark:hover:border-slate-500'
                       : esDiaMesaActiva
                         ? turno.esEspecial
-                          ? 'bg-linear-to-b from-purple-500/15 via-purple-500/5 to-transparent border-purple-400/80 text-purple-900 dark:text-purple-100 cursor-pointer sm:cursor-default'
-                          : 'bg-linear-to-b from-(--color-primary-bg) via-transparent to-transparent border-(--color-primary-border) text-(--text-body) cursor-pointer sm:cursor-default'
+                          ? 'bg-linear-to-b from-purple-500/15 via-purple-500/5 to-transparent border-purple-400/80 text-purple-900 dark:text-purple-100 cursor-pointer'
+                          : 'bg-linear-to-b from-(--color-primary-bg) via-transparent to-transparent border-(--color-primary-border) text-(--text-body) cursor-pointer'
                         : hito?.tipo === 'feriado'
                           ? 'bg-linear-to-b from-rose-500/15 via-rose-500/5 to-(--bg-surface) border-rose-500/40 text-rose-900 dark:text-rose-100 hover:border-rose-400/70 cursor-pointer'
                           : hito
                             ? 'bg-linear-to-b from-amber-500/15 via-amber-500/5 to-(--bg-surface) border-amber-500/40 text-amber-900 dark:text-amber-100 hover:border-amber-400/70 cursor-pointer'
-                            : 'bg-(--bg-surface) border border-(--border-color) text-(--text-body) hover:border-slate-400 dark:hover:border-slate-600'
+                            : 'bg-(--bg-surface) border border-(--border-color) text-(--text-body) hover:border-slate-400 dark:hover:border-slate-600 cursor-pointer'
                 }`}
                 style={esDiaMesaActiva ? {
                   boxShadow: turno.esEspecial
@@ -299,7 +303,13 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                   {metasEnEsteDia.length > 0 && (
                     <span 
                       className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)]" 
-                      title="Meta agendada" 
+                      title="Final agendado" 
+                    />
+                  )}
+                  {metasGlobalizadorEnEsteDia.length > 0 && (
+                    <span 
+                      className="w-2 h-2 rounded-full bg-(--color-cursable) shadow-[0_0_6px_var(--color-cursable-glow)]" 
+                      title="Globalizador agendado" 
                     />
                   )}
                   {esDiaMesaActiva && metasEnEsteDia.length === 0 && (
@@ -371,6 +381,33 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                           }}
                           className="text-emerald-600 dark:text-emerald-300 hover:text-rose-500 p-0.5 transition-colors cursor-pointer"
                           title="Quitar meta"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+
+                  {metasGlobalizadorEnEsteDia.map(mg => {
+                    const materia = MATERIAS_MAP[mg.materiaId];
+                    return (
+                      <div
+                        key={`glob-${mg.materiaId}`}
+                        className={`px-1.5 py-0.5 rounded bg-(--color-cursable-bg) border border-(--color-cursable-border) text-(--color-cursable) ${resolution.metaBadgeSize} font-bold flex items-center justify-between gap-1 shadow-xs`}
+                        title={`Globalizador: ${materia?.nombreCompleto || `#${mg.materiaId}`}`}
+                      >
+                        <span className="truncate flex items-center gap-1">
+                          <BookOpen className="w-2.5 h-2.5 shrink-0" />
+                          <span className="truncate">GLB · {materia?.nombre || `#${mg.materiaId}`}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeMetaGlobalizador(mg.materiaId);
+                          }}
+                          className="text-slate-400 hover:text-rose-500 p-0.5 transition-colors cursor-pointer"
+                          title="Quitar meta de globalizador"
                         >
                           <Trash2 className="w-2.5 h-2.5" />
                         </button>

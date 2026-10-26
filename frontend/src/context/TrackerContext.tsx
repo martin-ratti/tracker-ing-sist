@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen } from '../types/plan';
+import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen, MetaGlobalizador } from '../types/plan';
 import { MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
 import { fetchProgress, getLocalProgress, persistProgress, clearProgress, safeSaveProgressToStorage } from '../services/api';
 import { decodeProgress } from '../utils/share';
@@ -47,6 +47,9 @@ export interface AcademicTrackerContextType {
   metasExamen: Record<number, MetaExamen>;
   setMetaExamen: (materiaId: number, meta: MetaExamen) => void;
   removeMetaExamen: (materiaId: number) => void;
+  metasGlobalizador: Record<number, MetaGlobalizador>;
+  setMetaGlobalizador: (materiaId: number, meta: MetaGlobalizador) => void;
+  removeMetaGlobalizador: (materiaId: number) => void;
   isViewingShared: boolean;
   sharedName: string | null;
   exitSharedMode: () => void;
@@ -106,6 +109,10 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (typeof window !== 'undefined') return getLocalProgress().metasExamen || {};
     return {};
   });
+  const [metasGlobalizador, setMetasGlobalizadorState] = useState<Record<number, MetaGlobalizador>>(() => {
+    if (typeof window !== 'undefined') return getLocalProgress().metasGlobalizador || {};
+    return {};
+  });
   const [isViewingShared, setIsViewingShared] = useState(false);
   const [sharedName, setSharedName] = useState<string | null>(null);
 
@@ -156,6 +163,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
         setPerfilState(data.perfil || { nombre: '', legajo: '' });
         setMetasExamenState(data.metasExamen || {});
+        setMetasGlobalizadorState(data.metasGlobalizador || {});
       })
       .catch(err => console.error('Error al cargar progreso:', err));
   }, []);
@@ -201,6 +209,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
             setPerfilState(data.perfil || { nombre: '', legajo: '' });
             setMetasExamenState(data.metasExamen || {});
+            setMetasGlobalizadorState(data.metasGlobalizador || {});
           }
         });
       }
@@ -510,6 +519,48 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [metasExamen, showToast]);
 
+  const setMetaGlobalizador = useCallback((materiaId: number, meta: MetaGlobalizador) => {
+    setMetasGlobalizadorState(prev => {
+      const next = { ...prev, [materiaId]: meta };
+      void persistProgress({ metasGlobalizador: next });
+      return next;
+    });
+    const mat = MATERIAS_MAP[materiaId];
+    showToast(`📅 Meta de globalizador agendada para ${mat?.nombre || `#${materiaId}`}`);
+  }, [showToast]);
+
+  const removeMetaGlobalizador = useCallback((materiaId: number) => {
+    const prevMeta = metasGlobalizador[materiaId];
+    const mat = MATERIAS_MAP[materiaId];
+    const nombreMat = mat ? mat.nombre : `#${materiaId}`;
+
+    setMetasGlobalizadorState(prev => {
+      const next = { ...prev };
+      delete next[materiaId];
+      void persistProgress({ metasGlobalizador: next });
+      return next;
+    });
+
+    if (prevMeta) {
+      showToast(`📅 Meta de globalizador eliminada para ${nombreMat}`, {
+        variant: 'info',
+        action: {
+          label: 'Deshacer',
+          onClick: () => {
+            setMetasGlobalizadorState(prev => {
+              const restored = { ...prev, [materiaId]: prevMeta };
+              void persistProgress({ metasGlobalizador: restored });
+              return restored;
+            });
+            showToast(`↩️ Meta de globalizador restaurada para ${nombreMat}`, 'success');
+          }
+        }
+      });
+    } else {
+      showToast('Meta de globalizador eliminada');
+    }
+  }, [metasGlobalizador, showToast]);
+
   const resetAll = useCallback(() => {
     setEstados({});
     setEstadosElectivas({});
@@ -517,6 +568,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setPpsHorasState(0);
     setPerfilState({ nombre: '', legajo: '' });
     setMetasExamenState({});
+    setMetasGlobalizadorState({});
     void clearProgress();
     showToast('Plan reseteado por completo.');
   }, [showToast]);
@@ -534,9 +586,9 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [estados, estadosElectivas, notas, ppsHoras, metasExamen, esMateriaCursable]);
 
   const exportBackupJson = useCallback(() => {
-    downloadBackupJson(estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen);
+    downloadBackupJson(estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, metasGlobalizador);
     showToast('💾 Copia de seguridad exportada con éxito', 'success');
-  }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, showToast]);
+  }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, metasGlobalizador, showToast]);
 
   const importBackupJson = useCallback((jsonStr: string): boolean => {
     const data = parseBackupJson(jsonStr);
@@ -551,6 +603,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const newPps = typeof data.ppsHoras === 'number' ? data.ppsHoras : ppsHoras;
     const newPerfil = data.perfil && typeof data.perfil === 'object' ? data.perfil : perfil;
     const newMetas = data.metasExamen && typeof data.metasExamen === 'object' ? data.metasExamen : metasExamen;
+    const newMetasGlobalizador = data.metasGlobalizador && typeof data.metasGlobalizador === 'object' ? data.metasGlobalizador : metasGlobalizador;
 
     setEstados(newEstados);
     setEstadosElectivas(newElectivas);
@@ -558,6 +611,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setPpsHorasState(newPps);
     setPerfilState(newPerfil);
     setMetasExamenState(newMetas);
+    setMetasGlobalizadorState(newMetasGlobalizador);
 
     void persistProgress({
       estados: newEstados,
@@ -565,12 +619,13 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       notas: newNotas,
       ppsHoras: newPps,
       perfil: newPerfil,
-      metasExamen: newMetas
+      metasExamen: newMetas,
+      metasGlobalizador: newMetasGlobalizador
     });
 
     showToast('✅ ¡Progreso restaurado correctamente!', 'success');
     return true;
-  }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, showToast]);
+  }, [estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, metasGlobalizador, showToast]);
 
   return (
     <TrackerContext.Provider
@@ -585,6 +640,9 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         metasExamen,
         setMetaExamen,
         removeMetaExamen,
+        metasGlobalizador,
+        setMetaGlobalizador,
+        removeMetaGlobalizador,
         isViewingShared,
         sharedName,
         exitSharedMode,

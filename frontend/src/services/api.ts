@@ -1,4 +1,4 @@
-import type { EstadoMateria, NotaMateria, ProgresoUsuario, MetaExamen } from '../types/plan';
+import type { EstadoMateria, NotaMateria, ProgresoUsuario, MetaExamen, MetaGlobalizador } from '../types/plan';
 import { 
   auth, 
   isFirebaseConfigured, 
@@ -173,7 +173,8 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
     notas: {},
     ppsHoras: 0,
     perfil: { nombre: '', legajo: '' },
-    metasExamen: {}
+    metasExamen: {},
+    metasGlobalizador: {}
   };
 
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
@@ -255,6 +256,25 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
     }
   }
 
+  // 7. Metas de globalizador
+  const safeMetasGlobalizador: Record<number, MetaGlobalizador> = {};
+  if (src.metasGlobalizador && typeof src.metasGlobalizador === 'object' && !Array.isArray(src.metasGlobalizador)) {
+    for (const [key, value] of Object.entries(src.metasGlobalizador)) {
+      const id = Number(key);
+      if (Number.isInteger(id) && id > 0 && id < 100000 && value && typeof value === 'object' && !Array.isArray(value)) {
+        const mg = value as Record<string, unknown>;
+        if (typeof mg.fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(mg.fecha.trim())) {
+          safeMetasGlobalizador[id] = {
+            materiaId: id,
+            fecha: mg.fecha.trim().slice(0, 30),
+            comentario: typeof mg.comentario === 'string' ? sanitizeSafeText(mg.comentario, 500) : undefined,
+            notificado7Dias: typeof mg.notificado7Dias === 'boolean' ? mg.notificado7Dias : undefined
+          };
+        }
+      }
+    }
+  }
+
   return {
     estados: safeEstados,
     estadosElectivas: safeElectivas,
@@ -262,6 +282,7 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
     ppsHoras: safePps,
     perfil: safePerfil,
     metasExamen: safeMetas,
+    metasGlobalizador: safeMetasGlobalizador,
     actualizadoEn: typeof src.actualizadoEn === 'string' ? src.actualizadoEn.slice(0, 50) : new Date().toISOString()
   };
 }
@@ -282,7 +303,7 @@ export function hasAnyData(data?: ProgresoUsuario | null): boolean {
   const hasElectivas = Object.values(data.estadosElectivas || {}).some(e => e !== 'pendiente');
   const hasNotas = Object.keys(data.notas || {}).length > 0;
   const hasPerfil = Boolean(data.perfil?.nombre?.trim() || data.perfil?.legajo?.trim());
-  const hasMetas = Object.keys(data.metasExamen || {}).length > 0;
+  const hasMetas = Object.keys(data.metasExamen || {}).length > 0 || Object.keys(data.metasGlobalizador || {}).length > 0;
   const hasPps = (data.ppsHoras || 0) > 0;
   return hasEstados || hasElectivas || hasNotas || hasPerfil || hasMetas || hasPps;
 }
@@ -395,7 +416,8 @@ export function getLocalProgress(): ProgresoUsuario {
     notas: {},
     ppsHoras: 0,
     perfil: { nombre: '', legajo: '' },
-    metasExamen: {}
+    metasExamen: {},
+    metasGlobalizador: {}
   };
 }
 
@@ -455,6 +477,12 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
     ...(local.metasExamen || {})
   };
 
+  // Metas de globalizador
+  const mergedMetasGlobalizador = {
+    ...(cloud.metasGlobalizador || {}),
+    ...(local.metasGlobalizador || {})
+  };
+
   // Perfil
   const mergedPerfil = {
     nombre: sanitizePersonName(local.perfil?.nombre || cloud.perfil?.nombre || '', 100),
@@ -468,6 +496,7 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
     ppsHoras: Math.max(local.ppsHoras || 0, cloud.ppsHoras || 0),
     perfil: mergedPerfil,
     metasExamen: mergedMetas,
+    metasGlobalizador: mergedMetasGlobalizador,
     actualizadoEn: new Date().toISOString()
   };
 }

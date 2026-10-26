@@ -1,6 +1,6 @@
 import { MATERIAS_MAP } from '../data/plan2023';
 import { TURNOS_EXAMEN, getFechaExactaMesa } from '../data/calendario';
-import type { MetaExamen } from '../types/plan';
+import type { MetaExamen, MetaGlobalizador } from '../types/plan';
 
 /**
  * Formatea una fecha YYYY-MM-DD a formato iCalendar YYYYMMDD
@@ -35,9 +35,9 @@ function getNextDayStr(dateStr: string): string {
 }
 
 /**
- * Genera el contenido iCalendar (.ics) estándar RFC 5545 para las metas de examen
+ * Genera el contenido iCalendar (.ics) estándar RFC 5545 para las metas de examen y globalizadores
  */
-export function generateICSContent(metas: MetaExamen[]): string {
+export function generateICSContent(metas: MetaExamen[], metasGlobalizador: MetaGlobalizador[] = []): string {
   const nowStr = formatTimestampToICS(new Date());
 
   const lines: string[] = [
@@ -46,10 +46,11 @@ export function generateICSContent(metas: MetaExamen[]): string {
     'PRODID:-//UTN FRRo ISI//Tracker Plan 2023//ES',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:Exámenes Finales ISI - UTN FRRo',
+    'X-WR-CALNAME:Exámenes y Globalizadores ISI - UTN FRRo',
     'X-WR-TIMEZONE:America/Argentina/Buenos_Aires'
   ];
 
+  // 1. Exportar Exámenes Finales
   for (const meta of metas) {
     const materia = MATERIAS_MAP[meta.materiaId];
     const materiaNombre = materia ? materia.nombreCompleto : `Materia #${meta.materiaId}`;
@@ -87,7 +88,7 @@ export function generateICSContent(metas: MetaExamen[]): string {
       `DTSTAMP:${nowStr}`,
       `DTSTART;VALUE=DATE:${dtStart}`,
       `DTEND;VALUE=DATE:${dtEnd}`,
-      `SUMMARY:Examen Final: ${materiaCorta} (UTN FRRo)`,
+      `SUMMARY:[FINAL] ${materiaCorta} (UTN FRRo)`,
       `DESCRIPTION:${desc}`,
       'LOCATION:UTN Facultad Regional Rosario, Zeballos 1341, Rosario, Santa Fe',
       'STATUS:CONFIRMED',
@@ -96,13 +97,56 @@ export function generateICSContent(metas: MetaExamen[]): string {
       'BEGIN:VALARM',
       'TRIGGER:-P7D',
       'ACTION:DISPLAY',
-      `DESCRIPTION:Recordatorio: En 7 días rendís ${materiaCorta}`,
+      `DESCRIPTION:Recordatorio: En 7 días rendís el final de ${materiaCorta}`,
       'END:VALARM',
       // Alarma 1 día antes
       'BEGIN:VALARM',
       'TRIGGER:-P1D',
       'ACTION:DISPLAY',
-      `DESCRIPTION:Recordatorio: ¡Mañana rendís ${materiaCorta}!`,
+      `DESCRIPTION:Recordatorio: ¡Mañana rendís el final de ${materiaCorta}!`,
+      'END:VALARM',
+      'END:VEVENT'
+    );
+  }
+
+  // 2. Exportar Globalizadores
+  for (const glob of metasGlobalizador) {
+    if (!glob.fecha) continue;
+
+    const materia = MATERIAS_MAP[glob.materiaId];
+    const materiaNombre = materia ? materia.nombreCompleto : `Materia #${glob.materiaId}`;
+    const materiaCorta = materia ? materia.nombre : `#${glob.materiaId}`;
+
+    const dtStart = formatDateToICS(glob.fecha);
+    const dtEnd = getNextDayStr(glob.fecha);
+    const uid = `glob-${glob.materiaId}-${dtStart}@tracker-isi.utn`;
+
+    let desc = String.raw`Examen Globalizador de ${materiaNombre} (Instancia para Regularizar).`;
+    if (glob.comentario) desc += String.raw`\nNotas de estudio: ${glob.comentario}`;
+    desc += String.raw`\nFacultad Regional Rosario - Plan 2023 ISI.`;
+
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTAMP:${nowStr}`,
+      `DTSTART;VALUE=DATE:${dtStart}`,
+      `DTEND;VALUE=DATE:${dtEnd}`,
+      `SUMMARY:[GLOBALIZADOR] ${materiaCorta} (UTN FRRo)`,
+      `DESCRIPTION:${desc}`,
+      'LOCATION:UTN Facultad Regional Rosario, Zeballos 1341, Rosario, Santa Fe',
+      'STATUS:CONFIRMED',
+      'TRANSP:TRANSPARENT',
+      // Alarma 7 días antes
+      'BEGIN:VALARM',
+      'TRIGGER:-P7D',
+      'ACTION:DISPLAY',
+      `DESCRIPTION:Recordatorio: En 7 días rendís el globalizador de ${materiaCorta}`,
+      'END:VALARM',
+      // Alarma 1 día antes
+      'BEGIN:VALARM',
+      'TRIGGER:-P1D',
+      'ACTION:DISPLAY',
+      `DESCRIPTION:Recordatorio: ¡Mañana rendís el globalizador de ${materiaCorta}!`,
       'END:VALARM',
       'END:VEVENT'
     );
@@ -115,16 +159,16 @@ export function generateICSContent(metas: MetaExamen[]): string {
 /**
  * Descarga el archivo .ics en el navegador del usuario
  */
-export function exportMetasToICS(metas: MetaExamen[]): boolean {
-  if (!metas || metas.length === 0) return false;
+export function exportMetasToICS(metas: MetaExamen[], metasGlobalizador: MetaGlobalizador[] = []): boolean {
+  if ((!metas || metas.length === 0) && (!metasGlobalizador || metasGlobalizador.length === 0)) return false;
 
-  const content = generateICSContent(metas);
+  const content = generateICSContent(metas, metasGlobalizador);
   const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement('a');
   a.href = url;
-  a.download = `finales-utn-frro-${new Date().getFullYear()}.ics`;
+  a.download = `metas-utn-frro-${new Date().getFullYear()}.ics`;
   document.body.appendChild(a);
   a.click();
   a.remove();

@@ -17,6 +17,7 @@ function buildDefault(): ProgresoUsuario {
     ppsHoras: 0,
     perfil: { nombre: '', legajo: '' },
     metasExamen: {},
+    metasGlobalizador: {},
     actualizadoEn: new Date().toISOString()
   };
 }

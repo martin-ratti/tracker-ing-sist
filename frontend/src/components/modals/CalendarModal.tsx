@@ -4,10 +4,11 @@ import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { 
   TURNOS_EXAMEN, 
+  getFechaExactaMesa,
   type TurnoExamenOficial,
   type HitoAcademico
 } from '../../data/calendario';
-import { MATERIAS_TRONCALES } from '../../data/plan2023';
+import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../../data/plan2023';
 import { 
   X, 
   Calendar as CalendarIcon, 
@@ -21,6 +22,8 @@ import { CalendarMonthGrid, type CalendarCell } from './calendar/CalendarMonthGr
 import { CalendarMetasTab } from './calendar/CalendarMetasTab';
 import { CalendarTurnosTab } from './calendar/CalendarTurnosTab';
 import { CalendarScheduleDialog, type MetaDialogState } from './calendar/CalendarScheduleDialog';
+import { CalendarDayDetailModal } from './calendar/CalendarDayDetailModal';
+import { CalendarScheduleGlobalizadorDialog } from './calendar/CalendarScheduleGlobalizadorDialog';
 
 export const CalendarModal: React.FC = () => {
   const { 
@@ -29,7 +32,12 @@ export const CalendarModal: React.FC = () => {
     metasExamen, 
     setMetaExamen,
     removeMetaExamen, 
+    metasGlobalizador,
+    setMetaGlobalizador,
+    removeMetaGlobalizador,
     estados,
+    setEstadoDirecto,
+    esMateriaCursable,
     setSelectedSubjectId,
     showToast
   } = useTracker();
@@ -43,15 +51,16 @@ export const CalendarModal: React.FC = () => {
 
   const handleExportICS = useCallback(() => {
     const metas = Object.values(metasExamen);
-    if (metas.length === 0) {
-      showToast('⚠️ No tienes metas de final agendadas para exportar', 'warning');
+    const globs = Object.values(metasGlobalizador);
+    if (metas.length === 0 && globs.length === 0) {
+      showToast('⚠️ No tienes metas de final ni de globalizador agendadas para exportar', 'warning');
       return;
     }
-    const ok = exportMetasToICS(metas);
+    const ok = exportMetasToICS(metas, globs);
     if (ok) {
       showToast('📅 ¡Archivo .ics descargado con éxito!', 'success');
     }
-  }, [metasExamen, showToast]);
+  }, [metasExamen, metasGlobalizador, showToast]);
 
   // Fecha actual de referencia
   const today = useMemo(() => {
@@ -71,18 +80,30 @@ export const CalendarModal: React.FC = () => {
   const [navYear, setNavYear] = useState<number>(() => today.getFullYear());
   const [navMonth, setNavMonth] = useState<number>(() => today.getMonth());
 
-  // Diálogo para agendar meta desde una celda del calendario
+  // Diálogo para agendar meta de final desde una celda del calendario
   const [metaDialog, setMetaDialog] = useState<MetaDialogState | null>(null);
   const [materiaSeleccionadaId, setMateriaSeleccionadaId] = useState<number | ''>('');
   const [metaComentarioInput, setMetaComentarioInput] = useState('');
+
+  // Estados para Detalle del Día y Meta de Globalizador
+  const [selectedDayDetail, setSelectedDayDetail] = useState<{
+    fechaStr: string;
+    turno: TurnoExamenOficial | null;
+    hito: HitoAcademico | null;
+  } | null>(null);
+  const [globalizadorDialogFecha, setGlobalizadorDialogFecha] = useState<string | null>(null);
 
   // Cerrar con Escape
   useEffect(() => {
     if (!calendarOpen) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (metaDialog) {
+        if (globalizadorDialogFecha) {
+          setGlobalizadorDialogFecha(null);
+        } else if (metaDialog) {
           setMetaDialog(null);
+        } else if (selectedDayDetail) {
+          setSelectedDayDetail(null);
         } else {
           setCalendarOpen(false);
         }
@@ -90,14 +111,20 @@ export const CalendarModal: React.FC = () => {
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
-  }, [calendarOpen, setCalendarOpen, metaDialog]);
+  }, [calendarOpen, setCalendarOpen, metaDialog, selectedDayDetail, globalizadorDialogFecha]);
 
   const metasArray = useMemo(() => Object.values(metasExamen), [metasExamen]);
+  const metasGlobalizadorArray = useMemo(() => Object.values(metasGlobalizador), [metasGlobalizador]);
 
   // Materias regulares sin meta asignada
   const materiasRegularesSinMeta = useMemo(() => {
     return MATERIAS_TRONCALES.filter(m => estados[m.id] === 'regular' && !metasExamen[m.id]);
   }, [estados, metasExamen]);
+
+  // Materias cursables sin globalizador asignado
+  const materiasCursablesSinGlobalizador = useMemo(() => {
+    return MATERIAS_TRONCALES.filter(m => esMateriaCursable(m) && !metasGlobalizador[m.id]);
+  }, [esMateriaCursable, metasGlobalizador]);
 
   // Accesos rápidos por mes
   const mesesConTurnos = useMemo(() => {
@@ -248,10 +275,6 @@ export const CalendarModal: React.FC = () => {
     setMetaDialog(null);
   };
 
-  const handleRemoveMeta = (materiaId: number) => {
-    removeMetaExamen(materiaId);
-  };
-
   if (!isMounted) return null;
 
   return (
@@ -372,19 +395,30 @@ export const CalendarModal: React.FC = () => {
               calendarCells={calendarCells}
               todayStr={todayStr}
               metasArray={metasArray}
+              metasGlobalizadorArray={metasGlobalizadorArray}
               estados={estados}
               metasExamen={metasExamen}
               removeMetaExamen={removeMetaExamen}
+              removeMetaGlobalizador={removeMetaGlobalizador}
               selectedHito={selectedHito}
               setSelectedHito={setSelectedHito}
               onOpenMetaDialog={handleOpenMetaDialog}
+              onSelectDay={(fechaStr, turno, hito) => setSelectedDayDetail({ fechaStr, turno, hito })}
             />
           )}
 
           {activeTab === 'metas' && (
             <CalendarMetasTab
               metasArray={metasArray}
-              onRemoveMeta={handleRemoveMeta}
+              metasGlobalizadorArray={metasGlobalizadorArray}
+              onRemoveMeta={removeMetaExamen}
+              onRemoveMetaGlobalizador={removeMetaGlobalizador}
+              onAprobarGlobalizador={(materiaId) => {
+                setEstadoDirecto(materiaId, 'regular');
+                removeMetaGlobalizador(materiaId);
+                const mat = MATERIAS_MAP[materiaId];
+                showToast(`🎉 ¡Felicitaciones! "${mat?.nombre || materiaId}" pasada a Regular`, 'success');
+              }}
               onExportICS={handleExportICS}
               onSelectSubject={(materiaId) => {
                 setCalendarOpen(false);
@@ -403,6 +437,56 @@ export const CalendarModal: React.FC = () => {
         </div>
       </div>
 
+      {/* Modal de Detalle del Día */}
+      {selectedDayDetail && (
+        <CalendarDayDetailModal
+          fechaStr={selectedDayDetail.fechaStr}
+          turno={selectedDayDetail.turno}
+          hito={selectedDayDetail.hito}
+          onClose={() => setSelectedDayDetail(null)}
+          metasFinalEnEsteDia={metasArray.filter(m => {
+            if (m.fechaEstimada) return m.fechaEstimada === selectedDayDetail.fechaStr;
+            if (selectedDayDetail.turno && m.turnoId === selectedDayDetail.turno.id) {
+              const fe = getFechaExactaMesa(m.materiaId, selectedDayDetail.turno);
+              return fe ? fe.fechaExactaStr === selectedDayDetail.fechaStr : false;
+            }
+            return false;
+          })}
+          metasGlobalizadorEnEsteDia={metasGlobalizadorArray.filter(mg => mg.fecha === selectedDayDetail.fechaStr)}
+          onOpenAgendarFinal={handleOpenMetaDialog}
+          onOpenAgendarGlobalizador={(fecha) => {
+            setSelectedDayDetail(null);
+            setGlobalizadorDialogFecha(fecha);
+          }}
+          onRemoveMetaFinal={removeMetaExamen}
+          onRemoveMetaGlobalizador={removeMetaGlobalizador}
+          onAprobarGlobalizador={(materiaId) => {
+            setEstadoDirecto(materiaId, 'regular');
+            removeMetaGlobalizador(materiaId);
+            const mat = MATERIAS_MAP[materiaId];
+            showToast(`🎉 ¡Felicitaciones! "${mat?.nombre || materiaId}" pasada a Regular`, 'success');
+          }}
+          onSelectSubject={(materiaId) => {
+            setCalendarOpen(false);
+            setSelectedSubjectId(materiaId);
+          }}
+        />
+      )}
+
+      {/* Diálogo para agendar meta de globalizador */}
+      {globalizadorDialogFecha && (
+        <CalendarScheduleGlobalizadorDialog
+          fechaStr={globalizadorDialogFecha}
+          onClose={() => setGlobalizadorDialogFecha(null)}
+          materiasCursables={materiasCursablesSinGlobalizador}
+          onConfirm={(materiaId, fecha, comentario) => {
+            setMetaGlobalizador(materiaId, { materiaId, fecha, comentario });
+            setGlobalizadorDialogFecha(null);
+          }}
+        />
+      )}
+
+      {/* Diálogo para agendar meta de final */}
       {metaDialog && (
         <CalendarScheduleDialog
           metaDialog={metaDialog}

@@ -15,7 +15,8 @@ import {
   Trash2,
   FolderOpen,
   ExternalLink,
-  AlertTriangle
+  AlertTriangle,
+  BookOpen
 } from 'lucide-react';
 import { 
   TURNOS_EXAMEN, 
@@ -37,10 +38,14 @@ export const SubjectModal: React.FC = () => {
     metasExamen,
     setMetaExamen,
     removeMetaExamen,
+    metasGlobalizador,
+    setMetaGlobalizador,
+    removeMetaGlobalizador,
     setEstadoDirecto,
     setNotaMateria,
     showToast,
-    esMateriaRendible
+    esMateriaRendible,
+    esMateriaCursable
   } = useTracker();
 
   const [notaVal, setNotaVal] = useState<string>('');
@@ -49,6 +54,11 @@ export const SubjectModal: React.FC = () => {
   const [selectedTurnoId, setSelectedTurnoId] = useState<string>(TURNOS_EXAMEN[0]?.id || 'feb-2026-l1');
   const [metaComentario, setMetaComentario] = useState<string>('');
   const [showMetaForm, setShowMetaForm] = useState<boolean>(false);
+
+  // Estados para Meta de Globalizador
+  const [globalizadorFecha, setGlobalizadorFecha] = useState<string>('');
+  const [globalizadorComentario, setGlobalizadorComentario] = useState<string>('');
+  const [showGlobalizadorForm, setShowGlobalizadorForm] = useState<boolean>(false);
 
   const isOpen = Boolean(selectedSubjectId);
   const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
@@ -98,6 +108,18 @@ export const SubjectModal: React.FC = () => {
       setMetaComentario('');
       setShowMetaForm(false);
     }
+
+    if (selectedSubjectId && metasGlobalizador[selectedSubjectId]) {
+      const mg = metasGlobalizador[selectedSubjectId];
+      setGlobalizadorFecha(mg.fecha);
+      setGlobalizadorComentario(mg.comentario || '');
+      setShowGlobalizadorForm(false);
+    } else {
+      const today = new Date().toISOString().slice(0, 10);
+      setGlobalizadorFecha(today);
+      setGlobalizadorComentario('');
+      setShowGlobalizadorForm(false);
+    }
   }
 
   if (!isMounted || !activeMateria) return null;
@@ -105,6 +127,7 @@ export const SubjectModal: React.FC = () => {
 
   const currentEstado = estados[materia.id] || 'pendiente';
   const currentMeta = metasExamen[materia.id];
+  const currentGlobalizador = metasGlobalizador[materia.id];
 
   // Helper para countdown de días
   const getDaysRemaining = (targetDateStr: string) => {
@@ -149,6 +172,23 @@ export const SubjectModal: React.FC = () => {
     if (!materia) return;
     removeMetaExamen(materia.id);
     setShowMetaForm(false);
+  };
+
+  const handleSaveGlobalizador = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!materia || !globalizadorFecha) return;
+    setMetaGlobalizador(materia.id, {
+      materiaId: materia.id,
+      fecha: globalizadorFecha,
+      comentario: globalizadorComentario.trim() || undefined
+    });
+    setShowGlobalizadorForm(false);
+  };
+
+  const handleRemoveGlobalizador = () => {
+    if (!materia) return;
+    removeMetaGlobalizador(materia.id);
+    setShowGlobalizadorForm(false);
   };
 
   // Guardar calificación
@@ -547,6 +587,141 @@ export const SubjectModal: React.FC = () => {
                   )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Planificación de Meta de Globalizador (habilitado para materias Pendientes que se pueden cursar) */}
+          {currentEstado === 'pendiente' && esMateriaCursable(materia) && (
+            <div className="bg-(--color-cursable-bg) border border-(--color-cursable-border) rounded-xl p-4 space-y-3 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-(--bg-surface) text-(--color-cursable) border border-(--color-cursable-border)">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="font-syne font-bold text-xs text-(--text-body)">
+                      Meta de Globalizador · Instancia de Regularidad
+                    </h4>
+                    <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                      Asigna la fecha del examen para regularizar esta materia
+                    </p>
+                  </div>
+                </div>
+
+                {currentGlobalizador && !showGlobalizadorForm && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowGlobalizadorForm(true)}
+                      className="px-2.5 py-1 rounded bg-(--bg-surface) hover:bg-(--bg-elevated) border border-(--border-color) text-[11px] font-mono text-(--text-body) transition-colors shadow-xs"
+                    >
+                      Cambiar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRemoveGlobalizador}
+                      className="p-1.5 rounded text-slate-400 hover:text-rose-500 hover:bg-(--bg-surface) transition-colors"
+                      title="Quitar meta de globalizador"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {currentGlobalizador && !showGlobalizadorForm ? (
+                <div className="bg-(--bg-surface) border border-(--border-color) rounded-lg p-3 font-mono text-xs space-y-2 shadow-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-bold text-(--color-cursable) flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                      Fecha: {formatFechaLocal(currentGlobalizador.fecha)}
+                    </span>
+                    {getDaysRemaining(currentGlobalizador.fecha) && (
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-mono ${getDaysRemaining(currentGlobalizador.fecha).badgeColor}`}>
+                        {getDaysRemaining(currentGlobalizador.fecha).text}
+                      </span>
+                    )}
+                  </div>
+
+                  {currentGlobalizador.comentario && (
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 italic pt-1 border-t border-(--border-color)">
+                      "{currentGlobalizador.comentario}"
+                    </p>
+                  )}
+
+                  <div className="pt-2 border-t border-(--border-color) flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEstadoDirecto(materia.id, 'regular');
+                        removeMetaGlobalizador(materia.id);
+                        showToast(`🎉 ¡Felicitaciones! "${materia.nombre}" pasada a Regular`, 'success');
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>¡Aprobé el Globalizador! Pasar a Regular</span>
+                    </button>
+                  </div>
+                </div>
+              ) : !currentGlobalizador && !showGlobalizadorForm ? (
+                <button
+                  type="button"
+                  onClick={() => setShowGlobalizadorForm(true)}
+                  className="w-full py-2.5 px-3 rounded-lg border border-dashed border-(--color-cursable-border) hover:border-(--color-cursable) bg-(--color-cursable-bg) hover:opacity-90 text-(--color-cursable) font-mono text-xs flex items-center justify-center gap-2 transition-all font-medium cursor-pointer"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-(--color-cursable)" />
+                  <span>Programar fecha de examen globalizador</span>
+                </button>
+              ) : (
+                <form onSubmit={handleSaveGlobalizador} className="space-y-3 pt-1">
+                  <div>
+                    <label htmlFor="globalizador-fecha-picker" className="block text-[11px] font-mono text-slate-600 dark:text-slate-400 mb-1">
+                      Fecha del Examen:
+                    </label>
+                    <input
+                      id="globalizador-fecha-picker"
+                      type="date"
+                      value={globalizadorFecha}
+                      onChange={e => setGlobalizadorFecha(e.target.value)}
+                      required
+                      className="w-full bg-(--bg-surface) border border-(--border-color) rounded-lg p-2 text-xs font-mono text-(--text-body) focus:outline-none focus:border-(--color-cursable)"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="globalizador-comentario-input" className="block text-[11px] font-mono text-slate-600 dark:text-slate-400 mb-1">
+                      Notas de estudio (opcional):
+                    </label>
+                    <input
+                      id="globalizador-comentario-input"
+                      type="text"
+                      value={globalizadorComentario}
+                      onChange={e => setGlobalizadorComentario(e.target.value)}
+                      placeholder="Ej: Repasar unidades de la 2da mitad..."
+                      className="w-full bg-(--bg-surface) border border-(--border-color) rounded-lg p-2 text-xs font-mono text-(--text-body) focus:outline-none focus:border-(--color-cursable)"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowGlobalizadorForm(false)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-mono text-slate-500 hover:text-(--text-body) transition-colors cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!globalizadorFecha}
+                      className="px-4 py-1.5 rounded-lg bg-(--color-cursable) hover:opacity-90 disabled:opacity-40 text-slate-950 font-bold text-xs font-mono transition-opacity shadow-xs cursor-pointer flex items-center gap-1.5"
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>Guardar Globalizador</span>
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           )}
 

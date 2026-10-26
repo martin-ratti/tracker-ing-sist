@@ -141,7 +141,7 @@ apiRouter.get('/progress', optionalAuthMiddleware, (req: AuthenticatedRequest, r
 
 apiRouter.post('/progress', optionalAuthMiddleware, (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.userId;
-  const { estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen } = req.body;
+  const { estados, estadosElectivas, notas, ppsHoras, perfil, metasExamen, metasGlobalizador } = req.body;
 
   // Validación básica de tipos
   if (estados !== undefined && typeof estados !== 'object') {
@@ -168,6 +168,10 @@ apiRouter.post('/progress', optionalAuthMiddleware, (req: AuthenticatedRequest, 
     res.status(400).json({ error: 'El campo metasExamen debe ser un objeto.' });
     return;
   }
+  if (metasGlobalizador !== undefined && typeof metasGlobalizador !== 'object') {
+    res.status(400).json({ error: 'El campo metasGlobalizador debe ser un objeto.' });
+    return;
+  }
 
   try {
     const updated = saveProgress({
@@ -176,7 +180,8 @@ apiRouter.post('/progress', optionalAuthMiddleware, (req: AuthenticatedRequest, 
       ...(notas !== undefined && { notas }),
       ...(ppsHoras !== undefined && { ppsHoras }),
       ...(perfil !== undefined && { perfil }),
-      ...(metasExamen !== undefined && { metasExamen })
+      ...(metasExamen !== undefined && { metasExamen }),
+      ...(metasGlobalizador !== undefined && { metasGlobalizador })
     }, userId);
     res.json({ success: true, data: updated });
   } catch (err) {

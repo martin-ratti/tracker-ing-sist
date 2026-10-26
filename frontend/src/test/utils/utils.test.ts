@@ -35,19 +35,34 @@ describe('Utilidades del Sistema', () => {
       expect(ics).toContain('VERSION:2.0');
       expect(ics).toContain('PRODID:-//UTN FRRo ISI//Tracker Plan 2023//ES');
       expect(ics).toContain('CALSCALE:GREGORIAN');
-      expect(ics).toContain('X-WR-CALNAME:Exámenes Finales ISI - UTN FRRo');
+      expect(ics).toContain('X-WR-CALNAME:Exámenes y Globalizadores ISI - UTN FRRo');
       expect(ics).toContain('END:VCALENDAR');
     });
 
     it('debe generar los bloques VEVENT con alarmas de 7 días y 1 día antes', () => {
       const ics = generateICSContent(mockMetas);
       expect(ics).toContain('BEGIN:VEVENT');
-      expect(ics).toContain('SUMMARY:Examen Final: AM I (UTN FRRo)');
+      expect(ics).toContain('SUMMARY:[FINAL] AM I (UTN FRRo)');
       expect(ics).toContain('LOCATION:UTN Facultad Regional Rosario');
       expect(ics).toContain('Repasar integrales y series');
       expect(ics).toContain('TRIGGER:-P7D');
       expect(ics).toContain('TRIGGER:-P1D');
       expect(ics).toContain('END:VEVENT');
+    });
+
+    it('debe generar eventos VEVENT para metas de globalizador con etiqueta [GLOBALIZADOR]', () => {
+      const mockGlobs = [
+        {
+          materiaId: 1,
+          fecha: '2026-06-25',
+          comentario: 'Repasar integrales'
+        }
+      ];
+      const ics = generateICSContent([], mockGlobs);
+      expect(ics).toContain('SUMMARY:[GLOBALIZADOR] AM I (UTN FRRo)');
+      expect(ics).toContain('DTSTART;VALUE=DATE:20260625');
+      expect(ics).toContain('DTEND;VALUE=DATE:20260626');
+      expect(ics).toContain('Examen Globalizador de Análisis Matemático I');
     });
 
     it('exportMetasToICS debe retornar false si no se envían metas', () => {

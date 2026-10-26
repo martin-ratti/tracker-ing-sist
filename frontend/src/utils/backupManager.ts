@@ -1,4 +1,4 @@
-import type { EstadoMateria, NotaMateria, PerfilAlumno, MetaExamen } from '../types/plan';
+import type { EstadoMateria, NotaMateria, PerfilAlumno, MetaExamen, MetaGlobalizador } from '../types/plan';
 
 export interface BackupPayload {
   version: string;
@@ -10,6 +10,7 @@ export interface BackupPayload {
   ppsHoras: number;
   perfil: PerfilAlumno;
   metasExamen: Record<number, MetaExamen>;
+  metasGlobalizador?: Record<number, MetaGlobalizador>;
 }
 
 /**
@@ -21,7 +22,8 @@ export function downloadBackupJson(
   notas: Record<number, NotaMateria>,
   ppsHoras: number,
   perfil: PerfilAlumno,
-  metasExamen: Record<number, MetaExamen>
+  metasExamen: Record<number, MetaExamen>,
+  metasGlobalizador?: Record<number, MetaGlobalizador>
 ): void {
   const backupData: BackupPayload = {
     version: '1.0',
@@ -32,7 +34,8 @@ export function downloadBackupJson(
     notas,
     ppsHoras,
     perfil,
-    metasExamen
+    metasExamen,
+    metasGlobalizador
   };
 
   const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
