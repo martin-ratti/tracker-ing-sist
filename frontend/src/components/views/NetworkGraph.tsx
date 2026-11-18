@@ -15,6 +15,7 @@ import {
   X
 } from 'lucide-react';
 import type { Node as VisBaseNode, Edge as VisBaseEdge } from 'vis-network/standalone';
+import { MATERIAS_MAP } from '../../data/plan2023';
 import { MATERIAS_GRAFO, buildDependenciesTree } from './graph/graphDependencies';
 import { computeNodeVisualConfig, computeEdgeVisualConfig } from './graph/graphStyles';
 import { GraphSearchBar } from './graph/GraphSearchBar';
@@ -29,6 +30,9 @@ interface VisEdge extends VisBaseEdge {
   from: number;
   to: number;
   tipo: 'regular' | 'aprobada';
+  dashes?: boolean | number[];
+  title?: string;
+  hidden?: boolean;
 }
 
 import {
@@ -180,6 +184,7 @@ export const NetworkGraph: React.FC = () => {
       return {
         id: m.id,
         label: m.nombre,
+        title: `${m.nombreCompleto} (${m.nivel}º Nivel · ${m.horas} hs)`,
         level: m.nivel,
         shape: 'box',
         borderRadius: 8,
@@ -198,12 +203,16 @@ export const NetworkGraph: React.FC = () => {
       m.reqRegular.forEach(c => {
         const id = edgeId++;
         const cfg = getEdgeVisualConfig(c, m.id, 'regular');
+        const fromM = MATERIAS_MAP[c];
         prevEdgeSignaturesRef.current.set(id, cfg.sig);
         rawEdges.push({
           id,
           from: c,
           to: m.id,
           tipo: 'regular',
+          dashes: [6, 4],
+          hidden: cfg.hidden,
+          title: `${fromM?.nombreCompleto || fromM?.nombre || c} ➔ ${m.nombreCompleto || m.nombre} (Req. Regular)`,
           color: { color: cfg.color, opacity: 0.8 },
           width: cfg.width,
           arrows: { to: { enabled: true, scaleFactor: 0.45, type: 'arrow' } },
@@ -216,15 +225,19 @@ export const NetworkGraph: React.FC = () => {
         m.reqAprobada.forEach(c => {
           const id = edgeId++;
           const cfg = getEdgeVisualConfig(c, m.id, 'aprobada');
+          const fromM = MATERIAS_MAP[c];
           prevEdgeSignaturesRef.current.set(id, cfg.sig);
           rawEdges.push({
             id,
             from: c,
             to: m.id,
             tipo: 'aprobada',
+            dashes: false,
+            hidden: cfg.hidden,
+            title: `${fromM?.nombreCompleto || fromM?.nombre || c} ➔ ${m.nombreCompleto || m.nombre} (Req. Aprobada)`,
             color: { color: cfg.color, opacity: 0.8 },
             width: cfg.width,
-            arrows: { to: { enabled: true, scaleFactor: 0.5, type: 'arrow' } },
+            arrows: { to: { enabled: true, scaleFactor: 0.55, type: 'arrow' } },
             smooth: { enabled: true, type: 'cubicBezier', roundness: 0.5 },
             physics: false
           });
@@ -261,7 +274,7 @@ export const NetworkGraph: React.FC = () => {
       interaction: {
         selectConnectedEdges: false,
         hover: true,
-        tooltipDelay: 99999,
+        tooltipDelay: 200,
         zoomView: true,
         dragView: true,
         dragNodes: isFreeMode
@@ -444,6 +457,7 @@ export const NetworkGraph: React.FC = () => {
       if (prevEdgeSignaturesRef.current.get(edge.id) !== cfg.sig) {
         edgeUpdates.push({
           id: edge.id,
+          hidden: cfg.hidden,
           color: { color: cfg.color, opacity: 0.8 },
           width: cfg.width
         });
@@ -973,14 +987,14 @@ export const NetworkGraph: React.FC = () => {
             <kbd className="px-1.5 py-0.5 rounded bg-(--bg-elevated) border border-(--border-color) text-(--text-body) font-bold">Click Der.</kbd>
             <span>Ficha</span>
           </span>
-          <div className="flex items-center gap-2 2xl:gap-3 border-l border-(--border-color) pl-2.5 2xl:pl-3.5">
-            <span className="flex items-center gap-1 2xl:gap-1.5 font-semibold" style={{ color: 'var(--color-regular)' }}>
-              <span className="w-2 2xl:w-2.5 h-2 2xl:h-2.5 rounded-full" style={{ backgroundColor: 'var(--color-regular)' }} />
-              <span>Regularidad</span>
+          <div className="flex items-center gap-2.5 2xl:gap-3.5 border-l border-(--border-color) pl-2.5 2xl:pl-3.5">
+            <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-regular)' }}>
+              <span className="inline-block w-3.5 border-t-2 border-dashed" style={{ borderColor: 'var(--color-regular)' }} />
+              <span>Req. Regular</span>
             </span>
-            <span className="flex items-center gap-1 2xl:gap-1.5 font-semibold" style={{ color: 'var(--color-aprobada)' }}>
-              <span className="w-2 2xl:w-2.5 h-2 2xl:h-2.5 rounded-full" style={{ backgroundColor: 'var(--color-aprobada)' }} />
-              <span>Aprobación</span>
+            <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-aprobada)' }}>
+              <span className="inline-block w-3.5 border-t-2" style={{ borderColor: 'var(--color-aprobada)' }} />
+              <span>Req. Aprobada</span>
             </span>
           </div>
         </div>

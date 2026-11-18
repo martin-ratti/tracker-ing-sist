@@ -138,11 +138,11 @@ describe('Header Component', () => {
 
     await user.click(screen.getByRole('button', { name: /Grafo Red/i }));
 
-    const botonesCursar = screen.getAllByRole('button', { name: /Para Cursar/i });
+    const botonesCursar = screen.getAllByRole('button', { name: /Req\. Regular/i });
     await user.click(botonesCursar[0]);
     expect(botonesCursar[0]).toBeInTheDocument();
 
-    const botonesRendir = screen.getAllByRole('button', { name: /Para Rendir/i });
+    const botonesRendir = screen.getAllByRole('button', { name: /Req\. Aprobada/i });
     await user.click(botonesRendir[0]);
     expect(botonesRendir[0]).toBeInTheDocument();
 

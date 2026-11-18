@@ -47,6 +47,7 @@ Artículos que profundizan en las decisiones de diseño, algoritmos subyacentes 
 - [Motor de Correlatividades y Resolución en Cascada](./explanation/motor-de-correlatividades.md): Lógica de evaluación de requisitos para cursar vs. rendir, validación del Seminario Integrador ADUSI y reseteo recursivo en cascada.
 - [Sincronización Híbrida y Fusión Inteligente (Merge Local ↔ Nube)](./explanation/sincronizacion-hibrida-y-merge.md): Filosofía Offline-First, almacenamiento dual (localStorage + Firestore/Express) y algoritmo de merge sin pérdida de datos.
 - [Arquitectura Visual, Rendimiento y Accesibilidad](./explanation/arquitectura-visual-y-rendimiento.md): Code-splitting diferido para `vis-network`, motor de variables semánticas de Tailwind CSS v4 y estándares WCAG 2.2 AA.
+- [Visualización de Correlatividades y Flechas en el Grafo](./explanation/visualizacion-grafo-correlativas.md): Diferenciación de trazos (regularidad vs. aprobación), resolución de ocultamiento y diagnóstico de aristas entrantes.
 
 ---
 

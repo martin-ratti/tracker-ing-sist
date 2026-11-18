@@ -404,7 +404,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   color: 'var(--color-cursable)'
                 } : {}}
               >
-                Para Cursar
+                Req. Regular
               </button>
               <button
                 type="button"
@@ -417,7 +417,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                   color: 'var(--color-regular)'
                 } : {}}
               >
-                Para Rendir
+                Req. Aprobada
               </button>
             </div>
 
@@ -551,7 +551,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                     color: 'var(--color-cursable)'
                   } : {}}
                 >
-                  Para Cursar
+                  Req. Regular
                 </button>
                 <button
                   onClick={() => setEdgeMode('aprobada')}
@@ -563,7 +563,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
                     color: 'var(--color-regular)'
                   } : {}}
                 >
-                  Para Rendir
+                  Req. Aprobada
                 </button>
               </div>
             </div>

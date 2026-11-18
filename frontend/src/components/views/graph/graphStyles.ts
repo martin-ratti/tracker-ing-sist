@@ -32,6 +32,7 @@ export interface NodeVisualResult {
 export interface EdgeVisualResult {
   color: string;
   width: number;
+  hidden: boolean;
   sig: string;
 }
 
@@ -238,7 +239,8 @@ export function computeEdgeVisualConfig(
     }
   }
 
-  const finalColor = hidden && !dependenciesTree && !criticalChainActive ? 'transparent' : color;
-  const sig = `${finalColor}_${width}_${dimApproved}_${criticalChainActive}_${focusedSubjectId}_${tipo}`;
-  return { color: finalColor, width, sig };
+  const isHidden = hidden && !dependenciesTree && !criticalChainActive;
+  const finalColor = isHidden ? 'transparent' : color;
+  const sig = `${finalColor}_${width}_${isHidden}_${dimApproved}_${criticalChainActive}_${focusedSubjectId}_${tipo}`;
+  return { color: finalColor, width, hidden: isHidden, sig };
 }
