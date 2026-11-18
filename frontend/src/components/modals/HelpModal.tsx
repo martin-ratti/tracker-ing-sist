@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useModalAnimation } from '../../hooks/useModalAnimation';
-import { X, HelpCircle, AlertTriangle, ExternalLink, GitFork, Sparkles, BookOpen, Network, CheckCircle2, Heart, Copy, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Modal } from '../ui/Modal';
+import { HelpCircle, AlertTriangle, ExternalLink, GitFork, Sparkles, BookOpen, Network, CheckCircle2, Heart, Copy, Check } from 'lucide-react';
 import { DONATION_CONFIG } from '../../data/donations';
 
 interface HelpModalProps {
@@ -10,8 +9,6 @@ interface HelpModalProps {
 }
 
 export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
-  const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
-  const modalRef = useFocusTrap(isOpen);
   const [copiedAlias, setCopiedAlias] = useState(false);
 
   const handleCopyAlias = () => {
@@ -25,68 +22,29 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
-
-  if (!isMounted) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
-      <div
-        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${isVisible ? 'opacity-100' : 'opacity-0'
-          }`}
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="help-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-xl 2xl:max-w-2xl 4k:max-w-3xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col my-auto transform transition-all duration-200 ease-out ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-          }`}
-      >
-        {/* Cabecera */}
-        <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div
-              className="p-2 rounded-xl border shrink-0"
-              style={{
-                backgroundColor: 'var(--color-primary-bg)',
-                borderColor: 'var(--color-primary-border)',
-                color: 'var(--color-primary)'
-              }}
-            >
-              <HelpCircle className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 id="help-modal-title" className="text-base sm:text-lg font-bold font-syne text-(--text-body)">
-                Guía del Tracker Plan 2023
-              </h2>
-              <p className="text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400">
-                Reglas de correlatividades y funcionamiento interactivo
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar guía de ayuda"
-            className="p-2 rounded-xl text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 transition-all min-w-9 min-h-9 flex items-center justify-center shrink-0"
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Guía del Tracker Plan 2023"
+      subtitle="Reglas de correlatividades y funcionamiento interactivo"
+      titleId="help-modal-title"
+      closeLabel="Cerrar guía de ayuda"
+      maxWidth="max-w-xl 2xl:max-w-2xl 4k:max-w-3xl"
+      icon={
+        <div
+          className="p-2 rounded-xl border"
+          style={{
+            backgroundColor: 'var(--color-primary-bg)',
+            borderColor: 'var(--color-primary-border)',
+            color: 'var(--color-primary)'
+          }}
+        >
+          <HelpCircle className="w-5 h-5" />
         </div>
-
-        {/* Contenido con módulos resumidos */}
-        <div className="p-4 sm:p-6 space-y-4 text-xs font-mono text-slate-600 dark:text-slate-300 overflow-y-auto flex-1 no-scrollbar">
+      }
+    >
+      <div className="space-y-4 text-xs font-mono text-slate-600 dark:text-slate-300">
 
           {/* Módulo 1: Flujo de Estados y Controles */}
           <div className="space-y-2.5">
@@ -178,7 +136,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <span>Filtros de Correlativas en el Grafo</span>
             </h3>
             <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-[11px]">
-              En el Grafo de Red podés filtrar flechas: <strong>Todas</strong> (mapa completo), <strong>Para Cursar</strong> (regularidades) o <strong>Para Rendir</strong> (aprobaciones).
+              En el Grafo de Red podés filtrar flechas: <strong>Todas</strong> (mapa completo), <strong>Req. Regular</strong> (líneas punteadas, regularidades) o <strong>Req. Aprobada</strong> (líneas continuas, finales aprobados).
             </p>
           </div>
 
@@ -307,8 +265,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </span>
             <span className="shrink-0 text-slate-500">Esc para cerrar</span>
           </div>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };

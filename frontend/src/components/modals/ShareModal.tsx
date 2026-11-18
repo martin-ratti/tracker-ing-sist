@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTracker } from '../../context/TrackerContext';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useModalAnimation } from '../../hooks/useModalAnimation';
+import { Modal } from '../ui/Modal';
 import { encodeProgress } from '../../utils/share';
-import { X, Share2, Copy, Check, Eye } from 'lucide-react';
+import { Share2, Copy, Check, Eye } from 'lucide-react';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -12,20 +11,7 @@ interface ShareModalProps {
 
 export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
   const { estados, estadosElectivas, perfil, ppsHoras, stats, showToast } = useTracker();
-  const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
   const [copied, setCopied] = useState(false);
-  const modalRef = useFocusTrap(isOpen);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
-
-  if (!isMounted) return null;
 
   const shareCode = encodeProgress({
     estados,
@@ -47,49 +33,20 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
-      <div
-        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-lg 2xl:max-w-xl 4k:max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl my-auto transform transition-all duration-200 ease-out ${
-          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-        }`}
-      >
-        {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 shrink-0">
-              <Share2 className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-sm sm:text-base font-bold font-syne text-(--text-body)">
-                Compartir Avance de Carrera
-              </h2>
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono">
-                Genera un enlace público en modo solo lectura
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Cerrar"
-            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 transition-all shrink-0"
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Compartir Avance de Carrera"
+      subtitle="Genera un enlace público en modo solo lectura"
+      maxWidth="max-w-lg 2xl:max-w-xl 4k:max-w-2xl"
+      icon={
+        <div className="p-2 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400">
+          <Share2 className="w-5 h-5" />
         </div>
-
-        {/* Content */}
-        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto no-scrollbar">
-          <div className="p-3.5 sm:p-4 rounded-xl bg-(--bg-base) border border-(--border-color) space-y-2 text-xs font-mono">
+      }
+    >
+      <div className="space-y-4">
+        <div className="p-3.5 sm:p-4 rounded-xl bg-(--bg-base) border border-(--border-color) space-y-2 text-xs font-mono">
             <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 pb-2 border-b border-(--border-color)">
               <span>Resumen compartido:</span>
               <span className="font-bold text-(--text-body)">{perfil.nombre || 'Estudiante'}</span>
@@ -122,7 +79,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
                 type="text"
                 readOnly
                 value={shareUrl}
-                className="flex-1 bg-(--bg-base) border border-(--border-color) rounded-lg px-3 py-2 text-xs font-mono text-(--text-body) focus:outline-none select-all"
+                className="flex-1 bg-(--bg-base) border border-(--border-color) rounded-lg px-3 py-2 text-xs font-mono text-(--text-body) focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-1 select-all"
               />
               <button
                 type="button"
@@ -145,8 +102,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
               Quien reciba este enlace podrá visualizar tu grafo y malla curricular sin modificar tus datos guardados.
             </span>
           </div>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };

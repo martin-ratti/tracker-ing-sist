@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTracker } from '../../context/TrackerContext';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useModalAnimation } from '../../hooks/useModalAnimation';
-import { X, User, Check, GraduationCap, Download, Upload, Database, Heart, Copy, FileDown } from 'lucide-react';
+import { Modal } from '../ui/Modal';
+import { User, Check, GraduationCap, Download, Upload, Database, Heart, Copy, FileDown } from 'lucide-react';
 import { DONATION_CONFIG } from '../../data/donations';
 import { exportFichaCurricularPDF } from '../../utils/pdfExporter';
 
@@ -43,8 +42,6 @@ export const ProfileModal: React.FC = () => {
     }
   };
 
-  const { isMounted, isVisible } = useModalAnimation(profileModalOpen, 200);
-  const modalRef = useFocusTrap(profileModalOpen);
   const [prevOpen, setPrevOpen] = useState(profileModalOpen);
 
   if (profileModalOpen !== prevOpen) {
@@ -54,17 +51,6 @@ export const ProfileModal: React.FC = () => {
       setLegajo(perfil.legajo || '');
     }
   }
-
-  useEffect(() => {
-    if (!profileModalOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setProfileModalOpen(false);
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [profileModalOpen, setProfileModalOpen]);
-
-  if (!isMounted) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,81 +113,54 @@ export const ProfileModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
-      <div
-        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-hidden="true"
-        onClick={() => setProfileModalOpen(false)}
-      />
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="profile-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-md 2xl:max-w-lg 4k:max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl my-auto flex flex-col transform transition-all duration-200 ease-out ${
-          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-        }`}
-      >
-        {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 shrink-0">
-              <User className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 id="profile-modal-title" className="text-sm sm:text-base font-bold font-syne text-(--text-body) tracking-wide">
-                Perfil y Copia de Seguridad
-              </h2>
-              <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                Datos personales y respaldo de tu avance
-              </p>
-            </div>
+    <Modal
+      isOpen={profileModalOpen}
+      onClose={() => setProfileModalOpen(false)}
+      title="Perfil y Copia de Seguridad"
+      subtitle="Datos personales y respaldo de tu avance"
+      titleId="profile-modal-title"
+      closeLabel="Cerrar perfil"
+      maxWidth="max-w-md 2xl:max-w-lg 4k:max-w-xl"
+      icon={
+        <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
+          <User className="w-5 h-5" />
+        </div>
+      }
+    >
+      <div className="space-y-6 font-mono text-xs">
+        {/* Formulario de perfil */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="profile-nombre-input" className="block text-slate-600 dark:text-slate-400 mb-1 font-semibold">
+              Nombre y Apellido:
+            </label>
+            <input
+              id="profile-nombre-input"
+              name="nombre"
+              type="text"
+              autoComplete="name"
+              value={nombre}
+              onChange={e => setNombre(e.target.value)}
+              placeholder="Ej: Martín Ratti"
+              className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-(--text-body) placeholder:text-slate-400 focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-1"
+              autoFocus
+            />
           </div>
 
-          <button
-            type="button"
-            onClick={() => setProfileModalOpen(false)}
-            aria-label="Cerrar perfil"
-            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 transition-all shrink-0"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Contenido scrolleable */}
-        <div className="p-4 sm:p-6 space-y-6 font-mono text-xs overflow-y-auto no-scrollbar">
-          {/* Formulario de perfil */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="profile-nombre-input" className="block text-slate-600 dark:text-slate-400 mb-1 font-semibold">
-                Nombre y Apellido:
-              </label>
-              <input
-                id="profile-nombre-input"
-                type="text"
-                value={nombre}
-                onChange={e => setNombre(e.target.value)}
-                placeholder="Ej: Martín Ratti"
-                className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
-                autoFocus
-              />
-            </div>
-
-            <div>
-              <label htmlFor="profile-legajo-input" className="block text-slate-600 dark:text-slate-400 mb-1 font-semibold">
-                Legajo Universitario UTN:
-              </label>
-              <input
-                id="profile-legajo-input"
-                type="text"
-                value={legajo}
-                onChange={e => setLegajo(e.target.value)}
-                placeholder="Ej: 48210 o 51234"
-                className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-(--text-body) placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
+          <div>
+            <label htmlFor="profile-legajo-input" className="block text-slate-600 dark:text-slate-400 mb-1 font-semibold">
+              Legajo Universitario UTN:
+            </label>
+            <input
+              id="profile-legajo-input"
+              name="legajo"
+              type="text"
+              value={legajo}
+              onChange={e => setLegajo(e.target.value)}
+              placeholder="Ej: 48210 o 51234"
+              className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg px-3 py-2 text-(--text-body) placeholder:text-slate-400 focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-1"
+            />
+          </div>
 
             <div className="p-3 rounded-lg bg-(--bg-elevated) border border-(--border-color) text-[11px] text-slate-600 dark:text-slate-400 flex items-start gap-2">
               <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
@@ -316,8 +275,7 @@ export const ProfileModal: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
