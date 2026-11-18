@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, X, AlertCircle } from 'lucide-react';
+import { useNativeDialog } from '../../../hooks/useNativeDialog';
 import type { Materia } from '../../../types/plan';
 import { formatFechaLocal } from '../../../utils/formatters';
 
@@ -36,21 +37,23 @@ export const CalendarScheduleGlobalizadorDialog: React.FC<CalendarScheduleGlobal
     onClose();
   };
 
+  const { dialogRef } = useNativeDialog({
+    isOpen: true,
+    onClose,
+    enableHistoryBack: false
+  });
   const materiaSeleccionada = materiasCursables.find(m => m.id === selectedMateriaId);
 
   return (
-    <div className="fixed inset-0 z-70 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150 no-scrollbar">
-      <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-xs"
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <div
-        className="relative z-10 bg-(--bg-surface) border border-(--color-cursable-border) rounded-2xl sm:rounded-3xl max-w-md 2xl:max-w-xl w-full p-4 sm:p-5 2xl:p-7 space-y-4 shadow-2xl font-mono my-auto transition-all text-left"
-        style={{
-          boxShadow: '0 0 25px var(--color-cursable-glow)'
-        }}
-      >
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="schedule-globalizador-title"
+      {...({ closedby: 'any' } as Record<string, string>)}
+      className="native-dialog m-auto bg-(--bg-surface) text-(--text-body) border border-(--color-cursable-border) rounded-2xl sm:rounded-3xl max-w-md 2xl:max-w-xl w-[calc(100%-1.5rem)] max-h-[90vh] overflow-y-auto p-4 sm:p-5 2xl:p-7 space-y-4 shadow-2xl font-mono text-left"
+      style={{
+        boxShadow: '0 0 25px var(--color-cursable-glow)'
+      }}
+    >
         {/* Cabecera del diálogo */}
         <div className="flex items-center justify-between border-b border-(--border-color) pb-3">
           <div className="flex items-center gap-2.5">
@@ -58,7 +61,7 @@ export const CalendarScheduleGlobalizadorDialog: React.FC<CalendarScheduleGlobal
               <BookOpen className="w-5 h-5 shrink-0" />
             </div>
             <div>
-              <h3 className="font-syne font-bold text-(--text-body) text-base 2xl:text-lg">
+              <h3 id="schedule-globalizador-title" className="font-syne font-bold text-(--text-body) text-base 2xl:text-lg">
                 Anotar Meta de Globalizador
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -170,7 +173,6 @@ export const CalendarScheduleGlobalizadorDialog: React.FC<CalendarScheduleGlobal
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </dialog>
   );
 };

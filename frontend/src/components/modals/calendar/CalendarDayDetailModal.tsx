@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNativeDialog } from '../../../hooks/useNativeDialog';
 import { 
   Calendar as CalendarIcon, 
   X, 
@@ -42,6 +43,11 @@ export const CalendarDayDetailModal: React.FC<CalendarDayDetailModalProps> = ({
   onAprobarGlobalizador,
   onSelectSubject
 }) => {
+  const { dialogRef } = useNativeDialog({
+    isOpen: true,
+    onClose,
+    enableHistoryBack: false
+  });
   const dateObj = new Date(fechaStr + 'T00:00:00');
   const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   const diaNombre = diasSemana[dateObj.getDay()];
@@ -50,15 +56,12 @@ export const CalendarDayDetailModal: React.FC<CalendarDayDetailModalProps> = ({
   const totalMetas = metasFinalEnEsteDia.length + metasGlobalizadorEnEsteDia.length;
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150 no-scrollbar">
-      <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-xs"
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <div
-        className="relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl max-w-lg 2xl:max-w-xl w-full p-4 sm:p-6 space-y-4 shadow-2xl font-mono my-auto transition-all text-left"
-      >
+    <dialog
+      ref={dialogRef}
+      aria-label={`Detalle del ${diaNombre} ${fechaStr}`}
+      {...({ closedby: 'any' } as Record<string, string>)}
+      className="native-dialog m-auto bg-(--bg-surface) text-(--text-body) border border-(--border-color) rounded-2xl sm:rounded-3xl max-w-lg 2xl:max-w-xl w-[calc(100%-1.5rem)] max-h-[90vh] overflow-y-auto p-4 sm:p-6 space-y-4 shadow-2xl font-mono text-left"
+    >
         {/* Cabecera del día */}
         <div className="flex items-center justify-between border-b border-(--border-color) pb-3">
           <div className="flex items-center gap-2.5">
@@ -296,7 +299,6 @@ export const CalendarDayDetailModal: React.FC<CalendarDayDetailModalProps> = ({
             <span>+ Agendar Globalizador</span>
           </button>
         </div>
-      </div>
-    </div>
+    </dialog>
   );
 };

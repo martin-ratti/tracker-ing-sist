@@ -1,5 +1,6 @@
 import React from 'react';
 import { Target, X } from 'lucide-react';
+import { useNativeDialog } from '../../../hooks/useNativeDialog';
 import type { Materia } from '../../../types/plan';
 import type { TurnoExamenOficial } from '../../../data/calendario';
 import { DIAS_MESA_POR_MATERIA } from '../../../data/calendario';
@@ -33,20 +34,23 @@ export const CalendarScheduleDialog: React.FC<CalendarScheduleDialogProps> = ({
   onConfirm,
   hasRegulares
 }) => {
+  const { dialogRef } = useNativeDialog({
+    isOpen: true,
+    onClose,
+    enableHistoryBack: false
+  });
+
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150 no-scrollbar">
-      <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm"
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <div 
-        className="relative z-10 bg-(--bg-surface) border border-(--color-primary-border) rounded-2xl sm:rounded-3xl max-w-md 2xl:max-w-xl 4k:max-w-2xl w-full p-4 sm:p-5 2xl:p-7 space-y-4 2xl:space-y-6 shadow-2xl font-mono my-auto transition-all"
-      >
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="schedule-final-title"
+      {...({ closedby: 'any' } as Record<string, string>)}
+      className="native-dialog m-auto bg-(--bg-surface) text-(--text-body) border border-(--color-primary-border) rounded-2xl sm:rounded-3xl max-w-md 2xl:max-w-xl 4k:max-w-2xl w-[calc(100%-1.5rem)] max-h-[90vh] overflow-y-auto p-4 sm:p-5 2xl:p-7 space-y-4 2xl:space-y-6 shadow-2xl font-mono"
+    >
         <div className="flex items-center justify-between border-b border-(--border-color) pb-3 2xl:pb-4">
           <div className="flex items-center gap-2 2xl:gap-3">
             <Target className="w-5 h-5 2xl:w-6 2xl:h-6 text-(--color-primary) shrink-0" />
-            <h3 className="font-syne font-bold text-(--text-body) text-base 2xl:text-xl">
+            <h3 id="schedule-final-title" className="font-syne font-bold text-(--text-body) text-base 2xl:text-xl">
               Anotar Meta de Examen
             </h3>
           </div>
@@ -140,7 +144,6 @@ export const CalendarScheduleDialog: React.FC<CalendarScheduleDialogProps> = ({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </dialog>
   );
 };

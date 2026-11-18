@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTracker } from '../../context/TrackerContext';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useModalAnimation } from '../../hooks/useModalAnimation';
+import { useNativeDialog } from '../../hooks/useNativeDialog';
 import { 
   TURNOS_EXAMEN, 
   getFechaExactaMesa,
@@ -42,12 +41,9 @@ export const CalendarModal: React.FC = () => {
     showToast
   } = useTracker();
 
-  const { isMounted, isVisible } = useModalAnimation(calendarOpen, 200);
   const [activeTab, setActiveTab] = useState<'calendario' | 'metas' | 'turnos'>('calendario');
   const resolution = useViewportResolution(activeTab === 'calendario');
   const [selectedHito, setSelectedHito] = useState<HitoAcademico | null>(null);
-
-  const modalRef = useFocusTrap(calendarOpen);
 
   const handleExportICS = useCallback(() => {
     const metas = Object.values(metasExamen);
@@ -93,25 +89,17 @@ export const CalendarModal: React.FC = () => {
   } | null>(null);
   const [globalizadorDialogFecha, setGlobalizadorDialogFecha] = useState<string | null>(null);
 
-  // Cerrar con Escape
-  useEffect(() => {
-    if (!calendarOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (globalizadorDialogFecha) {
-          setGlobalizadorDialogFecha(null);
-        } else if (metaDialog) {
-          setMetaDialog(null);
-        } else if (selectedDayDetail) {
-          setSelectedDayDetail(null);
-        } else {
-          setCalendarOpen(false);
-        }
-      }
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [calendarOpen, setCalendarOpen, metaDialog, selectedDayDetail, globalizadorDialogFecha]);
+  const hasSubDialogOpen = Boolean(globalizadorDialogFecha || metaDialog || selectedDayDetail);
+  const handleCloseCalendar = useCallback(() => {
+    if (!hasSubDialogOpen) {
+      setCalendarOpen(false);
+    }
+  }, [hasSubDialogOpen, setCalendarOpen]);
+
+  const { dialogRef, rendered } = useNativeDialog({
+    isOpen: calendarOpen,
+    onClose: handleCloseCalendar
+  });
 
   const metasArray = useMemo(() => Object.values(metasExamen), [metasExamen]);
   const metasGlobalizadorArray = useMemo(() => Object.values(metasGlobalizador), [metasGlobalizador]);
@@ -275,26 +263,15 @@ export const CalendarModal: React.FC = () => {
     setMetaDialog(null);
   };
 
-  if (!isMounted) return null;
+  if (!rendered) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 lg:p-6 no-scrollbar">
-      <div
-        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-hidden="true"
-        onClick={() => setCalendarOpen(false)}
-      />
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="calendar-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full flex flex-col overflow-hidden shadow-2xl my-auto transform transition-all duration-200 ease-out ${resolution.calendarModalSize} ${
-          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-        }`}
-      >
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="calendar-modal-title"
+      {...({ closedby: 'any' } as Record<string, string>)}
+      className={`native-dialog m-auto p-0 bg-(--bg-surface) text-(--text-body) border border-(--border-color) rounded-2xl sm:rounded-3xl w-[calc(100%-1.25rem)] open:flex flex-col overflow-hidden shadow-2xl ${resolution.calendarModalSize}`}
+    >
         {/* Cabecera del modal con selector de pestañas */}
         <div className="p-2.5 sm:p-5 border-b border-(--border-color) bg-(--bg-elevated) relative shrink-0">
           <div className="flex items-center justify-between gap-2.5">
@@ -435,7 +412,6 @@ export const CalendarModal: React.FC = () => {
             />
           )}
         </div>
-      </div>
 
       {/* Modal de Detalle del Día */}
       {selectedDayDetail && (
@@ -500,6 +476,6 @@ export const CalendarModal: React.FC = () => {
           hasRegulares={MATERIAS_TRONCALES.some(m => estados[m.id] === 'regular')}
         />
       )}
-    </div>
+    </dialog>
   );
 };
