@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTracker } from '../../context/TrackerContext';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useHistoryBack } from '../../hooks/useHistoryBack';
-import { useModalAnimation } from '../../hooks/useModalAnimation';
+import { useNativeDialog } from '../../hooks/useNativeDialog';
 import { MATERIAS_MAP, MATERIAS_TRONCALES } from '../../data/plan2023';
 import { 
   X, 
@@ -61,7 +59,8 @@ export const SubjectModal: React.FC = () => {
   const [showGlobalizadorForm, setShowGlobalizadorForm] = useState<boolean>(false);
 
   const isOpen = Boolean(selectedSubjectId);
-  const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
+  const handleClose = React.useCallback(() => setSelectedSubjectId(null), [setSelectedSubjectId]);
+  const { dialogRef, rendered } = useNativeDialog({ isOpen, onClose: handleClose });
 
   const rawMateria = selectedSubjectId ? MATERIAS_MAP[selectedSubjectId] : null;
   const [lastSubject, setLastSubject] = useState(rawMateria);
@@ -69,20 +68,6 @@ export const SubjectModal: React.FC = () => {
     setLastSubject(rawMateria);
   }
   const activeMateria = rawMateria || lastSubject;
-
-  const modalRef = useFocusTrap(isOpen);
-  const handleClose = React.useCallback(() => setSelectedSubjectId(null), [setSelectedSubjectId]);
-  useHistoryBack(isOpen, handleClose);
-
-  // Cerrar con Escape
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedSubjectId(null);
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, setSelectedSubjectId]);
 
   const currentNotaNum = selectedSubjectId ? notas[selectedSubjectId]?.nota : undefined;
   const [prevSubjectId, setPrevSubjectId] = useState(selectedSubjectId);
@@ -122,7 +107,7 @@ export const SubjectModal: React.FC = () => {
     }
   }
 
-  if (!isMounted || !activeMateria) return null;
+  if (!rendered || !activeMateria) return null;
   const materia = activeMateria;
 
   const currentEstado = estados[materia.id] || 'pendiente';
@@ -229,23 +214,12 @@ export const SubjectModal: React.FC = () => {
     .map(reqId => MATERIAS_MAP[reqId]?.nombre || `#${reqId}`);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
-      <div
-        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-hidden="true"
-        onClick={() => setSelectedSubjectId(null)}
-      />
-      <div 
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="subject-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-2xl lg:max-w-3xl 2xl:max-w-4xl 4k:max-w-5xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col my-auto transform transition-all duration-200 ease-out ${
-          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-        }`}
-      >
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="subject-modal-title"
+      {...({ closedby: 'any' } as Record<string, string>)}
+      className="native-dialog m-auto p-0 bg-(--bg-surface) text-(--text-body) border border-(--border-color) rounded-2xl sm:rounded-3xl w-[calc(100%-1.5rem)] max-w-2xl lg:max-w-3xl 2xl:max-w-4xl 4k:max-w-5xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl open:flex flex-col"
+    >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) relative shrink-0">
           <div className="flex items-start justify-between gap-3">
@@ -988,7 +962,6 @@ export const SubjectModal: React.FC = () => {
           )}
 
         </div>
-      </div>
-    </div>
+    </dialog>
   );
 };

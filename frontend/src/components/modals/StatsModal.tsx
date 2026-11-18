@@ -1,10 +1,8 @@
 import React, { useMemo } from 'react';
 import { useTracker } from '../../context/TrackerContext';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useModalAnimation } from '../../hooks/useModalAnimation';
+import { Modal } from '../ui/Modal';
 import { MATERIAS_TRONCALES, MATERIAS_MAP } from '../../data/plan2023';
 import { 
-  X, 
   BarChart3, 
   TrendingUp, 
   Award,
@@ -20,18 +18,6 @@ interface StatsModalProps {
 
 export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
   const { stats, estados, estadosElectivas, notas } = useTracker();
-  const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
-  const modalRef = useFocusTrap(isOpen);
-
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [isOpen, onClose]);
 
   const {
     aprobadasCount,
@@ -86,47 +72,21 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
     return entries.sort((a, b) => a.id - b.id);
   }, [notas, estados, estadosElectivas]);
 
-  if (!isMounted) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
-      <div
-        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <div 
-        ref={modalRef}
-        className={`relative z-10 w-full max-w-3xl lg:max-w-4xl 2xl:max-w-5xl 4k:max-w-6xl max-h-[92vh] sm:max-h-[90vh] bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto transform transition-all duration-200 ease-out ${
-          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-        }`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="stats-title"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-(--border-color) bg-(--bg-elevated) shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-pink-500/20 rounded-lg">
-              <BarChart3 className="w-5 h-5 text-pink-500 dark:text-pink-400" />
-            </div>
-            <h2 id="stats-title" className="font-syne font-bold text-base sm:text-lg text-(--text-body)">
-              Dashboard de Estadísticas
-            </h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 rounded-xl transition-all min-w-9 min-h-9 flex items-center justify-center shrink-0"
-            aria-label="Cerrar modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Dashboard de Estadísticas"
+      titleId="stats-title"
+      closeLabel="Cerrar modal"
+      maxWidth="max-w-3xl lg:max-w-4xl 2xl:max-w-5xl 4k:max-w-6xl"
+      icon={
+        <div className="p-2 bg-pink-500/20 rounded-lg">
+          <BarChart3 className="w-5 h-5 text-pink-500 dark:text-pink-400" />
         </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-5 sm:space-y-6 no-scrollbar">
+      }
+    >
+      <div className="space-y-5 sm:space-y-6">
           
           {/* Fila superior: Tarjetas de Métricas Clave (KPIs) compactas y armónicas */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
@@ -292,7 +252,6 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, onClose }) => {
           </div>
 
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 };

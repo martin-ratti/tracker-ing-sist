@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useTracker } from '../../context/TrackerContext';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useModalAnimation } from '../../hooks/useModalAnimation';
+import { useNativeDialog } from '../../hooks/useNativeDialog';
 import { MATERIAS_TRONCALES, MATERIAS_ELECTIVAS, MATERIAS_MAP } from '../../data/plan2023';
 import { 
   X, 
@@ -29,19 +28,10 @@ export const PrintableReportModal: React.FC = () => {
 
   const [isDownloading, setIsDownloading] = React.useState(false);
 
-  const { isMounted, isVisible } = useModalAnimation(reportOpen, 200);
-  const modalRef = useFocusTrap(reportOpen);
+  const handleClose = useCallback(() => setReportOpen(false), [setReportOpen]);
+  const { dialogRef, rendered } = useNativeDialog({ isOpen: reportOpen, onClose: handleClose });
 
-  useEffect(() => {
-    if (!reportOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setReportOpen(false);
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [reportOpen, setReportOpen]);
-
-  if (!isMounted) return null;
+  if (!rendered) return null;
 
   const handleDownloadPDF = () => {
     try {
@@ -75,23 +65,12 @@ export const PrintableReportModal: React.FC = () => {
   const metasArray = Object.values(metasExamen);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 no-scrollbar print:p-0 print:static print:overflow-visible print:block">
-      <div
-        className={`fixed inset-0 bg-black/80 backdrop-blur-sm print:hidden transition-opacity duration-200 ease-out ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-hidden="true"
-        onClick={() => setReportOpen(false)}
-      />
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="report-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl my-auto print:border-none print:shadow-none print:max-w-none print:max-h-none print:h-auto print:rounded-none print:bg-white print:text-black print:overflow-visible print:static print:block transform transition-all duration-200 ease-out ${
-          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-        }`}
-      >
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="report-modal-title"
+      {...({ closedby: 'any' } as Record<string, string>)}
+      className="native-dialog m-auto p-0 bg-(--bg-surface) text-(--text-body) border border-(--border-color) rounded-2xl sm:rounded-3xl w-[calc(100%-1.25rem)] max-w-4xl max-h-[92vh] sm:max-h-[90vh] open:flex flex-col overflow-hidden shadow-2xl print:border-none print:shadow-none print:max-w-none print:max-h-none print:h-auto print:rounded-none print:bg-white print:text-black print:overflow-visible print:static print:block"
+    >
         {/* Barra de Acciones (oculta al imprimir) */}
         <div className="p-3.5 sm:p-4 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between gap-3 shrink-0 print:hidden">
           <div className="flex items-center gap-2.5">
@@ -352,7 +331,6 @@ export const PrintableReportModal: React.FC = () => {
           </div>
 
         </div>
-      </div>
-    </div>
+    </dialog>
   );
 };

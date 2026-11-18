@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTracker } from '../../context/TrackerContext';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useModalAnimation } from '../../hooks/useModalAnimation';
-import { X, GraduationCap, Award, CheckCircle2 } from 'lucide-react';
+import { Modal } from '../ui/Modal';
+import { GraduationCap, Award, CheckCircle2 } from 'lucide-react';
 
 interface TitlesModalProps {
   isOpen: boolean;
@@ -11,66 +10,23 @@ interface TitlesModalProps {
 
 export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => {
   const { stats, ppsHoras, setPpsHoras } = useTracker();
-  const { isMounted, isVisible } = useModalAnimation(isOpen, 200);
-  const modalRef = useFocusTrap(isOpen);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
-
-  if (!isMounted) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 no-scrollbar">
-      <div
-        className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ease-out ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <div 
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="titles-modal-title"
-        className={`relative z-10 bg-(--bg-surface) border border-(--border-color) rounded-2xl sm:rounded-3xl w-full max-w-2xl lg:max-w-3xl 2xl:max-w-4xl 4k:max-w-5xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col my-auto transform transition-all duration-200 ease-out ${
-          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-        }`}
-      >
-        {/* Header */}
-        <div className="p-4 sm:p-6 border-b border-(--border-color) bg-(--bg-elevated) flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 shrink-0">
-              <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div>
-              <h2 id="titles-modal-title" className="text-base sm:text-xl font-bold font-syne text-(--text-body) tracking-wide">
-                Titulación Universitaria
-              </h2>
-              <p className="text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400">
-                Plan 2023 · UTN Facultad Regional Rosario
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar seguimiento de títulos"
-            className="p-2 rounded-xl min-w-9 min-h-9 flex items-center justify-center text-slate-400 hover:text-(--text-body) hover:bg-(--bg-surface) active:scale-90 transition-all shrink-0"
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Titulación Universitaria"
+      subtitle="Plan 2023 · UTN Facultad Regional Rosario"
+      titleId="titles-modal-title"
+      closeLabel="Cerrar seguimiento de títulos"
+      maxWidth="max-w-2xl lg:max-w-3xl 2xl:max-w-4xl 4k:max-w-5xl"
+      icon={
+        <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 shrink-0">
+          <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
-
-        {/* Contenido */}
-        <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1 no-scrollbar">
+      }
+    >
+      <div className="space-y-4 sm:space-y-6">
           
           {/* Tarjeta ADUSI (Título Intermedio) */}
           <div className="bg-(--bg-elevated) border border-(--border-color) rounded-xl p-4 sm:p-5 relative overflow-hidden">
@@ -233,7 +189,6 @@ export const TitlesModal: React.FC<TitlesModalProps> = ({ isOpen, onClose }) => 
           </div>
 
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 };
