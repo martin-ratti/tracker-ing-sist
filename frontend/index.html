@@ -2,6 +2,21 @@
 <html lang="es" class="dark" data-theme="frost" data-mode="dark">
   <head>
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      try {
+        var savedMode = localStorage.getItem('utn_tracker_colormode');
+        var mode = savedMode === 'light' || savedMode === 'dark' ? savedMode : 'dark';
+        var savedTheme = localStorage.getItem('utn_tracker_theme');
+        var theme = savedTheme && /^(cyber|synthwave|matrix|sunset|frost)$/.test(savedTheme) ? savedTheme : 'frost';
+        var root = document.documentElement;
+        root.setAttribute('data-theme', theme);
+        root.setAttribute('data-mode', mode);
+        root.classList.toggle('dark', mode === 'dark');
+        var csMeta = document.querySelector('meta[name="color-scheme"]');
+        if (csMeta) csMeta.setAttribute('content', mode);
+      } catch (e) {}
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="canonical" href="https://utn-sistemas-frro.web.app/" />
@@ -10,9 +25,6 @@
     <meta name="theme-color" content="#090e17" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
     <meta name="description" content="Tracker interactivo del plan de estudio de Ingeniería en Sistemas de Información (Plan 2023 - UTN FRRo)" />
     <meta name="keywords" content="UTN, Sistemas de Información, Plan 2023, FRRo, Correlatividades, Tracker, Rosario, Ingeniería" />
     <meta name="author" content="Martín Ratti" />

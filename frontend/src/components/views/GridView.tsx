@@ -91,10 +91,14 @@ export const GridView: React.FC = () => {
           </p>
         </div>
 
-        <div className="relative w-full sm:w-80" role="search">
+        <search className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
           <input
             type="text"
+            name="search"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
             placeholder="Buscar materia o código..."
             aria-label="Buscar materia por nombre o código"
             value={search}
@@ -105,7 +109,7 @@ export const GridView: React.FC = () => {
                 e.currentTarget.blur();
               }
             }}
-            className="w-full bg-(--bg-surface) border border-(--border-color) rounded-xl pl-9 pr-9 py-2 text-xs font-mono text-(--text-body) placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors shadow-sm"
+            className="w-full bg-(--bg-surface) border border-(--border-color) rounded-xl pl-9 pr-9 py-2 text-xs font-mono text-(--text-body) placeholder:text-slate-400 dark:placeholder:text-slate-500 focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-1 focus:border-cyan-500 transition-colors shadow-sm"
           />
           {search && (
             <button
@@ -117,7 +121,7 @@ export const GridView: React.FC = () => {
               <X className="w-3.5 h-3.5" />
             </button>
           )}
-        </div>
+        </search>
       </div>
 
       {/* Selector de Nivel Académico (Carrusel táctil con scroll suave) */}
@@ -403,7 +407,7 @@ export const GridView: React.FC = () => {
                         tabIndex={0}
                         aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
                         title="Click: alternar estado · Click derecho: ver detalle y notas"
-                        className={`group relative p-3 2xl:p-4 rounded-lg 2xl:rounded-xl border card-interactive cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-slate-500 flex flex-col justify-between ${cardStyle}`}
+                        className={`group relative p-3 2xl:p-4 rounded-lg 2xl:rounded-xl border card-interactive cursor-pointer focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-2 flex flex-col justify-between ${cardStyle}`}
                         onClick={() => handleToggleMateria(m.id)}
                         onContextMenu={(e) => {
                           e.preventDefault();

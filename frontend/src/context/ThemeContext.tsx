@@ -192,6 +192,16 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return 'dark';
   });
 
+  const applyDomTheme = (nextTheme: ThemeId, nextMode: ColorMode) => {
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    document.documentElement.setAttribute('data-mode', nextMode);
+    document.documentElement.classList.toggle('dark', nextMode === 'dark');
+    const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+    if (colorSchemeMeta) {
+      colorSchemeMeta.setAttribute('content', nextMode);
+    }
+  };
+
   const setTheme = (newTheme: ThemeId) => {
     setThemeState(newTheme);
     localStorage.setItem(THEME_STORAGE_KEY, newTheme);
@@ -201,12 +211,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const setColorMode = (newMode: ColorMode) => {
     setColorModeState(newMode);
     localStorage.setItem(MODE_STORAGE_KEY, newMode);
-    document.documentElement.setAttribute('data-mode', newMode);
-    if (newMode === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    applyDomTheme(theme, newMode);
   };
 
   const toggleColorMode = () => {
@@ -214,14 +219,21 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.setAttribute('data-mode', colorMode);
-    if (colorMode === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    applyDomTheme(theme, colorMode);
   }, [theme, colorMode]);
+
+  useEffect(() => {
+    const handleStorageSync = (e: StorageEvent) => {
+      if (e.key === THEME_STORAGE_KEY && e.newValue && e.newValue in THEMES) {
+        setThemeState(e.newValue as ThemeId);
+      }
+      if (e.key === MODE_STORAGE_KEY && (e.newValue === 'light' || e.newValue === 'dark')) {
+        setColorModeState(e.newValue);
+      }
+    };
+    window.addEventListener('storage', handleStorageSync);
+    return () => window.removeEventListener('storage', handleStorageSync);
+  }, []);
 
   const activeThemeConfig = useMemo(() => {
     const base = THEMES[theme] || THEMES.frost;

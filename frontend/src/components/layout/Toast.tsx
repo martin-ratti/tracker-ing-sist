@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import type { ToastItem } from '../../context/TrackerContext';
+import { X } from 'lucide-react';
 
 const VARIANT_STYLES: Record<ToastItem['variant'], { border: string; dot: string; bg: string }> = {
   success: {
@@ -27,15 +28,17 @@ const VARIANT_STYLES: Record<ToastItem['variant'], { border: string; dot: string
 
 const SingleToast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = ({ toast, onDismiss }) => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
+    if (paused) return;
     timerRef.current = setTimeout(() => {
       onDismiss(toast.id);
     }, toast.duration);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [toast.id, toast.duration, onDismiss]);
+  }, [toast.id, toast.duration, onDismiss, paused]);
 
   const style = VARIANT_STYLES[toast.variant];
 
@@ -44,16 +47,24 @@ const SingleToast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void 
       role="alert"
       tabIndex={0}
       onClick={() => onDismiss(toast.id)}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+          setPaused(false);
+        }
+      }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           onDismiss(toast.id);
         }
       }}
-      className={`relative w-full sm:w-auto text-left bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-(--text-body) px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center justify-between gap-3 sm:gap-4 transition-all duration-200 hover:scale-[1.01] ${style.bg} animate-in fade-in slide-in-from-bottom-3 select-none cursor-pointer shadow-lg`}
+      className={`relative w-full sm:w-auto text-left bg-(--bg-surface)/95 backdrop-blur-md border border-(--border-color) border-l-4 ${style.border} text-(--text-body) px-4 py-2.5 rounded-lg text-xs md:text-sm font-mono flex items-center justify-between gap-3 sm:gap-4 transition-all duration-200 hover:scale-[1.01] ${style.bg} animate-in fade-in slide-in-from-bottom-3 cursor-pointer shadow-lg`}
     >
       <div className="flex items-center gap-2 flex-1 min-w-0">
-        <span className={`w-2 h-2 rounded-full shrink-0 animate-pulse ${style.dot}`} />
+        <span aria-hidden="true" className={`w-2 h-2 rounded-full shrink-0 animate-pulse ${style.dot}`} />
         <span className="flex-1 whitespace-normal sm:whitespace-nowrap">{toast.message}</span>
       </div>
 
@@ -71,10 +82,24 @@ const SingleToast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void 
         </button>
       )}
 
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDismiss(toast.id);
+        }}
+        aria-label="Cerrar notificación"
+        className="p-1 rounded-md text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors shrink-0"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+
       <div
-        className="absolute bottom-0 left-0 h-0.5 rounded-full bg-(--text-body)/30"
+        aria-hidden="true"
+        className="toast-progress-bar absolute bottom-0 left-0 h-0.5 rounded-full bg-(--text-body)/30"
         style={{
-          animation: `shrinkBar ${toast.duration}ms linear forwards`
+          animation: `shrinkBar ${toast.duration}ms linear forwards`,
+          animationPlayState: paused ? 'paused' : 'running'
         }}
       />
     </div>
@@ -93,8 +118,18 @@ export const Toast: React.FC = () => {
           from { width: 100%; }
           to { width: 0%; }
         }
+        @media (prefers-reduced-motion: reduce) {
+          .toast-progress-bar {
+            animation: none !important;
+            width: 100%;
+          }
+        }
       `}</style>
-      <div className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col-reverse gap-2 pointer-events-auto w-auto max-w-[calc(100vw-2rem)] sm:max-w-2xl md:max-w-3xl px-2 sm:px-4 safe-bottom items-center">
+      <div
+        role="region"
+        aria-label="Notificaciones"
+        className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col-reverse gap-2 pointer-events-auto w-auto max-w-[calc(100vw-2rem)] sm:max-w-2xl md:max-w-3xl px-2 sm:px-4 safe-bottom items-center"
+      >
         {toasts.map(toast => (
           <SingleToast key={toast.id} toast={toast} onDismiss={dismissToast} />
         ))}

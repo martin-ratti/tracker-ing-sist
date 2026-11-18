@@ -85,13 +85,13 @@ export const CalendarScheduleDialog: React.FC<CalendarScheduleDialogProps> = ({
             ) : (
               <select
                 id="materia-regular-select"
+                name="materiaId"
                 value={materiaSeleccionadaId}
                 onChange={e => setMateriaSeleccionadaId(Number(e.target.value))}
-                className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg 2xl:rounded-xl p-2 2xl:p-3 text-xs 2xl:text-sm text-(--text-body) focus:outline-none focus:border-(--color-primary) cursor-pointer"
+                className="w-full bg-(--bg-elevated) border border-(--border-color) rounded-lg 2xl:rounded-xl p-2 2xl:p-3 text-xs 2xl:text-sm text-(--text-body) focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-1 focus:border-(--color-primary) cursor-pointer"
               >
                 {materiasRegularesSinMeta
-                  .slice()
-                  .sort((a, b) => {
+                  .toSorted((a, b) => {
                     const aMatch = DIAS_MESA_POR_MATERIA[a.id] === metaDialog.diaNombre ? -1 : 1;
                     const bMatch = DIAS_MESA_POR_MATERIA[b.id] === metaDialog.diaNombre ? -1 : 1;
                     return aMatch - bMatch;
