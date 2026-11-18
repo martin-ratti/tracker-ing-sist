@@ -487,6 +487,15 @@ dialog.native-dialog[open]:where(:not([data-closing])) {
   header, nav, .print\:hidden {
     display: none !important;
   }
+  dialog.native-dialog[open] {
+    position: static !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
   @page {
     margin: 1.2cm;
     size: A4 portrait;
