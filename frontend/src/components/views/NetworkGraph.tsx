@@ -174,6 +174,116 @@ export const NetworkGraph: React.FC = () => {
     );
   }, [estados, edgeMode, dependenciesTree, focusedSubjectId, themeConfig, colorMode, dimApproved]);
 
+  const getEdgeVisualConfigRef = useRef(getEdgeVisualConfig);
+  useEffect(() => {
+    getEdgeVisualConfigRef.current = getEdgeVisualConfig;
+  }, [getEdgeVisualConfig]);
+
+  const applyCleanHierarchicalLayout = useCallback((direction: 'UD' | 'LR', dragNodes: boolean) => {
+    const net = networkRef.current;
+    const nodesDataset = nodesDatasetRef.current;
+    const edgesDataset = edgesDatasetRef.current;
+    if (!net || !nodesDataset || !edgesDataset) return;
+
+    const spacing = direction === 'LR' ? spacingConfig.LR : spacingConfig.UD;
+
+    // 1. Mostrar temporalmente todas las aristas para que el algoritmo jerárquico considere el grafo completo
+    const unhideEdges: Partial<VisEdge>[] = [];
+    edgesDataset.forEach((edge: VisEdge) => {
+      if (edge.hidden) {
+        unhideEdges.push({ id: edge.id, hidden: false });
+      }
+    });
+    if (unhideEdges.length > 0) {
+      edgesDataset.update(unhideEdges);
+    }
+
+    // 2. Limpiar coordenadas previas usando null (vis-network ignora undefined)
+    const clearNodes = MATERIAS_GRAFO.map(m => ({
+      id: m.id,
+      x: null,
+      y: null,
+      physics: false
+    }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    nodesDataset.update(clearNodes as any);
+
+    // 3. Recalcular layout jerárquico con la topología íntegra
+    net.setOptions({
+      layout: {
+        hierarchical: {
+          enabled: true,
+          direction,
+          levelSeparation: spacing.levelSeparation,
+          nodeSpacing: spacing.nodeSpacing,
+          treeSpacing: spacing.treeSpacing,
+          blockShifting: true,
+          edgeMinimization: false,
+          parentCentralization: true,
+          sortMethod: 'directed'
+        }
+      },
+      physics: { enabled: false, stabilization: false },
+      nodes: { physics: false },
+      edges: { physics: false },
+      interaction: {
+        dragNodes: false,
+        dragView: true
+      }
+    });
+
+    net.redraw();
+    const calculated = net.getPositions();
+    const canonical = getCanonicalGraphPositions(direction);
+    const finalPositions = isValidPositions(calculated, direction) ? calculated : canonical;
+
+    // 4. Fijar las posiciones limpias y desactivar re-layout automático para evitar saltos al filtrar aristas
+    const fixedNodes = MATERIAS_GRAFO.map(m => {
+      const p = finalPositions[m.id] || canonical[m.id];
+      return {
+        id: m.id,
+        x: p.x,
+        y: p.y,
+        physics: false
+      };
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    nodesDataset.update(fixedNodes as any);
+
+    net.setOptions({
+      layout: { hierarchical: { enabled: false } },
+      physics: { enabled: false, stabilization: false },
+      nodes: { physics: false },
+      edges: { physics: false },
+      interaction: {
+        dragNodes,
+        dragView: true
+      }
+    });
+
+    // 5. Restaurar visibilidad y estilo de aristas según el filtro activo
+    const edgeUpdates: Partial<VisEdge>[] = [];
+    const nextEdgeSignatures = new Map<number, string>();
+    edgesDataset.forEach((edge: VisEdge) => {
+      const cfg = getEdgeVisualConfigRef.current(edge.from, edge.to, edge.tipo);
+      nextEdgeSignatures.set(edge.id, cfg.sig);
+      edgeUpdates.push({
+        id: edge.id,
+        hidden: cfg.hidden,
+        color: { color: cfg.color, opacity: 0.8 },
+        width: cfg.width
+      });
+    });
+    if (edgeUpdates.length > 0) {
+      edgesDataset.update(edgeUpdates);
+      prevEdgeSignaturesRef.current = nextEdgeSignatures;
+    }
+
+    requestAnimationFrame(() => {
+      fitToSafeAreaRef.current(true);
+    });
+  }, [spacingConfig]);
+
   // Inicializar vis-network
   useEffect(() => {
     if (!containerRef.current) return;
@@ -211,7 +321,7 @@ export const NetworkGraph: React.FC = () => {
           to: m.id,
           tipo: 'regular',
           dashes: [6, 4],
-          hidden: cfg.hidden,
+          hidden: false,
           title: `${fromM?.nombreCompleto || fromM?.nombre || c} ➔ ${m.nombreCompleto || m.nombre} (Req. Regular)`,
           color: { color: cfg.color, opacity: 0.8 },
           width: cfg.width,
@@ -233,7 +343,7 @@ export const NetworkGraph: React.FC = () => {
             to: m.id,
             tipo: 'aprobada',
             dashes: false,
-            hidden: cfg.hidden,
+            hidden: false,
             title: `${fromM?.nombreCompleto || fromM?.nombre || c} ➔ ${m.nombreCompleto || m.nombre} (Req. Aprobada)`,
             color: { color: cfg.color, opacity: 0.8 },
             width: cfg.width,
@@ -347,41 +457,51 @@ export const NetworkGraph: React.FC = () => {
     net.once('afterDrawing', () => {
       net.redraw();
 
-      // Si el componente monta con Modo Libre activo, transicionar de forma transparente
-      // fijando las coordenadas jerárquicas en el dataset y liberando el eje Y para arrastre 2D
-      if (isFreeModeRef.current) {
+      // Fijar posiciones limpias tras el primer cálculo jerárquico para que filtrar aristas nunca desarme el grafo
+      const currentPos = net.getPositions();
+      const canonical = getCanonicalGraphPositions(graphDirectionRef.current);
+      const basePos = isValidPositions(currentPos, graphDirectionRef.current) ? currentPos : canonical;
+      const saved = isFreeModeRef.current ? loadSavedPositions() : null;
+      const posToUse = (saved && isValidPositions(saved, graphDirectionRef.current))
+        ? saved
+        : basePos;
+
+      if (nodesDatasetRef.current) {
+        const updates = MATERIAS_GRAFO.map(m => {
+          const p = posToUse[m.id] || canonical[m.id];
+          return {
+            id: m.id,
+            x: p.x,
+            y: p.y,
+            physics: false
+          };
+        });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (net as any)?.physics?.stopSimulation?.();
-        const currentPos = net.getPositions();
-        const saved = loadSavedPositions();
-        const posToUse = (saved && isValidPositions(saved, graphDirectionRef.current))
-          ? saved
-          : currentPos;
+        nodesDatasetRef.current.update(updates as any);
+      }
 
-        if (nodesDatasetRef.current) {
-          const updates = MATERIAS_GRAFO.map(m => {
-            const p = posToUse[m.id] || currentPos[m.id];
-            return {
-              id: m.id,
-              x: p ? p.x : undefined,
-              y: p ? p.y : undefined,
-              physics: false
-            };
-          });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nodesDatasetRef.current.update(updates as any);
+      net.setOptions({
+        layout: { hierarchical: { enabled: false } },
+        physics: { enabled: false, stabilization: false },
+        nodes: { physics: false },
+        edges: { physics: false },
+        interaction: {
+          dragNodes: isFreeModeRef.current,
+          dragView: true
         }
+      });
 
-        net.setOptions({
-          layout: { hierarchical: { enabled: false } },
-          physics: { enabled: false, stabilization: false },
-          nodes: { physics: false },
-          edges: { physics: false },
-          interaction: {
-            dragNodes: true,
-            dragView: true
+      if (edgesDatasetRef.current) {
+        const initialHiddenUpdates: Partial<VisEdge>[] = [];
+        edgesDatasetRef.current.forEach((edge: VisEdge) => {
+          const cfg = getEdgeVisualConfigRef.current(edge.from, edge.to, edge.tipo);
+          if (cfg.hidden) {
+            initialHiddenUpdates.push({ id: edge.id, hidden: true });
           }
         });
+        if (initialHiddenUpdates.length > 0) {
+          edgesDatasetRef.current.update(initialHiddenUpdates);
+        }
       }
 
       fitToSafeAreaRef.current(false);
@@ -574,31 +694,11 @@ export const NetworkGraph: React.FC = () => {
   const handleToggleDirection = () => {
     const nextDir = graphDirection === 'UD' ? 'LR' : 'UD';
     setGraphDirection(nextDir);
+    graphDirectionRef.current = nextDir;
     if (!networkRef.current) return;
 
     if (!isFreeMode) {
-      const spacing = nextDir === 'LR' ? spacingConfig.LR : spacingConfig.UD;
-      networkRef.current.setOptions({
-        layout: {
-          hierarchical: {
-            enabled: true,
-            direction: nextDir,
-            levelSeparation: spacing.levelSeparation,
-            nodeSpacing: spacing.nodeSpacing,
-            treeSpacing: spacing.treeSpacing,
-            blockShifting: true,
-            edgeMinimization: false,
-            parentCentralization: true,
-            sortMethod: 'directed'
-          }
-        },
-        physics: false,
-        interaction: {
-          dragNodes: false,
-          dragView: true
-        }
-      });
-      fitToSafeArea(true);
+      applyCleanHierarchicalLayout(nextDir, false);
     }
   };
 
@@ -606,6 +706,7 @@ export const NetworkGraph: React.FC = () => {
   const handleToggleFreeMode = () => {
     const nextMode = !isFreeMode;
     setIsFreeMode(nextMode);
+    isFreeModeRef.current = nextMode;
     try {
       localStorage.setItem(STORAGE_FREE_MODE_KEY, String(nextMode));
     } catch {
@@ -622,9 +723,9 @@ export const NetworkGraph: React.FC = () => {
       const currentPos = networkRef.current.getPositions();
       const saved = loadSavedPositions();
       const canonical = getCanonicalGraphPositions(graphDirection);
-      const posToUse = (saved && isValidPositions(saved))
+      const posToUse = (saved && isValidPositions(saved, graphDirection))
         ? saved
-        : (isValidPositions(currentPos) ? currentPos : canonical);
+        : (isValidPositions(currentPos, graphDirection) ? currentPos : canonical);
 
       // 2. Fijar { x, y } y physics: false para cada materia de forma que no salten ni se amontonen
       const nodeUpdates = MATERIAS_GRAFO.map(m => {
@@ -639,7 +740,7 @@ export const NetworkGraph: React.FC = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       nodesDatasetRef.current.update(nodeUpdates as any);
 
-      // 3. Desactivar layout jerárquico y física completamente, y habilitar arrastre libre individual de materias
+      // 3. Habilitar arrastre libre individual de materias
       networkRef.current.setOptions({
         layout: { hierarchical: { enabled: false } },
         physics: { enabled: false, stabilization: false },
@@ -658,45 +759,12 @@ export const NetworkGraph: React.FC = () => {
       }
       fitToSafeArea(true);
     } else {
-      // Volver a Modo Jerárquico canónico
-      const resetCoords = MATERIAS_GRAFO.map(m => ({
-        id: m.id,
-        x: undefined,
-        y: undefined,
-        physics: false
-      }));
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      nodesDatasetRef.current.update(resetCoords as any);
-
-      const spacing = graphDirection === 'LR' ? spacingConfig.LR : spacingConfig.UD;
-
-      networkRef.current.setOptions({
-        layout: {
-          hierarchical: {
-            enabled: true,
-            direction: graphDirection,
-            levelSeparation: spacing.levelSeparation,
-            nodeSpacing: spacing.nodeSpacing,
-            treeSpacing: spacing.treeSpacing,
-            blockShifting: true,
-            edgeMinimization: false,
-            parentCentralization: true,
-            sortMethod: 'directed'
-          }
-        },
-        physics: { enabled: false, stabilization: false },
-        nodes: { physics: false },
-        edges: { physics: false },
-        interaction: {
-          dragNodes: false,
-          dragView: true
-        }
-      });
-      fitToSafeArea(true);
+      // Volver a Modo Jerárquico limpio
+      applyCleanHierarchicalLayout(graphDirection, false);
     }
   };
 
-  // Reiniciar disposición y zoom a coordenadas canónicas espaciadas
+  // Reiniciar disposición y zoom a posiciones jerárquicas limpias
   const handleResetLayout = () => {
     try {
       localStorage.removeItem('tracker_graph_positions');
@@ -706,43 +774,9 @@ export const NetworkGraph: React.FC = () => {
       // Ignorar
     }
     setIsFreeMode(false);
+    isFreeModeRef.current = false;
 
-    if (!networkRef.current || !nodesDatasetRef.current) return;
-
-    const resetNodes = MATERIAS_GRAFO.map(m => ({
-      id: m.id,
-      x: undefined,
-      y: undefined,
-      physics: false
-    }));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    nodesDatasetRef.current.update(resetNodes as any);
-
-    const spacing = graphDirection === 'LR' ? spacingConfig.LR : spacingConfig.UD;
-
-    networkRef.current.setOptions({
-      layout: {
-        hierarchical: {
-          enabled: true,
-          direction: graphDirection,
-          levelSeparation: spacing.levelSeparation,
-          nodeSpacing: spacing.nodeSpacing,
-          treeSpacing: spacing.treeSpacing,
-          blockShifting: true,
-          edgeMinimization: false,
-          parentCentralization: true,
-          sortMethod: 'directed'
-        }
-      },
-      physics: { enabled: false, stabilization: false },
-      nodes: { physics: false },
-      edges: { physics: false },
-      interaction: {
-        dragNodes: false,
-        dragView: true
-      }
-    });
-    fitToSafeArea(true);
+    applyCleanHierarchicalLayout(graphDirectionRef.current, false);
   };
 
   // Foco animado al buscar una materia
