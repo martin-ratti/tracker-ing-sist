@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.5",
     "concurrently": "^10.0.5",
     "oxlint": "^1.83.0"
   }
