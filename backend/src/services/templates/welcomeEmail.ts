@@ -4,8 +4,27 @@ export interface WelcomeEmailParams {
   appUrl?: string;
 }
 
+export function escapeHtml(raw: string): string {
+  return String(raw)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export function sanitizeEmailUrl(url: string, fallback: string): string {
+  const trimmed = (url || '').trim();
+  if (/^https?:\/\//i.test(trimmed)) {
+    return escapeHtml(trimmed);
+  }
+  return escapeHtml(fallback);
+}
+
 export function renderWelcomeEmailHtml({ name, appUrl = 'https://utn-sistemas-frro.web.app' }: WelcomeEmailParams): string {
-  const displayName = name?.trim() ? name.trim() : 'Estudiante de Sistemas';
+  const rawName = name?.trim() ? name.trim().slice(0, 100) : 'Estudiante de Sistemas';
+  const displayName = escapeHtml(rawName);
+  const safeAppUrl = sanitizeEmailUrl(appUrl, 'https://utn-sistemas-frro.web.app');
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -219,7 +238,7 @@ export function renderWelcomeEmailHtml({ name, appUrl = 'https://utn-sistemas-fr
 
         <!-- CTA -->
         <div class="cta-container">
-          <a href="${appUrl}" target="_blank" class="cta-button">
+          <a href="${safeAppUrl}" target="_blank" class="cta-button">
             Ir a mi Tracker →
           </a>
         </div>
@@ -229,7 +248,7 @@ export function renderWelcomeEmailHtml({ name, appUrl = 'https://utn-sistemas-fr
       <div class="footer">
         <p>
           Este correo fue enviado porque iniciaste sesión o te registraste en 
-          <a href="${appUrl}">Tracker UTN Sistemas (FRRo)</a>.
+          <a href="${safeAppUrl}">Tracker UTN Sistemas (FRRo)</a>.
         </p>
         <p>
           Desarrollado para la comunidad de Ingeniería en Sistemas de Información · UTN Facultad Regional Rosario.

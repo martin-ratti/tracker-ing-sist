@@ -9,7 +9,11 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 import { sendWelcomeEmail, sendExamReminderEmail } from '../services/emailService.js';
 
 async function main() {
-  const targetEmail = process.env.EMAIL_OVERRIDE_TO || 'martinratti10@gmail.com';
+  const targetEmail = (process.env.EMAIL_OVERRIDE_TO || '').trim();
+  if (!targetEmail || !targetEmail.includes('@')) {
+    console.error('❌ Define EMAIL_OVERRIDE_TO en tu archivo .env para ejecutar la prueba de envío.');
+    process.exit(1);
+  }
   console.log('====================================================');
   console.log('🚀 INICIANDO PRUEBA DE ENVÍO DE CORREOS CON RESEND');
   console.log(`Destinatario de revisión: ${targetEmail}`);

@@ -43,6 +43,14 @@ export interface EmailResult {
   recipient: string;
 }
 
+export function sanitizeSubjectText(raw: string, maxLength = 100): string {
+  return String(raw || '')
+    .replace(/[\r\n\t<>]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+}
+
 /**
  * Envía el correo de bienvenida al estudiante
  */
@@ -60,11 +68,12 @@ export async function sendWelcomeEmail({ to, name, appUrl }: WelcomeEmailParams)
 
   try {
     const from = getFromEmail();
-    const html = renderWelcomeEmailHtml({ to: effectiveRecipient, name, appUrl });
-    const text = renderWelcomeEmailText({ to: effectiveRecipient, name, appUrl });
+    const safeName = name ? sanitizeSubjectText(name, 80) : undefined;
+    const html = renderWelcomeEmailHtml({ to: effectiveRecipient, name: safeName, appUrl });
+    const text = renderWelcomeEmailText({ to: effectiveRecipient, name: safeName, appUrl });
 
-    const subject = name?.trim() 
-      ? `¡Te damos la bienvenida a Tracker UTN Sistemas, ${name.trim()}!`
+    const subject = safeName 
+      ? `¡Te damos la bienvenida a Tracker UTN Sistemas, ${safeName}!`
       : '¡Te damos la bienvenida a Tracker UTN Sistemas!';
 
     const response = await resend.emails.send({
@@ -106,10 +115,11 @@ export async function sendExamReminderEmail(params: ExamReminderEmailParams): Pr
 
   try {
     const from = getFromEmail();
-    const html = renderExamReminderEmailHtml({ ...params, to: effectiveRecipient });
-    const text = renderExamReminderEmailText({ ...params, to: effectiveRecipient });
+    const safeSubjectName = sanitizeSubjectText(params.subjectName, 120);
+    const html = renderExamReminderEmailHtml({ ...params, subjectName: safeSubjectName, to: effectiveRecipient });
+    const text = renderExamReminderEmailText({ ...params, subjectName: safeSubjectName, to: effectiveRecipient });
 
-    const subject = `⏰ Faltan ${params.diasFaltantes ?? 7} días: Recordá anotarte al examen de ${params.subjectName}`;
+    const subject = `⏰ Faltan ${params.diasFaltantes ?? 7} días: Recordá anotarte al examen de ${safeSubjectName}`;
 
     const response = await resend.emails.send({
       from,

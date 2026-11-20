@@ -1,3 +1,5 @@
+import { escapeHtml, sanitizeEmailUrl } from './welcomeEmail.js';
+
 export interface ExamReminderEmailParams {
   to: string;
   studentName?: string;
@@ -20,15 +22,22 @@ export function renderExamReminderEmailHtml({
   sysacadUrl = 'https://alumnos.frro.utn.edu.ar/loginAlumno.asp?refrescar',
   appUrl = 'https://utn-sistemas-frro.web.app'
 }: ExamReminderEmailParams): string {
-  const displayName = studentName?.trim() ? studentName.trim() : 'Estudiante';
-  const llamadoStr = llamado ? `Llamado ${llamado}` : 'Mesa regular';
+  const rawName = studentName?.trim() ? studentName.trim().slice(0, 100) : 'Estudiante';
+  const displayName = escapeHtml(rawName);
+  const safeSubject = escapeHtml((subjectName || '').slice(0, 150));
+  const safeExamDate = escapeHtml((examDate || '').slice(0, 100));
+  const safeTurno = escapeHtml((turnoNombre || '').slice(0, 120));
+  const safeDays = typeof diasFaltantes === 'number' && Number.isFinite(diasFaltantes) ? Math.round(diasFaltantes) : 7;
+  const llamadoStr = llamado && Number.isFinite(Number(llamado)) ? `Llamado ${Math.round(Number(llamado))}` : 'Mesa regular';
+  const safeSysacadUrl = sanitizeEmailUrl(sysacadUrl, 'https://alumnos.frro.utn.edu.ar/loginAlumno.asp?refrescar');
+  const safeAppUrl = sanitizeEmailUrl(appUrl, 'https://utn-sistemas-frro.web.app');
 
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recordatorio de Examen Final: ${subjectName}</title>
+  <title>Recordatorio de Examen Final: ${safeSubject}</title>
   <style>
     body {
       margin: 0;
@@ -234,9 +243,9 @@ export function renderExamReminderEmailHtml({
     <div class="container">
       <!-- HEADER -->
       <div class="header">
-        <div class="badge">⏰ Recordatorio de Mesa · Faltan ${diasFaltantes} días</div>
+        <div class="badge">⏰ Recordatorio de Mesa · Faltan ${safeDays} días</div>
         <h1>¡Hora de anotarse a la mesa!</h1>
-        <p>${subjectName}</p>
+        <p>${safeSubject}</p>
       </div>
 
       <!-- CONTENT -->
@@ -250,15 +259,15 @@ export function renderExamReminderEmailHtml({
 
         <!-- HIGHLIGHT CARD -->
         <div class="highlight-card">
-          <div class="highlight-subject">📘 ${subjectName}</div>
+          <div class="highlight-subject">📘 ${safeSubject}</div>
           <div class="details-grid">
             <div class="detail-col">
               <div class="detail-label">Fecha del Examen</div>
-              <div class="detail-value">${examDate}</div>
+              <div class="detail-value">${safeExamDate}</div>
             </div>
             <div class="detail-col">
               <div class="detail-label">Turno / Mesa</div>
-              <div class="detail-value">${turnoNombre} (${llamadoStr})</div>
+              <div class="detail-value">${safeTurno} (${llamadoStr})</div>
             </div>
           </div>
         </div>
@@ -282,10 +291,10 @@ export function renderExamReminderEmailHtml({
 
         <!-- CTA -->
         <div class="cta-container">
-          <a href="${sysacadUrl}" target="_blank" class="cta-button">
+          <a href="${safeSysacadUrl}" target="_blank" class="cta-button">
             Ir a Sysacad UTN Rosario →
           </a>
-          <a href="${appUrl}" target="_blank" class="secondary-button">
+          <a href="${safeAppUrl}" target="_blank" class="secondary-button">
             Ver mis Metas en el Tracker
           </a>
         </div>
@@ -295,7 +304,7 @@ export function renderExamReminderEmailHtml({
       <div class="footer">
         <p>
           Recibiste este recordatorio porque configuraste una meta de examen en 
-          <a href="${appUrl}">Tracker UTN Sistemas (Plan 2023)</a>.
+          <a href="${safeAppUrl}">Tracker UTN Sistemas (Plan 2023)</a>.
         </p>
         <p>
           ¡Muchos éxitos en tu examen! · UTN Facultad Regional Rosario

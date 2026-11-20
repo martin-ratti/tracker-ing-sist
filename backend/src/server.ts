@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import { createRateLimiter } from './middleware/rateLimiter.js';
 import { apiRouter } from './routes/api.js';
 import { startReminderScheduler, stopReminderScheduler } from './services/reminderService.js';
 
@@ -25,11 +26,17 @@ app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-cron-secret']
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50kb' }));
 
-app.use('/api', apiRouter);
+const globalApiLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 120,
+  keyPrefix: 'global',
+  message: 'Demasiadas solicitudes desde esta IP. Por favor intenta nuevamente en un minuto.'
+});
+app.use('/api', globalApiLimiter, apiRouter);
 
 // Middleware de errores global — captura cualquier excepción no tratada
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

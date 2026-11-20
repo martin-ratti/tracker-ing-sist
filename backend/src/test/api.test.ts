@@ -260,4 +260,48 @@ describe('API REST Integration Tests', () => {
       expect(resetRes.body.data.ppsHoras).toBe(0);
     });
   });
+
+  describe('Seguridad en Rutas de Correo (/api/mail)', () => {
+    it('debe rechazar /api/mail/welcome sin autenticación con 401', async () => {
+      const res = await request(app)
+        .post('/api/mail/welcome')
+        .send({ email: 'anonimo@utn.edu.ar', name: 'Anónimo' });
+      expect(res.status).toBe(401);
+    });
+
+    it('debe permitir /api/mail/welcome a usuario autenticado y usar su email de sesión', async () => {
+      const prevOverride = process.env.EMAIL_OVERRIDE_TO;
+      delete process.env.EMAIL_OVERRIDE_TO;
+      const token = signToken({ userId: 'u-mail-1', email: 'autenticado@utn.edu.ar' });
+      const res = await request(app)
+        .post('/api/mail/welcome')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Alumno Autenticado' });
+      expect(res.status).toBe(200);
+      expect(res.body.recipient).toBe('autenticado@utn.edu.ar');
+      if (prevOverride !== undefined) process.env.EMAIL_OVERRIDE_TO = prevOverride;
+    });
+
+    it('debe proteger /api/mail/check-reminders con CRON_SECRET y nunca exponer emails ni detalles de terceros', async () => {
+      delete process.env.CRON_SECRET;
+      const resNoConfig = await request(app).post('/api/mail/check-reminders');
+      expect(resNoConfig.status).toBe(503);
+
+      process.env.CRON_SECRET = 'super-secreto-cron-123';
+
+      const resUnauthorized = await request(app)
+        .post('/api/mail/check-reminders')
+        .set('x-cron-secret', 'clave-incorrecta');
+      expect(resUnauthorized.status).toBe(401);
+
+      const resOk = await request(app)
+        .post('/api/mail/check-reminders')
+        .set('x-cron-secret', 'super-secreto-cron-123');
+      expect(resOk.status).toBe(200);
+      expect(resOk.body.success).toBe(true);
+      expect(typeof resOk.body.report.checkedUsers).toBe('number');
+      expect(typeof resOk.body.report.sentReminders).toBe('number');
+      expect(resOk.body.report.details).toBeUndefined();
+    });
+  });
 });

@@ -17,8 +17,8 @@ describe('Email Service & Templates', () => {
     });
 
     it('debe redirigir a EMAIL_OVERRIDE_TO si está definido', () => {
-      process.env.EMAIL_OVERRIDE_TO = 'martinratti10@gmail.com';
-      expect(resolveRecipient('alumno@frro.utn.edu.ar')).toBe('martinratti10@gmail.com');
+      process.env.EMAIL_OVERRIDE_TO = 'tester@ejemplo.com';
+      expect(resolveRecipient('alumno@frro.utn.edu.ar')).toBe('tester@ejemplo.com');
     });
   });
 
@@ -56,6 +56,28 @@ describe('Email Service & Templates', () => {
 
       expect(text).toContain('¡Hola, Martín!');
       expect(text).toContain('Plan 2023');
+    });
+
+    it('escapa etiquetas HTML e inyecciones de scripts en nombre y materias', () => {
+      const htmlWelcome = renderWelcomeEmailHtml({
+        to: 'test@ejemplo.com',
+        name: '<script>alert("xss")</script>',
+        appUrl: 'javascript:alert(1)'
+      });
+      expect(htmlWelcome).not.toContain('<script>');
+      expect(htmlWelcome).toContain('&lt;script&gt;');
+      expect(htmlWelcome).not.toContain('javascript:alert(1)');
+
+      const htmlReminder = renderExamReminderEmailHtml({
+        to: 'test@ejemplo.com',
+        studentName: '<img src=x onerror=alert(1)>',
+        subjectName: '<b>Materia Hack</b>',
+        examDate: '24/11/2026',
+        turnoNombre: 'Turno <script>bad()</script>'
+      });
+      expect(htmlReminder).not.toContain('<img src=x');
+      expect(htmlReminder).not.toContain('<b>Materia Hack</b>');
+      expect(htmlReminder).toContain('&lt;b&gt;Materia Hack&lt;/b&gt;');
     });
   });
 

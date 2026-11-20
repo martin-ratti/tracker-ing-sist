@@ -25,19 +25,21 @@ export interface RateLimiterOptions {
   windowMs: number; // Duración de la ventana en ms (ej. 60000 = 1 minuto)
   maxRequests: number; // Máximo de peticiones permitidas por IP
   message?: string;
+  keyPrefix?: string; // Prefijo opcional para aislar distintos limitadores por IP
 }
 
 export function createRateLimiter(options: RateLimiterOptions) {
-  const { windowMs, maxRequests, message = 'Demasiados intentos. Por favor espera antes de volver a intentar.' } = options;
+  const { windowMs, maxRequests, message = 'Demasiados intentos. Por favor espera antes de volver a intentar.', keyPrefix = 'default' } = options;
 
   return (req: Request, res: Response, next: NextFunction): void => {
-    const ip = req.ip || req.socket.remoteAddress || 'unknown-ip';
+    const ip = req.ip || req.socket?.remoteAddress || 'unknown-ip';
+    const storeKey = `${keyPrefix}:${ip}`;
     const now = Date.now();
 
-    const record = rateLimitStore.get(ip);
+    const record = rateLimitStore.get(storeKey);
 
     if (!record || now > record.resetTime) {
-      rateLimitStore.set(ip, {
+      rateLimitStore.set(storeKey, {
         count: 1,
         resetTime: now + windowMs
       });

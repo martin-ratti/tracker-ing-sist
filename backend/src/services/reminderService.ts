@@ -20,13 +20,6 @@ const MATERIA_NAMES_MAP = new Map<number, string>();
 export interface ReminderExecutionReport {
   checkedUsers: number;
   sentReminders: number;
-  details: Array<{
-    userId: string;
-    email: string;
-    materiaNombre: string;
-    fechaExamen: string;
-    diasFaltantes: number;
-  }>;
 }
 
 /**
@@ -74,8 +67,7 @@ export function formatFriendlyDate(dateStr: string): string {
 export async function checkAndSendDueReminders(referenceDate: Date = new Date()): Promise<ReminderExecutionReport> {
   const report: ReminderExecutionReport = {
     checkedUsers: 0,
-    sentReminders: 0,
-    details: []
+    sentReminders: 0
   };
 
   if (!fs.existsSync(PROGRESS_DIR)) {
@@ -95,7 +87,10 @@ export async function checkAndSendDueReminders(referenceDate: Date = new Date())
       continue;
     }
 
-    const email = user?.email || process.env.EMAIL_OVERRIDE_TO || 'martinratti10@gmail.com';
+    const email = (user?.email || process.env.EMAIL_OVERRIDE_TO || '').trim();
+    if (!email || !email.includes('@')) {
+      continue;
+    }
     const studentName = progress.perfil?.nombre || user?.email?.split('@')[0] || 'Estudiante';
     let progressChanged = false;
 
@@ -112,7 +107,7 @@ export async function checkAndSendDueReminders(referenceDate: Date = new Date())
         const subjectName = MATERIA_NAMES_MAP.get(materiaId) || `Materia #${materiaId}`;
         const friendlyDate = formatFriendlyDate(meta.fechaEstimada);
 
-        console.log(`[ReminderService] Enviando recordatorio a ${email} para "${subjectName}" (Faltan ${diffDays} días)...`);
+        console.log(`[ReminderService] Enviando recordatorio para "${subjectName}" (Faltan ${diffDays} días)...`);
 
         const sendResult = await sendExamReminderEmail({
           to: email,
@@ -132,14 +127,6 @@ export async function checkAndSendDueReminders(referenceDate: Date = new Date())
           metas[materiaId] = updatedMeta;
           progressChanged = true;
           report.sentReminders++;
-
-          report.details.push({
-            userId,
-            email,
-            materiaNombre: subjectName,
-            fechaExamen: friendlyDate,
-            diasFaltantes: diffDays
-          });
         }
       }
     }

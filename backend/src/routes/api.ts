@@ -14,7 +14,15 @@ export const apiRouter = Router();
 const authLimiter = createRateLimiter({
   windowMs: 60 * 1000,
   maxRequests: 10,
+  keyPrefix: 'auth',
   message: 'Demasiados intentos de autenticación. Por favor espera un minuto antes de reintentar.'
+});
+
+const mailLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 5,
+  keyPrefix: 'mail',
+  message: 'Demasiadas solicitudes de envío de correo. Por favor espera un minuto.'
 });
 
 // Health check
@@ -198,8 +206,8 @@ apiRouter.post('/progress/reset', optionalAuthMiddleware, (req: AuthenticatedReq
 
 // --- RUTAS DE CORREO (RESEND) ---
 
-apiRouter.post('/mail/welcome', authLimiter, optionalAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
-  const targetEmail = (req.body?.email || req.user?.email || '').trim();
+apiRouter.post('/mail/welcome', mailLimiter, requireAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+  const targetEmail = (req.user?.email || '').trim();
   const name = typeof req.body?.name === 'string' ? req.body.name.slice(0, 100) : undefined;
 
   if (!targetEmail || !targetEmail.includes('@')) {
@@ -221,10 +229,32 @@ apiRouter.post('/mail/welcome', authLimiter, optionalAuthMiddleware, async (req:
   }
 });
 
-apiRouter.post('/mail/check-reminders', requireAuthMiddleware, async (_req: AuthenticatedRequest, res: Response) => {
+apiRouter.post('/mail/check-reminders', mailLimiter, async (req: Request, res: Response) => {
+  const configuredSecret = (process.env.CRON_SECRET || '').trim();
+  if (!configuredSecret) {
+    res.status(503).json({ error: 'CRON_SECRET no está configurado en el servidor.' });
+    return;
+  }
+
+  const headerSecret = typeof req.headers['x-cron-secret'] === 'string' ? req.headers['x-cron-secret'].trim() : '';
+  const authHeader = typeof req.headers.authorization === 'string' ? req.headers.authorization.trim() : '';
+  const bearerSecret = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  const providedSecret = headerSecret || bearerSecret;
+
+  if (!providedSecret || providedSecret !== configuredSecret) {
+    res.status(401).json({ error: 'Clave de autorización de tarea programada inválida o faltante.' });
+    return;
+  }
+
   try {
     const report = await checkAndSendDueReminders();
-    res.json({ success: true, report });
+    res.json({
+      success: true,
+      report: {
+        checkedUsers: report.checkedUsers,
+        sentReminders: report.sentReminders
+      }
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     res.status(500).json({ error: 'Error al procesar recordatorios de examen.', details: message });
