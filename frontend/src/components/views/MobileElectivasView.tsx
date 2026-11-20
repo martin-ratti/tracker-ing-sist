@@ -204,19 +204,16 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   Título Intermedio ADUSI
                 </span>
               </div>
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => toggleMateriaEstado(seminario.id)}
-                onKeyDown={(ev) => {
-                  if (ev.key === 'Enter' || ev.key === ' ') {
-                    ev.preventDefault();
-                    toggleMateriaEstado(seminario.id);
-                  }
-                }}
-                className={`w-full text-left p-3 rounded-2xl border transition-all duration-200 cursor-pointer select-none hover:border-pink-500/50 shadow-xs ${cardStyle}`}
+              <article
+                className={`relative w-full text-left p-3 rounded-2xl border transition-all duration-200 select-none hover:border-pink-500/50 shadow-xs ${cardStyle}`}
               >
-                <div className="flex items-start justify-between gap-2 mb-1">
+                <button
+                  type="button"
+                  aria-label={`${seminario.nombreCompleto}, estado: ${estSem}. Presiona Enter para cambiar estado.`}
+                  onClick={() => toggleMateriaEstado(seminario.id)}
+                  className="absolute inset-0 z-0 w-full h-full rounded-2xl cursor-pointer focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-2"
+                />
+                <div className="relative z-10 pointer-events-none flex items-start justify-between gap-2 mb-1">
                   <div>
                     <span className="text-[9px] font-mono text-pink-600 dark:text-pink-400 font-bold mr-1.5">
                       3er NIVEL · ADUSI
@@ -233,7 +230,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
+                <div className="relative z-10 pointer-events-none flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-slate-500">Cuatrimestral</span>
                     <span className="text-slate-400">•</span>
@@ -243,15 +240,14 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                     href={getDriveUrlForMateria(seminario.id, seminario.nivel)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={(ev) => ev.stopPropagation()}
-                    className="px-2 py-0.5 rounded text-pink-600 dark:text-pink-400 hover:bg-pink-500/10 transition-colors flex items-center gap-1 font-semibold"
+                    className="pointer-events-auto px-2 py-0.5 rounded text-pink-600 dark:text-pink-400 hover:bg-pink-500/10 transition-colors flex items-center gap-1 font-semibold focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-1"
                     title="Abrir carpeta de Drive del Seminario Integrador"
                   >
                     <FolderOpen className="w-3.5 h-3.5 text-pink-500" />
                     <span>Drive</span>
                   </a>
                 </div>
-              </div>
+              </article>
             </div>
           );
         })()}
@@ -329,20 +325,17 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
             }
 
             return (
-              <div
+              <article
                 key={e.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => toggleElectivaEstado(e.id)}
-                onKeyDown={(ev) => {
-                  if (ev.key === 'Enter' || ev.key === ' ') {
-                    ev.preventDefault();
-                    toggleElectivaEstado(e.id);
-                  }
-                }}
-                className={`p-3 rounded-2xl border transition-all duration-200 cursor-pointer select-none hover:border-slate-400 dark:hover:border-slate-600 shadow-xs ${cardStyle}`}
+                className={`relative p-3 rounded-2xl border transition-all duration-200 select-none hover:border-slate-400 dark:hover:border-slate-600 shadow-xs ${cardStyle}`}
               >
-                <div className="flex items-start justify-between gap-2 mb-1">
+                <button
+                  type="button"
+                  aria-label={`${e.nombre}, nivel ${e.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
+                  onClick={() => toggleElectivaEstado(e.id)}
+                  className="absolute inset-0 z-0 w-full h-full rounded-2xl cursor-pointer focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-2"
+                />
+                <div className="relative z-10 pointer-events-none flex items-start justify-between gap-2 mb-1">
                   <div>
                     <span className="text-[9px] font-mono text-amber-600 dark:text-amber-400 font-bold mr-1.5">
                       {e.nivel}º NIVEL
@@ -359,7 +352,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
+                <div className="relative z-10 pointer-events-none flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-slate-500">{e.tipo} ({e.cuatrimestre})</span>
                     <span className="text-slate-400">•</span>
@@ -369,8 +362,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                     href={getDriveUrlForMateria(e.id, e.nivel)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={(ev) => ev.stopPropagation()}
-                    className="px-2 py-0.5 rounded text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors flex items-center gap-1 font-semibold"
+                    className="pointer-events-auto px-2 py-0.5 rounded text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors flex items-center gap-1 font-semibold focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-1"
                     title={hasSpecificDriveFolder(e.id) ? `Abrir carpeta de Drive de ${e.nombre}` : `Abrir carpeta general de Electivas en Drive (sin carpeta propia)`}
                   >
                     <FolderOpen className="w-3.5 h-3.5 text-amber-500" />
@@ -380,7 +372,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
 
                 {/* Correlatividades exigidas */}
                 {(e.reqRegular.length > 0 || e.reqAprobada.length > 0) && (
-                  <div className="mt-2 pt-1.5 border-t border-(--border-color) text-[9px] font-mono space-y-1">
+                  <div className="relative z-10 pointer-events-none mt-2 pt-1.5 border-t border-(--border-color) text-[9px] font-mono space-y-1">
                     {e.reqRegular.length > 0 && (
                       <div className="text-slate-500 flex flex-wrap items-center gap-1">
                         <span className="font-semibold">Regulares:</span>
@@ -426,7 +418,7 @@ export const MobileElectivasView: React.FC<MobileElectivasViewProps> = ({ onBack
                     )}
                   </div>
                 )}
-              </div>
+              </article>
             );
           })
         )}

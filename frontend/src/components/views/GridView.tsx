@@ -401,26 +401,22 @@ export const GridView: React.FC = () => {
                     }
 
                     return (
-                      <div
+                      <article
                         key={m.id}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
-                        title="Click: alternar estado · Click derecho: ver detalle y notas"
-                        className={`group relative p-3 2xl:p-4 rounded-lg 2xl:rounded-xl border card-interactive cursor-pointer focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-2 flex flex-col justify-between ${cardStyle}`}
-                        onClick={() => handleToggleMateria(m.id)}
                         onContextMenu={(e) => {
                           e.preventDefault();
                           setSelectedSubjectId(m.id);
                         }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            handleToggleMateria(m.id);
-                          }
-                        }}
+                        className={`group relative p-3 2xl:p-4 rounded-lg 2xl:rounded-xl border card-interactive flex flex-col justify-between ${cardStyle}`}
                       >
-                        <div>
+                        <button
+                          type="button"
+                          aria-label={`${m.nombreCompleto}, nivel ${m.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
+                          title="Click: alternar estado · Click derecho: ver detalle y notas"
+                          onClick={() => handleToggleMateria(m.id)}
+                          className="absolute inset-0 z-0 w-full h-full rounded-lg 2xl:rounded-xl cursor-pointer focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-2"
+                        />
+                        <div className="relative z-10 pointer-events-none">
                           {/* Fila superior: ID y Badges con altura uniforme */}
                           <div className="flex items-center justify-between gap-1 mb-1.5 font-mono text-[10px] h-5">
                             <span className="font-bold text-slate-500 dark:text-slate-400 group-hover:text-(--text-body) transition-colors leading-none">
@@ -453,7 +449,7 @@ export const GridView: React.FC = () => {
                         </div>
 
                         {/* Fila inferior: Estado, Nota, Meta y Botón de Información */}
-                        <div className="flex items-center justify-between pt-1 border-t border-(--border-color) mt-1 min-h-9">
+                        <div className="relative z-10 pointer-events-none flex items-center justify-between pt-1 border-t border-(--border-color) mt-1 min-h-9">
                           <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                             {statusBadge}
                             {est === 'aprobada' && nota !== undefined && (
@@ -472,33 +468,29 @@ export const GridView: React.FC = () => {
                             )}
                           </div>
 
-                          <div className="flex items-center gap-0.5 shrink-0">
+                          <div className="pointer-events-auto flex items-center gap-0.5 shrink-0">
                             <a
                               href={getDriveUrlForMateria(m.id, m.nivel)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
                               aria-label={`Abrir carpeta de Google Drive de ${m.nombreCompleto}`}
-                              className="p-2 rounded-lg text-slate-400 hover:text-cyan-500 hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 flex items-center justify-center"
+                              className="p-2 rounded-lg text-slate-400 hover:text-cyan-500 hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-1"
                               title={`Abrir carpeta de Drive de ${m.nombre} (exámenes y apuntes)`}
                             >
                               <FolderOpen className="w-3.5 h-3.5" />
                             </a>
                             <button
                               type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedSubjectId(m.id);
-                              }}
+                              onClick={() => setSelectedSubjectId(m.id)}
                               aria-label={`Ver detalles, correlativas y notas de ${m.nombreCompleto}`}
-                              className="p-2 -mr-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 flex items-center justify-center"
+                              className="p-2 -mr-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-(--text-body) hover:bg-(--bg-elevated) transition-colors min-w-9 min-h-9 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-1"
                               title="Ver correlativas y registrar notas"
                             >
                               <Info className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
-                      </div>
+                      </article>
                     );
                   })
                 )}

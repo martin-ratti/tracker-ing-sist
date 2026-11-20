@@ -233,19 +233,16 @@ export const ElectivasDrawer: React.FC = () => {
                       Título Intermedio ADUSI
                     </span>
                   </div>
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => toggleMateriaEstado(seminario.id)}
-                    onKeyDown={(ev) => {
-                      if (ev.key === 'Enter' || ev.key === ' ') {
-                        ev.preventDefault();
-                        toggleMateriaEstado(seminario.id);
-                      }
-                    }}
-                    className={`p-4 rounded-xl border card-interactive cursor-pointer hover:border-pink-500/40 ${cardStyle}`}
+                  <article
+                    className={`relative p-4 rounded-xl border card-interactive hover:border-pink-500/40 ${cardStyle}`}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <button
+                      type="button"
+                      aria-label={`${seminario.nombreCompleto}, estado: ${estSem}. Presiona Enter para cambiar estado.`}
+                      onClick={() => toggleMateriaEstado(seminario.id)}
+                      className="absolute inset-0 z-0 w-full h-full rounded-xl cursor-pointer focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-2"
+                    />
+                    <div className="relative z-10 pointer-events-none flex items-start justify-between gap-2 mb-1.5">
                       <div>
                         <span className="text-[10px] font-mono text-pink-600 dark:text-pink-400 font-bold mr-2">
                           3er NIVEL · ADUSI
@@ -262,7 +259,7 @@ export const ElectivasDrawer: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
+                    <div className="relative z-10 pointer-events-none flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-slate-600 dark:text-slate-400">Cuatrimestral</span>
                         <span className="text-slate-400 dark:text-slate-600">•</span>
@@ -272,8 +269,7 @@ export const ElectivasDrawer: React.FC = () => {
                         href={getDriveUrlForMateria(seminario.id, seminario.nivel)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={(ev) => ev.stopPropagation()}
-                        className="px-2 py-0.5 rounded text-pink-600 dark:text-pink-400 hover:bg-pink-500/10 transition-colors flex items-center gap-1 font-semibold"
+                        className="pointer-events-auto px-2 py-0.5 rounded text-pink-600 dark:text-pink-400 hover:bg-pink-500/10 transition-colors flex items-center gap-1 font-semibold focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-1"
                         title="Abrir carpeta de Drive del Seminario Integrador"
                         aria-label="Abrir carpeta de Drive del Seminario Integrador"
                       >
@@ -284,7 +280,7 @@ export const ElectivasDrawer: React.FC = () => {
 
                     {/* Correlativas del Seminario */}
                     {(seminario.reqRegular.length > 0 || (Array.isArray(seminario.reqAprobada) && seminario.reqAprobada.length > 0)) && (
-                      <div className="mt-2.5 pt-2 border-t border-(--border-color) text-[10px] font-mono space-y-1">
+                      <div className="relative z-10 pointer-events-none mt-2.5 pt-2 border-t border-(--border-color) text-[10px] font-mono space-y-1">
                         {seminario.reqRegular.length > 0 && (
                           <div className="text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-1">
                             <span className="text-slate-600 dark:text-slate-500 font-medium">Regulares:</span>
@@ -326,7 +322,7 @@ export const ElectivasDrawer: React.FC = () => {
                         )}
                       </div>
                     )}
-                  </div>
+                  </article>
                 </div>
               );
             })()}
@@ -405,20 +401,17 @@ export const ElectivasDrawer: React.FC = () => {
                 }
 
                 return (
-                  <div
+                  <article
                     key={e.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => toggleElectivaEstado(e.id)}
-                    onKeyDown={(ev) => {
-                      if (ev.key === 'Enter' || ev.key === ' ') {
-                        ev.preventDefault();
-                        toggleElectivaEstado(e.id);
-                      }
-                    }}
-                    className={`p-4 rounded-xl border card-interactive cursor-pointer hover:border-slate-500/50 ${cardStyle}`}
+                    className={`relative p-4 rounded-xl border card-interactive hover:border-slate-500/50 ${cardStyle}`}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <button
+                      type="button"
+                      aria-label={`${e.nombre}, nivel ${e.nivel}, estado: ${est}. Presiona Enter para cambiar estado.`}
+                      onClick={() => toggleElectivaEstado(e.id)}
+                      className="absolute inset-0 z-0 w-full h-full rounded-xl cursor-pointer focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-2"
+                    />
+                    <div className="relative z-10 pointer-events-none flex items-start justify-between gap-2 mb-1.5">
                       <div>
                         <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold mr-2">
                           {e.nivel}º NIVEL
@@ -435,7 +428,7 @@ export const ElectivasDrawer: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
+                    <div className="relative z-10 pointer-events-none flex items-center justify-between mt-2 pt-2 border-t border-(--border-color) text-[10px] font-mono">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-slate-500 dark:text-slate-400">{e.tipo} ({e.cuatrimestre})</span>
                         <span className="text-slate-400 dark:text-slate-600">•</span>
@@ -445,8 +438,7 @@ export const ElectivasDrawer: React.FC = () => {
                         href={getDriveUrlForMateria(e.id, e.nivel)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={(ev) => ev.stopPropagation()}
-                        className="px-2 py-0.5 rounded text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors flex items-center gap-1 font-semibold"
+                        className="pointer-events-auto px-2 py-0.5 rounded text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors flex items-center gap-1 font-semibold focus-visible:outline-2 focus-visible:outline-(--color-primary) focus-visible:outline-offset-1"
                         title={hasSpecificDriveFolder(e.id) ? `Abrir carpeta de Drive de ${e.nombre}` : `Abrir carpeta general de Electivas en Drive (sin carpeta propia)`}
                         aria-label={`Abrir carpeta de Drive de ${e.nombre}`}
                       >
@@ -457,7 +449,7 @@ export const ElectivasDrawer: React.FC = () => {
 
                     {/* Correlatividades exigidas */}
                     {(e.reqRegular.length > 0 || e.reqAprobada.length > 0) && (
-                      <div className="mt-2.5 pt-2 border-t border-(--border-color) text-[10px] font-mono space-y-1">
+                      <div className="relative z-10 pointer-events-none mt-2.5 pt-2 border-t border-(--border-color) text-[10px] font-mono space-y-1">
                         {e.reqRegular.length > 0 && (
                           <div className="text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-1">
                             <span className="font-semibold text-slate-600 dark:text-slate-400">Regulares:</span>
@@ -503,7 +495,7 @@ export const ElectivasDrawer: React.FC = () => {
                         )}
                       </div>
                     )}
-                  </div>
+                  </article>
                 );
               })}
               </div>

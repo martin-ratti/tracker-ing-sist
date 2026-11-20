@@ -10,7 +10,6 @@ import {
   Sparkles
 } from 'lucide-react';
 import { formatPromedio } from '../../utils/formatters';
-import { exportFichaCurricularPDF } from '../../utils/pdfExporter';
 
 export const PrintableReportModal: React.FC = () => {
   const { 
@@ -33,9 +32,10 @@ export const PrintableReportModal: React.FC = () => {
 
   if (!rendered) return null;
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     try {
       setIsDownloading(true);
+      const { exportFichaCurricularPDF } = await import('../../utils/pdfExporter');
       exportFichaCurricularPDF({
         perfil,
         estados,
@@ -139,9 +139,9 @@ export const PrintableReportModal: React.FC = () => {
                 <span className="text-[9px] text-slate-500 dark:text-slate-400 print:text-black tracking-widest">FRRo</span>
               </div>
               <div>
-                <h1 className="font-syne font-black text-base sm:text-lg text-(--text-body) print:text-black tracking-wide leading-tight">
+                <h3 className="font-syne font-black text-base sm:text-lg text-(--text-body) print:text-black tracking-wide leading-tight">
                   UNIVERSIDAD TECNOLÓGICA NACIONAL
-                </h1>
+                </h3>
                 <p className="text-xs font-mono text-slate-600 dark:text-slate-300 print:text-neutral-700 font-semibold">
                   Facultad Regional Rosario · Dpto. Ingeniería en Sistemas de Información
                 </p>
@@ -210,12 +210,12 @@ export const PrintableReportModal: React.FC = () => {
 
           {/* Grilla de Materias Troncales por Nivel */}
           <div className="space-y-5">
-            <h2 className="font-syne font-bold text-sm text-(--text-body) print:text-black uppercase tracking-wider border-b border-(--border-color) print:border-neutral-300 pb-1 flex items-center justify-between">
+            <h3 className="font-syne font-bold text-sm text-(--text-body) print:text-black uppercase tracking-wider border-b border-(--border-color) print:border-neutral-300 pb-1 flex items-center justify-between">
               <span>Asignaturas Troncales (Plan 2023)</span>
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400 print:text-neutral-600 lowercase font-normal">
                 {stats.aprobadasCount} aprobadas · {stats.regularesCount} regulares · {stats.cursablesCount} cursables
               </span>
-            </h2>
+            </h3>
 
             {niveles.map(nivel => {
               const materiasNivel = MATERIAS_TRONCALES.filter(m => m.nivel === nivel && !m.esAdusiSolo);

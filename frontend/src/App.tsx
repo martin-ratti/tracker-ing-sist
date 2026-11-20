@@ -13,19 +13,20 @@ import {
   GraphSkeleton,
   ElectivasDrawer,
   SubjectModal,
-  TitlesModal,
   HelpModal,
   AuthModal,
-  CalendarModal,
-  PrintableReportModal,
   ProfileModal,
-  StatsModal,
   ShareModal,
   CascadeConfirmModal,
+  SyncConflictModal,
   NotFoundView
 } from './components';
 
 const NetworkGraph = lazy(() => import('./components/views/NetworkGraph').then(m => ({ default: m.NetworkGraph })));
+const CalendarModal = lazy(() => import('./components/modals/CalendarModal').then(m => ({ default: m.CalendarModal })));
+const PrintableReportModal = lazy(() => import('./components/modals/PrintableReportModal').then(m => ({ default: m.PrintableReportModal })));
+const StatsModal = lazy(() => import('./components/modals/StatsModal').then(m => ({ default: m.StatsModal })));
+const TitlesModal = lazy(() => import('./components/modals/TitlesModal').then(m => ({ default: m.TitlesModal })));
 
 const TrackerMain: React.FC = () => {
   const {
@@ -88,9 +89,9 @@ const TrackerMain: React.FC = () => {
 
   useKeyboardShortcuts(shortcuts);
 
-  if (isNotFound) {
-    return (
-      <AuthProvider onUserChanged={reloadProgress}>
+  return (
+    <AuthProvider onUserChanged={reloadProgress}>
+      {isNotFound ? (
         <NotFoundView 
           onNavigateHome={() => {
             if (typeof window !== 'undefined') window.history.pushState(null, '', '/');
@@ -112,126 +113,131 @@ const TrackerMain: React.FC = () => {
             setCalendarOpen(true);
           }}
         />
-        <CalendarModal />
-        <Toast />
-      </AuthProvider>
-    );
-  }
+      ) : (
+        <div className={`bg-(--bg-base) text-(--text-body) flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200 ${
+          viewMode === 'grafo' ? 'h-dvh overflow-hidden' : 'min-h-screen'
+        }`}>
+          {/* Enlace accesible para saltar al contenido principal (WCAG 2.4.1) */}
+          <a 
+            href="#main-content" 
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-400 focus:text-slate-950 focus:font-bold focus:rounded-xl focus:shadow-2xl focus:outline-none"
+          >
+            Saltar al contenido principal
+          </a>
 
-  return (
-    <AuthProvider onUserChanged={reloadProgress}>
-      <div className={`bg-(--bg-base) text-(--text-body) flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200 ${
-        viewMode === 'grafo' ? 'h-dvh overflow-hidden' : 'min-h-screen'
-      }`}>
-        {/* Enlace accesible para saltar al contenido principal (WCAG 2.4.1) */}
-        <a 
-          href="#main-content" 
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-400 focus:text-slate-950 focus:font-bold focus:rounded-xl focus:shadow-2xl focus:outline-none"
-        >
-          Saltar al contenido principal
-        </a>
-
-        {/* Banner de Modo Compartido (Solo Lectura) */}
-        {isViewingShared && (
-          <div className="bg-sky-600 text-white px-4 py-2 text-xs font-mono flex flex-wrap items-center justify-between gap-2 z-40 border-b border-sky-400/50 shadow-md shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-              <span>
-                Estás visualizando el progreso compartido de <strong className="underline">{sharedName || 'Estudiante'}</strong> (Solo Lectura)
-              </span>
+          {/* Banner de Modo Compartido (Solo Lectura) */}
+          {isViewingShared && (
+            <div className="bg-sky-600 text-white px-4 py-2 text-xs font-mono flex flex-wrap items-center justify-between gap-2 z-40 border-b border-sky-400/50 shadow-md shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                <span>
+                  Estás visualizando el progreso compartido de <strong className="underline">{sharedName || 'Estudiante'}</strong> (Solo Lectura)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={importSharedProgress}
+                  className="px-2.5 py-1 rounded bg-white text-sky-950 font-bold hover:bg-sky-100 transition-colors shadow-sm"
+                  title="Guardar este avance en tu cuenta o navegador"
+                >
+                  Importar como mi progreso
+                </button>
+                <button
+                  onClick={exitSharedMode}
+                  className="px-2.5 py-1 rounded bg-sky-900/80 hover:bg-sky-900 border border-sky-400/50 text-white transition-colors"
+                  title="Volver a tu progreso personal"
+                >
+                  Volver a mi progreso
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={importSharedProgress}
-                className="px-2.5 py-1 rounded bg-white text-sky-950 font-bold hover:bg-sky-100 transition-colors shadow-sm"
-                title="Guardar este avance en tu cuenta o navegador"
-              >
-                Importar como mi progreso
-              </button>
-              <button
-                onClick={exitSharedMode}
-                className="px-2.5 py-1 rounded bg-sky-900/80 hover:bg-sky-900 border border-sky-400/50 text-white transition-colors"
-                title="Volver a tu progreso personal"
-              >
-                Volver a mi progreso
-              </button>
+          )}
+
+          {/* Barra superior con navegación, filtros y métricas */}
+          <Header 
+            onOpenTitles={() => setTitlesModalOpen(true)}
+            onOpenHelp={() => setHelpModalOpen(true)}
+          />
+
+          {/* Contenido principal según vista seleccionada */}
+          <main id="main-content" className={`flex-1 relative ${viewMode === 'grafo' ? 'min-h-0 overflow-hidden pb-16 sm:pb-0' : 'pb-16 sm:pb-0'}`}>
+            <div key={viewMode} className="view-transition-enter h-full w-full">
+              {viewMode === 'grafo' ? (
+                <Suspense fallback={<GraphSkeleton />}>
+                  <NetworkGraph />
+                </Suspense>
+              ) : (
+                <GridView />
+              )}
             </div>
-          </div>
-        )}
+          </main>
 
-        {/* Barra superior con navegación, filtros y métricas */}
-        <Header 
-          onOpenTitles={() => setTitlesModalOpen(true)}
-          onOpenHelp={() => setHelpModalOpen(true)}
-        />
+          {/* Panel lateral de Electivas */}
+          <ElectivasDrawer />
 
-        {/* Contenido principal según vista seleccionada */}
-        <main id="main-content" className={`flex-1 relative ${viewMode === 'grafo' ? 'min-h-0 overflow-hidden pb-16 sm:pb-0' : 'pb-16 sm:pb-0'}`}>
-          <div key={viewMode} className="view-transition-enter h-full w-full">
-            {viewMode === 'grafo' ? (
-              <Suspense fallback={<GraphSkeleton />}>
-                <NetworkGraph />
-              </Suspense>
-            ) : (
-              <GridView />
-            )}
-          </div>
-        </main>
+          {/* Modal de detalles de Materia y Notas */}
+          <SubjectModal />
 
-        {/* Panel lateral de Electivas */}
-        <ElectivasDrawer />
+          {/* Modal de Seguimiento de Títulos (ADUSI / Ingeniería) */}
+          <Suspense fallback={null}>
+            <TitlesModal 
+              isOpen={titlesModalOpen} 
+              onClose={() => setTitlesModalOpen(false)} 
+            />
+          </Suspense>
 
-        {/* Modal de detalles de Materia y Notas */}
-        <SubjectModal />
+          {/* Modal de Ficha Curricular Imprimible / PDF */}
+          <Suspense fallback={null}>
+            <PrintableReportModal />
+          </Suspense>
 
-        {/* Modal de Seguimiento de Títulos (ADUSI / Ingeniería) */}
-        <TitlesModal 
-          isOpen={titlesModalOpen} 
-          onClose={() => setTitlesModalOpen(false)} 
-        />
+          {/* Modal de Perfil de Alumno */}
+          <ProfileModal />
 
-        {/* Modal de Calendario Académico Oficial y Metas */}
+          {/* Modal de Estadísticas Avanzadas */}
+          <Suspense fallback={null}>
+            <StatsModal 
+              isOpen={statsModalOpen}
+              onClose={() => setStatsModalOpen(false)}
+            />
+          </Suspense>
+
+          {/* Modal de Compartir Progreso */}
+          <ShareModal
+            isOpen={shareModalOpen}
+            onClose={() => setShareModalOpen(false)}
+          />
+
+          {/* Modal de Guía / Ayuda */}
+          <HelpModal 
+            isOpen={helpModalOpen} 
+            onClose={() => setHelpModalOpen(false)} 
+          />
+
+          {/* Modal de Autenticación / Nube */}
+          <AuthModal />
+
+          {/* Modal de Confirmación de Reseteo en Cascada (> 3 materias afectadas) */}
+          <CascadeConfirmModal />
+
+          {/* Barra de navegación inferior móvil */}
+          <BottomNav 
+            onOpenMenu={() => openMobileDrawer('menu')} 
+            onOpenElectivas={() => openMobileDrawer('electivas')} 
+          />
+        </div>
+      )}
+
+      {/* Modal de Calendario Académico Oficial y Metas (compartido entre vista principal y 404) */}
+      <Suspense fallback={null}>
         <CalendarModal />
+      </Suspense>
 
-        {/* Modal de Ficha Curricular Imprimible / PDF */}
-        <PrintableReportModal />
+      {/* Confirmación única de conflicto al vincular cuenta con datos previos */}
+      <SyncConflictModal />
 
-        {/* Modal de Perfil de Alumno */}
-        <ProfileModal />
-
-        {/* Modal de Estadísticas Avanzadas */}
-        <StatsModal 
-          isOpen={statsModalOpen}
-          onClose={() => setStatsModalOpen(false)}
-        />
-
-        {/* Modal de Compartir Progreso */}
-        <ShareModal
-          isOpen={shareModalOpen}
-          onClose={() => setShareModalOpen(false)}
-        />
-
-        {/* Modal de Guía / Ayuda */}
-        <HelpModal 
-          isOpen={helpModalOpen} 
-          onClose={() => setHelpModalOpen(false)} 
-        />
-
-        {/* Modal de Autenticación / Nube */}
-        <AuthModal />
-
-        {/* Modal de Confirmación de Reseteo en Cascada (> 3 materias afectadas) */}
-        <CascadeConfirmModal />
-
-        {/* Barra de navegación inferior móvil */}
-        <BottomNav 
-          onOpenMenu={() => openMobileDrawer('menu')} 
-          onOpenElectivas={() => openMobileDrawer('electivas')} 
-        />
-
-        {/* Notificaciones flotantes */}
-        <Toast />
-      </div>
+      {/* Notificaciones flotantes */}
+      <Toast />
     </AuthProvider>
   );
 };
