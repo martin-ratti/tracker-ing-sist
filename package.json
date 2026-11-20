@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,yellow\" \"pnpm --filter tracker-backend dev\" \"pnpm --filter frontend dev\"",
-    "dev:backend": "pnpm --filter tracker-backend dev",
-    "dev:frontend": "pnpm --filter frontend dev",
+    "dev": "pnpm --filter @tracker/types build && concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,yellow\" \"pnpm --filter tracker-backend dev\" \"pnpm --filter frontend dev\"",
+    "dev:backend": "pnpm --filter @tracker/types build && pnpm --filter tracker-backend dev",
+    "dev:frontend": "pnpm --filter @tracker/types build && pnpm --filter frontend dev",
     "build": "pnpm --filter @tracker/types build && pnpm --filter tracker-backend build && pnpm --filter frontend build",
     "lint": "oxlint packages/types/src frontend/src backend/src",
     "deploy": "pnpm build && firebase deploy --only hosting",
     "deploy:all": "pnpm build && firebase deploy",
-    "test": "pnpm --filter tracker-backend test && pnpm --filter frontend test",
-    "test:coverage": "pnpm --filter tracker-backend test:coverage && pnpm --filter frontend test:coverage",
-    "test:e2e": "playwright test",
+    "test": "pnpm --filter @tracker/types build && pnpm --filter tracker-backend test && pnpm --filter frontend test",
+    "test:coverage": "pnpm --filter @tracker/types build && pnpm --filter tracker-backend test:coverage && pnpm --filter frontend test:coverage",
+    "test:e2e": "pnpm --filter @tracker/types build && playwright test",
     "install:all": "pnpm --filter tracker-backend install && pnpm --filter frontend install"
   },
   "devDependencies": {
