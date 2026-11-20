@@ -1,13 +1,37 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import fs from 'node:fs';
+import path from 'node:path';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+
+function pwaPrecacheManifestPlugin(): Plugin {
+  return {
+    name: 'pwa-precache-manifest',
+    apply: 'build',
+    writeBundle(options, bundle) {
+      const outDir = options.dir || path.resolve(process.cwd(), 'dist');
+      const assetUrls: string[] = [];
+      for (const fileName of Object.keys(bundle)) {
+        if (/\.(js|css|svg|png|webmanifest)$/i.test(fileName) && !fileName.endsWith('.map')) {
+          assetUrls.push(`/${fileName.replace(/\\/g, '/')}`);
+        }
+      }
+      fs.writeFileSync(
+        path.join(outDir, 'sw-assets.json'),
+        JSON.stringify(assetUrls, null, 2),
+        'utf-8'
+      );
+    }
+  };
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss()
+    tailwindcss(),
+    pwaPrecacheManifestPlugin()
   ],
   test: {
     globals: true,
