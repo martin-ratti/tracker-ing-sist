@@ -1,4 +1,5 @@
 import type { EstadoMateria, NotaMateria, PerfilAlumno, MetaExamen, MetaGlobalizador } from '../types/plan';
+import { sanitizeProgress } from '../services/api';
 
 export interface BackupPayload {
   version: string;
@@ -57,10 +58,23 @@ export function downloadBackupJson(
 export function parseBackupJson(jsonStr: string): Partial<BackupPayload> | null {
   try {
     const data = JSON.parse(jsonStr);
-    if (!data || typeof data !== 'object') {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
       return null;
     }
-    return data as Partial<BackupPayload>;
+    const raw = data as Record<string, unknown>;
+    const sanitized = sanitizeProgress(raw);
+    return {
+      version: typeof raw.version === 'string' ? raw.version.slice(0, 20) : '1.0',
+      exportDate: typeof raw.exportDate === 'string' ? raw.exportDate.slice(0, 50) : new Date().toISOString(),
+      plan: typeof raw.plan === 'string' ? raw.plan.slice(0, 100) : 'Plan 2023 ISI UTN FRRo',
+      ...(raw.estados && typeof raw.estados === 'object' ? { estados: sanitized.estados } : {}),
+      ...(raw.estadosElectivas && typeof raw.estadosElectivas === 'object' ? { estadosElectivas: sanitized.estadosElectivas } : {}),
+      ...(raw.notas && typeof raw.notas === 'object' ? { notas: sanitized.notas } : {}),
+      ...(typeof raw.ppsHoras === 'number' ? { ppsHoras: sanitized.ppsHoras } : {}),
+      ...(raw.perfil && typeof raw.perfil === 'object' ? { perfil: sanitized.perfil } : {}),
+      ...(raw.metasExamen && typeof raw.metasExamen === 'object' ? { metasExamen: sanitized.metasExamen } : {}),
+      ...(raw.metasGlobalizador && typeof raw.metasGlobalizador === 'object' ? { metasGlobalizador: sanitized.metasGlobalizador } : {})
+    };
   } catch {
     return null;
   }

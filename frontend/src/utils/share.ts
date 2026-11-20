@@ -1,4 +1,5 @@
 import type { EstadoMateria, PerfilAlumno } from '../types/plan';
+import { sanitizeProgress } from '../services/api';
 
 export interface SharedData {
   estados: Record<number, EstadoMateria>;
@@ -78,11 +79,18 @@ export function decodeProgress(hashStr: string): SharedData | null {
       });
     }
 
-    return {
+    const sanitized = sanitizeProgress({
       estados,
       estadosElectivas,
       perfil: { nombre: parsed.p || 'Estudiante', legajo: '' },
       ppsHoras: typeof parsed.pps === 'number' ? parsed.pps : 0
+    });
+
+    return {
+      estados: sanitized.estados,
+      estadosElectivas: sanitized.estadosElectivas,
+      perfil: sanitized.perfil || { nombre: 'Estudiante', legajo: '' },
+      ppsHoras: sanitized.ppsHoras
     };
   } catch (err) {
     console.error('Error al decodificar progreso compartido:', err);

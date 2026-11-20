@@ -1,9 +1,41 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Cada usuario solo puede leer y escribir su propio documento de progreso
+    function isValidProgressDoc(data) {
+      let allowedKeys = [
+        'estados',
+        'estadosElectivas',
+        'notas',
+        'ppsHoras',
+        'perfil',
+        'metasExamen',
+        'metasGlobalizador',
+        'actualizadoEn'
+      ];
+      return data.keys().hasOnly(allowedKeys)
+        && data.keys().size() <= 8
+        && (!('estados' in data) || (data.estados is map && data.estados.size() <= 100))
+        && (!('estadosElectivas' in data) || (data.estadosElectivas is map && data.estadosElectivas.size() <= 100))
+        && (!('notas' in data) || (data.notas is map && data.notas.size() <= 100))
+        && (!('ppsHoras' in data) || (data.ppsHoras is number && data.ppsHoras >= 0 && data.ppsHoras <= 500))
+        && (!('perfil' in data) || (
+          data.perfil is map
+          && data.perfil.keys().hasOnly(['nombre', 'legajo'])
+          && (!('nombre' in data.perfil) || (data.perfil.nombre is string && data.perfil.nombre.size() <= 100))
+          && (!('legajo' in data.perfil) || (data.perfil.legajo is string && data.perfil.legajo.size() <= 50))
+        ))
+        && (!('metasExamen' in data) || (data.metasExamen is map && data.metasExamen.size() <= 100))
+        && (!('metasGlobalizador' in data) || (data.metasGlobalizador is map && data.metasGlobalizador.size() <= 100))
+        && (!('actualizadoEn' in data) || (data.actualizadoEn is string && data.actualizadoEn.size() <= 60));
+    }
+
+    // Cada usuario solo puede leer y escribir su propio documento de progreso validado
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && isValidProgressDoc(request.resource.data);
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
