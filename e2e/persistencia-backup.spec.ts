@@ -13,8 +13,8 @@ test.describe('Persistencia en LocalStorage y Modal de Ayuda', () => {
     await btnMalla.click();
 
     // 2. Marcar Análisis Matemático I como Regular
-    const am1Card = page.locator('div[role="button"]:has-text("Análisis Matemático I")').first();
-    await am1Card.click();
+    const am1Card = page.locator('article:has-text("Análisis Matemático I")').first();
+    await am1Card.locator('button[aria-label*="Análisis Matemático I"]').first().click();
     await expect(am1Card.locator('text=Regular')).toBeVisible();
 
     // 3. Abrir modal de Perfil y guardar datos
@@ -39,7 +39,7 @@ test.describe('Persistencia en LocalStorage y Modal de Ayuda', () => {
 
     // 5. Ir a Malla y verificar que Análisis Matemático I continúe Regular
     await btnMalla.click();
-    const am1CardReloaded = page.locator('div[role="button"]:has-text("Análisis Matemático I")').first();
+    const am1CardReloaded = page.locator('article:has-text("Análisis Matemático I")').first();
     await expect(am1CardReloaded.locator('text=Regular')).toBeVisible();
 
     // 6. Verificar que el perfil mantenga el nombre en el header

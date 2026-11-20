@@ -7,6 +7,7 @@ import {
   loginApi,
   registerApi,
   checkAuthMe,
+  sendWelcomeEmailApi,
   fetchProgress,
   persistProgress,
   clearProgress,
@@ -14,6 +15,9 @@ import {
   mergeProgress,
   hasAnyData,
   syncUserProgressOnAuth,
+  resolveSyncConflict,
+  forceSyncNow,
+  isProgressDifferent,
   sanitizeProgress,
   safeSaveProgressToStorage
 } from '../../services/api';
@@ -109,6 +113,28 @@ describe('Frontend API & Storage Service (api.ts)', () => {
 
       const user = await checkAuthMe();
       expect(user?.email).toBe('fallback@utn.edu.ar');
+    });
+
+    it('sendWelcomeEmailApi: debe retornar false si el servidor devuelve text/html del fallback SPA en vez de application/json', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        headers: { get: () => 'text/html; charset=utf-8' },
+        json: () => Promise.reject(new Error('Invalid JSON'))
+      });
+
+      const ok = await sendWelcomeEmailApi('alumno@utn.edu.ar', 'Martín');
+      expect(ok).toBe(false);
+    });
+
+    it('sendWelcomeEmailApi: debe retornar true solo si devuelve JSON con success: true', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        headers: { get: () => 'application/json' },
+        json: () => Promise.resolve({ success: true })
+      });
+
+      const ok = await sendWelcomeEmailApi('alumno@utn.edu.ar', 'Martín');
+      expect(ok).toBe(true);
     });
   });
 
@@ -405,6 +431,42 @@ describe('Frontend API & Storage Service (api.ts)', () => {
       expect(synced.estados[2]).toBe('regular');
       expect(synced.perfil?.nombre).toBe('Marto');
       expect(synced.perfil?.legajo).toBe('123');
+    });
+
+    it('isProgressDifferent, resolveSyncConflict y forceSyncNow deben manejar diferencias y sincronización bajo demanda', async () => {
+      const p1 = sanitizeProgress({ estados: { 1: 'aprobada' }, ppsHoras: 100 });
+      const p2 = sanitizeProgress({ estados: { 1: 'regular' }, ppsHoras: 100 });
+      expect(isProgressDifferent(p1, p2)).toBe(true);
+      expect(isProgressDifferent(p1, p1)).toBe(false);
+
+      const conflict = {
+        userId: 'uid-conflict-1',
+        localData: p1,
+        cloudData: p2
+      };
+
+      const resCloud = await resolveSyncConflict(conflict, 'cloud');
+      expect(resCloud.estados[1]).toBe('regular');
+
+      const resLocal = await resolveSyncConflict(conflict, 'local');
+      expect(resLocal.estados[1]).toBe('aprobada');
+
+      const resMerge = await resolveSyncConflict(conflict, 'merge');
+      expect(resMerge.estados[1]).toBe('aprobada');
+
+      saveAuthSession('token-force-sync', { id: 'u-force', email: 'force@utn.edu.ar' });
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        headers: { get: () => 'application/json' },
+        json: () => Promise.resolve({
+          estados: { 5: 'aprobada' },
+          ppsHoras: 120
+        })
+      });
+
+      const forced = await forceSyncNow();
+      expect(forced.estados[5]).toBe('aprobada');
+      expect(forced.ppsHoras).toBe(120);
     });
   });
 

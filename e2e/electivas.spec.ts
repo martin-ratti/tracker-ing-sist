@@ -35,18 +35,20 @@ test.describe('Materias Electivas y Acumulación de Horas', () => {
     await filtro2do.click();
 
     // 4. Localizar la electiva "Entornos Gráficos" dentro del drawer
-    const electiva = drawer.locator('h3:has-text("Entornos Gráficos")');
-    await electiva.scrollIntoViewIfNeeded();
-    await expect(electiva).toBeVisible();
+    const electivaCard = drawer.locator('article:has-text("Entornos Gráficos")').first();
+    await electivaCard.scrollIntoViewIfNeeded();
+    await expect(electivaCard).toBeVisible();
 
     // Estado inicial de horas: 0 / 20 hs
     await expect(drawer.locator('text=0 / 20 hs')).toBeVisible();
 
+    const electivaBtn = electivaCard.locator('button[aria-label*="Entornos Gráficos"]').first();
+
     // 5. Clickeamos la electiva para cambiar a Regular
-    await electiva.click();
+    await electivaBtn.click();
 
     // 6. Clickeamos nuevamente para cambiar a Aprobada (+4hs)
-    await electiva.click();
+    await electivaBtn.click();
 
     // 7. Verificar que las horas de Ingeniería aumentaron a 4 / 20 hs
     await expect(drawer.locator('text=4 / 20 hs')).toBeVisible();

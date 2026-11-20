@@ -13,9 +13,9 @@ test.describe('Detalle de Materia, Notas y Planificación de Metas', () => {
     await botonMalla.click();
 
     // 2. Localizar tarjeta de Análisis Matemático I y ponerla Regular
-    const am1Card = page.locator('div[role="button"]:has-text("Análisis Matemático I")').first();
+    const am1Card = page.locator('article:has-text("Análisis Matemático I")').first();
     await expect(am1Card).toBeVisible();
-    await am1Card.click();
+    await am1Card.locator('button[aria-label*="Análisis Matemático I"]').first().click();
     await expect(am1Card.locator('text=Regular')).toBeVisible();
 
     // 3. Abrir modal de detalles

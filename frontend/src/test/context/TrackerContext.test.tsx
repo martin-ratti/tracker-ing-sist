@@ -4,26 +4,30 @@ import React from 'react';
 import { TrackerProvider, useTracker } from '../../context/TrackerContext';
 import { MATERIAS_MAP } from '../../data/plan2023';
 
-vi.mock('../../services/api', () => ({
-  fetchProgress: vi.fn().mockResolvedValue({
-    estados: {},
-    estadosElectivas: {},
-    notas: {},
-    ppsHoras: 0,
-    perfil: { nombre: '', legajo: '' },
-    metasExamen: {},
-  }),
-  getLocalProgress: vi.fn().mockReturnValue({
-    estados: {},
-    estadosElectivas: {},
-    notas: {},
-    ppsHoras: 0,
-    perfil: { nombre: '', legajo: '' },
-    metasExamen: {},
-  }),
-  persistProgress: vi.fn(),
-  clearProgress: vi.fn(),
-}));
+vi.mock('../../services/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../services/api')>();
+  return {
+    ...actual,
+    fetchProgress: vi.fn().mockResolvedValue({
+      estados: {},
+      estadosElectivas: {},
+      notas: {},
+      ppsHoras: 0,
+      perfil: { nombre: '', legajo: '' },
+      metasExamen: {},
+    }),
+    getLocalProgress: vi.fn().mockReturnValue({
+      estados: {},
+      estadosElectivas: {},
+      notas: {},
+      ppsHoras: 0,
+      perfil: { nombre: '', legajo: '' },
+      metasExamen: {},
+    }),
+    persistProgress: vi.fn(),
+    clearProgress: vi.fn(),
+  };
+});
 
 vi.mock('../services/firebase', () => ({
   subscribeToUserProgress: vi.fn(),

@@ -25,8 +25,8 @@ test.describe('Malla Curricular e Interacción con Materias', () => {
     await botonMalla.click();
 
     // Click en la tarjeta de Análisis Matemático I para alternar a Regular
-    const am1Card = page.locator('div[role="button"]:has-text("Análisis Matemático I")').first();
-    await am1Card.click();
+    const am1Card = page.locator('article:has-text("Análisis Matemático I")').first();
+    await am1Card.locator('button[aria-label*="Análisis Matemático I"]').first().click();
     await expect(am1Card.locator('text=Regular')).toBeVisible();
 
     // Click en el botón de información y detalles de la materia

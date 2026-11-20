@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TrackerProvider, useTracker } from '../../../context/TrackerContext';
@@ -105,17 +105,20 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
 
       const am1 = screen.getByText('Análisis Matemático I');
       expect(am1).toBeInTheDocument();
-      await user.click(am1);
+      const card = am1.closest('article');
+      const mainBtn = card?.querySelector('button[aria-label*="Análisis Matemático I"]') as HTMLElement;
+      expect(mainBtn).toBeInTheDocument();
+      await user.click(mainBtn);
 
-      // Teclado Enter y Espacio sobre la tarjeta
-      const card = am1.closest('[role="button"]') || am1;
-      fireEvent.keyDown(card, { key: 'Enter' });
-      fireEvent.keyDown(card, { key: ' ' });
+      // Teclado Enter sobre el botón principal de la tarjeta
+      mainBtn.focus();
+      await user.keyboard('{Enter}');
 
+      // Verificar que presionar Enter en el botón de detalles NO cambie el estado de la materia
       const botonInfo = screen.getAllByRole('button', { name: /Ver detalles/i })[0];
-      if (botonInfo) {
-        await user.click(botonInfo);
-      }
+      expect(botonInfo).toBeInTheDocument();
+      expect(mainBtn.contains(botonInfo)).toBe(false);
+      await user.click(botonInfo);
     });
   });
 
@@ -149,12 +152,13 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
 
       // Clic en la tarjeta de la electiva
       const cardElectiva = screen.getByText(/Entornos Gráficos/i);
-      await user.click(cardElectiva);
+      const electivaBtn = cardElectiva.closest('article')?.querySelector('button[aria-label*="Entornos Gráficos"]') as HTMLElement;
+      expect(electivaBtn).toBeInTheDocument();
+      await user.click(electivaBtn);
 
-      // Teclado Enter y Espacio en electiva
-      const cardContainer = cardElectiva.closest('[role="button"]') || cardElectiva;
-      fireEvent.keyDown(cardContainer, { key: 'Enter' });
-      fireEvent.keyDown(cardContainer, { key: ' ' });
+      // Teclado Enter en electiva
+      electivaBtn.focus();
+      await user.keyboard('{Enter}');
 
       // Cerrar drawer
       const botonCerrar = screen.getByLabelText(/Cerrar panel de electivas/i);
@@ -180,10 +184,11 @@ describe('Componentes de Vistas (GridView, ElectivasDrawer, GraphSkeleton)', () 
 
       // Clic y teclado en electiva en vista móvil
       const cardMobile = screen.getByText(/Algoritmos Genéticos/i);
-      await user.click(cardMobile);
-      const cardMobileContainer = cardMobile.closest('[role="button"]') || cardMobile;
-      fireEvent.keyDown(cardMobileContainer, { key: 'Enter' });
-      fireEvent.keyDown(cardMobileContainer, { key: ' ' });
+      const mobileBtn = cardMobile.closest('article')?.querySelector('button[aria-label*="Algoritmos Genéticos"]') as HTMLElement;
+      expect(mobileBtn).toBeInTheDocument();
+      await user.click(mobileBtn);
+      mobileBtn.focus();
+      await user.keyboard('{Enter}');
 
       const botonMenu = screen.getByRole('button', { name: /Menú/i });
       await user.click(botonMenu);

@@ -62,8 +62,8 @@ test.describe('Navegación Móvil y Drawer Adaptativo', () => {
     await btnMalla.click();
 
     // Click en Análisis Matemático I para pasar a Regular
-    const am1Card = page.locator('div[role="button"]:has-text("Análisis Matemático I")').first();
-    await am1Card.click();
+    const am1Card = page.locator('article:has-text("Análisis Matemático I")').first();
+    await am1Card.locator('button[aria-label*="Análisis Matemático I"]').first().click();
     await expect(am1Card.locator('text=Regular')).toBeVisible();
   });
 

@@ -283,7 +283,9 @@ describe('Componentes Modales', () => {
       // Clic en descargar PDF
       const botonDescargar = screen.getByRole('button', { name: /Descargar PDF/i });
       fireEvent.click(botonDescargar);
-      expect(exportPdfSpy).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(exportPdfSpy).toHaveBeenCalled();
+      });
     });
   });
 

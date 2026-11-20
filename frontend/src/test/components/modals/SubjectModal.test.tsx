@@ -199,7 +199,7 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
     );
 
     await user.click(screen.getByRole('button', { name: /Seleccionar Materia 1/i }));
-    expect(screen.getByText('Análisis Matemático I')).toBeInTheDocument();
+    expect(await screen.findByText('Análisis Matemático I')).toBeInTheDocument();
 
     const botonCerrar = screen.getByLabelText(/Cerrar detalles de la materia/i);
     await user.click(botonCerrar);
@@ -210,7 +210,7 @@ describe('SubjectModal - Detalle e Interacción con Materia', () => {
 
     // Reabrir y cerrar con Escape
     await user.click(screen.getByRole('button', { name: /Seleccionar Materia 1/i }));
-    expect(screen.getByText('Análisis Matemático I')).toBeInTheDocument();
+    expect(await screen.findByText('Análisis Matemático I')).toBeInTheDocument();
     fireEvent.keyDown(document, { key: 'Escape' });
     await waitFor(() => {
       expect(screen.queryByText('Análisis Matemático I')).not.toBeInTheDocument();
