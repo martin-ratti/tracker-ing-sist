@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useTracker } from '../../context/TrackerContext';
 import { Modal } from '../ui/Modal';
-import { User, Check, GraduationCap, Download, Upload, Database, Heart, Copy, FileDown } from 'lucide-react';
+import { User, Check, GraduationCap, Download, Upload, Database, Heart, Copy, FileDown, RefreshCw, Cloud, CloudOff } from 'lucide-react';
 import { DONATION_CONFIG } from '../../data/donations';
-import { exportFichaCurricularPDF } from '../../utils/pdfExporter';
 
 export const ProfileModal: React.FC = () => {
   const { 
@@ -19,12 +18,25 @@ export const ProfileModal: React.FC = () => {
     notas,
     ppsHoras,
     stats,
-    metasExamen
+    metasExamen,
+    syncStatus,
+    syncNowFromCloud
   } = useTracker();
   const [nombre, setNombre] = useState(perfil.nombre || '');
   const [legajo, setLegajo] = useState(perfil.legajo || '');
   const [copiedAlias, setCopiedAlias] = useState(false);
+  const [isSyncingNow, setIsSyncingNow] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSyncNow = async () => {
+    if (isSyncingNow) return;
+    setIsSyncingNow(true);
+    try {
+      await syncNowFromCloud?.();
+    } finally {
+      setIsSyncingNow(false);
+    }
+  };
 
   const handleCopyAlias = () => {
     if (navigator.clipboard?.writeText) {
@@ -62,8 +74,9 @@ export const ProfileModal: React.FC = () => {
     setProfileModalOpen(false);
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     try {
+      const { exportFichaCurricularPDF } = await import('../../utils/pdfExporter');
       exportFichaCurricularPDF({
         perfil: { nombre: nombre.trim(), legajo: legajo.trim() },
         estados,
@@ -190,9 +203,47 @@ export const ProfileModal: React.FC = () => {
             </div>
           </form>
 
-          {/* Sección de Respaldo y Migración JSON */}
+          {/* Sección de Sincronización en la Nube y Respaldo JSON */}
           <div className="pt-4 border-t border-(--border-color) space-y-3">
-            <div className="flex items-center gap-2">
+            {/* Estado de sincronización y botón secundario de refresco */}
+            <div className="p-3 rounded-xl bg-(--bg-elevated) border border-(--border-color) flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+                <div className="p-1.5 rounded-lg bg-(--bg-surface) border border-(--border-color) shrink-0">
+                  {syncStatus === 'offline' ? (
+                    <CloudOff className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <Cloud className={`w-4 h-4 ${syncStatus === 'saving' || isSyncingNow ? 'text-amber-400 animate-pulse' : 'text-emerald-500'}`} />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-syne font-bold text-xs text-(--text-body) flex items-center gap-1.5">
+                    <span>
+                      {syncStatus === 'saving' || isSyncingNow
+                        ? 'Guardando cambios...'
+                        : syncStatus === 'offline'
+                        ? 'Sin conexión — guardado en este dispositivo'
+                        : 'Sincronizado con la nube'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                    Envía tus cambios pendientes y actualiza el avance desde la nube.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSyncNow}
+                disabled={isSyncingNow || syncStatus === 'offline'}
+                title="Envía cualquier cambio local pendiente a la nube y descarga la versión más reciente del servidor"
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-(--bg-surface) hover:bg-(--bg-base) text-(--text-body) border border-(--border-color) font-semibold transition-all shadow-xs shrink-0 disabled:opacity-50 cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-cyan-500 ${isSyncingNow ? 'animate-spin' : ''}`} />
+                <span>{isSyncingNow ? 'Sincronizando...' : 'Sincronizar ahora'}</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
               <Database className="w-4 h-4 text-cyan-500" />
               <h3 className="font-syne font-bold text-xs sm:text-sm text-(--text-body)">
                 Copia de Seguridad Local (.JSON)

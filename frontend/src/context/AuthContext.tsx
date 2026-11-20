@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { UserAuth } from '../services/api';
+import type { UserAuth, SyncConflictInfo, SyncResolutionChoice } from '../services/api';
 import { 
   getStoredUser, 
   saveAuthSession, 
@@ -7,7 +7,8 @@ import {
   checkAuthMe,
   loginApi,
   registerApi,
-  syncUserProgressOnAuth,
+  syncUserProgressOnAuthWithConflict,
+  resolveSyncConflict,
   sendWelcomeEmailApi
 } from '../services/api';
 import { 
@@ -30,6 +31,8 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   completeAuth: (authUser: UserAuth) => void;
   logout: () => void;
+  syncConflict: SyncConflictInfo | null;
+  handleResolveSyncConflict: (choice: SyncResolutionChoice) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
 }) => {
   const [user, setUser] = useState<UserAuth | null>(() => getStoredUser());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [syncConflict, setSyncConflict] = useState<SyncConflictInfo | null>(null);
 
   // Escuchar sesión en Firebase o verificar backend tradicional
   useEffect(() => {
@@ -54,11 +58,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
           saveAuthSession(token, authUser);
           setUser(authUser);
         } else {
-          // Si no hay sesión en Firebase pero había sesión local previa
+          // Si Firebase confirma que el usuario cerró sesión, limpiar cualquier sesión zombi local
           const stored = getStoredUser();
           if (stored) {
-            setUser(stored);
+            clearAuthSession();
           }
+          setUser(null);
         }
       });
       return () => unsubscribe();
@@ -80,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
     setUser(authUser);
     setIsAuthModalOpen(false);
 
-    // Enviar correo de bienvenida en el primer inicio de sesión o registro
+    // Enviar correo de bienvenida en el primer inicio de sesión o registro (si hay backend de correos activo)
     if (authUser.email && authUser.email.includes('@')) {
       const welcomeKey = `utn_welcome_sent_${authUser.id}`;
       if (!localStorage.getItem(welcomeKey)) {
@@ -95,6 +100,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
     if (onUserChanged) onUserChanged();
   }, [onUserChanged]);
 
+  const handleResolveSyncConflict = useCallback(async (choice: SyncResolutionChoice) => {
+    if (!syncConflict) return;
+    await resolveSyncConflict(syncConflict, choice);
+    setSyncConflict(null);
+    if (onUserChanged) onUserChanged();
+  }, [syncConflict, onUserChanged]);
+
   const loginWithGoogle = useCallback(async () => {
     const fbUser = await signInWithGoogle();
     const authUser: UserAuth = {
@@ -103,7 +115,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
     };
     const token = await fbUser.getIdToken();
     saveAuthSession(token, authUser);
-    await syncUserProgressOnAuth(fbUser.uid);
+    const outcome = await syncUserProgressOnAuthWithConflict(fbUser.uid);
+    if (outcome.conflict) {
+      setSyncConflict(outcome.conflict);
+    }
     completeAuth(authUser);
   }, [completeAuth]);
 
@@ -116,12 +131,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
       };
       const token = await fbUser.getIdToken();
       saveAuthSession(token, authUser);
-      await syncUserProgressOnAuth(fbUser.uid);
+      const outcome = await syncUserProgressOnAuthWithConflict(fbUser.uid);
+      if (outcome.conflict) {
+        setSyncConflict(outcome.conflict);
+      }
       completeAuth(authUser);
     } else {
       const res = await loginApi(email, password);
       if (res.user?.id) {
-        await syncUserProgressOnAuth(res.user.id);
+        const outcome = await syncUserProgressOnAuthWithConflict(res.user.id);
+        if (outcome.conflict) {
+          setSyncConflict(outcome.conflict);
+        }
       }
       completeAuth(res.user);
     }
@@ -136,12 +157,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
       };
       const token = await fbUser.getIdToken();
       saveAuthSession(token, authUser);
-      await syncUserProgressOnAuth(fbUser.uid);
+      const outcome = await syncUserProgressOnAuthWithConflict(fbUser.uid);
+      if (outcome.conflict) {
+        setSyncConflict(outcome.conflict);
+      }
       completeAuth(authUser);
     } else {
       const res = await registerApi(email, password);
       if (res.user?.id) {
-        await syncUserProgressOnAuth(res.user.id);
+        const outcome = await syncUserProgressOnAuthWithConflict(res.user.id);
+        if (outcome.conflict) {
+          setSyncConflict(outcome.conflict);
+        }
       }
       completeAuth(res.user);
     }
@@ -152,6 +179,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
       signOutFirebase().catch(() => {});
     }
     clearAuthSession();
+    setSyncConflict(null);
     setUser(null);
     if (onUserChanged) onUserChanged();
   }, [onUserChanged]);
@@ -168,7 +196,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; onUserChanged?:
         register,
         loginWithGoogle,
         completeAuth,
-        logout
+        logout,
+        syncConflict,
+        handleResolveSyncConflict
       }}
     >
       {children}

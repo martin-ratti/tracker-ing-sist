@@ -11,10 +11,15 @@ import {
 } from 'firebase/auth';
 import { 
   getFirestore, 
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   doc, 
   getDoc, 
+  getDocFromServer,
   setDoc, 
-  onSnapshot
+  onSnapshot,
+  waitForPendingWrites
 } from 'firebase/firestore';
 import type { Analytics } from 'firebase/analytics';
 import type { ProgresoUsuario } from '../types/plan';
@@ -45,7 +50,16 @@ const { auth, db, googleProvider } = (() => {
   try {
     const appInst = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
     const authInst = getAuth(appInst);
-    const dbInst = getFirestore(appInst);
+    let dbInst;
+    try {
+      dbInst = initializeFirestore(appInst, {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager()
+        })
+      });
+    } catch {
+      dbInst = getFirestore(appInst);
+    }
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     return { auth: authInst, db: dbInst, googleProvider: provider };
@@ -168,17 +182,61 @@ export async function fetchProgressFromFirestore(userId: string): Promise<Progre
 }
 
 /**
- * Suscripción en tiempo real a los cambios del documento del usuario en Firestore
+ * Consulta directamente al servidor de Firestore (ignorando caché local) con fallback seguro a getDoc
+ */
+export async function fetchProgressFromFirestoreServer(userId: string): Promise<ProgresoUsuario | null> {
+  if (!db) return null;
+  const userDocRef = doc(db, 'users', userId);
+  try {
+    const docSnap = await getDocFromServer(userDocRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as ProgresoUsuario;
+    }
+    return null;
+  } catch {
+    try {
+      const fallbackSnap = await getDoc(userDocRef);
+      if (fallbackSnap.exists()) {
+        return fallbackSnap.data() as ProgresoUsuario;
+      }
+    } catch (err) {
+      console.error('Error en fallback getDoc de Firestore:', err);
+    }
+    return null;
+  }
+}
+
+/**
+ * Espera a que todas las escrituras pendientes de Firestore se confirmen en el servidor
+ */
+export async function flushFirestorePendingWrites(): Promise<void> {
+  if (!db) return;
+  try {
+    await waitForPendingWrites(db);
+  } catch (err) {
+    console.warn('No se pudieron confirmar escrituras pendientes en Firestore:', err);
+  }
+}
+
+/**
+ * Suscripción en tiempo real a los cambios del documento del usuario en Firestore.
+ * Ignora ecos locales propios (hasPendingWrites) para evitar re-hidratar estado viejo durante escrituras rápidas.
  */
 export function subscribeToUserProgress(
   userId: string, 
-  onUpdate: (progress: ProgresoUsuario) => void
+  onUpdate: (progress: ProgresoUsuario, metadata: { hasPendingWrites: boolean; fromCache: boolean }) => void
 ): () => void {
   if (!db) return () => {};
   const userDocRef = doc(db, 'users', userId);
-  return onSnapshot(userDocRef, (docSnap) => {
+  return onSnapshot(userDocRef, { includeMetadataChanges: true }, (docSnap) => {
+    if (docSnap.metadata.hasPendingWrites) {
+      return;
+    }
     if (docSnap.exists()) {
-      onUpdate(docSnap.data() as ProgresoUsuario);
+      onUpdate(docSnap.data() as ProgresoUsuario, {
+        hasPendingWrites: docSnap.metadata.hasPendingWrites,
+        fromCache: docSnap.metadata.fromCache
+      });
     }
   }, (error) => {
     console.warn('Error en suscripción en tiempo real de Firestore:', error);

@@ -51,6 +51,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
     setShareModalOpen,
     perfil,
     resetAll,
+    syncStatus,
     openMobileDrawer
   } = useTracker();
 
@@ -345,10 +346,30 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTitles, onOpenHelp }) => {
           </button>
 
           {user ? (
-            <div className="flex items-center gap-1 bg-(--bg-elevated) border border-(--border-color) rounded-lg py-1 px-2.5 font-mono text-xs shadow-sm">
-              <div className="flex items-center gap-1.5 text-(--text-body) text-[11px]" title={`Sesión activa: ${user.email}`}>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]" />
+            <div className="flex items-center gap-1.5 bg-(--bg-elevated) border border-(--border-color) rounded-lg py-1 px-2.5 font-mono text-xs shadow-sm">
+              <div
+                className="flex items-center gap-1.5 text-(--text-body) text-[11px]"
+                title={
+                  syncStatus === 'saving'
+                    ? `Guardando cambios en la nube (${user.email})...`
+                    : syncStatus === 'offline'
+                    ? `Sin conexión — guardado en este dispositivo (${user.email})`
+                    : `Sincronizado con la nube (${user.email})`
+                }
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    syncStatus === 'saving'
+                      ? 'bg-amber-400 animate-pulse shadow-[0_0_5px_#fbbf24]'
+                      : syncStatus === 'offline'
+                      ? 'bg-slate-400'
+                      : 'bg-emerald-500 shadow-[0_0_5px_#10b981]'
+                  }`}
+                />
                 <span className="max-w-27.5 truncate font-medium">{user.email.split('@')[0]}</span>
+                <span className="hidden xl:inline text-[10px] text-slate-500 dark:text-slate-400">
+                  · {syncStatus === 'saving' ? 'Guardando...' : syncStatus === 'offline' ? 'Sin conexión' : 'Sincronizado'}
+                </span>
               </div>
               <button
                 onClick={logout}

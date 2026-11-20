@@ -1,7 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { EstadoMateria, Materia, Electiva, NotaMateria, ProgresoUsuario, PerfilAlumno, MetaExamen, MetaGlobalizador } from '../types/plan';
 import { MATERIAS_MAP, ELECTIVAS_MAP } from '../data/plan2023';
-import { fetchProgress, getLocalProgress, persistProgress, clearProgress, safeSaveProgressToStorage } from '../services/api';
+import {
+  fetchProgress,
+  getLocalProgress,
+  persistProgress,
+  clearProgress,
+  safeSaveProgressToStorage,
+  sanitizeProgress,
+  getSyncStatus,
+  subscribeSyncStatus,
+  forceSyncNow,
+  isOwnWriteEcho,
+  type SyncStatus
+} from '../services/api';
 import { decodeProgress } from '../utils/share';
 import { subscribeToUserProgress, onFirebaseAuthStateChanged, isFirebaseConfigured } from '../services/firebase';
 import { 
@@ -68,6 +80,8 @@ export interface AcademicTrackerContextType {
   stats: Stats;
   resetAll: () => void;
   reloadProgress: () => void;
+  syncStatus: SyncStatus;
+  syncNowFromCloud: () => Promise<void>;
   exportBackupJson: () => void;
   importBackupJson: (jsonStr: string) => boolean;
   cascadeConfirmDialog: {
@@ -85,36 +99,33 @@ export type TrackerContextType = AcademicTrackerContextType & UIContextType;
 const TrackerContext = createContext<AcademicTrackerContextType | undefined>(undefined);
 
 const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [estados, setEstados] = useState<Record<number, EstadoMateria>>(() => {
-    if (typeof window !== 'undefined') return getLocalProgress().estados || {};
-    return {};
-  });
-  const [estadosElectivas, setEstadosElectivas] = useState<Record<number, EstadoMateria>>(() => {
-    if (typeof window !== 'undefined') return getLocalProgress().estadosElectivas || {};
-    return {};
-  });
-  const [notas, setNotas] = useState<Record<number, NotaMateria>>(() => {
-    if (typeof window !== 'undefined') return getLocalProgress().notas || {};
-    return {};
-  });
-  const [ppsHoras, setPpsHorasState] = useState<number>(() => {
-    if (typeof window !== 'undefined') return getLocalProgress().ppsHoras || 0;
-    return 0;
-  });
-  const [perfil, setPerfilState] = useState<PerfilAlumno>(() => {
-    if (typeof window !== 'undefined') return getLocalProgress().perfil || { nombre: '', legajo: '' };
-    return { nombre: '', legajo: '' };
-  });
-  const [metasExamen, setMetasExamenState] = useState<Record<number, MetaExamen>>(() => {
-    if (typeof window !== 'undefined') return getLocalProgress().metasExamen || {};
-    return {};
-  });
-  const [metasGlobalizador, setMetasGlobalizadorState] = useState<Record<number, MetaGlobalizador>>(() => {
-    if (typeof window !== 'undefined') return getLocalProgress().metasGlobalizador || {};
-    return {};
-  });
+  const initialLocal = useMemo(() => {
+    if (typeof window !== 'undefined') return getLocalProgress();
+    return {
+      estados: {},
+      estadosElectivas: {},
+      notas: {},
+      ppsHoras: 0,
+      perfil: { nombre: '', legajo: '' },
+      metasExamen: {},
+      metasGlobalizador: {}
+    };
+  }, []);
+
+  const [estados, setEstados] = useState<Record<number, EstadoMateria>>(() => initialLocal.estados || {});
+  const [estadosElectivas, setEstadosElectivas] = useState<Record<number, EstadoMateria>>(() => initialLocal.estadosElectivas || {});
+  const [notas, setNotas] = useState<Record<number, NotaMateria>>(() => initialLocal.notas || {});
+  const [ppsHoras, setPpsHorasState] = useState<number>(() => initialLocal.ppsHoras || 0);
+  const [perfil, setPerfilState] = useState<PerfilAlumno>(() => initialLocal.perfil || { nombre: '', legajo: '' });
+  const [metasExamen, setMetasExamenState] = useState<Record<number, MetaExamen>>(() => initialLocal.metasExamen || {});
+  const [metasGlobalizador, setMetasGlobalizadorState] = useState<Record<number, MetaGlobalizador>>(() => initialLocal.metasGlobalizador || {});
   const [isViewingShared, setIsViewingShared] = useState(false);
   const [sharedName, setSharedName] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(() => getSyncStatus());
+
+  useEffect(() => {
+    return subscribeSyncStatus(setSyncStatus);
+  }, []);
 
   const ui = useContext(UIContext);
   const showToast = useCallback((
@@ -152,21 +163,41 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
+  const applyProgressToState = useCallback((data: ProgresoUsuario) => {
+    const clean = typeof sanitizeProgress === 'function' ? sanitizeProgress(data) : data;
+    setEstados(clean.estados || {});
+    setEstadosElectivas(clean.estadosElectivas || {});
+    setNotas(clean.notas || {});
+    setPpsHorasState(clean.ppsHoras !== undefined ? clean.ppsHoras : 0);
+    setPerfilState(clean.perfil || { nombre: '', legajo: '' });
+    setMetasExamenState(clean.metasExamen || {});
+    setMetasGlobalizadorState(clean.metasGlobalizador || {});
+  }, []);
+
   // Cargar estado inicial o al refrescar
   const reloadProgress = useCallback(() => {
     if (window.location.hash.startsWith('#share=')) return;
     fetchProgress()
       .then((data: ProgresoUsuario) => {
-        setEstados(data.estados || {});
-        setEstadosElectivas(data.estadosElectivas || {});
-        setNotas(data.notas || {});
-        setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
-        setPerfilState(data.perfil || { nombre: '', legajo: '' });
-        setMetasExamenState(data.metasExamen || {});
-        setMetasGlobalizadorState(data.metasGlobalizador || {});
+        applyProgressToState(data);
       })
       .catch(err => console.error('Error al cargar progreso:', err));
-  }, []);
+  }, [applyProgressToState]);
+
+  const syncNowFromCloud = useCallback(async () => {
+    if (window.location.hash.startsWith('#share=')) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      showToast('⚠️ Estás sin conexión. Tus cambios se guardan en este dispositivo y se subirán al volver internet.', 'warning');
+      return;
+    }
+    try {
+      const fresh = typeof forceSyncNow === 'function' ? await forceSyncNow() : await fetchProgress();
+      applyProgressToState(fresh);
+      showToast('☁️ Progreso sincronizado y actualizado con la nube', 'success');
+    } catch {
+      showToast('⚠️ No se pudo sincronizar con la nube en este momento', 'error');
+    }
+  }, [applyProgressToState, showToast]);
 
   const exitSharedMode = useCallback(() => {
     window.location.hash = '';
@@ -202,14 +233,12 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         unsubscribeSnapshot = subscribeToUserProgress(fbUser.uid, (data) => {
           if (window.location.hash.startsWith('#share=')) return;
           if (data) {
-            safeSaveProgressToStorage(data);
-            setEstados(data.estados || {});
-            setEstadosElectivas(data.estadosElectivas || {});
-            setNotas(data.notas || {});
-            setPpsHorasState(data.ppsHoras !== undefined ? data.ppsHoras : 0);
-            setPerfilState(data.perfil || { nombre: '', legajo: '' });
-            setMetasExamenState(data.metasExamen || {});
-            setMetasGlobalizadorState(data.metasGlobalizador || {});
+            if (typeof isOwnWriteEcho === 'function' && isOwnWriteEcho(data)) {
+              return;
+            }
+            const clean = typeof sanitizeProgress === 'function' ? sanitizeProgress(data) : data;
+            safeSaveProgressToStorage(clean);
+            applyProgressToState(clean);
           }
         });
       }
@@ -219,7 +248,7 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       unsubscribeAuth();
       if (unsubscribeSnapshot) unsubscribeSnapshot();
     };
-  }, []);
+  }, [applyProgressToState]);
 
   const [cascadeConfirmDialog, setCascadeConfirmDialog] = useState<{
     isOpen: boolean;
@@ -661,6 +690,8 @@ const AcademicTrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         stats,
         resetAll,
         reloadProgress,
+        syncStatus,
+        syncNowFromCloud,
         exportBackupJson,
         importBackupJson,
         cascadeConfirmDialog,

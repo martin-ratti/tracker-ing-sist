@@ -36,6 +36,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ onOpenTitles, onOpen
     setShareModalOpen,
     perfil,
     resetAll,
+    syncStatus,
     mobileDrawerOpen,
     mobileDrawerView,
     closeMobileDrawer,
@@ -219,10 +220,26 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ onOpenTitles, onOpen
                   {/* Sincronización Nube */}
                   <div className="p-2.5 rounded-2xl bg-(--bg-elevated) border border-(--border-color) flex items-center justify-between gap-1 shadow-sm min-w-0">
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase font-bold text-slate-500 truncate">Nube Firebase</div>
+                      <div className="text-[9px] uppercase font-bold text-slate-500 truncate">
+                        {user
+                          ? syncStatus === 'saving'
+                            ? 'Guardando...'
+                            : syncStatus === 'offline'
+                            ? 'Sin conexión'
+                            : 'Sincronizado'
+                          : 'Nube Firebase'}
+                      </div>
                       {user ? (
                         <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold truncate">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                              syncStatus === 'saving'
+                                ? 'bg-amber-400 animate-pulse'
+                                : syncStatus === 'offline'
+                                ? 'bg-slate-400'
+                                : 'bg-emerald-500'
+                            }`}
+                          />
                           {user.email?.split('@')[0]}
                         </span>
                       ) : (

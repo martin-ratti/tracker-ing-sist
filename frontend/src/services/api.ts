@@ -3,16 +3,66 @@ import {
   auth, 
   isFirebaseConfigured, 
   saveProgressToFirestore, 
-  fetchProgressFromFirestore 
+  fetchProgressFromFirestore,
+  fetchProgressFromFirestoreServer,
+  flushFirestorePendingWrites
 } from './firebase';
 
 const LOCAL_STORAGE_KEY = 'utn-sistemas-tracker-2023';
 const AUTH_TOKEN_KEY = 'utn_auth_token';
 const AUTH_USER_KEY = 'utn_auth_user';
+const LINKED_ACCOUNT_KEY = 'utn_linked_account_uid';
+const DIRTY_LOCAL_KEY = 'utn_dirty_local_writes';
+
+export type SyncStatus = 'synced' | 'saving' | 'offline';
+export type SyncResolutionChoice = 'cloud' | 'local' | 'merge';
+
+export interface SyncConflictInfo {
+  userId: string;
+  localData: ProgresoUsuario;
+  cloudData: ProgresoUsuario;
+}
+
+export interface SyncAuthOutcome {
+  progress: ProgresoUsuario;
+  conflict?: SyncConflictInfo;
+}
 
 export interface UserAuth {
   id: string;
   email: string;
+}
+
+type SyncStatusListener = (status: SyncStatus) => void;
+const syncStatusListeners = new Set<SyncStatusListener>();
+let currentSyncStatus: SyncStatus = typeof navigator !== 'undefined' && navigator.onLine === false ? 'offline' : 'synced';
+
+function emitSyncStatus(next: SyncStatus): void {
+  currentSyncStatus = next;
+  syncStatusListeners.forEach(cb => cb(currentSyncStatus));
+}
+
+export function getSyncStatus(): SyncStatus {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return 'offline';
+  }
+  return currentSyncStatus;
+}
+
+export function subscribeSyncStatus(listener: SyncStatusListener): () => void {
+  syncStatusListeners.add(listener);
+  return () => {
+    syncStatusListeners.delete(listener);
+  };
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    emitSyncStatus(hasPendingLocalChanges() ? 'saving' : 'synced');
+  });
+  window.addEventListener('offline', () => {
+    emitSyncStatus('offline');
+  });
 }
 
 export function getStoredToken(): string | null {
@@ -29,6 +79,18 @@ export function getStoredUser(): UserAuth | null {
   }
 }
 
+export function getLinkedAccountUid(): string | null {
+  return localStorage.getItem(LINKED_ACCOUNT_KEY);
+}
+
+export function setLinkedAccountUid(uid: string | null): void {
+  if (uid) {
+    localStorage.setItem(LINKED_ACCOUNT_KEY, uid);
+  } else {
+    localStorage.removeItem(LINKED_ACCOUNT_KEY);
+  }
+}
+
 export function saveAuthSession(token: string, user: UserAuth): void {
   const safeToken = typeof token === 'string' ? token.trim().slice(0, 2048) : '';
   const safeUser: UserAuth = {
@@ -42,6 +104,7 @@ export function saveAuthSession(token: string, user: UserAuth): void {
 export function clearAuthSession(): void {
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(AUTH_USER_KEY);
+  localStorage.removeItem(LINKED_ACCOUNT_KEY);
 }
 
 function getAuthHeaders(): HeadersInit {
@@ -53,6 +116,12 @@ function getAuthHeaders(): HeadersInit {
     headers['Authorization'] = `Bearer ${token}`;
   }
   return headers;
+}
+
+function isJsonResponse(res: Response): boolean {
+  const contentType = res.headers?.get?.('content-type');
+  if (!contentType) return true; // En tests unitarios donde headers no se mockea, asumir JSON
+  return contentType.toLowerCase().includes('application/json');
 }
 
 // --- API AUTH ---
@@ -97,9 +166,11 @@ export async function checkAuthMe(): Promise<UserAuth | null> {
     const res = await fetch('/api/auth/me', {
       headers: { Authorization: `Bearer ${token}` }
     });
-    if (res.ok) {
+    if (res.ok && isJsonResponse(res)) {
       const data = await res.json();
-      return data.user;
+      if (data?.user) {
+        return data.user;
+      }
     }
   } catch {
     // Si el backend no está disponible o falla, usamos la sesión local existente
@@ -108,13 +179,27 @@ export async function checkAuthMe(): Promise<UserAuth | null> {
 }
 
 export async function sendWelcomeEmailApi(email: string, name?: string): Promise<boolean> {
+  const mailApiUrl = (import.meta.env.VITE_MAIL_API_URL || '').trim();
+  const isProdWithoutMailServer = Boolean(import.meta.env.PROD && !mailApiUrl);
+  if (isProdWithoutMailServer) {
+    return false;
+  }
+
+  const endpoint = mailApiUrl
+    ? `${mailApiUrl.replace(/\/$/, '')}/api/mail/welcome`
+    : '/api/mail/welcome';
+
   try {
-    const res = await fetch('/api/mail/welcome', {
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ email, name })
     });
-    return res.ok;
+    if (!res.ok || !isJsonResponse(res)) {
+      return false;
+    }
+    const data = await res.json().catch(() => null);
+    return Boolean(data && typeof data === 'object' && 'success' in data && data.success === true);
   } catch {
     return false;
   }
@@ -205,7 +290,7 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
     }
   }
 
-  // 3. Notas
+  // 3. Notas (acotadas entre 0 y 10)
   const safeNotas: Record<number, NotaMateria> = {};
   if (src.notas && typeof src.notas === 'object' && !Array.isArray(src.notas)) {
     for (const [key, value] of Object.entries(src.notas)) {
@@ -213,18 +298,18 @@ export function sanitizeProgress(raw: unknown): ProgresoUsuario {
       if (Number.isInteger(id) && id > 0 && id < 100000 && value && typeof value === 'object' && !Array.isArray(value)) {
         const n = value as Record<string, unknown>;
         const safeNota: NotaMateria = {};
-        if (typeof n.nota === 'number' && Number.isFinite(n.nota) && n.nota >= 1 && n.nota <= 10) {
-          safeNota.nota = Math.round(n.nota);
+        if (typeof n.nota === 'number' && Number.isFinite(n.nota) && n.nota >= 0 && n.nota <= 10) {
+          safeNota.nota = Math.round(n.nota * 100) / 100;
         }
         safeNotas[id] = safeNota;
       }
     }
   }
 
-  // 4. Horas PPS
+  // 4. Horas PPS (rango válido 0..500)
   let safePps = 0;
   if (typeof src.ppsHoras === 'number' && Number.isFinite(src.ppsHoras) && src.ppsHoras >= 0) {
-    safePps = Math.min(Math.floor(src.ppsHoras), 10000);
+    safePps = Math.min(Math.floor(src.ppsHoras), 500);
   }
 
   // 5. Perfil
@@ -308,22 +393,80 @@ export function hasAnyData(data?: ProgresoUsuario | null): boolean {
   return hasEstados || hasElectivas || hasNotas || hasPerfil || hasMetas || hasPps;
 }
 
-export async function syncUserProgressOnAuth(userId?: string): Promise<ProgresoUsuario> {
+/**
+ * Compara si dos objetos de progreso tienen diferencias reales en su contenido académico
+ */
+export function isProgressDifferent(a: ProgresoUsuario, b: ProgresoUsuario): boolean {
+  const normalize = (p: ProgresoUsuario) => {
+    const cleanEstados: Record<number, EstadoMateria> = {};
+    for (const [k, v] of Object.entries(p.estados || {})) {
+      if (v && v !== 'pendiente') cleanEstados[Number(k)] = v;
+    }
+    const cleanElectivas: Record<number, EstadoMateria> = {};
+    for (const [k, v] of Object.entries(p.estadosElectivas || {})) {
+      if (v && v !== 'pendiente') cleanElectivas[Number(k)] = v;
+    }
+    return JSON.stringify({
+      estados: cleanEstados,
+      estadosElectivas: cleanElectivas,
+      notas: p.notas || {},
+      ppsHoras: p.ppsHoras || 0,
+      perfil: {
+        nombre: p.perfil?.nombre?.trim() || '',
+        legajo: p.perfil?.legajo?.trim() || ''
+      },
+      metasExamen: p.metasExamen || {},
+      metasGlobalizador: p.metasGlobalizador || {}
+    });
+  };
+  return normalize(a) !== normalize(b);
+}
+
+/**
+ * Sincroniza el progreso al iniciar sesión o vincular cuenta.
+ * Si el usuario no tenía esta cuenta vinculada previamente y existen datos locales distintos a los de la nube,
+ * devuelve también la información de conflicto para que la UI consulte al usuario qué desea hacer.
+ */
+export async function syncUserProgressOnAuthWithConflict(userId?: string): Promise<SyncAuthOutcome> {
   const localData = getLocalProgress();
   const uid = userId || auth?.currentUser?.uid;
+  const previouslyLinkedUid = getLinkedAccountUid();
+  const isFirstLinkForThisUser = previouslyLinkedUid !== uid;
 
   if (isFirebaseConfigured && uid) {
     try {
       const rawFirestore = await fetchProgressFromFirestore(uid);
       if (rawFirestore) {
         const cloudData = sanitizeProgress(rawFirestore);
-        const merged = mergeProgress(localData, cloudData);
-        safeSaveProgressToStorage(merged);
-        await saveProgressToFirestore(uid, merged).catch(() => {});
-        return merged;
+        const cloudHasData = hasAnyData(cloudData);
+        const localHasData = hasAnyData(localData);
+
+        if (isFirstLinkForThisUser && localHasData && cloudHasData && isProgressDifferent(localData, cloudData)) {
+          return {
+            progress: cloudData,
+            conflict: {
+              userId: uid,
+              localData,
+              cloudData
+            }
+          };
+        }
+
+        if (!cloudHasData && localHasData) {
+          setLinkedAccountUid(uid);
+          await saveProgressToFirestore(uid, localData).catch(() => {});
+          return { progress: localData };
+        }
+
+        setLinkedAccountUid(uid);
+        safeSaveProgressToStorage(cloudData);
+        return { progress: cloudData };
       } else if (hasAnyData(localData)) {
+        setLinkedAccountUid(uid);
         await saveProgressToFirestore(uid, localData).catch(() => {});
-        return localData;
+        return { progress: localData };
+      } else {
+        setLinkedAccountUid(uid);
       }
     } catch (err: unknown) {
       console.warn('Error al sincronizar con Firestore en autenticación:', err);
@@ -334,40 +477,110 @@ export async function syncUserProgressOnAuth(userId?: string): Promise<ProgresoU
   if (token) {
     try {
       const res = await fetch('/api/progress', { headers: getAuthHeaders() });
-      if (res.ok) {
+      if (res.ok && isJsonResponse(res)) {
         const rawJson: unknown = await res.json();
         const cloudData: ProgresoUsuario = sanitizeProgress(rawJson);
         const merged = mergeProgress(localData, cloudData);
         safeSaveProgressToStorage(merged);
+        if (uid) setLinkedAccountUid(uid);
         await fetch('/api/progress', {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify(merged)
         }).catch(() => {});
-        return merged;
+        return { progress: merged };
       }
     } catch {
       // Ignorar fallback
     }
   }
 
-  return localData;
+  return { progress: localData };
 }
 
+export async function syncUserProgressOnAuth(userId?: string): Promise<ProgresoUsuario> {
+  const outcome = await syncUserProgressOnAuthWithConflict(userId);
+  if (outcome.conflict) {
+    const merged = mergeProgress(outcome.conflict.localData, outcome.conflict.cloudData);
+    safeSaveProgressToStorage(merged);
+    setLinkedAccountUid(outcome.conflict.userId);
+    if (isFirebaseConfigured && outcome.conflict.userId) {
+      await saveProgressToFirestore(outcome.conflict.userId, merged).catch(() => {});
+    }
+    return merged;
+  }
+  return outcome.progress;
+}
+
+export async function resolveSyncConflict(
+  conflict: SyncConflictInfo,
+  choice: SyncResolutionChoice
+): Promise<ProgresoUsuario> {
+  let chosen: ProgresoUsuario;
+  if (choice === 'cloud') {
+    chosen = sanitizeProgress(conflict.cloudData);
+  } else if (choice === 'local') {
+    chosen = sanitizeProgress({
+      ...conflict.localData,
+      actualizadoEn: new Date().toISOString()
+    });
+  } else {
+    chosen = mergeProgress(conflict.localData, conflict.cloudData);
+  }
+
+  setLinkedAccountUid(conflict.userId);
+  localStorage.removeItem(DIRTY_LOCAL_KEY);
+  safeSaveProgressToStorage(chosen);
+
+  if (isFirebaseConfigured && conflict.userId && choice !== 'cloud') {
+    emitSyncStatus('saving');
+    try {
+      await saveProgressToFirestore(conflict.userId, chosen);
+      emitSyncStatus('synced');
+    } catch {
+      emitSyncStatus(typeof navigator !== 'undefined' && navigator.onLine === false ? 'offline' : 'synced');
+    }
+  } else {
+    emitSyncStatus('synced');
+  }
+
+  return chosen;
+}
+
+/**
+ * Carga el progreso inicial o al recargar la página.
+ * Si la cuenta ya está vinculada en la nube, la nube es la fuente de verdad principal
+ * (evitando re-mezclar estados viejos ni "resucitar" materias o metas borradas en otro dispositivo),
+ * salvo que haya cambios locales hechos sin conexión pendientes de subir.
+ */
 export async function fetchProgress(): Promise<ProgresoUsuario> {
   const localData = getLocalProgress();
 
   // 1. Intentar desde Cloud Firestore si hay usuario activo en Firebase
   if (isFirebaseConfigured && auth?.currentUser?.uid) {
+    const uid = auth.currentUser.uid;
     try {
-      const rawFirestore = await fetchProgressFromFirestore(auth.currentUser.uid);
+      if (hasPendingLocalChanges()) {
+        await flushPendingSave();
+        return getLocalProgress();
+      }
+      const rawFirestore = await fetchProgressFromFirestore(uid);
       if (rawFirestore) {
         const cloudData = sanitizeProgress(rawFirestore);
-        const merged = mergeProgress(localData, cloudData);
-        safeSaveProgressToStorage(merged);
-        return merged;
+        if (hasAnyData(cloudData) || getLinkedAccountUid() === uid) {
+          setLinkedAccountUid(uid);
+          safeSaveProgressToStorage(cloudData);
+          return cloudData;
+        }
+        if (hasAnyData(localData)) {
+          setLinkedAccountUid(uid);
+          saveProgressToFirestore(uid, localData).catch(() => {});
+          return localData;
+        }
+        return cloudData;
       } else if (hasAnyData(localData)) {
-        saveProgressToFirestore(auth.currentUser.uid, localData).catch(() => {});
+        setLinkedAccountUid(uid);
+        saveProgressToFirestore(uid, localData).catch(() => {});
         return localData;
       }
     } catch (err: unknown) {
@@ -380,12 +593,20 @@ export async function fetchProgress(): Promise<ProgresoUsuario> {
   const token = getStoredToken();
   if (token) {
     try {
+      if (hasPendingLocalChanges()) {
+        await flushPendingSave();
+        return getLocalProgress();
+      }
       const res = await fetch('/api/progress', {
         headers: getAuthHeaders()
       });
-      if (res.ok) {
+      if (res.ok && isJsonResponse(res)) {
         const rawJson: unknown = await res.json();
         const cloudData: ProgresoUsuario = sanitizeProgress(rawJson);
+        if (getLinkedAccountUid() && hasAnyData(cloudData)) {
+          safeSaveProgressToStorage(cloudData);
+          return cloudData;
+        }
         const merged = mergeProgress(localData, cloudData);
         safeSaveProgressToStorage(merged);
         return merged;
@@ -461,7 +682,6 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
     const notaL = local.notas?.[id];
     const notaC = cloud.notas?.[id];
     if (notaL && notaC) {
-      // Preferir la nota más alta o con mayor detalle
       mergedNotas[id] = (notaL.nota || 0) >= (notaC.nota || 0) ? { ...notaC, ...notaL } : { ...notaL, ...notaC };
     } else {
       const nota = notaL || notaC;
@@ -502,23 +722,185 @@ export function mergeProgress(local: ProgresoUsuario, cloud: ProgresoUsuario): P
 }
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+let firestoreDebounceTimeout: ReturnType<typeof setTimeout> | null = null;
+let pendingCloudProgress: ProgresoUsuario | null = null;
+let lastWrittenHash = '';
+
+function computeProgressHash(p: ProgresoUsuario): string {
+  const { actualizadoEn: _ignored, ...rest } = p;
+  return JSON.stringify(rest);
+}
+
+export function isOwnWriteEcho(incoming: ProgresoUsuario): boolean {
+  if (!lastWrittenHash) return false;
+  if (firestoreDebounceTimeout !== null || pendingCloudProgress !== null) {
+    return true;
+  }
+  return computeProgressHash(sanitizeProgress(incoming)) === lastWrittenHash;
+}
+
+export function hasPendingLocalChanges(): boolean {
+  return (
+    firestoreDebounceTimeout !== null ||
+    saveTimeout !== null ||
+    pendingCloudProgress !== null ||
+    localStorage.getItem(DIRTY_LOCAL_KEY) === 'true'
+  );
+}
+
+export async function flushPendingSave(): Promise<void> {
+  if (firestoreDebounceTimeout) {
+    clearTimeout(firestoreDebounceTimeout);
+    firestoreDebounceTimeout = null;
+  }
+  if (saveTimeout) {
+    clearTimeout(saveTimeout);
+    saveTimeout = null;
+  }
+
+  const toFlush = pendingCloudProgress || (localStorage.getItem(DIRTY_LOCAL_KEY) === 'true' ? getLocalProgress() : null);
+  pendingCloudProgress = null;
+
+  if (!toFlush) {
+    if (isFirebaseConfigured && auth?.currentUser?.uid) {
+      await flushFirestorePendingWrites();
+    }
+    return;
+  }
+
+  emitSyncStatus('saving');
+
+  if (isFirebaseConfigured && auth?.currentUser?.uid) {
+    try {
+      await saveProgressToFirestore(auth.currentUser.uid, toFlush);
+      await flushFirestorePendingWrites();
+      localStorage.removeItem(DIRTY_LOCAL_KEY);
+      emitSyncStatus('synced');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('No se pudo vaciar progreso pendiente en Firestore:', message);
+      emitSyncStatus(typeof navigator !== 'undefined' && navigator.onLine === false ? 'offline' : 'synced');
+    }
+  }
+
+  const token = getStoredToken();
+  if (token) {
+    try {
+      const res = await fetch('/api/progress', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(toFlush)
+      });
+      if (res.ok) {
+        localStorage.removeItem(DIRTY_LOCAL_KEY);
+        emitSyncStatus('synced');
+      }
+    } catch {
+      emitSyncStatus(typeof navigator !== 'undefined' && navigator.onLine === false ? 'offline' : 'synced');
+    }
+  }
+}
+
+/**
+ * Sincroniza manualmente bajo demanda (botón "Sincronizar ahora" en Perfil):
+ * 1. Si hay cambios locales en cola o hechos offline pendientes de subir, primero los envía (flush) a la nube para nunca pisar cambios recientes.
+ * 2. Luego consulta la versión más reciente directamente desde el servidor y actualiza el almacenamiento local.
+ */
+export async function forceSyncNow(): Promise<ProgresoUsuario> {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    emitSyncStatus('offline');
+    return getLocalProgress();
+  }
+
+  emitSyncStatus('saving');
+
+  if (hasPendingLocalChanges()) {
+    await flushPendingSave();
+  }
+
+  if (isFirebaseConfigured && auth?.currentUser?.uid) {
+    try {
+      await flushFirestorePendingWrites();
+      const rawServer = await fetchProgressFromFirestoreServer(auth.currentUser.uid);
+      if (rawServer) {
+        const clean = sanitizeProgress(rawServer);
+        lastWrittenHash = computeProgressHash(clean);
+        safeSaveProgressToStorage(clean);
+        localStorage.removeItem(DIRTY_LOCAL_KEY);
+        emitSyncStatus('synced');
+        return clean;
+      }
+    } catch (err) {
+      console.warn('Error al sincronizar manualmente desde Firestore:', err);
+    }
+  }
+
+  const token = getStoredToken();
+  if (token) {
+    try {
+      const res = await fetch('/api/progress', { headers: getAuthHeaders() });
+      if (res.ok && isJsonResponse(res)) {
+        const rawJson: unknown = await res.json();
+        const clean = sanitizeProgress(rawJson);
+        lastWrittenHash = computeProgressHash(clean);
+        safeSaveProgressToStorage(clean);
+        localStorage.removeItem(DIRTY_LOCAL_KEY);
+        emitSyncStatus('synced');
+        return clean;
+      }
+    } catch {
+      // Ignorar fallo
+    }
+  }
+
+  emitSyncStatus('synced');
+  return getLocalProgress();
+}
 
 export async function persistProgress(progress: Partial<ProgresoUsuario>): Promise<void> {
   const current: ProgresoUsuario = getLocalProgress();
 
-  const updated: ProgresoUsuario = {
+  const updated: ProgresoUsuario = sanitizeProgress({
     ...current,
     ...progress,
     actualizadoEn: new Date().toISOString()
-  };
+  });
+  lastWrittenHash = computeProgressHash(updated);
   safeSaveProgressToStorage(updated);
 
-  // 1. Sincronización en la nube con Firestore en tiempo real
+  const hasCloudSession = Boolean((isFirebaseConfigured && auth?.currentUser?.uid) || getStoredToken());
+  if (!hasCloudSession) {
+    return;
+  }
+
+  localStorage.setItem(DIRTY_LOCAL_KEY, 'true');
+  pendingCloudProgress = updated;
+
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    emitSyncStatus('offline');
+  } else {
+    emitSyncStatus('saving');
+  }
+
+  // 1. Sincronización en la nube con Firestore agrupada (debounce 400ms)
   if (isFirebaseConfigured && auth?.currentUser?.uid) {
-    saveProgressToFirestore(auth.currentUser.uid, updated).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.warn('No se pudo persistir en Firestore (offline):', message);
-    });
+    const uid = auth.currentUser.uid;
+    if (firestoreDebounceTimeout) clearTimeout(firestoreDebounceTimeout);
+    firestoreDebounceTimeout = setTimeout(() => {
+      firestoreDebounceTimeout = null;
+      const toSend = pendingCloudProgress || updated;
+      pendingCloudProgress = null;
+      saveProgressToFirestore(uid, toSend)
+        .then(() => {
+          localStorage.removeItem(DIRTY_LOCAL_KEY);
+          emitSyncStatus(typeof navigator !== 'undefined' && navigator.onLine === false ? 'offline' : 'synced');
+        })
+        .catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          console.warn('No se pudo persistir en Firestore (offline):', message);
+          emitSyncStatus('offline');
+        });
+    }, 400);
   }
 
   // 2. Sincronización secundaria con backend Express si hay sesión autenticada
@@ -526,13 +908,25 @@ export async function persistProgress(progress: Partial<ProgresoUsuario>): Promi
   if (token) {
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
+      saveTimeout = null;
+      const toSend = pendingCloudProgress || updated;
+      if (!isFirebaseConfigured) pendingCloudProgress = null;
       fetch('/api/progress', {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify(updated)
-      }).catch(() => {
-        // Ignorar fallo de backend tradicional cuando está en modo serverless
-      });
+        body: JSON.stringify(toSend)
+      })
+        .then((res) => {
+          if (res.ok && !isFirebaseConfigured) {
+            localStorage.removeItem(DIRTY_LOCAL_KEY);
+            emitSyncStatus('synced');
+          }
+        })
+        .catch(() => {
+          if (!isFirebaseConfigured) {
+            emitSyncStatus(typeof navigator !== 'undefined' && navigator.onLine === false ? 'offline' : 'synced');
+          }
+        });
     }, 400);
   }
 }
@@ -542,6 +936,12 @@ export async function clearProgress(): Promise<void> {
     clearTimeout(saveTimeout);
     saveTimeout = null;
   }
+  if (firestoreDebounceTimeout) {
+    clearTimeout(firestoreDebounceTimeout);
+    firestoreDebounceTimeout = null;
+  }
+  pendingCloudProgress = null;
+  localStorage.removeItem(DIRTY_LOCAL_KEY);
   localStorage.removeItem(LOCAL_STORAGE_KEY);
 
   const emptyProgress: ProgresoUsuario = {
@@ -551,14 +951,20 @@ export async function clearProgress(): Promise<void> {
     ppsHoras: 0,
     perfil: { nombre: '', legajo: '' },
     metasExamen: {},
+    metasGlobalizador: {},
     actualizadoEn: new Date().toISOString()
   };
+  lastWrittenHash = computeProgressHash(emptyProgress);
 
   if (isFirebaseConfigured && auth?.currentUser?.uid) {
-    saveProgressToFirestore(auth.currentUser.uid, emptyProgress).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.warn('No se pudo resetear en Firestore:', message);
-    });
+    emitSyncStatus('saving');
+    saveProgressToFirestore(auth.currentUser.uid, emptyProgress)
+      .then(() => emitSyncStatus('synced'))
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        console.warn('No se pudo resetear en Firestore:', message);
+        emitSyncStatus('offline');
+      });
   }
 
   const token = getStoredToken();
